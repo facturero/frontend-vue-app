@@ -1,0 +1,32 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: crm-ingress
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web
+spec:
+  rules:
+    - host: steep-geology-napping.ngrok-free.dev
+      http:
+        paths:
+          - path: /auth
+            pathType: Prefix
+            backend:
+              service:
+                name: api-gateway-node
+                port:
+                  number: 8080
+          - path: /health
+            pathType: Exact
+            backend:
+              service:
+                name: api-gateway-node
+                port:
+                  number: 8080
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: crm-frontend
+                port:
+                  number: 80
