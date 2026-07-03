@@ -1,11 +1,5 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
 
-/**
- * Cliente HTTP único. Apunta al GATEWAY (VITE_API_URL). Los tokens viven en
- * localStorage; el store de auth los lee/escribe con los helpers exportados.
- * No importa el store para evitar dependencias circulares.
- */
-
 const ACCESS_KEY = 'accessToken';
 const REFRESH_KEY = 'refreshToken';
 const baseURL = import.meta.env.VITE_API_URL;
@@ -30,7 +24,6 @@ export const http = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-// ── Request: adjunta el access token ──
 http.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = getAccessToken();
   if (token) {
@@ -39,13 +32,11 @@ http.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   return config;
 });
 
-// ── Response: refresh transparente en 401 ──
 let refreshing: Promise<string> | null = null;
 
 async function doRefresh(): Promise<string> {
   const refreshToken = getRefreshToken();
   if (!refreshToken) throw new Error('sin refresh token');
-  // axios "pelado" (sin interceptores) para no entrar en bucle.
   const { data } = await axios.post(`${baseURL}/auth/refresh`, { refreshToken });
   setTokens(data.accessToken, data.refreshToken);
   return data.accessToken;

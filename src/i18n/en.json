@@ -1,0 +1,43 @@
+{
+  "auth": {
+    "signIn": "Sign in",
+    "createAccount": "Create account",
+    "toAccessTemplate": "To access the template",
+    "registerToGetStarted": "Register to get started",
+    "register": "Register",
+    "login": "Login",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "next": "Next",
+    "change": "change",
+    "forgotPassword": "Forgot Password?",
+    "notRegisteredYet": "Not registered yet?",
+    "alreadyRegistered": "Already registered?",
+    "descriptionLogin": "Lost access to OneAuth? Worry not. Set up passphrase and backup number to recover OneAuth easily.",
+    "descriptionRegister": "Go back to sign in with your existing account.",
+    "errorUnexpected": "Unexpected error"
+  },
+  "home": {
+    "title": "Home",
+    "activeSession": "Active session",
+    "userId": "User ID",
+    "email": "Email",
+    "emailVerified": "Email verified",
+    "yes": "Yes",
+    "no": "No",
+    "provider": "Provider",
+    "loadSuccess": "GET /auth/me responded through the gateway ✓",
+    "loadError": "Could not load /auth/me"
+  },
+  "nav": {
+    "brand": "CRM",
+    "brandSubtitle": "Admin panel",
+    "collapse": "Collapse",
+    "comingSoon": "coming soon",
+    "home": "Home",
+    "customers": "Customers",
+    "invoices": "Invoices",
+    "products": "Products"
+  }
+}

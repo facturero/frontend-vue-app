@@ -1,7 +1,12 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
+import LocaleSwitcher from '@/components/LocaleSwitcher.vue';
+import GoogleSignIn from '@/components/GoogleSignIn.vue';
+
+const { t, locale } = useI18n();
 
 const auth = useAuthStore();
 const router = useRouter();
@@ -13,9 +18,6 @@ const password = ref('admin');
 const confirmPassword = ref('');
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
-
-const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-const googleEnabled = !!googleClientId && !googleClientId.startsWith('xxxx');
 
 async function submit(): Promise<void> {
   try {
@@ -44,30 +46,6 @@ function changeEmail(): void {
   step.value = 'email';
 }
 
-function initGoogle(): void {
-  if (!googleEnabled) return;
-  const g = (window as unknown as { google?: any }).google;
-  if (!g?.accounts?.id) return;
-  g.accounts.id.initialize({
-    client_id: googleClientId,
-    callback: async (resp: { credential: string }) => {
-      try {
-        await auth.loginWithGoogle(resp.credential);
-        router.push({ name: 'home' });
-      } catch {
-        /* manejado por el store */
-      }
-    },
-  });
-  const el = document.getElementById('google-btn');
-  if (el) {
-    g.accounts.id.renderButton(el, { theme: 'outline', size: 'large', width: 320 });
-  }
-}
-
-onMounted(() => {
-  setTimeout(initGoogle, 400);
-});
 </script>
 
 <template>
@@ -83,15 +61,15 @@ onMounted(() => {
         <v-col cols="12" md="6" class="pa-sm-8 pa-4">
 
           <v-card-item class="px-0">
-            <v-card-title class="px-0">{{ mode === 'login' ? 'Sign in' : 'Create account' }}</v-card-title>
-            <v-card-subtitle class="px-0">{{ mode === 'login' ? 'To access template' : 'Register to get started' }}</v-card-subtitle>
+            <v-card-title class="px-0">{{ mode === 'login' ? t('auth.signIn') : t('auth.createAccount') }}</v-card-title>
+            <v-card-subtitle class="px-0">{{ mode === 'login' ? t('auth.toAccessTemplate') : t('auth.registerToGetStarted') }}</v-card-subtitle>
             <template #append>
               <a
                 href="#"
                 class="text-body-2 text-medium-emphasis d-block d-md-none"
                 @click.prevent="toggleMode"
               >
-                {{ mode === 'login' ? 'Register' : 'Login' }}
+                {{ mode === 'login' ? t('auth.register') : t('auth.login') }}
               </a>
             </template>
           </v-card-item>
@@ -117,7 +95,7 @@ onMounted(() => {
                 <div v-if="step === 'email'">
                   <v-text-field
                     v-model="email"
-                    label="Email"
+                    :label="t('auth.email')"
                     variant="outlined"
                     density="compact"
                     class="mb-6"
@@ -128,7 +106,7 @@ onMounted(() => {
                     color="primary"
                     @click="goToPassword"
                   >
-                    Next
+                    {{ t('auth.next') }}
                   </v-btn>
                 </div>
                 <div v-else>
@@ -144,12 +122,12 @@ onMounted(() => {
                       color="primary"
                       @click="changeEmail"
                     >
-                      change
+                      {{ t('auth.change') }}
                     </v-btn>
                   </div>
                   <v-text-field
                     v-model="password"
-                    label="Password"
+                    :label="t('auth.password')"
                     variant="outlined"
                     density="compact"
                     class="mb-6"
@@ -165,7 +143,7 @@ onMounted(() => {
                     class="mb-3"
                     :loading="auth.loading"
                   >
-                    Login
+                    {{ t('auth.login') }}
                   </v-btn>
                   <v-btn
                     block
@@ -173,7 +151,7 @@ onMounted(() => {
                     href="#"
                     @click.prevent
                   >
-                    Forgot Password?
+                    {{ t('auth.forgotPassword') }}
                   </v-btn>
                 </div>
               </template>
@@ -182,7 +160,7 @@ onMounted(() => {
               <template v-else>
                 <v-text-field
                   v-model="email"
-                  label="Email"
+                  :label="t('auth.email')"
                   variant="outlined"
                   density="compact"
                   class="mb-6"
@@ -191,7 +169,7 @@ onMounted(() => {
                 />
                 <v-text-field
                   v-model="password"
-                  label="Password"
+                  :label="t('auth.password')"
                   variant="outlined"
                   density="compact"
                   class="mb-6"
@@ -202,7 +180,7 @@ onMounted(() => {
                 />
                 <v-text-field
                   v-model="confirmPassword"
-                  label="Confirm Password"
+                  :label="t('auth.confirmPassword')"
                   variant="outlined"
                   density="compact"
                   class="mb-6"
@@ -218,16 +196,12 @@ onMounted(() => {
                   class="mb-3"
                   :loading="auth.loading"
                 >
-                  Register
+                  {{ t('auth.register') }}
                 </v-btn>
               </template>
             </v-form>
 
-            <!-- Google sign-in (solo si configurado) -->
-            <div v-if="googleEnabled" class="mt-4">
-              <v-divider class="mb-4" />
-              <div id="google-btn" class="d-flex justify-center"></div>
-            </div>
+            <GoogleSignIn :locale="$i18n.locale" />
           </v-card-text>
         </v-col>
 
@@ -239,32 +213,13 @@ onMounted(() => {
         >
 
           <div class="position-absolute top-0 right-0 pa-4">
-            <v-menu :offset="[-8,-12]" location="bottom end">
-              <template #activator="{ props }">
-                <v-btn
-                  icon
-                  variant="text"
-                  size="small"
-                  v-bind="props"
-                >
-                  <v-icon>mdi-web</v-icon>
-                </v-btn>
-              </template>
-              <v-list density="compact">
-                <v-list-item value="en">
-                  <v-list-item-title>English</v-list-item-title>
-                </v-list-item>
-                <v-list-item value="es">
-                  <v-list-item-title>Español</v-list-item-title>
-                </v-list-item>
-              </v-list>
-            </v-menu>
+            <LocaleSwitcher />
           </div>
 
           <template v-if="mode === 'login'">
-            <h6 class="text-body-1 font-weight-semibold mb-3">Not Register yet?</h6>
+            <h6 class="text-body-1 font-weight-semibold mb-3">{{ t('auth.notRegisteredYet') }}</h6>
             <p class="text-body-2 text-medium-emphasis mb-6" style="max-width: 260px;">
-              Lost access to OneAuth? Worry not. Set up passphrase and backup number to recover OneAuth easily.
+              {{ t('auth.descriptionLogin') }}
             </p>
             <v-btn
               color="primary"
@@ -272,13 +227,13 @@ onMounted(() => {
               append-icon="mdi-account-plus"
               @click="mode = 'register'; step = 'email'"
             >
-              Register
+              {{ t('auth.register') }}
             </v-btn>
           </template>
           <template v-else>
-            <h6 class="text-body-1 font-weight-semibold mb-3">Already registered?</h6>
+            <h6 class="text-body-1 font-weight-semibold mb-3">{{ t('auth.alreadyRegistered') }}</h6>
             <p class="text-body-2 text-medium-emphasis mb-6" style="max-width: 260px;">
-              Go back to sign in with your existing account.
+              {{ t('auth.descriptionRegister') }}
             </p>
             <v-btn
               color="primary"
@@ -286,7 +241,7 @@ onMounted(() => {
               append-icon="mdi-login"
               @click="toggleMode"
             >
-              Login
+              {{ t('auth.login') }}
             </v-btn>
           </template>
         </v-col>

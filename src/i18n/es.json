@@ -1,0 +1,43 @@
+{
+  "auth": {
+    "signIn": "Iniciar sesión",
+    "createAccount": "Crear cuenta",
+    "toAccessTemplate": "Para acceder al panel",
+    "registerToGetStarted": "Regístrate para empezar",
+    "register": "Registrarse",
+    "login": "Entrar",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "confirmPassword": "Confirmar contraseña",
+    "next": "Siguiente",
+    "change": "cambiar",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "notRegisteredYet": "¿Aún no estás registrado?",
+    "alreadyRegistered": "¿Ya tienes cuenta?",
+    "descriptionLogin": "¿Perdiste el acceso a OneAuth? No te preocupes. Configura una frase de recuperación y un número de respaldo para recuperar OneAuth fácilmente.",
+    "descriptionRegister": "Vuelve a iniciar sesión con tu cuenta existente.",
+    "errorUnexpected": "Error inesperado"
+  },
+  "home": {
+    "title": "Inicio",
+    "activeSession": "Sesión activa",
+    "userId": "ID de usuario",
+    "email": "Correo electrónico",
+    "emailVerified": "Email verificado",
+    "yes": "Sí",
+    "no": "No",
+    "provider": "Proveedor",
+    "loadSuccess": "GET /auth/me respondió a través del gateway ✓",
+    "loadError": "No se pudo cargar /auth/me"
+  },
+  "nav": {
+    "brand": "CRM",
+    "brandSubtitle": "Panel de adm.",
+    "collapse": "Colapsar",
+    "comingSoon": "pronto",
+    "home": "Inicio",
+    "customers": "Clientes",
+    "invoices": "Facturas",
+    "products": "Productos"
+  }
+}

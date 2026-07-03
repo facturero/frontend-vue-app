@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import { getAccessToken } from '@/lib/http';
+import { getAccessToken } from '@/utils/http';
 import AuthView from '@/views/AuthView.vue';
 import HomeView from '@/views/HomeView.vue';
 

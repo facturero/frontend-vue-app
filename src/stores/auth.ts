@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
-import { clearTokens, getAccessToken, http, setTokens } from '@/lib/http';
+import { clearTokens, getAccessToken, http, setTokens } from '@/utils/http';
 
 export interface User {
   id: string;
