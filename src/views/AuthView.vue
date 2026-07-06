@@ -26,7 +26,11 @@ async function submit(): Promise<void> {
     } else {
       await auth.register(email.value, password.value);
     }
-    router.push({ name: 'home' });
+    if (auth.needsOrg) {
+      router.push({ name: 'profile' });
+    } else {
+      router.push({ name: 'home' });
+    }
   } catch {
     /* manejado por el store */
   }

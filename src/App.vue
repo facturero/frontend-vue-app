@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useDisplay } from 'vuetify';
 import { useUiStore } from '@/stores/ui';
+import { useAuthStore } from '@/stores/auth';
 import AppNavigationDrawer from '@/layouts/AppNavigationDrawer.vue';
 import AppTopBar from '@/layouts/AppTopBar.vue';
 
 const route = useRoute();
+const router = useRouter();
 const ui = useUiStore();
+const auth = useAuthStore();
 const { mobile } = useDisplay();
 
 const showShell = computed(() => !!route.meta.requiresAuth);
@@ -24,7 +27,7 @@ watch(
     <template v-if="showShell">
       <AppNavigationDrawer />
       <v-main>
-        <v-container>
+        <v-container :fluid="mobile">
           <AppTopBar />
           <router-view />
         </v-container>

@@ -1,12 +1,17 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { useDisplay } from 'vuetify';
 import { useUiStore } from '@/stores/ui';
+import { useAuthStore } from '@/stores/auth';
 import { getNavigationItems } from '@/menus/navigation';
 
 const ui = useUiStore();
+const auth = useAuthStore();
 const { mobile } = useDisplay();
 
-const items = getNavigationItems();
+const items = computed(() =>
+  getNavigationItems().filter((item) => !item.permission || auth.can(item.permission)),
+);
 </script>
 
 <template>

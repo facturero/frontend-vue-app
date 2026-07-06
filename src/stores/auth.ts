@@ -1,32 +1,25 @@
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
-import { clearTokens, getAccessToken, http, setTokens } from '@/utils/http';
-
-export interface User {
-  id: string;
-  email: string;
-  emailVerified: boolean;
-  authProvider: 'password' | 'google';
-}
-
-function extractError(e: unknown): string {
-  const err = e as { response?: { data?: { message?: string } }; message?: string };
-  return err?.response?.data?.message ?? err?.message ?? 'Error inesperado';
-}
+import { clearTokens, getAccessToken, setTokens } from '@/utils/http';
+import { extractError } from '@/utils/error';
+import { authApi } from '@/api/auth';
+import type { CompleteProfileInput, Me, UserSummary } from '@/types/auth';
 
 export const useAuthStore = defineStore('auth', () => {
-  const user = ref<User | null>(null);
+  const user = ref<UserSummary | null>(null);
   const loading = ref(false);
   const error = ref<string | null>(null);
+  const needsOrg = ref(false);
   const isAuthenticated = computed(() => !!getAccessToken());
 
   async function login(email: string, password: string): Promise<void> {
     loading.value = true;
     error.value = null;
     try {
-      const { data } = await http.post('/auth/login', { email, password });
+      const data = await authApi.login({ email, password });
       setTokens(data.accessToken, data.refreshToken);
       user.value = data.user;
+      needsOrg.value = data.needsOrg ?? false;
     } catch (e) {
       error.value = extractError(e);
       throw e;
@@ -39,9 +32,10 @@ export const useAuthStore = defineStore('auth', () => {
     loading.value = true;
     error.value = null;
     try {
-      const { data } = await http.post('/auth/register', { email, password });
+      const data = await authApi.register({ email, password });
       setTokens(data.accessToken, data.refreshToken);
       user.value = data.user;
+      needsOrg.value = false;
     } catch (e) {
       error.value = extractError(e);
       throw e;
@@ -54,9 +48,10 @@ export const useAuthStore = defineStore('auth', () => {
     loading.value = true;
     error.value = null;
     try {
-      const { data } = await http.post('/auth/google', { idToken });
+      const data = await authApi.google({ idToken });
       setTokens(data.accessToken, data.refreshToken);
       user.value = data.user;
+      needsOrg.value = data.needsOrg ?? false;
     } catch (e) {
       error.value = extractError(e);
       throw e;
@@ -65,16 +60,42 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function fetchMe(): Promise<User> {
-    const { data } = await http.get('/auth/me');
+  async function completeProfile(input: CompleteProfileInput): Promise<void> {
+    loading.value = true;
+    error.value = null;
+    try {
+      const data = await authApi.completeProfile(input);
+      setTokens(data.accessToken, data.refreshToken);
+      user.value = data.user;
+      needsOrg.value = false;
+    } catch (e) {
+      error.value = extractError(e);
+      throw e;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  async function fetchMe(): Promise<Me> {
+    const data = await authApi.me();
     user.value = data;
+    needsOrg.value = !data.orgId;
     return data;
+  }
+
+  function can(permission: string): boolean {
+    const perms = (user.value as Record<string, unknown>)?.permissions;
+    return Array.isArray(perms) ? perms.includes(permission) : false;
   }
 
   function logout(): void {
     clearTokens();
     user.value = null;
+    needsOrg.value = false;
   }
 
-  return { user, loading, error, isAuthenticated, login, register, loginWithGoogle, fetchMe, logout };
+  return {
+    user, loading, error, needsOrg, isAuthenticated,
+    login, register, loginWithGoogle, completeProfile, fetchMe, can, logout,
+  };
 });

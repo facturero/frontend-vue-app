@@ -1,13 +1,18 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 
 const auth = useAuthStore();
+const router = useRouter();
 const loadError = ref<string | null>(null);
 
 onMounted(async () => {
   try {
     await auth.fetchMe();
+    if (auth.needsOrg) {
+      router.replace({ name: 'profile' });
+    }
   } catch (e) {
     const err = e as { response?: { data?: { message?: string } } };
     loadError.value = err?.response?.data?.message ?? 'No se pudo cargar /auth/me';

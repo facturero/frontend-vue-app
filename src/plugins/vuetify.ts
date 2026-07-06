@@ -13,6 +13,12 @@ export default createVuetify({
     locale: 'es',
     messages: { es, en, fr },
   },
+  defaults: {
+    VCard: { elevation: 2 },
+    VTextField: { variant: 'outlined', density: 'compact' },
+    VSelect: { variant: 'outlined', density: 'compact' },
+    VBtn: { variant: 'flat', rounded: 'lg' },
+  },
   theme: {
     defaultTheme: 'light',
     themes: {
