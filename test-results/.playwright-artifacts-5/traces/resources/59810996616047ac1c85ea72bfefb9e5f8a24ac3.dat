@@ -1,0 +1,50 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/RoleBadge.vue");import { defineComponent as _defineComponent } from "/node_modules/.vite/deps/vue.js?v=8eb19d00";
+const _sfc_main = /* @__PURE__ */ _defineComponent({
+  __name: "RoleBadge",
+  props: {
+    name: { type: String, required: true }
+  },
+  setup(__props, { expose: __expose }) {
+    __expose();
+    const __returned__ = {};
+    Object.defineProperty(__returned__, "__isScriptSetup", { enumerable: false, value: true });
+    return __returned__;
+  }
+});
+import { toDisplayString as _toDisplayString, createTextVNode as _createTextVNode, resolveComponent as _resolveComponent, withCtx as _withCtx, openBlock as _openBlock, createBlock as _createBlock } from "/node_modules/.vite/deps/vue.js?v=8eb19d00";
+function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
+  const _component_v_chip = _resolveComponent("v-chip");
+  return _openBlock(), _createBlock(_component_v_chip, {
+    size: "small",
+    color: "primary",
+    variant: "tonal"
+  }, {
+    default: _withCtx(() => [
+      _createTextVNode(
+        _toDisplayString($props.name),
+        1
+        /* TEXT */
+      )
+    ]),
+    _: 1
+    /* STABLE */
+  });
+}
+_sfc_main.__hmrId = "fe99ca41";
+typeof __VUE_HMR_RUNTIME__ !== "undefined" && __VUE_HMR_RUNTIME__.createRecord(_sfc_main.__hmrId, _sfc_main);
+import.meta.hot.on("file-changed", ({ file }) => {
+  __VUE_HMR_RUNTIME__.CHANGED_FILE = file;
+});
+import.meta.hot.accept((mod) => {
+  if (!mod) return;
+  const { default: updated, _rerender_only } = mod;
+  if (_rerender_only) {
+    __VUE_HMR_RUNTIME__.rerender(updated.__hmrId, updated.render);
+  } else {
+    __VUE_HMR_RUNTIME__.reload(updated.__hmrId, updated);
+  }
+});
+import _export_sfc from "/@id/__x00__plugin-vue:export-helper";
+export default /* @__PURE__ */ _export_sfc(_sfc_main, [["render", _sfc_render], ["__file", "C:/Users/sansh/cmr-proyect/frontend/src/components/RoleBadge.vue"]]);
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozt1QkFLRSxhQUF3RTtBQUFBLElBQWhFLE1BQUs7QUFBQSxJQUFRLE9BQU07QUFBQSxJQUFVLFNBQVE7QUFBQTtzQkFBUSxNQUFVO0FBQUE7eUJBQVAsV0FBSTtBQUFBO0FBQUE7QUFBQTtBQUFBIiwibmFtZXMiOltdLCJpZ25vcmVMaXN0IjpbXSwic291cmNlcyI6WyJSb2xlQmFkZ2UudnVlIl0sInNvdXJjZXNDb250ZW50IjpbIjxzY3JpcHQgc2V0dXAgbGFuZz1cInRzXCI+XG5kZWZpbmVQcm9wczx7IG5hbWU6IHN0cmluZyB9PigpO1xuPC9zY3JpcHQ+XG5cbjx0ZW1wbGF0ZT5cbiAgPHYtY2hpcCBzaXplPVwic21hbGxcIiBjb2xvcj1cInByaW1hcnlcIiB2YXJpYW50PVwidG9uYWxcIj57eyBuYW1lIH19PC92LWNoaXA+XG48L3RlbXBsYXRlPlxuIl0sImZpbGUiOiJDOi9Vc2Vycy9zYW5zaC9jbXItcHJveWVjdC9mcm9udGVuZC9zcmMvY29tcG9uZW50cy9Sb2xlQmFkZ2UudnVlIn0=

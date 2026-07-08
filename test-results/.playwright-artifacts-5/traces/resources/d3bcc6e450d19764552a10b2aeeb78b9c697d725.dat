@@ -1,0 +1,6 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/node_modules/vuetify/lib/components/VDataTable/VDataTableFooter.css");import { updateStyle as __vite__updateStyle, removeStyle as __vite__removeStyle } from "/@vite/client"
+const __vite__id = "C:/Users/sansh/cmr-proyect/frontend/node_modules/vuetify/lib/components/VDataTable/VDataTableFooter.css"
+const __vite__css = ".v-data-table-footer {\n  align-items: center;\n  display: flex;\n  flex-wrap: wrap;\n  justify-content: flex-end;\n  padding: 8px 4px;\n}\n.v-data-table-footer__items-per-page {\n  align-items: center;\n  display: flex;\n  justify-content: center;\n}\n.v-data-table-footer__items-per-page > span {\n  padding-inline-end: 8px;\n}\n.v-data-table-footer__items-per-page > .v-select {\n  width: 90px;\n}\n.v-data-table-footer__info {\n  display: flex;\n  justify-content: flex-end;\n  min-width: 116px;\n  padding: 0 16px;\n}\n.v-data-table-footer__paginationz {\n  align-items: center;\n  display: flex;\n  margin-inline-start: 16px;\n}\n.v-data-table-footer__page {\n  padding: 0 8px;\n}"
+__vite__updateStyle(__vite__id, __vite__css)
+import.meta.hot.accept()
+import.meta.hot.prune(() => __vite__removeStyle(__vite__id))

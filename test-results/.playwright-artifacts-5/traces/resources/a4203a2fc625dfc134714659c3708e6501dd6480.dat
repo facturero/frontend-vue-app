@@ -1,0 +1,6 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/node_modules/vuetify/lib/components/VTimePicker/VTimePicker.css");import { updateStyle as __vite__updateStyle, removeStyle as __vite__removeStyle } from "/@vite/client"
+const __vite__id = "C:/Users/sansh/cmr-proyect/frontend/node_modules/vuetify/lib/components/VTimePicker/VTimePicker.css"
+const __vite__css = ".v-time-picker.v-picker {\n  min-width: 328px;\n}\n.v-time-picker .v-picker__body, .v-time-picker-controls__field-label,\n.v-time-picker .v-field {\n  transition-duration: 0.25s;\n  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);\n  transition-property: transform, max-height, opacity, font-size;\n}\n@media (prefers-reduced-motion: reduce) {\n  .v-time-picker .v-picker__body, .v-time-picker-controls__field-label,\n  .v-time-picker .v-field {\n    transition: none;\n  }\n}\n.v-time-picker .v-picker__body {\n  transition-behavior: allow-discrete;\n  max-height: calc-size(max-content, size);\n}\n.v-time-picker--variant-input .v-picker__body {\n  transform: scale(0);\n  max-height: 0;\n}"
+__vite__updateStyle(__vite__id, __vite__css)
+import.meta.hot.accept()
+import.meta.hot.prune(() => __vite__removeStyle(__vite__id))

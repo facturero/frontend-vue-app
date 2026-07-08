@@ -49,8 +49,8 @@ onMounted(() => {
           <v-card
             elevation="2"
             rounded="lg"
-            :disabled="r.isSystem && !canManage"
-            @click="canManage && router.push({ name: 'roles-edit', params: { id: r.id } })"
+            :disabled="r.isSystem"
+            @click="!r.isSystem && canManage && router.push({ name: 'roles-edit', params: { id: r.id } })"
             :class="{ 'cursor-pointer': canManage }"
           >
             <v-card-item>

@@ -5,6 +5,7 @@ import type { PermissionItem } from '@/types/roles';
 const props = defineProps<{
   permissions: PermissionItem[];
   modelValue: string[];
+  readonly?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -22,6 +23,7 @@ const grouped = computed(() => {
 });
 
 function toggle(code: string): void {
+  if (props.readonly) return;
   const current = [...props.modelValue];
   const idx = current.indexOf(code);
   if (idx >= 0) {
@@ -33,6 +35,7 @@ function toggle(code: string): void {
 }
 
 function toggleResource(resource: string, items: PermissionItem[]): void {
+  if (props.readonly) return;
   const codes = items.map((p) => p.code);
   const allSelected = codes.every((c) => props.modelValue.includes(c));
   const current = props.modelValue.filter((c) => !codes.includes(c));
@@ -62,7 +65,8 @@ function resourceIndeterminate(resource: string, items: PermissionItem[]): boole
             :indeterminate="resourceIndeterminate(resource, items)"
             density="compact"
             hide-details
-            @change="toggleResource(resource, items)"
+            :disabled="readonly"
+            @change="!readonly && toggleResource(resource, items)"
           />
         </template>
         <v-list-item-title class="text-uppercase text-caption font-weight-bold">
@@ -81,7 +85,8 @@ function resourceIndeterminate(resource: string, items: PermissionItem[]): boole
             :model-value="modelValue.includes(p.code)"
             density="compact"
             hide-details
-            @change="toggle(p.code)"
+            :disabled="readonly"
+            @change="!readonly && toggle(p.code)"
           />
         </template>
         <v-list-item-title class="text-body-2">

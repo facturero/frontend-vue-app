@@ -1,0 +1,6 @@
+export function extractError(e) {
+  const err = e;
+  return err?.response?.data?.message ?? err?.message ?? "Error inesperado";
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImVycm9yLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImV4cG9ydCBmdW5jdGlvbiBleHRyYWN0RXJyb3IoZTogdW5rbm93bik6IHN0cmluZyB7XG4gIGNvbnN0IGVyciA9IGUgYXMgeyByZXNwb25zZT86IHsgZGF0YT86IHsgbWVzc2FnZT86IHN0cmluZyB9IH07IG1lc3NhZ2U/OiBzdHJpbmcgfTtcbiAgcmV0dXJuIGVycj8ucmVzcG9uc2U/LmRhdGE/Lm1lc3NhZ2UgPz8gZXJyPy5tZXNzYWdlID8/ICdFcnJvciBpbmVzcGVyYWRvJztcbn1cbiJdLCJtYXBwaW5ncyI6IkFBQU8sZ0JBQVMsYUFBYSxHQUFvQjtBQUMvQyxRQUFNLE1BQU07QUFDWixTQUFPLEtBQUssVUFBVSxNQUFNLFdBQVcsS0FBSyxXQUFXO0FBQ3pEOyIsIm5hbWVzIjpbXX0=

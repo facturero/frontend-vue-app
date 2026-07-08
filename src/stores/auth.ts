@@ -6,10 +6,14 @@ import { authApi } from '@/api/auth';
 import type { CompleteProfileInput, Me, UserSummary } from '@/types/auth';
 
 export const useAuthStore = defineStore('auth', () => {
-  const user = ref<UserSummary | null>(null);
+  const user = ref<UserSummary | Me | null>(null);
   const loading = ref(false);
   const error = ref<string | null>(null);
   const needsOrg = ref(false);
+  const needsOrgSetup = computed(() => {
+    const u = user.value;
+    return u != null && 'orgId' in u ? !!u.orgId && !u.orgName : false;
+  });
   const isAuthenticated = computed(() => !!getAccessToken());
 
   async function login(email: string, password: string): Promise<void> {
@@ -28,11 +32,11 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  async function register(email: string, password: string): Promise<void> {
+  async function register(email: string, password: string, identification?: string): Promise<void> {
     loading.value = true;
     error.value = null;
     try {
-      const data = await authApi.register({ email, password });
+      const data = await authApi.register({ email, password, identification });
       setTokens(data.accessToken, data.refreshToken);
       user.value = data.user;
       needsOrg.value = false;
@@ -95,7 +99,7 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   return {
-    user, loading, error, needsOrg, isAuthenticated,
+    user, loading, error, needsOrg, needsOrgSetup, isAuthenticated,
     login, register, loginWithGoogle, completeProfile, fetchMe, can, logout,
   };
 });

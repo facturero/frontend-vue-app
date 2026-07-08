@@ -1,0 +1,22 @@
+{"version":8,"type":"context-options","origin":"testRunner","browserName":"","playwrightVersion":"1.61.1","options":{},"platform":"win32","wallTime":1783535495977,"monotonicTime":17100.066,"sdkLanguage":"javascript"}
+{"type":"before","callId":"hook@1","stepId":"hook@1","startTime":17112.953,"class":"Test","method":"hook","title":"Before Hooks","params":{},"stack":[]}
+{"type":"before","callId":"fixture@30","stepId":"fixture@30","parentId":"hook@1","startTime":17118.6,"class":"Test","method":"fixture","title":"Fixture \"browser\"","params":{},"stack":[]}
+{"type":"before","callId":"pw:api@31","stepId":"pw:api@31","parentId":"fixture@30","startTime":17120.057,"class":"Test","method":"pw:api","title":"Launch browser","params":{"handleSIGINT":"false","tracesDir":"C:\\Users\\sansh\\cmr-proyect\\frontend\\test-results\\.playwright-artifacts-8\\traces","artifactsDir":"C:\\Users\\sansh\\cmr-proyect\\frontend\\test-results\\.playwright-artifacts-8","headless":"true","ignoreDefaultArgs":"undefined","ignoreAllDefaultArgs":"false","env":"undefined","timeout":"180000"},"stack":[]}
+{"type":"after","callId":"pw:api@31","endTime":17184.317,"annotations":[]}
+{"type":"after","callId":"fixture@30","endTime":17184.505,"annotations":[]}
+{"type":"before","callId":"fixture@34","stepId":"fixture@34","parentId":"hook@1","startTime":17185.471,"class":"Test","method":"fixture","title":"Fixture \"context\"","params":{},"stack":[]}
+{"type":"before","callId":"pw:api@35","stepId":"pw:api@35","parentId":"fixture@34","startTime":17187.827,"class":"Test","method":"pw:api","title":"Create context","params":{"selectorEngines":"[]","testIdAttributeName":"data-testid","acceptDownloads":"accept","bypassCSP":"false","colorScheme":"light","hasTouch":"false","ignoreHTTPSErrors":"false","isMobile":"false","javaScriptEnabled":"true","locale":"en-US","offline":"false","storageState":"Object","viewport":"Object","baseURL":"http://localhost:5173","serviceWorkers":"allow","noDefaultViewport":"false","extraHTTPHeaders":"undefined","reducedMotion":"undefined","forcedColors":"undefined","contrast":"undefined","clientCertificates":"undefined"},"stack":[]}
+{"type":"after","callId":"pw:api@35","endTime":17252.915,"annotations":[]}
+{"type":"after","callId":"fixture@34","endTime":17256.645,"annotations":[]}
+{"type":"before","callId":"fixture@36","stepId":"fixture@36","parentId":"hook@1","startTime":17256.934,"class":"Test","method":"fixture","title":"Fixture \"page\"","params":{},"stack":[]}
+{"type":"before","callId":"pw:api@37","stepId":"pw:api@37","parentId":"fixture@36","startTime":17257.62,"class":"Test","method":"pw:api","title":"Create page","params":{},"stack":[]}
+{"type":"after","callId":"pw:api@37","endTime":17297.918,"annotations":[]}
+{"type":"after","callId":"fixture@36","endTime":17297.995,"annotations":[]}
+{"type":"after","callId":"hook@1","endTime":17298.026,"annotations":[]}
+{"type":"before","callId":"pw:api@38","stepId":"pw:api@38","startTime":17299.453,"class":"Test","method":"pw:api","title":"Navigate to \"/roles\"","params":{"url":"/roles","waitUntil":"load","timeout":"0"},"stack":[{"file":"C:\\Users\\sansh\\cmr-proyect\\frontend\\e2e\\specs\\roles.spec.ts","line":43,"column":16}]}
+{"type":"after","callId":"pw:api@38","endTime":17585.528,"annotations":[]}
+{"type":"before","callId":"expect@39","stepId":"expect@39","startTime":17590,"class":"Test","method":"expect","title":"Expect \"toBeVisible\"","params":{},"stack":[{"file":"C:\\Users\\sansh\\cmr-proyect\\frontend\\e2e\\specs\\roles.spec.ts","line":48,"column":33}]}
+{"type":"after","callId":"expect@39","endTime":17668.804,"annotations":[]}
+{"type":"before","callId":"pw:api@40","stepId":"pw:api@40","startTime":17669.897,"class":"Test","method":"pw:api","title":"Click locator('.v-card:not(.v-card--disabled)').filter({ hasNot: getByText('sistema') }).first()","params":{"selector":".v-card:not(.v-card--disabled) >> internal:has-not=\"internal:text=\\\"sistema\\\"i\" >> nth=0","strict":"true","timeout":"0"},"stack":[{"file":"C:\\Users\\sansh\\cmr-proyect\\frontend\\e2e\\specs\\roles.spec.ts","line":49,"column":25}]}
+{"type":"after","callId":"pw:api@40","endTime":17703.311,"annotations":[]}
+{"type":"before","callId":"expect@41","stepId":"expect@41","startTime":17703.895,"class":"Test","method":"expect","title":"Expect \"toHaveURL\"","params":{"expected":"Object"},"stack":[{"file":"C:\\Users\\sansh\\cmr-proyect\\frontend\\e2e\\specs\\roles.spec.ts","line":52,"column":24}]}

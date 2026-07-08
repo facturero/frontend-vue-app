@@ -1,0 +1,64 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/MessageInbox.vue");const _sfc_main = {  }
+import { resolveComponent as _resolveComponent, createVNode as _createVNode, mergeProps as _mergeProps, withCtx as _withCtx, createElementVNode as _createElementVNode, openBlock as _openBlock, createBlock as _createBlock } from "/node_modules/.vite/deps/vue.js?v=8eb19d00"
+
+function _sfc_render(_ctx, _cache) {
+  const _component_v_icon = _resolveComponent("v-icon")
+  const _component_v_btn = _resolveComponent("v-btn")
+  const _component_v_card_text = _resolveComponent("v-card-text")
+  const _component_v_card = _resolveComponent("v-card")
+  const _component_v_menu = _resolveComponent("v-menu")
+
+  return (_openBlock(), _createBlock(_component_v_menu, {
+    "min-width": "280",
+    transition: "slide-y-transition",
+    location: "bottom center",
+    offset: [0, 8]
+  }, {
+    activator: _withCtx(({ props }) => [
+      _createVNode(_component_v_btn, _mergeProps({ icon: "" }, props), {
+        default: _withCtx(() => [
+          _createVNode(_component_v_icon, { icon: "mdi-email-outline" })
+        ]),
+        _: 1 /* STABLE */
+      }, 16 /* FULL_PROPS */)
+    ]),
+    default: _withCtx(() => [
+      _createVNode(_component_v_card, null, {
+        default: _withCtx(() => [
+          _createVNode(_component_v_card_text, { class: "text-center text-medium-emphasis pa-8" }, {
+            default: _withCtx(() => [
+              _createVNode(_component_v_icon, {
+                icon: "mdi-email-off-outline",
+                size: "48",
+                class: "mb-4"
+              }),
+              _cache[0] || (_cache[0] = _createElementVNode("p", { class: "text-body-2" }, "Sin mensajes", -1 /* CACHED */))
+            ]),
+            _: 1 /* STABLE */
+          })
+        ]),
+        _: 1 /* STABLE */
+      })
+    ]),
+    _: 1 /* STABLE */
+  }))
+}
+
+
+_sfc_main.__hmrId = "b2fdafe0"
+typeof __VUE_HMR_RUNTIME__ !== 'undefined' && __VUE_HMR_RUNTIME__.createRecord(_sfc_main.__hmrId, _sfc_main)
+import.meta.hot.on('file-changed', ({ file }) => {
+  __VUE_HMR_RUNTIME__.CHANGED_FILE = file
+})
+import.meta.hot.accept(mod => {
+  if (!mod) return
+  const { default: updated, _rerender_only } = mod
+  if (_rerender_only) {
+    __VUE_HMR_RUNTIME__.rerender(updated.__hmrId, updated.render)
+  } else {
+    __VUE_HMR_RUNTIME__.reload(updated.__hmrId, updated)
+  }
+})
+import _export_sfc from "/@id/__x00__plugin-vue:export-helper"
+export default /*#__PURE__*/_export_sfc(_sfc_main, [['render',_sfc_render],['__file',"C:/Users/sansh/cmr-proyect/frontend/src/components/MessageInbox.vue"]])
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQzovVXNlcnMvc2Fuc2gvY21yLXByb3llY3QvZnJvbnRlbmQvc3JjL2NvbXBvbmVudHMvTWVzc2FnZUluYm94LnZ1ZSIsIm5hbWVzIjpbXSwic291cmNlcyI6WyJNZXNzYWdlSW5ib3gudnVlIl0sInNvdXJjZXNDb250ZW50IjpbIjx0ZW1wbGF0ZT5cbiAgPHYtbWVudSBtaW4td2lkdGg9XCIyODBcIiB0cmFuc2l0aW9uPVwic2xpZGUteS10cmFuc2l0aW9uXCIgbG9jYXRpb249XCJib3R0b20gY2VudGVyXCIgOm9mZnNldD1cIlswLCA4XVwiPlxuICAgIDx0ZW1wbGF0ZSAjYWN0aXZhdG9yPVwieyBwcm9wcyB9XCI+XG4gICAgICA8di1idG4gaWNvbiB2LWJpbmQ9XCJwcm9wc1wiPlxuICAgICAgICA8di1pY29uIGljb249XCJtZGktZW1haWwtb3V0bGluZVwiIC8+XG4gICAgICA8L3YtYnRuPlxuICAgIDwvdGVtcGxhdGU+XG4gICAgPHYtY2FyZD5cbiAgICAgIDx2LWNhcmQtdGV4dCBjbGFzcz1cInRleHQtY2VudGVyIHRleHQtbWVkaXVtLWVtcGhhc2lzIHBhLThcIj5cbiAgICAgICAgPHYtaWNvbiBpY29uPVwibWRpLWVtYWlsLW9mZi1vdXRsaW5lXCIgc2l6ZT1cIjQ4XCIgY2xhc3M9XCJtYi00XCIgLz5cbiAgICAgICAgPHAgY2xhc3M9XCJ0ZXh0LWJvZHktMlwiPlNpbiBtZW5zYWplczwvcD5cbiAgICAgIDwvdi1jYXJkLXRleHQ+XG4gICAgPC92LWNhcmQ+XG4gIDwvdi1tZW51PlxuPC90ZW1wbGF0ZT5cbiJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozt3QkFDRSxhQVlTO0lBWkQsV0FBUyxFQUFDLEtBQUs7SUFBQyxVQUFVLEVBQUMsb0JBQW9CO0lBQUMsUUFBUSxFQUFDLGVBQWU7SUFBRSxNQUFNLEVBQUUsTUFBTTs7SUFDbkYsU0FBUyxXQUNsQixDQUVRLEVBSGMsS0FBSztNQUMzQixhQUVRLGtCQUZSLFlBRVEsRUFGRCxJQUFJLEVBQUosRUFBSSxJQUFTLEtBQUs7MEJBQ3ZCLENBQW1DO1VBQW5DLGFBQW1DLHFCQUEzQixJQUFJLEVBQUMsbUJBQW1COzs7OztzQkFHcEMsQ0FLUztNQUxULGFBS1M7MEJBSlAsQ0FHYztVQUhkLGFBR2MsMEJBSEQsS0FBSyxFQUFDLHVDQUF1Qzs4QkFDeEQsQ0FBOEQ7Y0FBOUQsYUFBOEQ7Z0JBQXRELElBQUksRUFBQyx1QkFBdUI7Z0JBQUMsSUFBSSxFQUFDLElBQUk7Z0JBQUMsS0FBSyxFQUFDLE1BQU07O3dDQUMzRCxvQkFBdUMsT0FBcEMsS0FBSyxFQUFDLGFBQWEsSUFBQyxjQUFZIiwiaWdub3JlTGlzdCI6W119

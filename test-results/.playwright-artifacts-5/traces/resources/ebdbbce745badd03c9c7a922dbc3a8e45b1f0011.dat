@@ -1,0 +1,6 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/views/AcceptInviteView.vue?vue&type=style&index=0&scoped=f68eb181&lang.css");import { updateStyle as __vite__updateStyle, removeStyle as __vite__removeStyle } from "/@vite/client"
+const __vite__id = "C:/Users/sansh/cmr-proyect/frontend/src/views/AcceptInviteView.vue?vue&type=style&index=0&scoped=f68eb181&lang.css"
+const __vite__css = "\n.fill-height[data-v-f68eb181] {\n  min-height: 100vh;\n}\n"
+__vite__updateStyle(__vite__id, __vite__css)
+import.meta.hot.accept()
+import.meta.hot.prune(() => __vite__removeStyle(__vite__id))

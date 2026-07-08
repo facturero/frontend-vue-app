@@ -1,0 +1,6 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/node_modules/vuetify/lib/components/VAppBar/VAppBar.css");import { updateStyle as __vite__updateStyle, removeStyle as __vite__removeStyle } from "/@vite/client"
+const __vite__id = "C:/Users/sansh/cmr-proyect/frontend/node_modules/vuetify/lib/components/VAppBar/VAppBar.css"
+const __vite__css = ".v-app-bar {\n  display: flex;\n}\n.v-app-bar.v-toolbar {\n  background: rgb(var(--v-theme-surface));\n  color: rgba(var(--v-theme-on-surface), var(--v-high-emphasis-opacity));\n}\n.v-app-bar.v-toolbar:not(.v-toolbar--flat) {\n  box-shadow: 0px 2px 4px -1px var(--v-shadow-key-umbra-opacity, rgba(0, 0, 0, 0.2)), 0px 4px 5px 0px var(--v-shadow-key-penumbra-opacity, rgba(0, 0, 0, 0.14)), 0px 1px 10px 0px var(--v-shadow-key-ambient-opacity, rgba(0, 0, 0, 0.12));\n}\n.v-app-bar:not(.v-toolbar--absolute) {\n  padding-inline-end: var(--v-scrollbar-offset);\n}"
+__vite__updateStyle(__vite__id, __vite__css)
+import.meta.hot.accept()
+import.meta.hot.prune(() => __vite__removeStyle(__vite__id))

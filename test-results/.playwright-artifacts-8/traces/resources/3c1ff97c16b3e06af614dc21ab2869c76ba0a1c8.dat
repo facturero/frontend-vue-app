@@ -1,0 +1,8 @@
+import { createApp } from "/node_modules/.vite/deps/vue.js?v=8eb19d00";
+import { registerPlugins } from "/src/plugins/index.ts?t=1783535090400";
+import App from "/src/App.vue?t=1783535084050";
+const app = createApp(App);
+registerPlugins(app);
+app.mount("#app");
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIm1haW4udHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgY3JlYXRlQXBwIH0gZnJvbSAndnVlJztcbmltcG9ydCB7IHJlZ2lzdGVyUGx1Z2lucyB9IGZyb20gJ0AvcGx1Z2lucyc7XG5pbXBvcnQgQXBwIGZyb20gJy4vQXBwLnZ1ZSc7XG5cbmNvbnN0IGFwcCA9IGNyZWF0ZUFwcChBcHApO1xuXG5yZWdpc3RlclBsdWdpbnMoYXBwKTtcblxuYXBwLm1vdW50KCcjYXBwJyk7XG4iXSwibWFwcGluZ3MiOiJBQUFBLFNBQVMsaUJBQWlCO0FBQzFCLFNBQVMsdUJBQXVCO0FBQ2hDLE9BQU8sU0FBUztBQUVoQixNQUFNLE1BQU0sVUFBVSxHQUFHO0FBRXpCLGdCQUFnQixHQUFHO0FBRW5CLElBQUksTUFBTSxNQUFNOyIsIm5hbWVzIjpbXX0=

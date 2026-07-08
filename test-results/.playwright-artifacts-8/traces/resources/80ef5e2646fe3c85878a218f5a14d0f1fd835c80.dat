@@ -1,0 +1,6 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/node_modules/vuetify/lib/components/VMain/VMain.css");import { updateStyle as __vite__updateStyle, removeStyle as __vite__removeStyle } from "/@vite/client"
+const __vite__id = "C:/Users/sansh/cmr-proyect/frontend/node_modules/vuetify/lib/components/VMain/VMain.css"
+const __vite__css = ".v-main {\n  flex: 1 0 auto;\n  max-width: 100%;\n  transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);\n  padding-left: var(--v-layout-left);\n  padding-right: var(--v-layout-right);\n  padding-top: var(--v-layout-top);\n  padding-bottom: var(--v-layout-bottom);\n}\n@media (prefers-reduced-motion: reduce) {\n  .v-main {\n    transition: none;\n  }\n}\n.v-main__scroller {\n  max-width: 100%;\n  position: relative;\n}\n.v-main--scrollable {\n  display: flex;\n}\n.v-main--scrollable {\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 100%;\n  height: 100%;\n}\n.v-main--scrollable > .v-main__scroller {\n  flex: 1 1 auto;\n  overflow-y: auto;\n  --v-layout-left: 0px;\n  --v-layout-right: 0px;\n  --v-layout-top: 0px;\n  --v-layout-bottom: 0px;\n}"
+__vite__updateStyle(__vite__id, __vite__css)
+import.meta.hot.accept()
+import.meta.hot.prune(() => __vite__removeStyle(__vite__id))

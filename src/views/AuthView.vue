@@ -16,6 +16,7 @@ const step = ref<'email' | 'password'>('email');
 const email = ref('admin@admin.com');
 const password = ref('admin');
 const confirmPassword = ref('');
+const identification = ref('');
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
 
@@ -24,7 +25,7 @@ async function submit(): Promise<void> {
     if (mode.value === 'login') {
       await auth.login(email.value, password.value);
     } else {
-      await auth.register(email.value, password.value);
+      await auth.register(email.value, password.value, identification.value || undefined);
     }
     if (auth.needsOrg) {
       router.push({ name: 'profile' });
@@ -169,6 +170,14 @@ function changeEmail(): void {
                   density="compact"
                   class="mb-6"
                   type="email"
+                  hide-details="auto"
+                />
+                <v-text-field
+                  v-model="identification"
+                  label="Cédula / RUC"
+                  variant="outlined"
+                  density="compact"
+                  class="mb-6"
                   hide-details="auto"
                 />
                 <v-text-field

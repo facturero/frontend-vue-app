@@ -5,6 +5,7 @@ import { useEmployeeStore } from '@/stores/employees';
 import { useRoleStore } from '@/stores/roles';
 import { useAuthStore } from '@/stores/auth';
 import RoleBadge from '@/components/RoleBadge.vue';
+import RoleSelect from '@/components/RoleSelect.vue';
 
 const props = defineProps<{ id: string }>();
 const emp = useEmployeeStore();
@@ -14,9 +15,14 @@ const router = useRouter();
 
 const selectedRoleIds = ref<string[]>([]);
 const assigning = ref(false);
+const disabling = ref(false);
 
 const employee = computed(() => emp.list.find((e) => e.id === props.id));
-const canAssign = auth.can('user:assign_role');
+const isActive = computed(() => employee.value?.status === 'active');
+const canAssign = computed(() => auth.can('user:assign_role'));
+const isSelf = computed(() => auth.user?.id === props.id);
+const cannotModify = computed(() => isSelf.value || employee.value?.isOwner === true);
+const canDisable = computed(() => auth.can('user:update') && employee.value != null && !isSelf.value && !employee.value?.isOwner);
 
 onMounted(async () => {
   if (emp.list.length === 0) {
@@ -29,6 +35,23 @@ onMounted(async () => {
       .map((r) => r.id);
   }
 });
+
+async function onStatusChange(): Promise<void> {
+  await disableEmployee();
+}
+
+async function disableEmployee(): Promise<void> {
+  disabling.value = true;
+  emp.error = null;
+  try {
+    await emp.disable(props.id);
+    await emp.fetch();
+  } catch {
+    /* manejado por el store */
+  } finally {
+    disabling.value = false;
+  }
+}
 
 async function assignRole(): Promise<void> {
   if (selectedRoleIds.value.length === 0) return;
@@ -77,7 +100,38 @@ async function assignRole(): Promise<void> {
             <v-list-item title="Nombre" :subtitle="employee.fullName || '—'" prepend-icon="mdi-account-outline" />
             <v-list-item title="Estado" prepend-icon="mdi-check-circle-outline">
               <template #subtitle>
-                <v-chip size="x-small" :color="employee.status === 'active' ? 'success' : 'warning'" variant="tonal">
+                <v-chip-group
+                  v-if="canDisable"
+                  mandatory
+                  :model-value="isActive ? 0 : 1"
+                  @update:model-value="onStatusChange"
+                  column
+                >
+                  <v-chip
+                    :value="0"
+                    color="success"
+                    variant="tonal"
+                    size="x-small"
+                    :disabled="disabling"
+                  >
+                    activo
+                  </v-chip>
+                  <v-chip
+                    :value="1"
+                    color="warning"
+                    variant="tonal"
+                    size="x-small"
+                    :disabled="disabling"
+                  >
+                    desactivado
+                  </v-chip>
+                </v-chip-group>
+                <v-chip
+                  v-else
+                  size="x-small"
+                  :color="employee.status === 'active' ? 'success' : 'warning'"
+                  variant="tonal"
+                >
                   {{ employee.status }}
                 </v-chip>
               </template>
@@ -94,25 +148,33 @@ async function assignRole(): Promise<void> {
       <v-card v-if="canAssign" elevation="2" rounded="lg">
         <v-card-title>Asignar roles</v-card-title>
         <v-card-text>
-          <v-select
-            v-model="selectedRoleIds"
-            label="Roles"
-            :items="rolesStore.list"
-            item-title="name"
-            item-value="id"
-            variant="outlined"
+          <v-alert
+            v-if="isSelf"
+            type="info"
             density="compact"
+            variant="tonal"
             class="mb-4"
-            hide-details="auto"
+            text="No puedes modificar tus propios roles."
+          />
+          <v-alert
+            v-else-if="employee?.isOwner"
+            type="info"
+            density="compact"
+            variant="tonal"
+            class="mb-4"
+            text="No puedes modificar los roles del dueño de la organización."
+          />
+          <RoleSelect
+            v-model="selectedRoleIds"
             multiple
-            chips
-            closable-chips
+            :disabled="cannotModify"
+            class="mb-4"
           />
           <v-btn
             color="primary"
             variant="tonal"
             :loading="assigning"
-            :disabled="selectedRoleIds.length === 0"
+            :disabled="selectedRoleIds.length === 0 || cannotModify"
             @click="assignRole"
           >
             Actualizar roles

@@ -22,16 +22,20 @@ export const useEmployeeStore = defineStore('employees', () => {
     }
   }
 
-  async function invite(email: string, roleId: string): Promise<string> {
-    error.value = null;
-    const { userId } = await employeeApi.invite({ email, roleId });
+  async function invite(email: string, roleIds: string[]): Promise<string> {
+    const { userId } = await employeeApi.invite({ email, roleIds });
     return userId;
   }
 
   async function assignRole(userId: string, roleIds: string[]): Promise<void> {
     error.value = null;
-    await employeeApi.assignRole(userId, roleId);
+    await employeeApi.assignRole(userId, roleIds);
   }
 
-  return { list, loading, error, fetch, invite, assignRole };
+  async function disable(userId: string): Promise<void> {
+    error.value = null;
+    await employeeApi.disable(userId);
+  }
+
+  return { list, loading, error, fetch, invite, assignRole, disable };
 });

@@ -12,6 +12,8 @@ onMounted(async () => {
     await auth.fetchMe();
     if (auth.needsOrg) {
       router.replace({ name: 'profile' });
+    } else if (auth.needsOrgSetup) {
+      router.replace({ name: 'organization-settings' });
     }
   } catch (e) {
     const err = e as { response?: { data?: { message?: string } } };

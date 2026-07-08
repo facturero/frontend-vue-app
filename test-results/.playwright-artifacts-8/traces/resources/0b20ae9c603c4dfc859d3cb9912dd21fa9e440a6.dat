@@ -1,0 +1,11 @@
+import { useTheme } from "/node_modules/.vite/deps/vuetify.js?v=8eb19d00";
+export function useThemeToggle() {
+  const theme = useTheme();
+  function toggleTheme() {
+    theme.global.name.value = theme.global.current.value.dark ? "light" : "dark";
+  }
+  const isDark = () => theme.global.current.value.dark;
+  return { toggleTheme, isDark };
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInVzZVRoZW1lVG9nZ2xlLnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB7IHVzZVRoZW1lIH0gZnJvbSAndnVldGlmeSc7XG5cbmV4cG9ydCBmdW5jdGlvbiB1c2VUaGVtZVRvZ2dsZSgpIHtcbiAgY29uc3QgdGhlbWUgPSB1c2VUaGVtZSgpO1xuXG4gIGZ1bmN0aW9uIHRvZ2dsZVRoZW1lKCk6IHZvaWQge1xuICAgIHRoZW1lLmdsb2JhbC5uYW1lLnZhbHVlID0gdGhlbWUuZ2xvYmFsLmN1cnJlbnQudmFsdWUuZGFyayA/ICdsaWdodCcgOiAnZGFyayc7XG4gIH1cblxuICBjb25zdCBpc0RhcmsgPSAoKSA9PiB0aGVtZS5nbG9iYWwuY3VycmVudC52YWx1ZS5kYXJrO1xuXG4gIHJldHVybiB7IHRvZ2dsZVRoZW1lLCBpc0RhcmsgfTtcbn1cbiJdLCJtYXBwaW5ncyI6IkFBQUEsU0FBUyxnQkFBZ0I7QUFFbEIsZ0JBQVMsaUJBQWlCO0FBQy9CLFFBQU0sUUFBUSxTQUFTO0FBRXZCLFdBQVMsY0FBb0I7QUFDM0IsVUFBTSxPQUFPLEtBQUssUUFBUSxNQUFNLE9BQU8sUUFBUSxNQUFNLE9BQU8sVUFBVTtBQUFBLEVBQ3hFO0FBRUEsUUFBTSxTQUFTLE1BQU0sTUFBTSxPQUFPLFFBQVEsTUFBTTtBQUVoRCxTQUFPLEVBQUUsYUFBYSxPQUFPO0FBQy9COyIsIm5hbWVzIjpbXX0=

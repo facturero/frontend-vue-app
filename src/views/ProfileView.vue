@@ -76,6 +76,8 @@ async function submit(): Promise<void> {
     await auth.fetchMe();
     if (isSetup.value) {
       router.push({ name: 'home' });
+    } else if (auth.needsOrgSetup) {
+      router.push({ name: 'organization-settings' });
     } else {
       saved.value = true;
     }

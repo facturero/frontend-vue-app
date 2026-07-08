@@ -1,0 +1,483 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/views/AuthView.vue");import { defineComponent as _defineComponent } from "/node_modules/.vite/deps/vue.js?v=8eb19d00";
+import { ref } from "/node_modules/.vite/deps/vue.js?v=8eb19d00";
+import { useRouter } from "/node_modules/.vite/deps/vue-router.js?v=8eb19d00";
+import { useI18n } from "/node_modules/.vite/deps/vue-i18n.js?v=8eb19d00";
+import { useAuthStore } from "/src/stores/auth.ts?t=1783535084050";
+import LocaleSwitcher from "/src/components/LocaleSwitcher.vue";
+import GoogleSignIn from "/src/components/GoogleSignIn.vue?t=1783535084050";
+const _sfc_main = /* @__PURE__ */ _defineComponent({
+  __name: "AuthView",
+  setup(__props, { expose: __expose }) {
+    __expose();
+    const { t, locale } = useI18n();
+    const auth = useAuthStore();
+    const router = useRouter();
+    const mode = ref("login");
+    const step = ref("email");
+    const email = ref("admin@admin.com");
+    const password = ref("admin");
+    const confirmPassword = ref("");
+    const identification = ref("");
+    const showPassword = ref(false);
+    const showConfirmPassword = ref(false);
+    async function submit() {
+      try {
+        if (mode.value === "login") {
+          await auth.login(email.value, password.value);
+        } else {
+          await auth.register(email.value, password.value, identification.value || void 0);
+        }
+        if (auth.needsOrg) {
+          router.push({ name: "profile" });
+        } else {
+          router.push({ name: "home" });
+        }
+      } catch {
+      }
+    }
+    function toggleMode() {
+      mode.value = mode.value === "login" ? "register" : "login";
+      step.value = "email";
+      auth.error = null;
+    }
+    function goToPassword() {
+      if (email.value) step.value = "password";
+    }
+    function changeEmail() {
+      step.value = "email";
+    }
+    const __returned__ = { t, locale, auth, router, mode, step, email, password, confirmPassword, identification, showPassword, showConfirmPassword, submit, toggleMode, goToPassword, changeEmail, LocaleSwitcher, GoogleSignIn };
+    Object.defineProperty(__returned__, "__isScriptSetup", { enumerable: false, value: true });
+    return __returned__;
+  }
+});
+import { createCommentVNode as _createCommentVNode, toDisplayString as _toDisplayString, createTextVNode as _createTextVNode, resolveComponent as _resolveComponent, withCtx as _withCtx, createVNode as _createVNode, withModifiers as _withModifiers, createElementVNode as _createElementVNode, openBlock as _openBlock, createBlock as _createBlock, createElementBlock as _createElementBlock, Fragment as _Fragment } from "/node_modules/.vite/deps/vue.js?v=8eb19d00";
+const _hoisted_1 = { class: "auth-wrapper d-flex align-center justify-center fill-height bg-background" };
+const _hoisted_2 = { key: 0 };
+const _hoisted_3 = { key: 1 };
+const _hoisted_4 = {
+  class: "d-flex align-center border rounded py-1 px-2 mb-6",
+  style: { "background-color": "rgba(var(--v-theme-secondary), var(--v-hover-opacity))" }
+};
+const _hoisted_5 = { class: "text-caption" };
+const _hoisted_6 = { class: "position-absolute top-0 right-0 pa-4" };
+const _hoisted_7 = { class: "text-body-1 font-weight-semibold mb-3" };
+const _hoisted_8 = {
+  class: "text-body-2 text-medium-emphasis mb-6",
+  style: { "max-width": "260px" }
+};
+const _hoisted_9 = { class: "text-body-1 font-weight-semibold mb-3" };
+const _hoisted_10 = {
+  class: "text-body-2 text-medium-emphasis mb-6",
+  style: { "max-width": "260px" }
+};
+function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
+  const _component_v_card_title = _resolveComponent("v-card-title");
+  const _component_v_card_subtitle = _resolveComponent("v-card-subtitle");
+  const _component_v_card_item = _resolveComponent("v-card-item");
+  const _component_v_alert = _resolveComponent("v-alert");
+  const _component_v_text_field = _resolveComponent("v-text-field");
+  const _component_v_btn = _resolveComponent("v-btn");
+  const _component_v_spacer = _resolveComponent("v-spacer");
+  const _component_v_form = _resolveComponent("v-form");
+  const _component_v_card_text = _resolveComponent("v-card-text");
+  const _component_v_col = _resolveComponent("v-col");
+  const _component_v_row = _resolveComponent("v-row");
+  const _component_v_card = _resolveComponent("v-card");
+  return _openBlock(), _createElementBlock("div", _hoisted_1, [
+    _createVNode(_component_v_card, {
+      "max-width": "900",
+      class: "mx-auto",
+      rounded: "lg",
+      style: { "width": "100%" }
+    }, {
+      default: _withCtx(() => [
+        _createVNode(_component_v_row, { "no-gutters": "" }, {
+          default: _withCtx(() => [
+            _createCommentVNode(" Left column: Form "),
+            _createVNode(_component_v_col, {
+              cols: "12",
+              md: "6",
+              class: "pa-sm-8 pa-4"
+            }, {
+              default: _withCtx(() => [
+                _createVNode(_component_v_card_item, { class: "px-0" }, {
+                  append: _withCtx(() => [
+                    _createElementVNode(
+                      "a",
+                      {
+                        href: "#",
+                        class: "text-body-2 text-medium-emphasis d-block d-md-none",
+                        onClick: _withModifiers($setup.toggleMode, ["prevent"])
+                      },
+                      _toDisplayString($setup.mode === "login" ? $setup.t("auth.register") : $setup.t("auth.login")),
+                      1
+                      /* TEXT */
+                    )
+                  ]),
+                  default: _withCtx(() => [
+                    _createVNode(_component_v_card_title, { class: "px-0" }, {
+                      default: _withCtx(() => [
+                        _createTextVNode(
+                          _toDisplayString($setup.mode === "login" ? $setup.t("auth.signIn") : $setup.t("auth.createAccount")),
+                          1
+                          /* TEXT */
+                        )
+                      ]),
+                      _: 1
+                      /* STABLE */
+                    }),
+                    _createVNode(_component_v_card_subtitle, { class: "px-0" }, {
+                      default: _withCtx(() => [
+                        _createTextVNode(
+                          _toDisplayString($setup.mode === "login" ? $setup.t("auth.toAccessTemplate") : $setup.t("auth.registerToGetStarted")),
+                          1
+                          /* TEXT */
+                        )
+                      ]),
+                      _: 1
+                      /* STABLE */
+                    })
+                  ]),
+                  _: 1
+                  /* STABLE */
+                }),
+                _createVNode(_component_v_card_text, { class: "px-0" }, {
+                  default: _withCtx(() => [
+                    _createCommentVNode(" Error alert "),
+                    $setup.auth.error ? (_openBlock(), _createBlock(_component_v_alert, {
+                      key: 0,
+                      type: "error",
+                      variant: "tonal",
+                      closable: "",
+                      class: "mb-4",
+                      density: "compact",
+                      "onClick:close": _cache[0] || (_cache[0] = ($event) => $setup.auth.error = null)
+                    }, {
+                      default: _withCtx(() => [
+                        _createTextVNode(
+                          _toDisplayString($setup.auth.error),
+                          1
+                          /* TEXT */
+                        )
+                      ]),
+                      _: 1
+                      /* STABLE */
+                    })) : _createCommentVNode("v-if", true),
+                    _createVNode(_component_v_form, {
+                      onSubmit: _withModifiers($setup.submit, ["prevent"])
+                    }, {
+                      default: _withCtx(() => [
+                        _createCommentVNode(" Login: two-step flow "),
+                        $setup.mode === "login" ? (_openBlock(), _createElementBlock(
+                          _Fragment,
+                          { key: 0 },
+                          [
+                            $setup.step === "email" ? (_openBlock(), _createElementBlock("div", _hoisted_2, [
+                              _createVNode(_component_v_text_field, {
+                                modelValue: $setup.email,
+                                "onUpdate:modelValue": _cache[1] || (_cache[1] = ($event) => $setup.email = $event),
+                                label: $setup.t("auth.email"),
+                                variant: "outlined",
+                                density: "compact",
+                                class: "mb-6",
+                                "hide-details": "auto"
+                              }, null, 8, ["modelValue", "label"]),
+                              _createVNode(_component_v_btn, {
+                                block: "",
+                                color: "primary",
+                                onClick: $setup.goToPassword
+                              }, {
+                                default: _withCtx(() => [
+                                  _createTextVNode(
+                                    _toDisplayString($setup.t("auth.next")),
+                                    1
+                                    /* TEXT */
+                                  )
+                                ]),
+                                _: 1
+                                /* STABLE */
+                              })
+                            ])) : (_openBlock(), _createElementBlock("div", _hoisted_3, [
+                              _createElementVNode("div", _hoisted_4, [
+                                _createElementVNode(
+                                  "span",
+                                  _hoisted_5,
+                                  _toDisplayString($setup.email),
+                                  1
+                                  /* TEXT */
+                                ),
+                                _createVNode(_component_v_spacer),
+                                _createVNode(_component_v_btn, {
+                                  variant: "text",
+                                  size: "small",
+                                  color: "primary",
+                                  onClick: $setup.changeEmail
+                                }, {
+                                  default: _withCtx(() => [
+                                    _createTextVNode(
+                                      _toDisplayString($setup.t("auth.change")),
+                                      1
+                                      /* TEXT */
+                                    )
+                                  ]),
+                                  _: 1
+                                  /* STABLE */
+                                })
+                              ]),
+                              _createVNode(_component_v_text_field, {
+                                modelValue: $setup.password,
+                                "onUpdate:modelValue": _cache[2] || (_cache[2] = ($event) => $setup.password = $event),
+                                label: $setup.t("auth.password"),
+                                variant: "outlined",
+                                density: "compact",
+                                class: "mb-6",
+                                type: $setup.showPassword ? "text" : "password",
+                                "append-inner-icon": $setup.showPassword ? "mdi-eye" : "mdi-eye-off",
+                                "onClick:appendInner": _cache[3] || (_cache[3] = ($event) => $setup.showPassword = !$setup.showPassword),
+                                "hide-details": "auto"
+                              }, null, 8, ["modelValue", "label", "type", "append-inner-icon"]),
+                              _createVNode(_component_v_btn, {
+                                block: "",
+                                color: "primary",
+                                type: "submit",
+                                class: "mb-3",
+                                loading: $setup.auth.loading
+                              }, {
+                                default: _withCtx(() => [
+                                  _createTextVNode(
+                                    _toDisplayString($setup.t("auth.login")),
+                                    1
+                                    /* TEXT */
+                                  )
+                                ]),
+                                _: 1
+                                /* STABLE */
+                              }, 8, ["loading"]),
+                              _createVNode(_component_v_btn, {
+                                block: "",
+                                variant: "tonal",
+                                href: "#",
+                                onClick: _cache[4] || (_cache[4] = _withModifiers(() => {
+                                }, ["prevent"]))
+                              }, {
+                                default: _withCtx(() => [
+                                  _createTextVNode(
+                                    _toDisplayString($setup.t("auth.forgotPassword")),
+                                    1
+                                    /* TEXT */
+                                  )
+                                ]),
+                                _: 1
+                                /* STABLE */
+                              })
+                            ]))
+                          ],
+                          64
+                          /* STABLE_FRAGMENT */
+                        )) : (_openBlock(), _createElementBlock(
+                          _Fragment,
+                          { key: 1 },
+                          [
+                            _createCommentVNode(" Register: all fields at once "),
+                            _createVNode(_component_v_text_field, {
+                              modelValue: $setup.email,
+                              "onUpdate:modelValue": _cache[5] || (_cache[5] = ($event) => $setup.email = $event),
+                              label: $setup.t("auth.email"),
+                              variant: "outlined",
+                              density: "compact",
+                              class: "mb-6",
+                              type: "email",
+                              "hide-details": "auto"
+                            }, null, 8, ["modelValue", "label"]),
+                            _createVNode(_component_v_text_field, {
+                              modelValue: $setup.identification,
+                              "onUpdate:modelValue": _cache[6] || (_cache[6] = ($event) => $setup.identification = $event),
+                              label: "Cédula / RUC",
+                              variant: "outlined",
+                              density: "compact",
+                              class: "mb-6",
+                              "hide-details": "auto"
+                            }, null, 8, ["modelValue"]),
+                            _createVNode(_component_v_text_field, {
+                              modelValue: $setup.password,
+                              "onUpdate:modelValue": _cache[7] || (_cache[7] = ($event) => $setup.password = $event),
+                              label: $setup.t("auth.password"),
+                              variant: "outlined",
+                              density: "compact",
+                              class: "mb-6",
+                              type: $setup.showPassword ? "text" : "password",
+                              "append-inner-icon": $setup.showPassword ? "mdi-eye" : "mdi-eye-off",
+                              "onClick:appendInner": _cache[8] || (_cache[8] = ($event) => $setup.showPassword = !$setup.showPassword),
+                              "hide-details": "auto"
+                            }, null, 8, ["modelValue", "label", "type", "append-inner-icon"]),
+                            _createVNode(_component_v_text_field, {
+                              modelValue: $setup.confirmPassword,
+                              "onUpdate:modelValue": _cache[9] || (_cache[9] = ($event) => $setup.confirmPassword = $event),
+                              label: $setup.t("auth.confirmPassword"),
+                              variant: "outlined",
+                              density: "compact",
+                              class: "mb-6",
+                              type: $setup.showConfirmPassword ? "text" : "password",
+                              "append-inner-icon": $setup.showConfirmPassword ? "mdi-eye" : "mdi-eye-off",
+                              "onClick:appendInner": _cache[10] || (_cache[10] = ($event) => $setup.showConfirmPassword = !$setup.showConfirmPassword),
+                              "hide-details": "auto"
+                            }, null, 8, ["modelValue", "label", "type", "append-inner-icon"]),
+                            _createVNode(_component_v_btn, {
+                              block: "",
+                              color: "primary",
+                              type: "submit",
+                              class: "mb-3",
+                              loading: $setup.auth.loading
+                            }, {
+                              default: _withCtx(() => [
+                                _createTextVNode(
+                                  _toDisplayString($setup.t("auth.register")),
+                                  1
+                                  /* TEXT */
+                                )
+                              ]),
+                              _: 1
+                              /* STABLE */
+                            }, 8, ["loading"])
+                          ],
+                          64
+                          /* STABLE_FRAGMENT */
+                        ))
+                      ]),
+                      _: 1
+                      /* STABLE */
+                    }),
+                    _createVNode($setup["GoogleSignIn"], {
+                      locale: _ctx.$i18n.locale
+                    }, null, 8, ["locale"])
+                  ]),
+                  _: 1
+                  /* STABLE */
+                })
+              ]),
+              _: 1
+              /* STABLE */
+            }),
+            _createCommentVNode(" Right column: Illustration & CTA "),
+            _createVNode(_component_v_col, {
+              cols: "6",
+              class: "pa-8 text-center border-s d-none d-md-flex flex-column align-center justify-center position-relative",
+              style: { "block-size": "33rem" }
+            }, {
+              default: _withCtx(() => [
+                _createElementVNode("div", _hoisted_6, [
+                  _createVNode($setup["LocaleSwitcher"])
+                ]),
+                $setup.mode === "login" ? (_openBlock(), _createElementBlock(
+                  _Fragment,
+                  { key: 0 },
+                  [
+                    _createElementVNode(
+                      "h6",
+                      _hoisted_7,
+                      _toDisplayString($setup.t("auth.notRegisteredYet")),
+                      1
+                      /* TEXT */
+                    ),
+                    _createElementVNode(
+                      "p",
+                      _hoisted_8,
+                      _toDisplayString($setup.t("auth.descriptionLogin")),
+                      1
+                      /* TEXT */
+                    ),
+                    _createVNode(_component_v_btn, {
+                      color: "primary",
+                      variant: "tonal",
+                      "append-icon": "mdi-account-plus",
+                      onClick: _cache[11] || (_cache[11] = ($event) => {
+                        $setup.mode = "register";
+                        $setup.step = "email";
+                      })
+                    }, {
+                      default: _withCtx(() => [
+                        _createTextVNode(
+                          _toDisplayString($setup.t("auth.register")),
+                          1
+                          /* TEXT */
+                        )
+                      ]),
+                      _: 1
+                      /* STABLE */
+                    })
+                  ],
+                  64
+                  /* STABLE_FRAGMENT */
+                )) : (_openBlock(), _createElementBlock(
+                  _Fragment,
+                  { key: 1 },
+                  [
+                    _createElementVNode(
+                      "h6",
+                      _hoisted_9,
+                      _toDisplayString($setup.t("auth.alreadyRegistered")),
+                      1
+                      /* TEXT */
+                    ),
+                    _createElementVNode(
+                      "p",
+                      _hoisted_10,
+                      _toDisplayString($setup.t("auth.descriptionRegister")),
+                      1
+                      /* TEXT */
+                    ),
+                    _createVNode(_component_v_btn, {
+                      color: "primary",
+                      variant: "tonal",
+                      "append-icon": "mdi-login",
+                      onClick: $setup.toggleMode
+                    }, {
+                      default: _withCtx(() => [
+                        _createTextVNode(
+                          _toDisplayString($setup.t("auth.login")),
+                          1
+                          /* TEXT */
+                        )
+                      ]),
+                      _: 1
+                      /* STABLE */
+                    })
+                  ],
+                  64
+                  /* STABLE_FRAGMENT */
+                ))
+              ]),
+              _: 1
+              /* STABLE */
+            })
+          ]),
+          _: 1
+          /* STABLE */
+        })
+      ]),
+      _: 1
+      /* STABLE */
+    })
+  ]);
+}
+import "/src/views/AuthView.vue?vue&type=style&index=0&scoped=bd851895&lang.css";
+_sfc_main.__hmrId = "bd851895";
+typeof __VUE_HMR_RUNTIME__ !== "undefined" && __VUE_HMR_RUNTIME__.createRecord(_sfc_main.__hmrId, _sfc_main);
+import.meta.hot.on("file-changed", ({ file }) => {
+  __VUE_HMR_RUNTIME__.CHANGED_FILE = file;
+});
+export const _rerender_only = __VUE_HMR_RUNTIME__.CHANGED_FILE === "C:/Users/sansh/cmr-proyect/frontend/src/views/AuthView.vue";
+import.meta.hot.accept((mod) => {
+  if (!mod) return;
+  const { default: updated, _rerender_only: _rerender_only2 } = mod;
+  if (_rerender_only2) {
+    __VUE_HMR_RUNTIME__.rerender(updated.__hmrId, updated.render);
+  } else {
+    __VUE_HMR_RUNTIME__.reload(updated.__hmrId, updated);
+  }
+});
+import _export_sfc from "/@id/__x00__plugin-vue:export-helper";
+export default /* @__PURE__ */ _export_sfc(_sfc_main, [["render", _sfc_render], ["__scopeId", "data-v-bd851895"], ["__file", "C:/Users/sansh/cmr-proyect/frontend/src/views/AuthView.vue"]]);
+
+//# sourceMappingURL=data:application/json;base64,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O0FBQUEsb0JBRU4sYUFPUTtBQUFBLHNCQU5OLE9BQU07QUFBQSxzQkFDTixTQUFRO0FBQUEsc0JBQ1IsZUFBWTtBQUFBLHNCQUNYLFNBQUs7QUFBRSxzQ0FBSTtBQUFlLHNDQUFJO0FBQUE7QUFBQTt3Q0FFL0IsTUFBd0I7QUFBQTsyQ0FBckIsU0FBQztBQUFBO0FBQUE7QUFBQTtBQUFBOzs7Ozs7O29DQUdSO0FBQUEsa0JBYVc7QUFBQTtBQUFBO0FBQUEsb0JBWlQ7QUFBQSxzQkFBd0Y7QUFBQSxzQkFBeEY7QUFBQSxzQkFBd0YsaUJBQW5DLFNBQUM7QUFBQTtBQUFBO0FBQUE7QUFBQSxvQkFDdEQ7QUFBQSxzQkFFSTtBQUFBLHNCQUZKO0FBQUEsc0JBRUksaUJBREMsU0FBQztBQUFBO0FBQUE7QUFBQTtBQUFBLG9CQUVOLGFBT1E7QUFBQSxzQkFOTixPQUFNO0FBQUEsc0JBQ04sU0FBUTtBQUFBLHNCQUNSLGVBQVk7QUFBQSxzQkFDWCxTQUFPO0FBQUE7d0NBRVIsTUFBcUI7QUFBQTsyQ0FBbEIsU0FBQztBQUFBO0FBQUE7QUFBQTtBQUFBIiwibmFtZXMiOltdLCJpZ25vcmVMaXN0IjpbXSwic291cmNlcyI6WyJBdXRoVmlldy52dWUiXSwic291cmNlc0NvbnRlbnQiOlsiPHNjcmlwdCBzZXR1cCBsYW5nPVwidHNcIj5cbmltcG9ydCB7IHJlZiB9IGZyb20gJ3Z1ZSc7XG5pbXBvcnQgeyB1c2VSb3V0ZXIgfSBmcm9tICd2dWUtcm91dGVyJztcbmltcG9ydCB7IHVzZUkxOG4gfSBmcm9tICd2dWUtaTE4bic7XG5pbXBvcnQgeyB1c2VBdXRoU3RvcmUgfSBmcm9tICdAL3N0b3Jlcy9hdXRoJztcbmltcG9ydCBMb2NhbGVTd2l0Y2hlciBmcm9tICdAL2NvbXBvbmVudHMvTG9jYWxlU3dpdGNoZXIudnVlJztcbmltcG9ydCBHb29nbGVTaWduSW4gZnJvbSAnQC9jb21wb25lbnRzL0dvb2dsZVNpZ25Jbi52dWUnO1xuXG5jb25zdCB7IHQsIGxvY2FsZSB9ID0gdXNlSTE4bigpO1xuXG5jb25zdCBhdXRoID0gdXNlQXV0aFN0b3JlKCk7XG5jb25zdCByb3V0ZXIgPSB1c2VSb3V0ZXIoKTtcblxuY29uc3QgbW9kZSA9IHJlZjwnbG9naW4nIHwgJ3JlZ2lzdGVyJz4oJ2xvZ2luJyk7XG5jb25zdCBzdGVwID0gcmVmPCdlbWFpbCcgfCAncGFzc3dvcmQnPignZW1haWwnKTtcbmNvbnN0IGVtYWlsID0gcmVmKCdhZG1pbkBhZG1pbi5jb20nKTtcbmNvbnN0IHBhc3N3b3JkID0gcmVmKCdhZG1pbicpO1xuY29uc3QgY29uZmlybVBhc3N3b3JkID0gcmVmKCcnKTtcbmNvbnN0IGlkZW50aWZpY2F0aW9uID0gcmVmKCcnKTtcbmNvbnN0IHNob3dQYXNzd29yZCA9IHJlZihmYWxzZSk7XG5jb25zdCBzaG93Q29uZmlybVBhc3N3b3JkID0gcmVmKGZhbHNlKTtcblxuYXN5bmMgZnVuY3Rpb24gc3VibWl0KCk6IFByb21pc2U8dm9pZD4ge1xuICB0cnkge1xuICAgIGlmIChtb2RlLnZhbHVlID09PSAnbG9naW4nKSB7XG4gICAgICBhd2FpdCBhdXRoLmxvZ2luKGVtYWlsLnZhbHVlLCBwYXNzd29yZC52YWx1ZSk7XG4gICAgfSBlbHNlIHtcbiAgICAgIGF3YWl0IGF1dGgucmVnaXN0ZXIoZW1haWwudmFsdWUsIHBhc3N3b3JkLnZhbHVlLCBpZGVudGlmaWNhdGlvbi52YWx1ZSB8fCB1bmRlZmluZWQpO1xuICAgIH1cbiAgICBpZiAoYXV0aC5uZWVkc09yZykge1xuICAgICAgcm91dGVyLnB1c2goeyBuYW1lOiAncHJvZmlsZScgfSk7XG4gICAgfSBlbHNlIHtcbiAgICAgIHJvdXRlci5wdXNoKHsgbmFtZTogJ2hvbWUnIH0pO1xuICAgIH1cbiAgfSBjYXRjaCB7XG4gICAgLyogbWFuZWphZG8gcG9yIGVsIHN0b3JlICovXG4gIH1cbn1cblxuZnVuY3Rpb24gdG9nZ2xlTW9kZSgpOiB2b2lkIHtcbiAgbW9kZS52YWx1ZSA9IG1vZGUudmFsdWUgPT09ICdsb2dpbicgPyAncmVnaXN0ZXInIDogJ2xvZ2luJztcbiAgc3RlcC52YWx1ZSA9ICdlbWFpbCc7XG4gIGF1dGguZXJyb3IgPSBudWxsO1xufVxuXG5mdW5jdGlvbiBnb1RvUGFzc3dvcmQoKTogdm9pZCB7XG4gIGlmIChlbWFpbC52YWx1ZSkgc3RlcC52YWx1ZSA9ICdwYXNzd29yZCc7XG59XG5cbmZ1bmN0aW9uIGNoYW5nZUVtYWlsKCk6IHZvaWQge1xuICBzdGVwLnZhbHVlID0gJ2VtYWlsJztcbn1cblxuPC9zY3JpcHQ+XG5cbjx0ZW1wbGF0ZT5cbiAgPGRpdiBjbGFzcz1cImF1dGgtd3JhcHBlciBkLWZsZXggYWxpZ24tY2VudGVyIGp1c3RpZnktY2VudGVyIGZpbGwtaGVpZ2h0IGJnLWJhY2tncm91bmRcIj5cbiAgICA8di1jYXJkXG4gICAgICBtYXgtd2lkdGg9XCI5MDBcIlxuICAgICAgY2xhc3M9XCJteC1hdXRvXCJcbiAgICAgIHJvdW5kZWQ9XCJsZ1wiXG4gICAgICBzdHlsZT1cIndpZHRoOiAxMDAlO1wiXG4gICAgPlxuICAgICAgPHYtcm93IG5vLWd1dHRlcnMgPlxuICAgICAgICA8IS0tIExlZnQgY29sdW1uOiBGb3JtIC0tPlxuICAgICAgICA8di1jb2wgY29scz1cIjEyXCIgbWQ9XCI2XCIgY2xhc3M9XCJwYS1zbS04IHBhLTRcIj5cblxuICAgICAgICAgIDx2LWNhcmQtaXRlbSBjbGFzcz1cInB4LTBcIj5cbiAgICAgICAgICAgIDx2LWNhcmQtdGl0bGUgY2xhc3M9XCJweC0wXCI+e3sgbW9kZSA9PT0gJ2xvZ2luJyA/IHQoJ2F1dGguc2lnbkluJykgOiB0KCdhdXRoLmNyZWF0ZUFjY291bnQnKSB9fTwvdi1jYXJkLXRpdGxlPlxuICAgICAgICAgICAgPHYtY2FyZC1zdWJ0aXRsZSBjbGFzcz1cInB4LTBcIj57eyBtb2RlID09PSAnbG9naW4nID8gdCgnYXV0aC50b0FjY2Vzc1RlbXBsYXRlJykgOiB0KCdhdXRoLnJlZ2lzdGVyVG9HZXRTdGFydGVkJykgfX08L3YtY2FyZC1zdWJ0aXRsZT5cbiAgICAgICAgICAgIDx0ZW1wbGF0ZSAjYXBwZW5kPlxuICAgICAgICAgICAgICA8YVxuICAgICAgICAgICAgICAgIGhyZWY9XCIjXCJcbiAgICAgICAgICAgICAgICBjbGFzcz1cInRleHQtYm9keS0yIHRleHQtbWVkaXVtLWVtcGhhc2lzIGQtYmxvY2sgZC1tZC1ub25lXCJcbiAgICAgICAgICAgICAgICBAY2xpY2sucHJldmVudD1cInRvZ2dsZU1vZGVcIlxuICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAge3sgbW9kZSA9PT0gJ2xvZ2luJyA/IHQoJ2F1dGgucmVnaXN0ZXInKSA6IHQoJ2F1dGgubG9naW4nKSB9fVxuICAgICAgICAgICAgICA8L2E+XG4gICAgICAgICAgICA8L3RlbXBsYXRlPlxuICAgICAgICAgIDwvdi1jYXJkLWl0ZW0+XG5cbiAgICAgICAgICA8di1jYXJkLXRleHQgY2xhc3M9XCJweC0wXCI+XG4gICAgICAgICAgICBcbiAgICAgICAgICAgIDwhLS0gRXJyb3IgYWxlcnQgLS0+XG4gICAgICAgICAgICA8di1hbGVydFxuICAgICAgICAgICAgICB2LWlmPVwiYXV0aC5lcnJvclwiXG4gICAgICAgICAgICAgIHR5cGU9XCJlcnJvclwiXG4gICAgICAgICAgICAgIHZhcmlhbnQ9XCJ0b25hbFwiXG4gICAgICAgICAgICAgIGNsb3NhYmxlXG4gICAgICAgICAgICAgIGNsYXNzPVwibWItNFwiXG4gICAgICAgICAgICAgIGRlbnNpdHk9XCJjb21wYWN0XCJcbiAgICAgICAgICAgICAgQGNsaWNrOmNsb3NlPVwiYXV0aC5lcnJvciA9IG51bGxcIlxuICAgICAgICAgICAgPlxuICAgICAgICAgICAgICB7eyBhdXRoLmVycm9yIH19XG4gICAgICAgICAgICA8L3YtYWxlcnQ+XG5cbiAgICAgICAgICAgIDx2LWZvcm0gQHN1Ym1pdC5wcmV2ZW50PVwic3VibWl0XCI+XG4gICAgICAgICAgICAgIDwhLS0gTG9naW46IHR3by1zdGVwIGZsb3cgLS0+XG4gICAgICAgICAgICAgIDx0ZW1wbGF0ZSB2LWlmPVwibW9kZSA9PT0gJ2xvZ2luJ1wiPlxuICAgICAgICAgICAgICAgIDxkaXYgdi1pZj1cInN0ZXAgPT09ICdlbWFpbCdcIj5cbiAgICAgICAgICAgICAgICAgIDx2LXRleHQtZmllbGRcbiAgICAgICAgICAgICAgICAgICAgdi1tb2RlbD1cImVtYWlsXCJcbiAgICAgICAgICAgICAgICAgICAgOmxhYmVsPVwidCgnYXV0aC5lbWFpbCcpXCJcbiAgICAgICAgICAgICAgICAgICAgdmFyaWFudD1cIm91dGxpbmVkXCJcbiAgICAgICAgICAgICAgICAgICAgZGVuc2l0eT1cImNvbXBhY3RcIlxuICAgICAgICAgICAgICAgICAgICBjbGFzcz1cIm1iLTZcIlxuICAgICAgICAgICAgICAgICAgICBoaWRlLWRldGFpbHM9XCJhdXRvXCJcbiAgICAgICAgICAgICAgICAgIC8+XG4gICAgICAgICAgICAgICAgICA8di1idG5cbiAgICAgICAgICAgICAgICAgICAgYmxvY2tcbiAgICAgICAgICAgICAgICAgICAgY29sb3I9XCJwcmltYXJ5XCJcbiAgICAgICAgICAgICAgICAgICAgQGNsaWNrPVwiZ29Ub1Bhc3N3b3JkXCJcbiAgICAgICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICAgICAge3sgdCgnYXV0aC5uZXh0JykgfX1cbiAgICAgICAgICAgICAgICAgIDwvdi1idG4+XG4gICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgICAgPGRpdiB2LWVsc2U+XG4gICAgICAgICAgICAgICAgICA8ZGl2XG4gICAgICAgICAgICAgICAgICAgIGNsYXNzPVwiZC1mbGV4IGFsaWduLWNlbnRlciBib3JkZXIgcm91bmRlZCBweS0xIHB4LTIgbWItNlwiXG4gICAgICAgICAgICAgICAgICAgIHN0eWxlPVwiYmFja2dyb3VuZC1jb2xvcjogcmdiYSh2YXIoLS12LXRoZW1lLXNlY29uZGFyeSksIHZhcigtLXYtaG92ZXItb3BhY2l0eSkpO1wiXG4gICAgICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgICAgIDxzcGFuIGNsYXNzPVwidGV4dC1jYXB0aW9uXCI+e3sgZW1haWwgfX08L3NwYW4+XG4gICAgICAgICAgICAgICAgICAgIDx2LXNwYWNlciAvPlxuICAgICAgICAgICAgICAgICAgICA8di1idG5cbiAgICAgICAgICAgICAgICAgICAgICB2YXJpYW50PVwidGV4dFwiXG4gICAgICAgICAgICAgICAgICAgICAgc2l6ZT1cInNtYWxsXCJcbiAgICAgICAgICAgICAgICAgICAgICBjb2xvcj1cInByaW1hcnlcIlxuICAgICAgICAgICAgICAgICAgICAgIEBjbGljaz1cImNoYW5nZUVtYWlsXCJcbiAgICAgICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAgICAgIHt7IHQoJ2F1dGguY2hhbmdlJykgfX1cbiAgICAgICAgICAgICAgICAgICAgPC92LWJ0bj5cbiAgICAgICAgICAgICAgICAgIDwvZGl2PlxuICAgICAgICAgICAgICAgICAgPHYtdGV4dC1maWVsZFxuICAgICAgICAgICAgICAgICAgICB2LW1vZGVsPVwicGFzc3dvcmRcIlxuICAgICAgICAgICAgICAgICAgICA6bGFiZWw9XCJ0KCdhdXRoLnBhc3N3b3JkJylcIlxuICAgICAgICAgICAgICAgICAgICB2YXJpYW50PVwib3V0bGluZWRcIlxuICAgICAgICAgICAgICAgICAgICBkZW5zaXR5PVwiY29tcGFjdFwiXG4gICAgICAgICAgICAgICAgICAgIGNsYXNzPVwibWItNlwiXG4gICAgICAgICAgICAgICAgICAgIDp0eXBlPVwic2hvd1Bhc3N3b3JkID8gJ3RleHQnIDogJ3Bhc3N3b3JkJ1wiXG4gICAgICAgICAgICAgICAgICAgIDphcHBlbmQtaW5uZXItaWNvbj1cInNob3dQYXNzd29yZCA/ICdtZGktZXllJyA6ICdtZGktZXllLW9mZidcIlxuICAgICAgICAgICAgICAgICAgICBAY2xpY2s6YXBwZW5kLWlubmVyPVwic2hvd1Bhc3N3b3JkID0gIXNob3dQYXNzd29yZFwiXG4gICAgICAgICAgICAgICAgICAgIGhpZGUtZGV0YWlscz1cImF1dG9cIlxuICAgICAgICAgICAgICAgICAgLz5cbiAgICAgICAgICAgICAgICAgIDx2LWJ0blxuICAgICAgICAgICAgICAgICAgICBibG9ja1xuICAgICAgICAgICAgICAgICAgICBjb2xvcj1cInByaW1hcnlcIlxuICAgICAgICAgICAgICAgICAgICB0eXBlPVwic3VibWl0XCJcbiAgICAgICAgICAgICAgICAgICAgY2xhc3M9XCJtYi0zXCJcbiAgICAgICAgICAgICAgICAgICAgOmxvYWRpbmc9XCJhdXRoLmxvYWRpbmdcIlxuICAgICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAgICB7eyB0KCdhdXRoLmxvZ2luJykgfX1cbiAgICAgICAgICAgICAgICAgIDwvdi1idG4+XG4gICAgICAgICAgICAgICAgICA8di1idG5cbiAgICAgICAgICAgICAgICAgICAgYmxvY2tcbiAgICAgICAgICAgICAgICAgICAgdmFyaWFudD1cInRvbmFsXCJcbiAgICAgICAgICAgICAgICAgICAgaHJlZj1cIiNcIlxuICAgICAgICAgICAgICAgICAgICBAY2xpY2sucHJldmVudFxuICAgICAgICAgICAgICAgICAgPlxuICAgICAgICAgICAgICAgICAgICB7eyB0KCdhdXRoLmZvcmdvdFBhc3N3b3JkJykgfX1cbiAgICAgICAgICAgICAgICAgIDwvdi1idG4+XG4gICAgICAgICAgICAgICAgPC9kaXY+XG4gICAgICAgICAgICAgIDwvdGVtcGxhdGU+XG5cbiAgICAgICAgICAgICAgPCEtLSBSZWdpc3RlcjogYWxsIGZpZWxkcyBhdCBvbmNlIC0tPlxuICAgICAgICAgICAgICA8dGVtcGxhdGUgdi1lbHNlPlxuICAgICAgICAgICAgICAgIDx2LXRleHQtZmllbGRcbiAgICAgICAgICAgICAgICAgIHYtbW9kZWw9XCJlbWFpbFwiXG4gICAgICAgICAgICAgICAgICA6bGFiZWw9XCJ0KCdhdXRoLmVtYWlsJylcIlxuICAgICAgICAgICAgICAgICAgdmFyaWFudD1cIm91dGxpbmVkXCJcbiAgICAgICAgICAgICAgICAgIGRlbnNpdHk9XCJjb21wYWN0XCJcbiAgICAgICAgICAgICAgICAgIGNsYXNzPVwibWItNlwiXG4gICAgICAgICAgICAgICAgICB0eXBlPVwiZW1haWxcIlxuICAgICAgICAgICAgICAgICAgaGlkZS1kZXRhaWxzPVwiYXV0b1wiXG4gICAgICAgICAgICAgICAgLz5cbiAgICAgICAgICAgICAgICA8di10ZXh0LWZpZWxkXG4gICAgICAgICAgICAgICAgICB2LW1vZGVsPVwiaWRlbnRpZmljYXRpb25cIlxuICAgICAgICAgICAgICAgICAgbGFiZWw9XCJDw6lkdWxhIC8gUlVDXCJcbiAgICAgICAgICAgICAgICAgIHZhcmlhbnQ9XCJvdXRsaW5lZFwiXG4gICAgICAgICAgICAgICAgICBkZW5zaXR5PVwiY29tcGFjdFwiXG4gICAgICAgICAgICAgICAgICBjbGFzcz1cIm1iLTZcIlxuICAgICAgICAgICAgICAgICAgaGlkZS1kZXRhaWxzPVwiYXV0b1wiXG4gICAgICAgICAgICAgICAgLz5cbiAgICAgICAgICAgICAgICA8di10ZXh0LWZpZWxkXG4gICAgICAgICAgICAgICAgICB2LW1vZGVsPVwicGFzc3dvcmRcIlxuICAgICAgICAgICAgICAgICAgOmxhYmVsPVwidCgnYXV0aC5wYXNzd29yZCcpXCJcbiAgICAgICAgICAgICAgICAgIHZhcmlhbnQ9XCJvdXRsaW5lZFwiXG4gICAgICAgICAgICAgICAgICBkZW5zaXR5PVwiY29tcGFjdFwiXG4gICAgICAgICAgICAgICAgICBjbGFzcz1cIm1iLTZcIlxuICAgICAgICAgICAgICAgICAgOnR5cGU9XCJzaG93UGFzc3dvcmQgPyAndGV4dCcgOiAncGFzc3dvcmQnXCJcbiAgICAgICAgICAgICAgICAgIDphcHBlbmQtaW5uZXItaWNvbj1cInNob3dQYXNzd29yZCA/ICdtZGktZXllJyA6ICdtZGktZXllLW9mZidcIlxuICAgICAgICAgICAgICAgICAgQGNsaWNrOmFwcGVuZC1pbm5lcj1cInNob3dQYXNzd29yZCA9ICFzaG93UGFzc3dvcmRcIlxuICAgICAgICAgICAgICAgICAgaGlkZS1kZXRhaWxzPVwiYXV0b1wiXG4gICAgICAgICAgICAgICAgLz5cbiAgICAgICAgICAgICAgICA8di10ZXh0LWZpZWxkXG4gICAgICAgICAgICAgICAgICB2LW1vZGVsPVwiY29uZmlybVBhc3N3b3JkXCJcbiAgICAgICAgICAgICAgICAgIDpsYWJlbD1cInQoJ2F1dGguY29uZmlybVBhc3N3b3JkJylcIlxuICAgICAgICAgICAgICAgICAgdmFyaWFudD1cIm91dGxpbmVkXCJcbiAgICAgICAgICAgICAgICAgIGRlbnNpdHk9XCJjb21wYWN0XCJcbiAgICAgICAgICAgICAgICAgIGNsYXNzPVwibWItNlwiXG4gICAgICAgICAgICAgICAgICA6dHlwZT1cInNob3dDb25maXJtUGFzc3dvcmQgPyAndGV4dCcgOiAncGFzc3dvcmQnXCJcbiAgICAgICAgICAgICAgICAgIDphcHBlbmQtaW5uZXItaWNvbj1cInNob3dDb25maXJtUGFzc3dvcmQgPyAnbWRpLWV5ZScgOiAnbWRpLWV5ZS1vZmYnXCJcbiAgICAgICAgICAgICAgICAgIEBjbGljazphcHBlbmQtaW5uZXI9XCJzaG93Q29uZmlybVBhc3N3b3JkID0gIXNob3dDb25maXJtUGFzc3dvcmRcIlxuICAgICAgICAgICAgICAgICAgaGlkZS1kZXRhaWxzPVwiYXV0b1wiXG4gICAgICAgICAgICAgICAgLz5cbiAgICAgICAgICAgICAgICA8di1idG5cbiAgICAgICAgICAgICAgICAgIGJsb2NrXG4gICAgICAgICAgICAgICAgICBjb2xvcj1cInByaW1hcnlcIlxuICAgICAgICAgICAgICAgICAgdHlwZT1cInN1Ym1pdFwiXG4gICAgICAgICAgICAgICAgICBjbGFzcz1cIm1iLTNcIlxuICAgICAgICAgICAgICAgICAgOmxvYWRpbmc9XCJhdXRoLmxvYWRpbmdcIlxuICAgICAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgICAgIHt7IHQoJ2F1dGgucmVnaXN0ZXInKSB9fVxuICAgICAgICAgICAgICAgIDwvdi1idG4+XG4gICAgICAgICAgICAgIDwvdGVtcGxhdGU+XG4gICAgICAgICAgICA8L3YtZm9ybT5cblxuICAgICAgICAgICAgPEdvb2dsZVNpZ25JbiA6bG9jYWxlPVwiJGkxOG4ubG9jYWxlXCIgLz5cbiAgICAgICAgICA8L3YtY2FyZC10ZXh0PlxuICAgICAgICA8L3YtY29sPlxuXG4gICAgICAgIDwhLS0gUmlnaHQgY29sdW1uOiBJbGx1c3RyYXRpb24gJiBDVEEgLS0+XG4gICAgICAgIDx2LWNvbFxuICAgICAgICAgIGNvbHM9XCI2XCJcbiAgICAgICAgICBjbGFzcz1cInBhLTggdGV4dC1jZW50ZXIgYm9yZGVyLXMgZC1ub25lIGQtbWQtZmxleCBmbGV4LWNvbHVtbiBhbGlnbi1jZW50ZXIganVzdGlmeS1jZW50ZXIgcG9zaXRpb24tcmVsYXRpdmVcIlxuICAgICAgICAgIHN0eWxlPVwiYmxvY2stc2l6ZTogMzNyZW07XCJcbiAgICAgICAgPlxuXG4gICAgICAgICAgPGRpdiBjbGFzcz1cInBvc2l0aW9uLWFic29sdXRlIHRvcC0wIHJpZ2h0LTAgcGEtNFwiPlxuICAgICAgICAgICAgPExvY2FsZVN3aXRjaGVyIC8+XG4gICAgICAgICAgPC9kaXY+XG5cbiAgICAgICAgICA8dGVtcGxhdGUgdi1pZj1cIm1vZGUgPT09ICdsb2dpbidcIj5cbiAgICAgICAgICAgIDxoNiBjbGFzcz1cInRleHQtYm9keS0xIGZvbnQtd2VpZ2h0LXNlbWlib2xkIG1iLTNcIj57eyB0KCdhdXRoLm5vdFJlZ2lzdGVyZWRZZXQnKSB9fTwvaDY+XG4gICAgICAgICAgICA8cCBjbGFzcz1cInRleHQtYm9keS0yIHRleHQtbWVkaXVtLWVtcGhhc2lzIG1iLTZcIiBzdHlsZT1cIm1heC13aWR0aDogMjYwcHg7XCI+XG4gICAgICAgICAgICAgIHt7IHQoJ2F1dGguZGVzY3JpcHRpb25Mb2dpbicpIH19XG4gICAgICAgICAgICA8L3A+XG4gICAgICAgICAgICA8di1idG5cbiAgICAgICAgICAgICAgY29sb3I9XCJwcmltYXJ5XCJcbiAgICAgICAgICAgICAgdmFyaWFudD1cInRvbmFsXCJcbiAgICAgICAgICAgICAgYXBwZW5kLWljb249XCJtZGktYWNjb3VudC1wbHVzXCJcbiAgICAgICAgICAgICAgQGNsaWNrPVwibW9kZSA9ICdyZWdpc3Rlcic7IHN0ZXAgPSAnZW1haWwnXCJcbiAgICAgICAgICAgID5cbiAgICAgICAgICAgICAge3sgdCgnYXV0aC5yZWdpc3RlcicpIH19XG4gICAgICAgICAgICA8L3YtYnRuPlxuICAgICAgICAgIDwvdGVtcGxhdGU+XG4gICAgICAgICAgPHRlbXBsYXRlIHYtZWxzZT5cbiAgICAgICAgICAgIDxoNiBjbGFzcz1cInRleHQtYm9keS0xIGZvbnQtd2VpZ2h0LXNlbWlib2xkIG1iLTNcIj57eyB0KCdhdXRoLmFscmVhZHlSZWdpc3RlcmVkJykgfX08L2g2PlxuICAgICAgICAgICAgPHAgY2xhc3M9XCJ0ZXh0LWJvZHktMiB0ZXh0LW1lZGl1bS1lbXBoYXNpcyBtYi02XCIgc3R5bGU9XCJtYXgtd2lkdGg6IDI2MHB4O1wiPlxuICAgICAgICAgICAgICB7eyB0KCdhdXRoLmRlc2NyaXB0aW9uUmVnaXN0ZXInKSB9fVxuICAgICAgICAgICAgPC9wPlxuICAgICAgICAgICAgPHYtYnRuXG4gICAgICAgICAgICAgIGNvbG9yPVwicHJpbWFyeVwiXG4gICAgICAgICAgICAgIHZhcmlhbnQ9XCJ0b25hbFwiXG4gICAgICAgICAgICAgIGFwcGVuZC1pY29uPVwibWRpLWxvZ2luXCJcbiAgICAgICAgICAgICAgQGNsaWNrPVwidG9nZ2xlTW9kZVwiXG4gICAgICAgICAgICA+XG4gICAgICAgICAgICAgIHt7IHQoJ2F1dGgubG9naW4nKSB9fVxuICAgICAgICAgICAgPC92LWJ0bj5cbiAgICAgICAgICA8L3RlbXBsYXRlPlxuICAgICAgICA8L3YtY29sPlxuICAgICAgPC92LXJvdz5cbiAgICA8L3YtY2FyZD5cbiAgPC9kaXY+XG48L3RlbXBsYXRlPlxuXG48c3R5bGUgc2NvcGVkPlxuLmZpbGwtaGVpZ2h0IHtcbiAgbWluLWhlaWdodDogMTAwdmg7XG59XG48L3N0eWxlPlxuIl0sImZpbGUiOiJDOi9Vc2Vycy9zYW5zaC9jbXItcHJveWVjdC9mcm9udGVuZC9zcmMvdmlld3MvQXV0aFZpZXcudnVlIn0=

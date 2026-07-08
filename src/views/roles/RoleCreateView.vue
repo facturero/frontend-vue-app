@@ -22,6 +22,7 @@ async function submit(): Promise<void> {
   store.error = null;
   try {
     const roleId = await store.create(name.value, description.value || undefined, selectedPermissions.value);
+    await store.fetch();
     router.push({ name: 'roles-edit', params: { id: roleId } });
   } catch {
     /* manejado por el store */

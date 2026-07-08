@@ -1,0 +1,204 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/views/organization/OrganizationSettingsView.vue");import { defineComponent as _defineComponent } from "/node_modules/.vite/deps/vue.js?v=8eb19d00";
+import { onMounted, ref } from "/node_modules/.vite/deps/vue.js?v=8eb19d00";
+import { useAuthStore } from "/src/stores/auth.ts?t=1783535084050";
+import { useOrganizationStore } from "/src/stores/organization.ts";
+const _sfc_main = /* @__PURE__ */ _defineComponent({
+  __name: "OrganizationSettingsView",
+  setup(__props, { expose: __expose }) {
+    __expose();
+    const auth = useAuthStore();
+    const store = useOrganizationStore();
+    const legalName = ref("");
+    const tradeName = ref("");
+    const saved = ref(false);
+    onMounted(async () => {
+      try {
+        await store.fetch();
+        if (store.org) {
+          legalName.value = store.org.legalName ?? "";
+          tradeName.value = store.org.tradeName ?? "";
+        }
+      } catch {
+      }
+    });
+    async function submit() {
+      saved.value = false;
+      try {
+        await store.update({
+          legalName: legalName.value || void 0,
+          tradeName: tradeName.value || void 0
+        });
+        await auth.fetchMe();
+        saved.value = true;
+      } catch {
+      }
+    }
+    const __returned__ = { auth, store, legalName, tradeName, saved, submit };
+    Object.defineProperty(__returned__, "__isScriptSetup", { enumerable: false, value: true });
+    return __returned__;
+  }
+});
+import { createElementVNode as _createElementVNode, toDisplayString as _toDisplayString, createTextVNode as _createTextVNode, resolveComponent as _resolveComponent, withCtx as _withCtx, openBlock as _openBlock, createBlock as _createBlock, createCommentVNode as _createCommentVNode, createVNode as _createVNode, withModifiers as _withModifiers } from "/node_modules/.vite/deps/vue.js?v=8eb19d00";
+function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
+  const _component_v_alert = _resolveComponent("v-alert");
+  const _component_v_text_field = _resolveComponent("v-text-field");
+  const _component_v_btn = _resolveComponent("v-btn");
+  const _component_v_form = _resolveComponent("v-form");
+  const _component_v_card_text = _resolveComponent("v-card-text");
+  const _component_v_card = _resolveComponent("v-card");
+  const _component_v_col = _resolveComponent("v-col");
+  const _component_v_row = _resolveComponent("v-row");
+  const _component_v_container = _resolveComponent("v-container");
+  return _openBlock(), _createBlock(_component_v_container, null, {
+    default: _withCtx(() => [
+      _cache[7] || (_cache[7] = _createElementVNode(
+        "h2",
+        { class: "text-h5 font-weight-medium mt-6 mb-4" },
+        "Configuración de la organización",
+        -1
+        /* CACHED */
+      )),
+      _createVNode(_component_v_row, null, {
+        default: _withCtx(() => [
+          _createVNode(_component_v_col, {
+            cols: "12",
+            md: "8",
+            lg: "6"
+          }, {
+            default: _withCtx(() => [
+              _createVNode(_component_v_card, {
+                elevation: "2",
+                rounded: "lg"
+              }, {
+                default: _withCtx(() => [
+                  _createVNode(_component_v_card_text, null, {
+                    default: _withCtx(() => [
+                      _cache[6] || (_cache[6] = _createElementVNode(
+                        "p",
+                        { class: "text-body-2 text-medium-emphasis mb-4" },
+                        " Datos básicos de tu organización. Estos datos se usarán en facturas y notificaciones. ",
+                        -1
+                        /* CACHED */
+                      )),
+                      $setup.store.error ? (_openBlock(), _createBlock(_component_v_alert, {
+                        key: 0,
+                        type: "error",
+                        variant: "tonal",
+                        closable: "",
+                        class: "mb-4",
+                        density: "compact",
+                        "onClick:close": _cache[0] || (_cache[0] = ($event) => $setup.store.error = null)
+                      }, {
+                        default: _withCtx(() => [
+                          _createTextVNode(
+                            _toDisplayString($setup.store.error),
+                            1
+                            /* TEXT */
+                          )
+                        ]),
+                        _: 1
+                        /* STABLE */
+                      })) : _createCommentVNode("v-if", true),
+                      $setup.saved ? (_openBlock(), _createBlock(_component_v_alert, {
+                        key: 1,
+                        type: "success",
+                        variant: "tonal",
+                        closable: "",
+                        class: "mb-4",
+                        density: "compact",
+                        "onClick:close": _cache[1] || (_cache[1] = ($event) => $setup.saved = false)
+                      }, {
+                        default: _withCtx(() => [..._cache[4] || (_cache[4] = [
+                          _createTextVNode(
+                            " Organización actualizada ",
+                            -1
+                            /* CACHED */
+                          )
+                        ])]),
+                        _: 1
+                        /* STABLE */
+                      })) : _createCommentVNode("v-if", true),
+                      _createVNode(_component_v_form, {
+                        onSubmit: _withModifiers($setup.submit, ["prevent"])
+                      }, {
+                        default: _withCtx(() => [
+                          _createVNode(_component_v_text_field, {
+                            modelValue: $setup.legalName,
+                            "onUpdate:modelValue": _cache[2] || (_cache[2] = ($event) => $setup.legalName = $event),
+                            label: "Nombre legal",
+                            variant: "outlined",
+                            density: "compact",
+                            class: "mb-4",
+                            "hide-details": "auto",
+                            placeholder: "Ej. Mi Empresa S.A.S."
+                          }, null, 8, ["modelValue"]),
+                          _createVNode(_component_v_text_field, {
+                            modelValue: $setup.tradeName,
+                            "onUpdate:modelValue": _cache[3] || (_cache[3] = ($event) => $setup.tradeName = $event),
+                            label: "Nombre comercial",
+                            variant: "outlined",
+                            density: "compact",
+                            class: "mb-6",
+                            "hide-details": "auto",
+                            placeholder: "Ej. MiEmpresa"
+                          }, null, 8, ["modelValue"]),
+                          _createVNode(_component_v_btn, {
+                            block: "",
+                            color: "primary",
+                            type: "submit",
+                            loading: $setup.store.saving,
+                            disabled: !$setup.legalName
+                          }, {
+                            default: _withCtx(() => [..._cache[5] || (_cache[5] = [
+                              _createTextVNode(
+                                " Guardar cambios ",
+                                -1
+                                /* CACHED */
+                              )
+                            ])]),
+                            _: 1
+                            /* STABLE */
+                          }, 8, ["loading", "disabled"])
+                        ]),
+                        _: 1
+                        /* STABLE */
+                      })
+                    ]),
+                    _: 1
+                    /* STABLE */
+                  })
+                ]),
+                _: 1
+                /* STABLE */
+              })
+            ]),
+            _: 1
+            /* STABLE */
+          })
+        ]),
+        _: 1
+        /* STABLE */
+      })
+    ]),
+    _: 1
+    /* STABLE */
+  });
+}
+_sfc_main.__hmrId = "922517a3";
+typeof __VUE_HMR_RUNTIME__ !== "undefined" && __VUE_HMR_RUNTIME__.createRecord(_sfc_main.__hmrId, _sfc_main);
+import.meta.hot.on("file-changed", ({ file }) => {
+  __VUE_HMR_RUNTIME__.CHANGED_FILE = file;
+});
+import.meta.hot.accept((mod) => {
+  if (!mod) return;
+  const { default: updated, _rerender_only } = mod;
+  if (_rerender_only) {
+    __VUE_HMR_RUNTIME__.rerender(updated.__hmrId, updated.render);
+  } else {
+    __VUE_HMR_RUNTIME__.reload(updated.__hmrId, updated);
+  }
+});
+import _export_sfc from "/@id/__x00__plugin-vue:export-helper";
+export default /* @__PURE__ */ _export_sfc(_sfc_main, [["render", _sfc_render], ["__file", "C:/Users/sansh/cmr-proyect/frontend/src/views/organization/OrganizationSettingsView.vue"]]);
+
+//# sourceMappingURL=data:application/json;base64,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NEJBQ2YsVUFBUSxDQUFHO0FBQUE7OENBQ2IsTUFFRDtBQUFBO2dDQUZDO0FBQUEsZ0NBRUQ7QUFBQTtBQUFBO0FBQUEiLCJuYW1lcyI6W10sImlnbm9yZUxpc3QiOltdLCJzb3VyY2VzIjpbIk9yZ2FuaXphdGlvblNldHRpbmdzVmlldy52dWUiXSwic291cmNlc0NvbnRlbnQiOlsiPHNjcmlwdCBzZXR1cCBsYW5nPVwidHNcIj5cbmltcG9ydCB7IG9uTW91bnRlZCwgcmVmIH0gZnJvbSAndnVlJztcbmltcG9ydCB7IHVzZUF1dGhTdG9yZSB9IGZyb20gJ0Avc3RvcmVzL2F1dGgnO1xuaW1wb3J0IHsgdXNlT3JnYW5pemF0aW9uU3RvcmUgfSBmcm9tICdAL3N0b3Jlcy9vcmdhbml6YXRpb24nO1xuXG5jb25zdCBhdXRoID0gdXNlQXV0aFN0b3JlKCk7XG5jb25zdCBzdG9yZSA9IHVzZU9yZ2FuaXphdGlvblN0b3JlKCk7XG5cbmNvbnN0IGxlZ2FsTmFtZSA9IHJlZignJyk7XG5jb25zdCB0cmFkZU5hbWUgPSByZWYoJycpO1xuY29uc3Qgc2F2ZWQgPSByZWYoZmFsc2UpO1xuXG5vbk1vdW50ZWQoYXN5bmMgKCkgPT4ge1xuICB0cnkge1xuICAgIGF3YWl0IHN0b3JlLmZldGNoKCk7XG4gICAgaWYgKHN0b3JlLm9yZykge1xuICAgICAgbGVnYWxOYW1lLnZhbHVlID0gc3RvcmUub3JnLmxlZ2FsTmFtZSA/PyAnJztcbiAgICAgIHRyYWRlTmFtZS52YWx1ZSA9IHN0b3JlLm9yZy50cmFkZU5hbWUgPz8gJyc7XG4gICAgfVxuICB9IGNhdGNoIHtcbiAgICAvLyBoYW5kbGVkIGJ5IHN0b3JlXG4gIH1cbn0pO1xuXG5hc3luYyBmdW5jdGlvbiBzdWJtaXQoKTogUHJvbWlzZTx2b2lkPiB7XG4gIHNhdmVkLnZhbHVlID0gZmFsc2U7XG4gIHRyeSB7XG4gICAgYXdhaXQgc3RvcmUudXBkYXRlKHtcbiAgICAgIGxlZ2FsTmFtZTogbGVnYWxOYW1lLnZhbHVlIHx8IHVuZGVmaW5lZCxcbiAgICAgIHRyYWRlTmFtZTogdHJhZGVOYW1lLnZhbHVlIHx8IHVuZGVmaW5lZCxcbiAgICB9KTtcbiAgICBhd2FpdCBhdXRoLmZldGNoTWUoKTtcbiAgICBzYXZlZC52YWx1ZSA9IHRydWU7XG4gIH0gY2F0Y2gge1xuICAgIC8vIGhhbmRsZWQgYnkgc3RvcmVcbiAgfVxufVxuPC9zY3JpcHQ+XG5cbjx0ZW1wbGF0ZT5cbiAgPHYtY29udGFpbmVyPlxuICAgIDxoMiBjbGFzcz1cInRleHQtaDUgZm9udC13ZWlnaHQtbWVkaXVtIG10LTYgbWItNFwiPkNvbmZpZ3VyYWNpw7NuIGRlIGxhIG9yZ2FuaXphY2nDs248L2gyPlxuXG4gICAgPHYtcm93PlxuICAgICAgPHYtY29sIGNvbHM9XCIxMlwiIG1kPVwiOFwiIGxnPVwiNlwiPlxuICAgICAgICA8di1jYXJkIGVsZXZhdGlvbj1cIjJcIiByb3VuZGVkPVwibGdcIj5cbiAgICAgICAgICA8di1jYXJkLXRleHQ+XG4gICAgICAgICAgICA8cCBjbGFzcz1cInRleHQtYm9keS0yIHRleHQtbWVkaXVtLWVtcGhhc2lzIG1iLTRcIj5cbiAgICAgICAgICAgICAgRGF0b3MgYsOhc2ljb3MgZGUgdHUgb3JnYW5pemFjacOzbi4gRXN0b3MgZGF0b3Mgc2UgdXNhcsOhbiBlbiBmYWN0dXJhcyB5IG5vdGlmaWNhY2lvbmVzLlxuICAgICAgICAgICAgPC9wPlxuXG4gICAgICAgICAgICA8di1hbGVydFxuICAgICAgICAgICAgICB2LWlmPVwic3RvcmUuZXJyb3JcIlxuICAgICAgICAgICAgICB0eXBlPVwiZXJyb3JcIlxuICAgICAgICAgICAgICB2YXJpYW50PVwidG9uYWxcIlxuICAgICAgICAgICAgICBjbG9zYWJsZVxuICAgICAgICAgICAgICBjbGFzcz1cIm1iLTRcIlxuICAgICAgICAgICAgICBkZW5zaXR5PVwiY29tcGFjdFwiXG4gICAgICAgICAgICAgIEBjbGljazpjbG9zZT1cInN0b3JlLmVycm9yID0gbnVsbFwiXG4gICAgICAgICAgICA+XG4gICAgICAgICAgICAgIHt7IHN0b3JlLmVycm9yIH19XG4gICAgICAgICAgICA8L3YtYWxlcnQ+XG5cbiAgICAgICAgICAgIDx2LWFsZXJ0XG4gICAgICAgICAgICAgIHYtaWY9XCJzYXZlZFwiXG4gICAgICAgICAgICAgIHR5cGU9XCJzdWNjZXNzXCJcbiAgICAgICAgICAgICAgdmFyaWFudD1cInRvbmFsXCJcbiAgICAgICAgICAgICAgY2xvc2FibGVcbiAgICAgICAgICAgICAgY2xhc3M9XCJtYi00XCJcbiAgICAgICAgICAgICAgZGVuc2l0eT1cImNvbXBhY3RcIlxuICAgICAgICAgICAgICBAY2xpY2s6Y2xvc2U9XCJzYXZlZCA9IGZhbHNlXCJcbiAgICAgICAgICAgID5cbiAgICAgICAgICAgICAgT3JnYW5pemFjacOzbiBhY3R1YWxpemFkYVxuICAgICAgICAgICAgPC92LWFsZXJ0PlxuXG4gICAgICAgICAgICA8di1mb3JtIEBzdWJtaXQucHJldmVudD1cInN1Ym1pdFwiPlxuICAgICAgICAgICAgICA8di10ZXh0LWZpZWxkXG4gICAgICAgICAgICAgICAgdi1tb2RlbD1cImxlZ2FsTmFtZVwiXG4gICAgICAgICAgICAgICAgbGFiZWw9XCJOb21icmUgbGVnYWxcIlxuICAgICAgICAgICAgICAgIHZhcmlhbnQ9XCJvdXRsaW5lZFwiXG4gICAgICAgICAgICAgICAgZGVuc2l0eT1cImNvbXBhY3RcIlxuICAgICAgICAgICAgICAgIGNsYXNzPVwibWItNFwiXG4gICAgICAgICAgICAgICAgaGlkZS1kZXRhaWxzPVwiYXV0b1wiXG4gICAgICAgICAgICAgICAgcGxhY2Vob2xkZXI9XCJFai4gTWkgRW1wcmVzYSBTLkEuUy5cIlxuICAgICAgICAgICAgICAvPlxuXG4gICAgICAgICAgICAgIDx2LXRleHQtZmllbGRcbiAgICAgICAgICAgICAgICB2LW1vZGVsPVwidHJhZGVOYW1lXCJcbiAgICAgICAgICAgICAgICBsYWJlbD1cIk5vbWJyZSBjb21lcmNpYWxcIlxuICAgICAgICAgICAgICAgIHZhcmlhbnQ9XCJvdXRsaW5lZFwiXG4gICAgICAgICAgICAgICAgZGVuc2l0eT1cImNvbXBhY3RcIlxuICAgICAgICAgICAgICAgIGNsYXNzPVwibWItNlwiXG4gICAgICAgICAgICAgICAgaGlkZS1kZXRhaWxzPVwiYXV0b1wiXG4gICAgICAgICAgICAgICAgcGxhY2Vob2xkZXI9XCJFai4gTWlFbXByZXNhXCJcbiAgICAgICAgICAgICAgLz5cblxuICAgICAgICAgICAgICA8di1idG5cbiAgICAgICAgICAgICAgICBibG9ja1xuICAgICAgICAgICAgICAgIGNvbG9yPVwicHJpbWFyeVwiXG4gICAgICAgICAgICAgICAgdHlwZT1cInN1Ym1pdFwiXG4gICAgICAgICAgICAgICAgOmxvYWRpbmc9XCJzdG9yZS5zYXZpbmdcIlxuICAgICAgICAgICAgICAgIDpkaXNhYmxlZD1cIiFsZWdhbE5hbWVcIlxuICAgICAgICAgICAgICA+XG4gICAgICAgICAgICAgICAgR3VhcmRhciBjYW1iaW9zXG4gICAgICAgICAgICAgIDwvdi1idG4+XG4gICAgICAgICAgICA8L3YtZm9ybT5cbiAgICAgICAgICA8L3YtY2FyZC10ZXh0PlxuICAgICAgICA8L3YtY2FyZD5cbiAgICAgIDwvdi1jb2w+XG4gICAgPC92LXJvdz5cbiAgPC92LWNvbnRhaW5lcj5cbjwvdGVtcGxhdGU+XG4iXSwiZmlsZSI6IkM6L1VzZXJzL3NhbnNoL2Ntci1wcm95ZWN0L2Zyb250ZW5kL3NyYy92aWV3cy9vcmdhbml6YXRpb24vT3JnYW5pemF0aW9uU2V0dGluZ3NWaWV3LnZ1ZSJ9

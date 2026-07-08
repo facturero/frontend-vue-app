@@ -13,6 +13,7 @@ const saving = ref(false);
 const saved = ref(false);
 
 const role = computed(() => store.list.find((r) => r.id === props.id));
+const isSystem = computed(() => role.value?.isSystem ?? false);
 
 onMounted(async () => {
   if (store.list.length === 0) {
@@ -79,6 +80,16 @@ async function save(): Promise<void> {
     </v-alert>
 
     <template v-if="role">
+      <v-alert
+        v-if="isSystem"
+        type="info"
+        density="compact"
+        variant="tonal"
+        class="mb-4"
+        title="Rol de sistema"
+        text="Este rol es del sistema y no puede ser modificado."
+      />
+
       <v-row>
         <v-col cols="12" md="5">
           <v-card elevation="2" rounded="lg">
@@ -96,6 +107,7 @@ async function save(): Promise<void> {
               </v-list>
 
               <v-btn
+                v-if="!isSystem"
                 block
                 color="primary"
                 variant="tonal"
@@ -116,6 +128,7 @@ async function save(): Promise<void> {
               <PermissionSelector
                 :permissions="store.permissions"
                 v-model="selectedPermissions"
+                :readonly="isSystem"
               />
             </v-card-text>
             <v-card-text v-else class="d-flex justify-center py-4">

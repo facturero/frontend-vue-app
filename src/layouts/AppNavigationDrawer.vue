@@ -9,8 +9,15 @@ const ui = useUiStore();
 const auth = useAuthStore();
 const { mobile } = useDisplay();
 
+const allowedWhenBlocked = ['/profile', '/organization/settings'];
+
 const items = computed(() =>
-  getNavigationItems().filter((item) => !item.permission || auth.can(item.permission)),
+  getNavigationItems()
+    .filter((item) => !item.permission || auth.can(item.permission))
+    .map((item) => ({
+      ...item,
+      blocked: auth.needsOrgSetup && !allowedWhenBlocked.includes(item.to ?? ''),
+    })),
 );
 </script>
 
@@ -24,12 +31,19 @@ const items = computed(() =>
         <v-divider />
 
         <template v-for="item in items" :key="item.title">
-          <v-list-item v-if="!item.soon" :to="item.to" :prepend-icon="item.icon" :title="item.title" rounded="lg" />
-          <v-list-item v-else :prepend-icon="item.icon" :title="item.title" disabled rounded="lg">
+          <v-list-item v-if="item.soon" :prepend-icon="item.icon" :title="item.title" disabled rounded="lg">
             <template #append>
               <v-chip size="x-small" color="secondary" variant="tonal">pronto</v-chip>
             </template>
           </v-list-item>
+          <v-list-item v-else-if="item.blocked" disabled rounded="lg">
+            <template #prepend>
+              <v-icon :icon="item.icon" class="mr-2" />
+              <v-icon icon="mdi-lock-outline" size="x-small" class="lock-icon" />
+            </template>
+            <v-list-item-title>{{ item.title }}</v-list-item-title>
+          </v-list-item>
+          <v-list-item v-else :to="item.to" :prepend-icon="item.icon" :title="item.title" rounded="lg" />
         </template>
       </v-list>
     </div>
@@ -55,5 +69,14 @@ const items = computed(() =>
 
 .drawer-collapse-btn {
   flex-shrink: 0;
+}
+
+.lock-icon {
+  position: absolute;
+  bottom: 2px;
+  right: -2px;
+  background: rgba(var(--v-theme-surface), 0.85);
+  border-radius: 50%;
+  padding: 1px;
 }
 </style>

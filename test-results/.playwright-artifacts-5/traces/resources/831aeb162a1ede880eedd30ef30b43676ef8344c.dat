@@ -1,0 +1,74 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/NotificationBell.vue");const _sfc_main = {  }
+import { resolveComponent as _resolveComponent, createVNode as _createVNode, withCtx as _withCtx, mergeProps as _mergeProps, createElementVNode as _createElementVNode, openBlock as _openBlock, createBlock as _createBlock } from "/node_modules/.vite/deps/vue.js?v=8eb19d00"
+
+function _sfc_render(_ctx, _cache) {
+  const _component_v_icon = _resolveComponent("v-icon")
+  const _component_v_badge = _resolveComponent("v-badge")
+  const _component_v_btn = _resolveComponent("v-btn")
+  const _component_v_card_text = _resolveComponent("v-card-text")
+  const _component_v_card = _resolveComponent("v-card")
+  const _component_v_menu = _resolveComponent("v-menu")
+
+  return (_openBlock(), _createBlock(_component_v_menu, {
+    "min-width": "280",
+    transition: "slide-y-transition",
+    location: "bottom center",
+    offset: [0, 8]
+  }, {
+    activator: _withCtx(({ props }) => [
+      _createVNode(_component_v_btn, _mergeProps({ icon: "" }, props), {
+        default: _withCtx(() => [
+          _createVNode(_component_v_badge, {
+            dot: "",
+            color: "error",
+            offset: "-2"
+          }, {
+            default: _withCtx(() => [
+              _createVNode(_component_v_icon, { icon: "mdi-bell-outline" })
+            ]),
+            _: 1 /* STABLE */
+          })
+        ]),
+        _: 1 /* STABLE */
+      }, 16 /* FULL_PROPS */)
+    ]),
+    default: _withCtx(() => [
+      _createVNode(_component_v_card, null, {
+        default: _withCtx(() => [
+          _createVNode(_component_v_card_text, { class: "text-center text-medium-emphasis pa-8" }, {
+            default: _withCtx(() => [
+              _createVNode(_component_v_icon, {
+                icon: "mdi-bell-off-outline",
+                size: "48",
+                class: "mb-4"
+              }),
+              _cache[0] || (_cache[0] = _createElementVNode("p", { class: "text-body-2" }, "Sin notificaciones", -1 /* CACHED */))
+            ]),
+            _: 1 /* STABLE */
+          })
+        ]),
+        _: 1 /* STABLE */
+      })
+    ]),
+    _: 1 /* STABLE */
+  }))
+}
+
+
+_sfc_main.__hmrId = "8c1554dd"
+typeof __VUE_HMR_RUNTIME__ !== 'undefined' && __VUE_HMR_RUNTIME__.createRecord(_sfc_main.__hmrId, _sfc_main)
+import.meta.hot.on('file-changed', ({ file }) => {
+  __VUE_HMR_RUNTIME__.CHANGED_FILE = file
+})
+import.meta.hot.accept(mod => {
+  if (!mod) return
+  const { default: updated, _rerender_only } = mod
+  if (_rerender_only) {
+    __VUE_HMR_RUNTIME__.rerender(updated.__hmrId, updated.render)
+  } else {
+    __VUE_HMR_RUNTIME__.reload(updated.__hmrId, updated)
+  }
+})
+import _export_sfc from "/@id/__x00__plugin-vue:export-helper"
+export default /*#__PURE__*/_export_sfc(_sfc_main, [['render',_sfc_render],['__file',"C:/Users/sansh/cmr-proyect/frontend/src/components/NotificationBell.vue"]])
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQzovVXNlcnMvc2Fuc2gvY21yLXByb3llY3QvZnJvbnRlbmQvc3JjL2NvbXBvbmVudHMvTm90aWZpY2F0aW9uQmVsbC52dWUiLCJuYW1lcyI6W10sInNvdXJjZXMiOlsiTm90aWZpY2F0aW9uQmVsbC52dWUiXSwic291cmNlc0NvbnRlbnQiOlsiPHRlbXBsYXRlPlxuICA8di1tZW51IG1pbi13aWR0aD1cIjI4MFwiIHRyYW5zaXRpb249XCJzbGlkZS15LXRyYW5zaXRpb25cIiBsb2NhdGlvbj1cImJvdHRvbSBjZW50ZXJcIiA6b2Zmc2V0PVwiWzAsIDhdXCI+XG4gICAgPHRlbXBsYXRlICNhY3RpdmF0b3I9XCJ7IHByb3BzIH1cIj5cbiAgICAgIDx2LWJ0biBpY29uIHYtYmluZD1cInByb3BzXCI+XG4gICAgICAgIDx2LWJhZGdlIGRvdCBjb2xvcj1cImVycm9yXCIgb2Zmc2V0PVwiLTJcIj5cbiAgICAgICAgICA8di1pY29uIGljb249XCJtZGktYmVsbC1vdXRsaW5lXCIgLz5cbiAgICAgICAgPC92LWJhZGdlPlxuICAgICAgPC92LWJ0bj5cbiAgICA8L3RlbXBsYXRlPlxuICAgIDx2LWNhcmQ+XG4gICAgICA8di1jYXJkLXRleHQgY2xhc3M9XCJ0ZXh0LWNlbnRlciB0ZXh0LW1lZGl1bS1lbXBoYXNpcyBwYS04XCI+XG4gICAgICAgIDx2LWljb24gaWNvbj1cIm1kaS1iZWxsLW9mZi1vdXRsaW5lXCIgc2l6ZT1cIjQ4XCIgY2xhc3M9XCJtYi00XCIgLz5cbiAgICAgICAgPHAgY2xhc3M9XCJ0ZXh0LWJvZHktMlwiPlNpbiBub3RpZmljYWNpb25lczwvcD5cbiAgICAgIDwvdi1jYXJkLXRleHQ+XG4gICAgPC92LWNhcmQ+XG4gIDwvdi1tZW51PlxuPC90ZW1wbGF0ZT5cbiJdLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7d0JBQ0UsYUFjUztJQWRELFdBQVMsRUFBQyxLQUFLO0lBQUMsVUFBVSxFQUFDLG9CQUFvQjtJQUFDLFFBQVEsRUFBQyxlQUFlO0lBQUUsTUFBTSxFQUFFLE1BQU07O0lBQ25GLFNBQVMsV0FDbEIsQ0FJUSxFQUxjLEtBQUs7TUFDM0IsYUFJUSxrQkFKUixZQUlRLEVBSkQsSUFBSSxFQUFKLEVBQUksSUFBUyxLQUFLOzBCQUN2QixDQUVVO1VBRlYsYUFFVTtZQUZELEdBQUcsRUFBSCxFQUFHO1lBQUMsS0FBSyxFQUFDLE9BQU87WUFBQyxNQUFNLEVBQUMsSUFBSTs7OEJBQ3BDLENBQWtDO2NBQWxDLGFBQWtDLHFCQUExQixJQUFJLEVBQUMsa0JBQWtCOzs7Ozs7OztzQkFJckMsQ0FLUztNQUxULGFBS1M7MEJBSlAsQ0FHYztVQUhkLGFBR2MsMEJBSEQsS0FBSyxFQUFDLHVDQUF1Qzs4QkFDeEQsQ0FBNkQ7Y0FBN0QsYUFBNkQ7Z0JBQXJELElBQUksRUFBQyxzQkFBc0I7Z0JBQUMsSUFBSSxFQUFDLElBQUk7Z0JBQUMsS0FBSyxFQUFDLE1BQU07O3dDQUMxRCxvQkFBNkMsT0FBMUMsS0FBSyxFQUFDLGFBQWEsSUFBQyxvQkFBa0IiLCJpZ25vcmVMaXN0IjpbXX0=

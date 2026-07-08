@@ -1,0 +1,210 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/components/InviteEmployeeDialog.vue");import { defineComponent as _defineComponent } from "/node_modules/.vite/deps/vue.js?v=8eb19d00";
+import { ref } from "/node_modules/.vite/deps/vue.js?v=8eb19d00";
+import { useEmployeeStore } from "/src/stores/employees.ts";
+import { extractError } from "/src/utils/error.ts";
+import RoleSelect from "/src/components/RoleSelect.vue";
+const _sfc_main = /* @__PURE__ */ _defineComponent({
+  __name: "InviteEmployeeDialog",
+  props: {
+    modelValue: { type: Boolean, required: true }
+  },
+  emits: ["update:modelValue"],
+  setup(__props, { expose: __expose, emit: __emit }) {
+    __expose();
+    const emit = __emit;
+    const emp = useEmployeeStore();
+    const email = ref("");
+    const roleIds = ref([]);
+    const error = ref(null);
+    const inviting = ref(false);
+    const success = ref(false);
+    function close() {
+      email.value = "";
+      roleIds.value = [];
+      error.value = null;
+      inviting.value = false;
+      success.value = false;
+      emit("update:modelValue", false);
+    }
+    async function submit() {
+      if (!email.value || roleIds.value.length === 0) return;
+      inviting.value = true;
+      error.value = null;
+      try {
+        await emp.invite(email.value, roleIds.value);
+        await emp.fetch();
+        success.value = true;
+        setTimeout(() => {
+          success.value = false;
+          close();
+        }, 1500);
+      } catch (e) {
+        error.value = extractError(e);
+      } finally {
+        inviting.value = false;
+      }
+    }
+    const __returned__ = { emit, emp, email, roleIds, error, inviting, success, close, submit, RoleSelect };
+    Object.defineProperty(__returned__, "__isScriptSetup", { enumerable: false, value: true });
+    return __returned__;
+  }
+});
+import { createTextVNode as _createTextVNode, resolveComponent as _resolveComponent, withCtx as _withCtx, createVNode as _createVNode, toDisplayString as _toDisplayString, openBlock as _openBlock, createBlock as _createBlock, createCommentVNode as _createCommentVNode } from "/node_modules/.vite/deps/vue.js?v=8eb19d00";
+function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
+  const _component_v_card_title = _resolveComponent("v-card-title");
+  const _component_v_alert = _resolveComponent("v-alert");
+  const _component_v_text_field = _resolveComponent("v-text-field");
+  const _component_v_card_text = _resolveComponent("v-card-text");
+  const _component_v_spacer = _resolveComponent("v-spacer");
+  const _component_v_btn = _resolveComponent("v-btn");
+  const _component_v_card_actions = _resolveComponent("v-card-actions");
+  const _component_v_card = _resolveComponent("v-card");
+  const _component_v_dialog = _resolveComponent("v-dialog");
+  return _openBlock(), _createBlock(_component_v_dialog, {
+    "model-value": $props.modelValue,
+    "max-width": "500",
+    "onUpdate:modelValue": _cache[3] || (_cache[3] = (v) => {
+      if (!v) $setup.close();
+    })
+  }, {
+    default: _withCtx(() => [
+      _createVNode(_component_v_card, {
+        elevation: "2",
+        rounded: "lg"
+      }, {
+        default: _withCtx(() => [
+          _createVNode(_component_v_card_title, null, {
+            default: _withCtx(() => [..._cache[4] || (_cache[4] = [
+              _createTextVNode(
+                "Invitar empleado",
+                -1
+                /* CACHED */
+              )
+            ])]),
+            _: 1
+            /* STABLE */
+          }),
+          _createVNode(_component_v_card_text, null, {
+            default: _withCtx(() => [
+              $setup.error ? (_openBlock(), _createBlock(_component_v_alert, {
+                key: 0,
+                type: "error",
+                density: "compact",
+                variant: "tonal",
+                closable: "",
+                class: "mb-4",
+                "onClick:close": _cache[0] || (_cache[0] = ($event) => $setup.error = null)
+              }, {
+                default: _withCtx(() => [
+                  _createTextVNode(
+                    _toDisplayString($setup.error),
+                    1
+                    /* TEXT */
+                  )
+                ]),
+                _: 1
+                /* STABLE */
+              })) : _createCommentVNode("v-if", true),
+              $setup.success ? (_openBlock(), _createBlock(_component_v_alert, {
+                key: 1,
+                type: "success",
+                density: "compact",
+                variant: "tonal",
+                class: "mb-4"
+              }, {
+                default: _withCtx(() => [..._cache[5] || (_cache[5] = [
+                  _createTextVNode(
+                    " Empleado invitado exitosamente ",
+                    -1
+                    /* CACHED */
+                  )
+                ])]),
+                _: 1
+                /* STABLE */
+              })) : _createCommentVNode("v-if", true),
+              _createVNode(_component_v_text_field, {
+                modelValue: $setup.email,
+                "onUpdate:modelValue": _cache[1] || (_cache[1] = ($event) => $setup.email = $event),
+                label: "Correo electrónico",
+                type: "email",
+                variant: "outlined",
+                density: "compact",
+                class: "mb-4",
+                "hide-details": "auto"
+              }, null, 8, ["modelValue"]),
+              _createVNode($setup["RoleSelect"], {
+                modelValue: $setup.roleIds,
+                "onUpdate:modelValue": _cache[2] || (_cache[2] = ($event) => $setup.roleIds = $event),
+                label: "Roles",
+                multiple: "",
+                "hide-admin": ""
+              }, null, 8, ["modelValue"])
+            ]),
+            _: 1
+            /* STABLE */
+          }),
+          _createVNode(_component_v_card_actions, null, {
+            default: _withCtx(() => [
+              _createVNode(_component_v_spacer),
+              _createVNode(_component_v_btn, {
+                variant: "text",
+                onClick: $setup.close
+              }, {
+                default: _withCtx(() => [..._cache[6] || (_cache[6] = [
+                  _createTextVNode(
+                    "Cancelar",
+                    -1
+                    /* CACHED */
+                  )
+                ])]),
+                _: 1
+                /* STABLE */
+              }),
+              _createVNode(_component_v_btn, {
+                color: "primary",
+                variant: "tonal",
+                loading: $setup.inviting,
+                disabled: !$setup.email || $setup.roleIds.length === 0,
+                onClick: $setup.submit
+              }, {
+                default: _withCtx(() => [..._cache[7] || (_cache[7] = [
+                  _createTextVNode(
+                    " Enviar invitación ",
+                    -1
+                    /* CACHED */
+                  )
+                ])]),
+                _: 1
+                /* STABLE */
+              }, 8, ["loading", "disabled"])
+            ]),
+            _: 1
+            /* STABLE */
+          })
+        ]),
+        _: 1
+        /* STABLE */
+      })
+    ]),
+    _: 1
+    /* STABLE */
+  }, 8, ["model-value"]);
+}
+_sfc_main.__hmrId = "4c0c46f0";
+typeof __VUE_HMR_RUNTIME__ !== "undefined" && __VUE_HMR_RUNTIME__.createRecord(_sfc_main.__hmrId, _sfc_main);
+import.meta.hot.on("file-changed", ({ file }) => {
+  __VUE_HMR_RUNTIME__.CHANGED_FILE = file;
+});
+import.meta.hot.accept((mod) => {
+  if (!mod) return;
+  const { default: updated, _rerender_only } = mod;
+  if (_rerender_only) {
+    __VUE_HMR_RUNTIME__.rerender(updated.__hmrId, updated.render);
+  } else {
+    __VUE_HMR_RUNTIME__.reload(updated.__hmrId, updated);
+  }
+});
+import _export_sfc from "/@id/__x00__plugin-vue:export-helper";
+export default /* @__PURE__ */ _export_sfc(_sfc_main, [["render", _sfc_render], ["__file", "C:/Users/sansh/cmr-proyect/frontend/src/components/InviteEmployeeDialog.vue"]]);
+
+//# sourceMappingURL=data:application/json;base64,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QkFDVCxVQUFRLENBQUcsZ0JBQVMsZUFBUSxXQUFNO0FBQUEsZ0JBQ2xDLFNBQU87QUFBQTtrQ0FDVCxNQUVEO0FBQUE7b0JBRkM7QUFBQSxvQkFFRDtBQUFBO0FBQUE7QUFBQSIsIm5hbWVzIjpbXSwiaWdub3JlTGlzdCI6W10sInNvdXJjZXMiOlsiSW52aXRlRW1wbG95ZWVEaWFsb2cudnVlIl0sInNvdXJjZXNDb250ZW50IjpbIjxzY3JpcHQgc2V0dXAgbGFuZz1cInRzXCI+XG5pbXBvcnQgeyByZWYgfSBmcm9tICd2dWUnO1xuaW1wb3J0IHsgdXNlRW1wbG95ZWVTdG9yZSB9IGZyb20gJ0Avc3RvcmVzL2VtcGxveWVlcyc7XG5pbXBvcnQgeyBleHRyYWN0RXJyb3IgfSBmcm9tICdAL3V0aWxzL2Vycm9yJztcbmltcG9ydCBSb2xlU2VsZWN0IGZyb20gJ0AvY29tcG9uZW50cy9Sb2xlU2VsZWN0LnZ1ZSc7XG5cbmRlZmluZVByb3BzPHsgbW9kZWxWYWx1ZTogYm9vbGVhbiB9PigpO1xuY29uc3QgZW1pdCA9IGRlZmluZUVtaXRzPHsgJ3VwZGF0ZTptb2RlbFZhbHVlJzogW3ZhbHVlOiBib29sZWFuXSB9PigpO1xuXG5jb25zdCBlbXAgPSB1c2VFbXBsb3llZVN0b3JlKCk7XG5jb25zdCBlbWFpbCA9IHJlZignJyk7XG5jb25zdCByb2xlSWRzID0gcmVmPHN0cmluZ1tdPihbXSk7XG5jb25zdCBlcnJvciA9IHJlZjxzdHJpbmcgfCBudWxsPihudWxsKTtcbmNvbnN0IGludml0aW5nID0gcmVmKGZhbHNlKTtcbmNvbnN0IHN1Y2Nlc3MgPSByZWYoZmFsc2UpO1xuXG5mdW5jdGlvbiBjbG9zZSgpOiB2b2lkIHtcbiAgZW1haWwudmFsdWUgPSAnJztcbiAgcm9sZUlkcy52YWx1ZSA9IFtdO1xuICBlcnJvci52YWx1ZSA9IG51bGw7XG4gIGludml0aW5nLnZhbHVlID0gZmFsc2U7XG4gIHN1Y2Nlc3MudmFsdWUgPSBmYWxzZTtcbiAgZW1pdCgndXBkYXRlOm1vZGVsVmFsdWUnLCBmYWxzZSk7XG59XG5cbmFzeW5jIGZ1bmN0aW9uIHN1Ym1pdCgpOiBQcm9taXNlPHZvaWQ+IHtcbiAgaWYgKCFlbWFpbC52YWx1ZSB8fCByb2xlSWRzLnZhbHVlLmxlbmd0aCA9PT0gMCkgcmV0dXJuO1xuICBpbnZpdGluZy52YWx1ZSA9IHRydWU7XG4gIGVycm9yLnZhbHVlID0gbnVsbDtcbiAgdHJ5IHtcbiAgICBhd2FpdCBlbXAuaW52aXRlKGVtYWlsLnZhbHVlLCByb2xlSWRzLnZhbHVlKTtcbiAgICBhd2FpdCBlbXAuZmV0Y2goKTtcbiAgICBzdWNjZXNzLnZhbHVlID0gdHJ1ZTtcbiAgICBzZXRUaW1lb3V0KCgpID0+IHtcbiAgICAgIHN1Y2Nlc3MudmFsdWUgPSBmYWxzZTtcbiAgICAgIGNsb3NlKCk7XG4gICAgfSwgMTUwMCk7XG4gIH0gY2F0Y2ggKGUpIHtcbiAgICBlcnJvci52YWx1ZSA9IGV4dHJhY3RFcnJvcihlKTtcbiAgfSBmaW5hbGx5IHtcbiAgICBpbnZpdGluZy52YWx1ZSA9IGZhbHNlO1xuICB9XG59XG48L3NjcmlwdD5cblxuPHRlbXBsYXRlPlxuICA8di1kaWFsb2dcbiAgICA6bW9kZWwtdmFsdWU9XCJtb2RlbFZhbHVlXCJcbiAgICBtYXgtd2lkdGg9XCI1MDBcIlxuICAgIEB1cGRhdGU6bW9kZWwtdmFsdWU9XCIodikgPT4geyBpZiAoIXYpIGNsb3NlKCk7IH1cIlxuICA+XG4gICAgPHYtY2FyZCBlbGV2YXRpb249XCIyXCIgcm91bmRlZD1cImxnXCI+XG4gICAgICA8di1jYXJkLXRpdGxlPkludml0YXIgZW1wbGVhZG88L3YtY2FyZC10aXRsZT5cbiAgICAgIDx2LWNhcmQtdGV4dD5cbiAgICAgICAgPHYtYWxlcnRcbiAgICAgICAgICB2LWlmPVwiZXJyb3JcIlxuICAgICAgICAgIHR5cGU9XCJlcnJvclwiXG4gICAgICAgICAgZGVuc2l0eT1cImNvbXBhY3RcIlxuICAgICAgICAgIHZhcmlhbnQ9XCJ0b25hbFwiXG4gICAgICAgICAgY2xvc2FibGVcbiAgICAgICAgICBjbGFzcz1cIm1iLTRcIlxuICAgICAgICAgIEBjbGljazpjbG9zZT1cImVycm9yID0gbnVsbFwiXG4gICAgICAgID5cbiAgICAgICAgICB7eyBlcnJvciB9fVxuICAgICAgICA8L3YtYWxlcnQ+XG5cbiAgICAgICAgPHYtYWxlcnRcbiAgICAgICAgICB2LWlmPVwic3VjY2Vzc1wiXG4gICAgICAgICAgdHlwZT1cInN1Y2Nlc3NcIlxuICAgICAgICAgIGRlbnNpdHk9XCJjb21wYWN0XCJcbiAgICAgICAgICB2YXJpYW50PVwidG9uYWxcIlxuICAgICAgICAgIGNsYXNzPVwibWItNFwiXG4gICAgICAgID5cbiAgICAgICAgICBFbXBsZWFkbyBpbnZpdGFkbyBleGl0b3NhbWVudGVcbiAgICAgICAgPC92LWFsZXJ0PlxuXG4gICAgICAgIDx2LXRleHQtZmllbGRcbiAgICAgICAgICB2LW1vZGVsPVwiZW1haWxcIlxuICAgICAgICAgIGxhYmVsPVwiQ29ycmVvIGVsZWN0csOzbmljb1wiXG4gICAgICAgICAgdHlwZT1cImVtYWlsXCJcbiAgICAgICAgICB2YXJpYW50PVwib3V0bGluZWRcIlxuICAgICAgICAgIGRlbnNpdHk9XCJjb21wYWN0XCJcbiAgICAgICAgICBjbGFzcz1cIm1iLTRcIlxuICAgICAgICAgIGhpZGUtZGV0YWlscz1cImF1dG9cIlxuICAgICAgICAvPlxuXG4gICAgICAgIDxSb2xlU2VsZWN0XG4gICAgICAgICAgdi1tb2RlbD1cInJvbGVJZHNcIlxuICAgICAgICAgIGxhYmVsPVwiUm9sZXNcIlxuICAgICAgICAgIG11bHRpcGxlXG4gICAgICAgICAgaGlkZS1hZG1pblxuICAgICAgICAvPlxuICAgICAgPC92LWNhcmQtdGV4dD5cbiAgICAgIDx2LWNhcmQtYWN0aW9ucz5cbiAgICAgICAgPHYtc3BhY2VyIC8+XG4gICAgICAgIDx2LWJ0biB2YXJpYW50PVwidGV4dFwiIEBjbGljaz1cImNsb3NlXCI+Q2FuY2VsYXI8L3YtYnRuPlxuICAgICAgICA8di1idG5cbiAgICAgICAgICBjb2xvcj1cInByaW1hcnlcIlxuICAgICAgICAgIHZhcmlhbnQ9XCJ0b25hbFwiXG4gICAgICAgICAgOmxvYWRpbmc9XCJpbnZpdGluZ1wiXG4gICAgICAgICAgOmRpc2FibGVkPVwiIWVtYWlsIHx8IHJvbGVJZHMubGVuZ3RoID09PSAwXCJcbiAgICAgICAgICBAY2xpY2s9XCJzdWJtaXRcIlxuICAgICAgICA+XG4gICAgICAgICAgRW52aWFyIGludml0YWNpw7NuXG4gICAgICAgIDwvdi1idG4+XG4gICAgICA8L3YtY2FyZC1hY3Rpb25zPlxuICAgIDwvdi1jYXJkPlxuICA8L3YtZGlhbG9nPlxuPC90ZW1wbGF0ZT5cbiJdLCJmaWxlIjoiQzovVXNlcnMvc2Fuc2gvY21yLXByb3llY3QvZnJvbnRlbmQvc3JjL2NvbXBvbmVudHMvSW52aXRlRW1wbG95ZWVEaWFsb2cudnVlIn0=

@@ -1,0 +1,8 @@
+export const auth = {"signIn":"Connexion","createAccount":"Créer un compte","toAccessTemplate":"Pour accéder au tableau de bord","registerToGetStarted":"Inscrivez-vous pour commencer","register":"S'inscrire","login":"Connexion","email":"Adresse e-mail","password":"Mot de passe","confirmPassword":"Confirmer le mot de passe","next":"Suivant","change":"modifier","forgotPassword":"Mot de passe oublié ?","notRegisteredYet":"Pas encore inscrit ?","alreadyRegistered":"Déjà inscrit ?","descriptionLogin":"Vous avez perdu l'accès à OneAuth ? Ne vous inquiétez pas. Configurez une phrase de récupération et un numéro de sauvegarde pour récupérer OneAuth facilement.","descriptionRegister":"Reconnectez-vous avec votre compte existant.","errorUnexpected":"Erreur inattendue"};
+export const home = {"title":"Accueil","activeSession":"Session active","userId":"ID utilisateur","email":"E-mail","emailVerified":"E-mail vérifié","yes":"Oui","no":"Non","provider":"Fournisseur","loadSuccess":"GET /auth/me a répondu via la passerelle ✓","loadError":"Impossible de charger /auth/me"};
+export const nav = {"brand":"CRM","brandSubtitle":"Panneau d'admin.","collapse":"Réduire","comingSoon":"bientôt","home":"Accueil","customers":"Clients","invoices":"Factures","products":"Produits"};
+export default {
+  auth,
+  home,
+  nav,
+};

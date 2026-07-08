@@ -1,0 +1,180 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/views/HomeView.vue");import { defineComponent as _defineComponent } from "/node_modules/.vite/deps/vue.js?v=8eb19d00";
+import { onMounted, ref } from "/node_modules/.vite/deps/vue.js?v=8eb19d00";
+import { useRouter } from "/node_modules/.vite/deps/vue-router.js?v=8eb19d00";
+import { useAuthStore } from "/src/stores/auth.ts?t=1783535084050";
+const _sfc_main = /* @__PURE__ */ _defineComponent({
+  __name: "HomeView",
+  setup(__props, { expose: __expose }) {
+    __expose();
+    const auth = useAuthStore();
+    const router = useRouter();
+    const loadError = ref(null);
+    onMounted(async () => {
+      try {
+        await auth.fetchMe();
+        if (auth.needsOrg) {
+          router.replace({ name: "profile" });
+        } else if (auth.needsOrgSetup) {
+          router.replace({ name: "organization-settings" });
+        }
+      } catch (e) {
+        const err = e;
+        loadError.value = err?.response?.data?.message ?? "No se pudo cargar /auth/me";
+      }
+    });
+    const __returned__ = { auth, router, loadError };
+    Object.defineProperty(__returned__, "__isScriptSetup", { enumerable: false, value: true });
+    return __returned__;
+  }
+});
+import { createElementVNode as _createElementVNode, resolveComponent as _resolveComponent, createVNode as _createVNode, createTextVNode as _createTextVNode, withCtx as _withCtx, openBlock as _openBlock, createBlock as _createBlock, createCommentVNode as _createCommentVNode, Fragment as _Fragment, createElementBlock as _createElementBlock } from "/node_modules/.vite/deps/vue.js?v=8eb19d00";
+const _hoisted_1 = {
+  key: 2,
+  class: "d-flex justify-center py-8"
+};
+function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
+  const _component_v_icon = _resolveComponent("v-icon");
+  const _component_v_card_title = _resolveComponent("v-card-title");
+  const _component_v_alert = _resolveComponent("v-alert");
+  const _component_v_list_item = _resolveComponent("v-list-item");
+  const _component_v_list = _resolveComponent("v-list");
+  const _component_v_progress_circular = _resolveComponent("v-progress-circular");
+  const _component_v_card_text = _resolveComponent("v-card-text");
+  const _component_v_card = _resolveComponent("v-card");
+  const _component_v_col = _resolveComponent("v-col");
+  const _component_v_row = _resolveComponent("v-row");
+  const _component_v_container = _resolveComponent("v-container");
+  return _openBlock(), _createBlock(_component_v_container, null, {
+    default: _withCtx(() => [
+      _createVNode(_component_v_row, { justify: "center" }, {
+        default: _withCtx(() => [
+          _createVNode(_component_v_col, {
+            cols: "12",
+            md: "8",
+            lg: "7"
+          }, {
+            default: _withCtx(() => [
+              _cache[1] || (_cache[1] = _createElementVNode(
+                "h2",
+                { class: "text-h5 font-weight-medium mt-6 mb-4" },
+                "Inicio",
+                -1
+                /* CACHED */
+              )),
+              _createVNode(_component_v_card, {
+                elevation: "4",
+                rounded: "lg"
+              }, {
+                default: _withCtx(() => [
+                  _createVNode(_component_v_card_title, { class: "d-flex align-center" }, {
+                    default: _withCtx(() => [
+                      _createVNode(_component_v_icon, {
+                        icon: "mdi-account-circle",
+                        class: "mr-2"
+                      }),
+                      _cache[0] || (_cache[0] = _createTextVNode(
+                        " Sesión activa ",
+                        -1
+                        /* CACHED */
+                      ))
+                    ]),
+                    _: 1
+                    /* STABLE */
+                  }),
+                  _createVNode(_component_v_card_text, null, {
+                    default: _withCtx(() => [
+                      $setup.loadError ? (_openBlock(), _createBlock(_component_v_alert, {
+                        key: 0,
+                        type: "error",
+                        density: "compact",
+                        variant: "tonal",
+                        class: "mb-4",
+                        text: $setup.loadError
+                      }, null, 8, ["text"])) : _createCommentVNode("v-if", true),
+                      $setup.auth.user ? (_openBlock(), _createElementBlock(
+                        _Fragment,
+                        { key: 1 },
+                        [
+                          _createVNode(_component_v_list, {
+                            lines: "two",
+                            density: "comfortable"
+                          }, {
+                            default: _withCtx(() => [
+                              _createVNode(_component_v_list_item, {
+                                title: "User ID",
+                                subtitle: $setup.auth.user.id,
+                                "prepend-icon": "mdi-identifier"
+                              }, null, 8, ["subtitle"]),
+                              _createVNode(_component_v_list_item, {
+                                title: "Email",
+                                subtitle: $setup.auth.user.email,
+                                "prepend-icon": "mdi-email-outline"
+                              }, null, 8, ["subtitle"]),
+                              _createVNode(_component_v_list_item, {
+                                title: "Email verificado",
+                                subtitle: $setup.auth.user.emailVerified ? "Sí" : "No",
+                                "prepend-icon": "mdi-check-decagram-outline"
+                              }, null, 8, ["subtitle"]),
+                              _createVNode(_component_v_list_item, {
+                                title: "Proveedor",
+                                subtitle: $setup.auth.user.authProvider,
+                                "prepend-icon": "mdi-account-key-outline"
+                              }, null, 8, ["subtitle"])
+                            ]),
+                            _: 1
+                            /* STABLE */
+                          }),
+                          _createVNode(_component_v_alert, {
+                            type: "success",
+                            variant: "tonal",
+                            class: "mt-4",
+                            text: "GET /auth/me respondió a través del gateway ✔"
+                          })
+                        ],
+                        64
+                        /* STABLE_FRAGMENT */
+                      )) : !$setup.loadError ? (_openBlock(), _createElementBlock("div", _hoisted_1, [
+                        _createVNode(_component_v_progress_circular, {
+                          indeterminate: "",
+                          color: "primary"
+                        })
+                      ])) : _createCommentVNode("v-if", true)
+                    ]),
+                    _: 1
+                    /* STABLE */
+                  })
+                ]),
+                _: 1
+                /* STABLE */
+              })
+            ]),
+            _: 1
+            /* STABLE */
+          })
+        ]),
+        _: 1
+        /* STABLE */
+      })
+    ]),
+    _: 1
+    /* STABLE */
+  });
+}
+_sfc_main.__hmrId = "b4e148ca";
+typeof __VUE_HMR_RUNTIME__ !== "undefined" && __VUE_HMR_RUNTIME__.createRecord(_sfc_main.__hmrId, _sfc_main);
+import.meta.hot.on("file-changed", ({ file }) => {
+  __VUE_HMR_RUNTIME__.CHANGED_FILE = file;
+});
+import.meta.hot.accept((mod) => {
+  if (!mod) return;
+  const { default: updated, _rerender_only } = mod;
+  if (_rerender_only) {
+    __VUE_HMR_RUNTIME__.rerender(updated.__hmrId, updated.render);
+  } else {
+    __VUE_HMR_RUNTIME__.reload(updated.__hmrId, updated);
+  }
+});
+import _export_sfc from "/@id/__x00__plugin-vue:export-helper";
+export default /* @__PURE__ */ _export_sfc(_sfc_main, [["render", _sfc_render], ["__file", "C:/Users/sansh/cmr-proyect/frontend/src/views/HomeView.vue"]]);
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJtYXBwaW5ncyI6IjtBQUNBLFNBQVMsV0FBVyxXQUFXO0FBQy9CLFNBQVMsaUJBQWlCO0FBQzFCLFNBQVMsb0JBQW9COzs7OztBQUU3QixVQUFNLE9BQU8sYUFBYTtBQUMxQixVQUFNLFNBQVMsVUFBVTtBQUN6QixVQUFNLFlBQVksSUFBbUIsSUFBSTtBQUV6QyxjQUFVLFlBQVk7QUFDcEIsVUFBSTtBQUNGLGNBQU0sS0FBSyxRQUFRO0FBQ25CLFlBQUksS0FBSyxVQUFVO0FBQ2pCLGlCQUFPLFFBQVEsRUFBRSxNQUFNLFVBQVUsQ0FBQztBQUFBLFFBQ3BDLFdBQVcsS0FBSyxlQUFlO0FBQzdCLGlCQUFPLFFBQVEsRUFBRSxNQUFNLHdCQUF3QixDQUFDO0FBQUEsUUFDbEQ7QUFBQSxNQUNGLFNBQVMsR0FBRztBQUNWLGNBQU0sTUFBTTtBQUNaLGtCQUFVLFFBQVEsS0FBSyxVQUFVLE1BQU0sV0FBVztBQUFBLE1BQ3BEO0FBQUEsSUFDRixDQUFDOzs7Ozs7Ozs7RUFxRHVDLE9BQU07Ozs7Ozs7Ozs7Ozs7O3VCQWpENUMsYUF3RGM7QUFBQSxzQkF2RFosTUFzRFE7QUFBQSxNQXREUixhQXNEUSxvQkF0REQsU0FBUSxTQUFRO0FBQUEsMEJBQ3JCLE1Bb0RRO0FBQUEsVUFwRFIsYUFvRFE7QUFBQSxZQXBERCxNQUFLO0FBQUEsWUFBSyxJQUFHO0FBQUEsWUFBSSxJQUFHO0FBQUE7OEJBQ3pCLE1BQTREO0FBQUEsd0NBQTVEO0FBQUEsZ0JBQTREO0FBQUEsa0JBQXhELE9BQU0sdUNBQXNDO0FBQUEsZ0JBQUM7QUFBQSxnQkFBTTtBQUFBO0FBQUE7QUFBQSxjQUV2RCxhQWdEUztBQUFBLGdCQWhERCxXQUFVO0FBQUEsZ0JBQUksU0FBUTtBQUFBO2tDQUM1QixNQUdlO0FBQUEsa0JBSGYsYUFHZSwyQkFIRCxPQUFNLHNCQUFxQjtBQUFBLHNDQUN2QyxNQUFpRDtBQUFBLHNCQUFqRCxhQUFpRDtBQUFBLHdCQUF6QyxNQUFLO0FBQUEsd0JBQXFCLE9BQU07QUFBQTs7d0JBQVM7QUFBQSx3QkFFbkQ7QUFBQTtBQUFBO0FBQUE7Ozs7a0JBRUEsYUF5Q2M7QUFBQSxzQ0F4Q1osTUFPRTtBQUFBLHNCQU5NLGtDQURSLGFBT0U7QUFBQTt3QkFMQSxNQUFLO0FBQUEsd0JBQ0wsU0FBUTtBQUFBLHdCQUNSLFNBQVE7QUFBQSx3QkFDUixPQUFNO0FBQUEsd0JBQ0wsTUFBTTtBQUFBO3NCQUdPLFlBQUssc0JBQXJCO0FBQUEsd0JBMEJXO0FBQUE7QUFBQTtBQUFBLDBCQXpCVCxhQWlCUztBQUFBLDRCQWpCRCxPQUFNO0FBQUEsNEJBQU0sU0FBUTtBQUFBOzhDQUMxQixNQUFzRjtBQUFBLDhCQUF0RixhQUFzRjtBQUFBLGdDQUF6RSxPQUFNO0FBQUEsZ0NBQVcsVUFBVSxZQUFLLEtBQUs7QUFBQSxnQ0FBSSxnQkFBYTtBQUFBOzhCQUNuRSxhQUlFO0FBQUEsZ0NBSEEsT0FBTTtBQUFBLGdDQUNMLFVBQVUsWUFBSyxLQUFLO0FBQUEsZ0NBQ3JCLGdCQUFhO0FBQUE7OEJBRWYsYUFJRTtBQUFBLGdDQUhBLE9BQU07QUFBQSxnQ0FDTCxVQUFVLFlBQUssS0FBSyxnQkFBYTtBQUFBLGdDQUNsQyxnQkFBYTtBQUFBOzhCQUVmLGFBSUU7QUFBQSxnQ0FIQSxPQUFNO0FBQUEsZ0NBQ0wsVUFBVSxZQUFLLEtBQUs7QUFBQSxnQ0FDckIsZ0JBQWE7QUFBQTs7Ozs7MEJBSWpCLGFBS0U7QUFBQSw0QkFKQSxNQUFLO0FBQUEsNEJBQ0wsU0FBUTtBQUFBLDRCQUNSLE9BQU07QUFBQSw0QkFDTixNQUFLO0FBQUE7Ozs7NEJBSVEsa0NBQWpCLG9CQUVNLE9BRk4sWUFFTTtBQUFBLHdCQURKLGFBQXFEO0FBQUEsMEJBQWhDO0FBQUEsMEJBQWMsT0FBTTtBQUFBIiwibmFtZXMiOltdLCJpZ25vcmVMaXN0IjpbXSwic291cmNlcyI6WyJIb21lVmlldy52dWUiXSwic291cmNlc0NvbnRlbnQiOlsiPHNjcmlwdCBzZXR1cCBsYW5nPVwidHNcIj5cbmltcG9ydCB7IG9uTW91bnRlZCwgcmVmIH0gZnJvbSAndnVlJztcbmltcG9ydCB7IHVzZVJvdXRlciB9IGZyb20gJ3Z1ZS1yb3V0ZXInO1xuaW1wb3J0IHsgdXNlQXV0aFN0b3JlIH0gZnJvbSAnQC9zdG9yZXMvYXV0aCc7XG5cbmNvbnN0IGF1dGggPSB1c2VBdXRoU3RvcmUoKTtcbmNvbnN0IHJvdXRlciA9IHVzZVJvdXRlcigpO1xuY29uc3QgbG9hZEVycm9yID0gcmVmPHN0cmluZyB8IG51bGw+KG51bGwpO1xuXG5vbk1vdW50ZWQoYXN5bmMgKCkgPT4ge1xuICB0cnkge1xuICAgIGF3YWl0IGF1dGguZmV0Y2hNZSgpO1xuICAgIGlmIChhdXRoLm5lZWRzT3JnKSB7XG4gICAgICByb3V0ZXIucmVwbGFjZSh7IG5hbWU6ICdwcm9maWxlJyB9KTtcbiAgICB9IGVsc2UgaWYgKGF1dGgubmVlZHNPcmdTZXR1cCkge1xuICAgICAgcm91dGVyLnJlcGxhY2UoeyBuYW1lOiAnb3JnYW5pemF0aW9uLXNldHRpbmdzJyB9KTtcbiAgICB9XG4gIH0gY2F0Y2ggKGUpIHtcbiAgICBjb25zdCBlcnIgPSBlIGFzIHsgcmVzcG9uc2U/OiB7IGRhdGE/OiB7IG1lc3NhZ2U/OiBzdHJpbmcgfSB9IH07XG4gICAgbG9hZEVycm9yLnZhbHVlID0gZXJyPy5yZXNwb25zZT8uZGF0YT8ubWVzc2FnZSA/PyAnTm8gc2UgcHVkbyBjYXJnYXIgL2F1dGgvbWUnO1xuICB9XG59KTtcbjwvc2NyaXB0PlxuXG48dGVtcGxhdGU+XG4gIDx2LWNvbnRhaW5lcj5cbiAgICA8di1yb3cganVzdGlmeT1cImNlbnRlclwiPlxuICAgICAgPHYtY29sIGNvbHM9XCIxMlwiIG1kPVwiOFwiIGxnPVwiN1wiPlxuICAgICAgICA8aDIgY2xhc3M9XCJ0ZXh0LWg1IGZvbnQtd2VpZ2h0LW1lZGl1bSBtdC02IG1iLTRcIj5JbmljaW88L2gyPlxuXG4gICAgICAgIDx2LWNhcmQgZWxldmF0aW9uPVwiNFwiIHJvdW5kZWQ9XCJsZ1wiPlxuICAgICAgICAgIDx2LWNhcmQtdGl0bGUgY2xhc3M9XCJkLWZsZXggYWxpZ24tY2VudGVyXCI+XG4gICAgICAgICAgICA8di1pY29uIGljb249XCJtZGktYWNjb3VudC1jaXJjbGVcIiBjbGFzcz1cIm1yLTJcIiAvPlxuICAgICAgICAgICAgU2VzacOzbiBhY3RpdmFcbiAgICAgICAgICA8L3YtY2FyZC10aXRsZT5cblxuICAgICAgICAgIDx2LWNhcmQtdGV4dD5cbiAgICAgICAgICAgIDx2LWFsZXJ0XG4gICAgICAgICAgICAgIHYtaWY9XCJsb2FkRXJyb3JcIlxuICAgICAgICAgICAgICB0eXBlPVwiZXJyb3JcIlxuICAgICAgICAgICAgICBkZW5zaXR5PVwiY29tcGFjdFwiXG4gICAgICAgICAgICAgIHZhcmlhbnQ9XCJ0b25hbFwiXG4gICAgICAgICAgICAgIGNsYXNzPVwibWItNFwiXG4gICAgICAgICAgICAgIDp0ZXh0PVwibG9hZEVycm9yXCJcbiAgICAgICAgICAgIC8+XG5cbiAgICAgICAgICAgIDx0ZW1wbGF0ZSB2LWlmPVwiYXV0aC51c2VyXCI+XG4gICAgICAgICAgICAgIDx2LWxpc3QgbGluZXM9XCJ0d29cIiBkZW5zaXR5PVwiY29tZm9ydGFibGVcIj5cbiAgICAgICAgICAgICAgICA8di1saXN0LWl0ZW0gdGl0bGU9XCJVc2VyIElEXCIgOnN1YnRpdGxlPVwiYXV0aC51c2VyLmlkXCIgcHJlcGVuZC1pY29uPVwibWRpLWlkZW50aWZpZXJcIiAvPlxuICAgICAgICAgICAgICAgIDx2LWxpc3QtaXRlbVxuICAgICAgICAgICAgICAgICAgdGl0bGU9XCJFbWFpbFwiXG4gICAgICAgICAgICAgICAgICA6c3VidGl0bGU9XCJhdXRoLnVzZXIuZW1haWxcIlxuICAgICAgICAgICAgICAgICAgcHJlcGVuZC1pY29uPVwibWRpLWVtYWlsLW91dGxpbmVcIlxuICAgICAgICAgICAgICAgIC8+XG4gICAgICAgICAgICAgICAgPHYtbGlzdC1pdGVtXG4gICAgICAgICAgICAgICAgICB0aXRsZT1cIkVtYWlsIHZlcmlmaWNhZG9cIlxuICAgICAgICAgICAgICAgICAgOnN1YnRpdGxlPVwiYXV0aC51c2VyLmVtYWlsVmVyaWZpZWQgPyAnU8OtJyA6ICdObydcIlxuICAgICAgICAgICAgICAgICAgcHJlcGVuZC1pY29uPVwibWRpLWNoZWNrLWRlY2FncmFtLW91dGxpbmVcIlxuICAgICAgICAgICAgICAgIC8+XG4gICAgICAgICAgICAgICAgPHYtbGlzdC1pdGVtXG4gICAgICAgICAgICAgICAgICB0aXRsZT1cIlByb3ZlZWRvclwiXG4gICAgICAgICAgICAgICAgICA6c3VidGl0bGU9XCJhdXRoLnVzZXIuYXV0aFByb3ZpZGVyXCJcbiAgICAgICAgICAgICAgICAgIHByZXBlbmQtaWNvbj1cIm1kaS1hY2NvdW50LWtleS1vdXRsaW5lXCJcbiAgICAgICAgICAgICAgICAvPlxuICAgICAgICAgICAgICA8L3YtbGlzdD5cblxuICAgICAgICAgICAgICA8di1hbGVydFxuICAgICAgICAgICAgICAgIHR5cGU9XCJzdWNjZXNzXCJcbiAgICAgICAgICAgICAgICB2YXJpYW50PVwidG9uYWxcIlxuICAgICAgICAgICAgICAgIGNsYXNzPVwibXQtNFwiXG4gICAgICAgICAgICAgICAgdGV4dD1cIkdFVCAvYXV0aC9tZSByZXNwb25kacOzIGEgdHJhdsOpcyBkZWwgZ2F0ZXdheSDinJRcIlxuICAgICAgICAgICAgICAvPlxuICAgICAgICAgICAgPC90ZW1wbGF0ZT5cblxuICAgICAgICAgICAgPGRpdiB2LWVsc2UtaWY9XCIhbG9hZEVycm9yXCIgY2xhc3M9XCJkLWZsZXgganVzdGlmeS1jZW50ZXIgcHktOFwiPlxuICAgICAgICAgICAgICA8di1wcm9ncmVzcy1jaXJjdWxhciBpbmRldGVybWluYXRlIGNvbG9yPVwicHJpbWFyeVwiIC8+XG4gICAgICAgICAgICA8L2Rpdj5cbiAgICAgICAgICA8L3YtY2FyZC10ZXh0PlxuICAgICAgICA8L3YtY2FyZD5cbiAgICAgIDwvdi1jb2w+XG4gICAgPC92LXJvdz5cbiAgPC92LWNvbnRhaW5lcj5cbjwvdGVtcGxhdGU+XG4iXSwiZmlsZSI6IkM6L1VzZXJzL3NhbnNoL2Ntci1wcm95ZWN0L2Zyb250ZW5kL3NyYy92aWV3cy9Ib21lVmlldy52dWUifQ==

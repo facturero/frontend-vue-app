@@ -4,9 +4,10 @@ export interface EmployeeSummary {
   fullName: string | null;
   status: string;
   roles: string[];
+  isOwner: boolean;
 }
 
 export interface InviteEmployeeInput {
   email: string;
-  roleId: string;
+  roleIds: string[];
 }

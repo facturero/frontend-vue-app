@@ -1,0 +1,190 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/layouts/AppNavigationDrawer.vue");import { defineComponent as _defineComponent } from "/node_modules/.vite/deps/vue.js?v=8eb19d00";
+import { computed } from "/node_modules/.vite/deps/vue.js?v=8eb19d00";
+import { useDisplay } from "/node_modules/.vite/deps/vuetify.js?v=8eb19d00";
+import { useUiStore } from "/src/stores/ui.ts";
+import { useAuthStore } from "/src/stores/auth.ts?t=1783535084050";
+import { getNavigationItems } from "/src/menus/navigation.ts";
+const _sfc_main = /* @__PURE__ */ _defineComponent({
+  __name: "AppNavigationDrawer",
+  setup(__props, { expose: __expose }) {
+    __expose();
+    const ui = useUiStore();
+    const auth = useAuthStore();
+    const { mobile } = useDisplay();
+    const allowedWhenBlocked = ["/profile", "/organization/settings"];
+    const items = computed(
+      () => getNavigationItems().filter((item) => !item.permission || auth.can(item.permission)).map((item) => ({
+        ...item,
+        blocked: auth.needsOrgSetup && !allowedWhenBlocked.includes(item.to ?? "")
+      }))
+    );
+    const __returned__ = { ui, auth, mobile, allowedWhenBlocked, items };
+    Object.defineProperty(__returned__, "__isScriptSetup", { enumerable: false, value: true });
+    return __returned__;
+  }
+});
+import { resolveComponent as _resolveComponent, createVNode as _createVNode, renderList as _renderList, Fragment as _Fragment, openBlock as _openBlock, createElementBlock as _createElementBlock, createTextVNode as _createTextVNode, withCtx as _withCtx, createBlock as _createBlock, createCommentVNode as _createCommentVNode, toDisplayString as _toDisplayString, createElementVNode as _createElementVNode } from "/node_modules/.vite/deps/vue.js?v=8eb19d00";
+const _hoisted_1 = { class: "drawer-nav-scroll" };
+function _sfc_render(_ctx, _cache, $props, $setup, $data, $options) {
+  const _component_v_list_item = _resolveComponent("v-list-item");
+  const _component_v_divider = _resolveComponent("v-divider");
+  const _component_v_chip = _resolveComponent("v-chip");
+  const _component_v_icon = _resolveComponent("v-icon");
+  const _component_v_list_item_title = _resolveComponent("v-list-item-title");
+  const _component_v_list = _resolveComponent("v-list");
+  const _component_v_navigation_drawer = _resolveComponent("v-navigation-drawer");
+  return _openBlock(), _createBlock(_component_v_navigation_drawer, {
+    modelValue: $setup.ui.drawer,
+    "onUpdate:modelValue": _cache[1] || (_cache[1] = ($event) => $setup.ui.drawer = $event),
+    rail: !$setup.mobile && $setup.ui.rail,
+    permanent: !$setup.mobile,
+    temporary: $setup.mobile,
+    "expand-on-hover": ""
+  }, {
+    append: _withCtx(() => [
+      _createVNode(_component_v_divider),
+      _createVNode(_component_v_list_item, {
+        "prepend-icon": "mdi-chevron-left",
+        title: "Colapsar",
+        onClick: _cache[0] || (_cache[0] = ($event) => $setup.ui.toggleRail()),
+        class: "drawer-collapse-btn"
+      })
+    ]),
+    default: _withCtx(() => [
+      _createElementVNode("div", _hoisted_1, [
+        _createVNode(_component_v_list, {
+          nav: "",
+          density: "compact",
+          color: "primary"
+        }, {
+          default: _withCtx(() => [
+            _createVNode(_component_v_list_item, {
+              "prepend-icon": "mdi-alpha-c-circle",
+              title: "CRM",
+              subtitle: "Panel de adm.",
+              class: "drawer-brand"
+            }),
+            _createVNode(_component_v_divider),
+            (_openBlock(true), _createElementBlock(
+              _Fragment,
+              null,
+              _renderList($setup.items, (item) => {
+                return _openBlock(), _createElementBlock(
+                  _Fragment,
+                  {
+                    key: item.title
+                  },
+                  [
+                    item.soon ? (_openBlock(), _createBlock(_component_v_list_item, {
+                      key: 0,
+                      "prepend-icon": item.icon,
+                      title: item.title,
+                      disabled: "",
+                      rounded: "lg"
+                    }, {
+                      append: _withCtx(() => [
+                        _createVNode(_component_v_chip, {
+                          size: "x-small",
+                          color: "secondary",
+                          variant: "tonal"
+                        }, {
+                          default: _withCtx(() => [..._cache[2] || (_cache[2] = [
+                            _createTextVNode(
+                              "pronto",
+                              -1
+                              /* CACHED */
+                            )
+                          ])]),
+                          _: 1
+                          /* STABLE */
+                        })
+                      ]),
+                      _: 1
+                      /* STABLE */
+                    }, 8, ["prepend-icon", "title"])) : item.blocked ? (_openBlock(), _createBlock(
+                      _component_v_list_item,
+                      {
+                        key: 1,
+                        disabled: "",
+                        rounded: "lg"
+                      },
+                      {
+                        prepend: _withCtx(() => [
+                          _createVNode(_component_v_icon, {
+                            icon: item.icon,
+                            class: "mr-2"
+                          }, null, 8, ["icon"]),
+                          _createVNode(_component_v_icon, {
+                            icon: "mdi-lock-outline",
+                            size: "x-small",
+                            class: "lock-icon"
+                          })
+                        ]),
+                        default: _withCtx(() => [
+                          _createVNode(
+                            _component_v_list_item_title,
+                            null,
+                            {
+                              default: _withCtx(() => [
+                                _createTextVNode(
+                                  _toDisplayString(item.title),
+                                  1
+                                  /* TEXT */
+                                )
+                              ]),
+                              _: 2
+                              /* DYNAMIC */
+                            },
+                            1024
+                            /* DYNAMIC_SLOTS */
+                          )
+                        ]),
+                        _: 2
+                        /* DYNAMIC */
+                      },
+                      1024
+                      /* DYNAMIC_SLOTS */
+                    )) : (_openBlock(), _createBlock(_component_v_list_item, {
+                      key: 2,
+                      to: item.to,
+                      "prepend-icon": item.icon,
+                      title: item.title,
+                      rounded: "lg"
+                    }, null, 8, ["to", "prepend-icon", "title"]))
+                  ],
+                  64
+                  /* STABLE_FRAGMENT */
+                );
+              }),
+              128
+              /* KEYED_FRAGMENT */
+            ))
+          ]),
+          _: 1
+          /* STABLE */
+        })
+      ])
+    ]),
+    _: 1
+    /* STABLE */
+  }, 8, ["modelValue", "rail", "permanent", "temporary"]);
+}
+import "/src/layouts/AppNavigationDrawer.vue?vue&type=style&index=0&scoped=dd7b1159&lang.css";
+_sfc_main.__hmrId = "dd7b1159";
+typeof __VUE_HMR_RUNTIME__ !== "undefined" && __VUE_HMR_RUNTIME__.createRecord(_sfc_main.__hmrId, _sfc_main);
+import.meta.hot.on("file-changed", ({ file }) => {
+  __VUE_HMR_RUNTIME__.CHANGED_FILE = file;
+});
+import.meta.hot.accept((mod) => {
+  if (!mod) return;
+  const { default: updated, _rerender_only } = mod;
+  if (_rerender_only) {
+    __VUE_HMR_RUNTIME__.rerender(updated.__hmrId, updated.render);
+  } else {
+    __VUE_HMR_RUNTIME__.reload(updated.__hmrId, updated);
+  }
+});
+import _export_sfc from "/@id/__x00__plugin-vue:export-helper";
+export default /* @__PURE__ */ _export_sfc(_sfc_main, [["render", _sfc_render], ["__scopeId", "data-v-dd7b1159"], ["__file", "C:/Users/sansh/cmr-proyect/frontend/src/layouts/AppNavigationDrawer.vue"]]);
+
+//# sourceMappingURL=data:application/json;base64,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cmNlc0NvbnRlbnQiOlsiPHNjcmlwdCBzZXR1cCBsYW5nPVwidHNcIj5cbmltcG9ydCB7IGNvbXB1dGVkIH0gZnJvbSAndnVlJztcbmltcG9ydCB7IHVzZURpc3BsYXkgfSBmcm9tICd2dWV0aWZ5JztcbmltcG9ydCB7IHVzZVVpU3RvcmUgfSBmcm9tICdAL3N0b3Jlcy91aSc7XG5pbXBvcnQgeyB1c2VBdXRoU3RvcmUgfSBmcm9tICdAL3N0b3Jlcy9hdXRoJztcbmltcG9ydCB7IGdldE5hdmlnYXRpb25JdGVtcyB9IGZyb20gJ0AvbWVudXMvbmF2aWdhdGlvbic7XG5cbmNvbnN0IHVpID0gdXNlVWlTdG9yZSgpO1xuY29uc3QgYXV0aCA9IHVzZUF1dGhTdG9yZSgpO1xuY29uc3QgeyBtb2JpbGUgfSA9IHVzZURpc3BsYXkoKTtcblxuY29uc3QgYWxsb3dlZFdoZW5CbG9ja2VkID0gWycvcHJvZmlsZScsICcvb3JnYW5pemF0aW9uL3NldHRpbmdzJ107XG5cbmNvbnN0IGl0ZW1zID0gY29tcHV0ZWQoKCkgPT5cbiAgZ2V0TmF2aWdhdGlvbkl0ZW1zKClcbiAgICAuZmlsdGVyKChpdGVtKSA9PiAhaXRlbS5wZXJtaXNzaW9uIHx8IGF1dGguY2FuKGl0ZW0ucGVybWlzc2lvbikpXG4gICAgLm1hcCgoaXRlbSkgPT4gKHtcbiAgICAgIC4uLml0ZW0sXG4gICAgICBibG9ja2VkOiBhdXRoLm5lZWRzT3JnU2V0dXAgJiYgIWFsbG93ZWRXaGVuQmxvY2tlZC5pbmNsdWRlcyhpdGVtLnRvID8/ICcnKSxcbiAgICB9KSksXG4pO1xuPC9zY3JpcHQ+XG5cbjx0ZW1wbGF0ZT5cbiAgPHYtbmF2aWdhdGlvbi1kcmF3ZXIgdi1tb2RlbD1cInVpLmRyYXdlclwiIDpyYWlsPVwiIW1vYmlsZSAmJiB1aS5yYWlsXCIgOnBlcm1hbmVudD1cIiFtb2JpbGVcIiA6dGVtcG9yYXJ5PVwibW9iaWxlXCJcbiAgICBleHBhbmQtb24taG92ZXI+XG4gICAgPGRpdiBjbGFzcz1cImRyYXdlci1uYXYtc2Nyb2xsXCI+XG4gICAgICA8di1saXN0IG5hdiBkZW5zaXR5PVwiY29tcGFjdFwiIGNvbG9yPVwicHJpbWFyeVwiPlxuXG4gICAgICAgIDx2LWxpc3QtaXRlbSBwcmVwZW5kLWljb249XCJtZGktYWxwaGEtYy1jaXJjbGVcIiB0aXRsZT1cIkNSTVwiIHN1YnRpdGxlPVwiUGFuZWwgZGUgYWRtLlwiIGNsYXNzPVwiZHJhd2VyLWJyYW5kXCIgLz5cbiAgICAgICAgPHYtZGl2aWRlciAvPlxuXG4gICAgICAgIDx0ZW1wbGF0ZSB2LWZvcj1cIml0ZW0gaW4gaXRlbXNcIiA6a2V5PVwiaXRlbS50aXRsZVwiPlxuICAgICAgICAgIDx2LWxpc3QtaXRlbSB2LWlmPVwiaXRlbS5zb29uXCIgOnByZXBlbmQtaWNvbj1cIml0ZW0uaWNvblwiIDp0aXRsZT1cIml0ZW0udGl0bGVcIiBkaXNhYmxlZCByb3VuZGVkPVwibGdcIj5cbiAgICAgICAgICAgIDx0ZW1wbGF0ZSAjYXBwZW5kPlxuICAgICAgICAgICAgICA8di1jaGlwIHNpemU9XCJ4LXNtYWxsXCIgY29sb3I9XCJzZWNvbmRhcnlcIiB2YXJpYW50PVwidG9uYWxcIj5wcm9udG88L3YtY2hpcD5cbiAgICAgICAgICAgIDwvdGVtcGxhdGU+XG4gICAgICAgICAgPC92LWxpc3QtaXRlbT5cbiAgICAgICAgICA8di1saXN0LWl0ZW0gdi1lbHNlLWlmPVwiaXRlbS5ibG9ja2VkXCIgZGlzYWJsZWQgcm91bmRlZD1cImxnXCI+XG4gICAgICAgICAgICA8dGVtcGxhdGUgI3ByZXBlbmQ+XG4gICAgICAgICAgICAgIDx2LWljb24gOmljb249XCJpdGVtLmljb25cIiBjbGFzcz1cIm1yLTJcIiAvPlxuICAgICAgICAgICAgICA8di1pY29uIGljb249XCJtZGktbG9jay1vdXRsaW5lXCIgc2l6ZT1cIngtc21hbGxcIiBjbGFzcz1cImxvY2staWNvblwiIC8+XG4gICAgICAgICAgICA8L3RlbXBsYXRlPlxuICAgICAgICAgICAgPHYtbGlzdC1pdGVtLXRpdGxlPnt7IGl0ZW0udGl0bGUgfX08L3YtbGlzdC1pdGVtLXRpdGxlPlxuICAgICAgICAgIDwvdi1saXN0LWl0ZW0+XG4gICAgICAgICAgPHYtbGlzdC1pdGVtIHYtZWxzZSA6dG89XCJpdGVtLnRvXCIgOnByZXBlbmQtaWNvbj1cIml0ZW0uaWNvblwiIDp0aXRsZT1cIml0ZW0udGl0bGVcIiByb3VuZGVkPVwibGdcIiAvPlxuICAgICAgICA8L3RlbXBsYXRlPlxuICAgICAgPC92LWxpc3Q+XG4gICAgPC9kaXY+XG5cbiAgICA8dGVtcGxhdGUgI2FwcGVuZD5cbiAgICAgIDx2LWRpdmlkZXIgLz5cbiAgICAgIDx2LWxpc3QtaXRlbSBwcmVwZW5kLWljb249XCJtZGktY2hldnJvbi1sZWZ0XCIgdGl0bGU9XCJDb2xhcHNhclwiIEBjbGljaz1cInVpLnRvZ2dsZVJhaWwoKVwiXG4gICAgICAgIGNsYXNzPVwiZHJhd2VyLWNvbGxhcHNlLWJ0blwiIC8+XG4gICAgPC90ZW1wbGF0ZT5cbiAgPC92LW5hdmlnYXRpb24tZHJhd2VyPlxuPC90ZW1wbGF0ZT5cblxuPHN0eWxlIHNjb3BlZD5cbi5kcmF3ZXItYnJhbmQge1xuICBtaW4taGVpZ2h0OiA2NHB4O1xufVxuXG4uZHJhd2VyLW5hdi1zY3JvbGwge1xuICBmbGV4OiAxIDEgYXV0bztcbiAgb3ZlcmZsb3cteTogYXV0bztcbiAgb3ZlcmZsb3cteDogaGlkZGVuO1xufVxuXG4uZHJhd2VyLWNvbGxhcHNlLWJ0biB7XG4gIGZsZXgtc2hyaW5rOiAwO1xufVxuXG4ubG9jay1pY29uIHtcbiAgcG9zaXRpb246IGFic29sdXRlO1xuICBib3R0b206IDJweDtcbiAgcmlnaHQ6IC0ycHg7XG4gIGJhY2tncm91bmQ6IHJnYmEodmFyKC0tdi10aGVtZS1zdXJmYWNlKSwgMC44NSk7XG4gIGJvcmRlci1yYWRpdXM6IDUwJTtcbiAgcGFkZGluZzogMXB4O1xufVxuPC9zdHlsZT5cbiJdLCJmaWxlIjoiQzovVXNlcnMvc2Fuc2gvY21yLXByb3llY3QvZnJvbnRlbmQvc3JjL2xheW91dHMvQXBwTmF2aWdhdGlvbkRyYXdlci52dWUifQ==

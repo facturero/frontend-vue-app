@@ -1,0 +1,6 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/node_modules/vuetify/lib/components/VCode/VCode.css");import { updateStyle as __vite__updateStyle, removeStyle as __vite__removeStyle } from "/@vite/client"
+const __vite__id = "C:/Users/sansh/cmr-proyect/frontend/node_modules/vuetify/lib/components/VCode/VCode.css"
+const __vite__css = ".v-code {\n  background-color: rgb(var(--v-theme-code));\n  color: rgb(var(--v-theme-on-code));\n  border-radius: 4px;\n  line-height: 1.8;\n  font-size: 0.9em;\n  font-weight: normal;\n  padding: 0.2em 0.4em;\n}\n.v-code:has(> pre) {\n  display: inline-block;\n}"
+__vite__updateStyle(__vite__id, __vite__css)
+import.meta.hot.accept()
+import.meta.hot.prune(() => __vite__removeStyle(__vite__id))

@@ -1,0 +1,12 @@
+import { createI18n } from "/node_modules/.vite/deps/vue-i18n.js?v=8eb19d00";
+import es from "/src/i18n/es.json?import";
+import en from "/src/i18n/en.json?import";
+import fr from "/src/i18n/fr.json?import";
+const savedLocale = localStorage.getItem("app-locale") || "es";
+export default createI18n({
+  locale: savedLocale,
+  fallbackLocale: "es",
+  messages: { es, en, fr }
+});
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImkxOG4udHMiXSwic291cmNlc0NvbnRlbnQiOlsiaW1wb3J0IHsgY3JlYXRlSTE4biB9IGZyb20gJ3Z1ZS1pMThuJztcbmltcG9ydCBlcyBmcm9tICdAL2kxOG4vZXMuanNvbic7XG5pbXBvcnQgZW4gZnJvbSAnQC9pMThuL2VuLmpzb24nO1xuaW1wb3J0IGZyIGZyb20gJ0AvaTE4bi9mci5qc29uJztcblxuY29uc3Qgc2F2ZWRMb2NhbGUgPSBsb2NhbFN0b3JhZ2UuZ2V0SXRlbSgnYXBwLWxvY2FsZScpIHx8ICdlcyc7XG5cbmV4cG9ydCBkZWZhdWx0IGNyZWF0ZUkxOG4oe1xuICBsb2NhbGU6IHNhdmVkTG9jYWxlLFxuICBmYWxsYmFja0xvY2FsZTogJ2VzJyxcbiAgbWVzc2FnZXM6IHsgZXMsIGVuLCBmciB9LFxufSk7XG4iXSwibWFwcGluZ3MiOiJBQUFBLFNBQVMsa0JBQWtCO0FBQzNCLE9BQU8sUUFBUTtBQUNmLE9BQU8sUUFBUTtBQUNmLE9BQU8sUUFBUTtBQUVmLE1BQU0sY0FBYyxhQUFhLFFBQVEsWUFBWSxLQUFLO0FBRTFELGVBQWUsV0FBVztBQUFBLEVBQ3hCLFFBQVE7QUFBQSxFQUNSLGdCQUFnQjtBQUFBLEVBQ2hCLFVBQVUsRUFBRSxJQUFJLElBQUksR0FBRztBQUN6QixDQUFDOyIsIm5hbWVzIjpbXX0=

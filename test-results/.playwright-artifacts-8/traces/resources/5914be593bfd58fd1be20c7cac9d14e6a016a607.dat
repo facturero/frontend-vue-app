@@ -1,0 +1,6 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/node_modules/vuetify/lib/components/VRadioGroup/VRadioGroup.css");import { updateStyle as __vite__updateStyle, removeStyle as __vite__removeStyle } from "/@vite/client"
+const __vite__id = "C:/Users/sansh/cmr-proyect/frontend/node_modules/vuetify/lib/components/VRadioGroup/VRadioGroup.css"
+const __vite__css = ".v-radio-group > .v-input__control {\n  flex-direction: column;\n}\n.v-radio-group > .v-input__control > .v-label {\n  margin-inline-start: 16px;\n}\n.v-radio-group > .v-input__control > .v-label + .v-selection-control-group {\n  padding-inline-start: 6px;\n  margin-top: 8px;\n}\n.v-radio-group .v-input__details {\n  padding-inline: 16px;\n}"
+__vite__updateStyle(__vite__id, __vite__css)
+import.meta.hot.accept()
+import.meta.hot.prune(() => __vite__removeStyle(__vite__id))

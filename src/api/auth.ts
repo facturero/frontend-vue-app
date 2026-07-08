@@ -1,9 +1,18 @@
 import { http } from '@/utils/http';
 import type { CompleteProfileInput, Credentials, GoogleAuth, Me, TokenResponse } from '@/types/auth';
 
+export interface AcceptInviteInput {
+  token: string;
+  password: string;
+}
+
 export const authApi = {
   register: (body: Credentials) =>
-    http.post<TokenResponse>('/auth/register', body).then((r) => r.data),
+    http.post<TokenResponse>('/auth/register', {
+      email: body.email,
+      password: body.password,
+      identification: body.identification,
+    }).then((r) => r.data),
 
   login: (body: Credentials) =>
     http.post<TokenResponse>('/auth/login', body).then((r) => r.data),
@@ -21,4 +30,7 @@ export const authApi = {
 
   completeProfile: (body: CompleteProfileInput) =>
     http.post<TokenResponse>('/auth/complete-profile', body).then((r) => r.data),
+
+  acceptInvite: (body: AcceptInviteInput) =>
+    http.post<TokenResponse>('/auth/accept-invite', body).then((r) => r.data),
 };

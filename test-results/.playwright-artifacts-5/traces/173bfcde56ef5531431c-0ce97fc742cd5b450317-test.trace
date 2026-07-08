@@ -1,0 +1,18 @@
+{"version":8,"type":"context-options","origin":"testRunner","browserName":"","playwrightVersion":"1.61.1","options":{},"platform":"win32","wallTime":1783535489610,"monotonicTime":10733.18,"sdkLanguage":"javascript"}
+{"type":"before","callId":"hook@1","stepId":"hook@1","startTime":10749.057,"class":"Test","method":"hook","title":"Before Hooks","params":{},"stack":[]}
+{"type":"before","callId":"fixture@30","stepId":"fixture@30","parentId":"hook@1","startTime":10754.949,"class":"Test","method":"fixture","title":"Fixture \"browser\"","params":{},"stack":[]}
+{"type":"before","callId":"pw:api@31","stepId":"pw:api@31","parentId":"fixture@30","startTime":10756.46,"class":"Test","method":"pw:api","title":"Launch browser","params":{"handleSIGINT":"false","tracesDir":"C:\\Users\\sansh\\cmr-proyect\\frontend\\test-results\\.playwright-artifacts-5\\traces","artifactsDir":"C:\\Users\\sansh\\cmr-proyect\\frontend\\test-results\\.playwright-artifacts-5","headless":"true","ignoreDefaultArgs":"undefined","ignoreAllDefaultArgs":"false","env":"undefined","timeout":"180000"},"stack":[]}
+{"type":"after","callId":"pw:api@31","endTime":10830.652,"annotations":[]}
+{"type":"after","callId":"fixture@30","endTime":10830.899,"annotations":[]}
+{"type":"before","callId":"fixture@34","stepId":"fixture@34","parentId":"hook@1","startTime":10832.046,"class":"Test","method":"fixture","title":"Fixture \"context\"","params":{},"stack":[]}
+{"type":"before","callId":"pw:api@35","stepId":"pw:api@35","parentId":"fixture@34","startTime":10834.023,"class":"Test","method":"pw:api","title":"Create context","params":{"selectorEngines":"[]","testIdAttributeName":"data-testid","acceptDownloads":"accept","bypassCSP":"false","colorScheme":"light","hasTouch":"false","ignoreHTTPSErrors":"false","isMobile":"false","javaScriptEnabled":"true","locale":"en-US","offline":"false","storageState":"Object","viewport":"Object","baseURL":"http://localhost:5173","serviceWorkers":"allow","noDefaultViewport":"false","extraHTTPHeaders":"undefined","reducedMotion":"undefined","forcedColors":"undefined","contrast":"undefined","clientCertificates":"undefined"},"stack":[]}
+{"type":"after","callId":"pw:api@35","endTime":10906.883,"annotations":[]}
+{"type":"after","callId":"fixture@34","endTime":10909.974,"annotations":[]}
+{"type":"before","callId":"fixture@36","stepId":"fixture@36","parentId":"hook@1","startTime":10910.407,"class":"Test","method":"fixture","title":"Fixture \"page\"","params":{},"stack":[]}
+{"type":"before","callId":"pw:api@37","stepId":"pw:api@37","parentId":"fixture@36","startTime":10911.627,"class":"Test","method":"pw:api","title":"Create page","params":{},"stack":[]}
+{"type":"after","callId":"pw:api@37","endTime":10959.316,"annotations":[]}
+{"type":"after","callId":"fixture@36","endTime":10959.438,"annotations":[]}
+{"type":"after","callId":"hook@1","endTime":10959.499,"annotations":[]}
+{"type":"before","callId":"pw:api@38","stepId":"pw:api@38","startTime":10961.016,"class":"Test","method":"pw:api","title":"Navigate to \"/employees\"","params":{"url":"/employees","waitUntil":"load","timeout":"0"},"stack":[{"file":"C:\\Users\\sansh\\cmr-proyect\\frontend\\e2e\\specs\\employees.spec.ts","line":13,"column":16}]}
+{"type":"after","callId":"pw:api@38","endTime":11316.748,"annotations":[]}
+{"type":"before","callId":"pw:api@39","stepId":"pw:api@39","startTime":11319.487,"class":"Test","method":"pw:api","title":"Click getByRole('button', { name: 'Invitar' })","params":{"selector":"internal:role=button[name=\"Invitar\"i]","strict":"true","timeout":"0"},"stack":[{"file":"C:\\Users\\sansh\\cmr-proyect\\frontend\\e2e\\specs\\employees.spec.ts","line":15,"column":57}]}

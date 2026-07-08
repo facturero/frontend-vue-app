@@ -1,0 +1,6 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/node_modules/vuetify/lib/components/VTooltip/VTooltip.css");import { updateStyle as __vite__updateStyle, removeStyle as __vite__removeStyle } from "/@vite/client"
+const __vite__id = "C:/Users/sansh/cmr-proyect/frontend/node_modules/vuetify/lib/components/VTooltip/VTooltip.css"
+const __vite__css = ".v-tooltip > .v-overlay__content {\n  background: rgb(var(--v-theme-surface-variant));\n  color: rgb(var(--v-theme-on-surface-variant));\n  border-radius: 4px;\n  font-size: 0.875rem;\n  line-height: 1.6;\n  display: inline-block;\n  padding: 5px 16px;\n  text-transform: initial;\n  width: auto;\n  opacity: 1;\n  transition-property: opacity, transform;\n  overflow-wrap: break-word;\n}\n.v-tooltip > .v-overlay__content[class*=enter-active] {\n  transition-timing-function: cubic-bezier(0, 0, 0.2, 1);\n  transition-duration: 150ms;\n}\n.v-tooltip > .v-overlay__content[class*=leave-active] {\n  transition-timing-function: cubic-bezier(0.4, 0, 1, 1);\n  transition-duration: 75ms;\n}\n.v-tooltip:not(.v-tooltip--interactive) > .v-overlay__content {\n  pointer-events: none;\n}"
+__vite__updateStyle(__vite__id, __vite__css)
+import.meta.hot.accept()
+import.meta.hot.prune(() => __vite__removeStyle(__vite__id))

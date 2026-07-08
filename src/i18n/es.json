@@ -16,7 +16,10 @@
     "alreadyRegistered": "¿Ya tienes cuenta?",
     "descriptionLogin": "¿Perdiste el acceso a OneAuth? No te preocupes. Configura una frase de recuperación y un número de respaldo para recuperar OneAuth fácilmente.",
     "descriptionRegister": "Vuelve a iniciar sesión con tu cuenta existente.",
-    "errorUnexpected": "Error inesperado"
+    "errorUnexpected": "Error inesperado",
+    "acceptInvite": "Aceptar invitación",
+    "setPasswordToJoin": "Establece una contraseña para unirte a la organización",
+    "acceptAndContinue": "Aceptar y continuar"
   },
   "home": {
     "title": "Inicio",

@@ -3,6 +3,7 @@ export type AuthProvider = 'password' | 'google';
 export interface Credentials {
   email: string;
   password: string;
+  identification?: string;
 }
 
 export interface GoogleAuth {
@@ -34,6 +35,7 @@ export interface Me {
   emailVerified: boolean;
   authProvider: AuthProvider;
   orgId: string | null;
+  orgName: string | null;
   permissions: string[];
   fullName: string | null;
   identification: { type: string; number: string } | null;

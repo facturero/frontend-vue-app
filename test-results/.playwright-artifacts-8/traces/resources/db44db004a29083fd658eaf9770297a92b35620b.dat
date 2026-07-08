@@ -1,0 +1,12 @@
+import { createPinia } from "/node_modules/.vite/deps/pinia.js?v=8eb19d00";
+import vuetify from "/src/plugins/vuetify.ts";
+import i18n from "/src/plugins/i18n.ts";
+import router from "/src/router/index.ts?t=1783535090400";
+export function registerPlugins(app) {
+  app.use(createPinia());
+  app.use(router);
+  app.use(vuetify);
+  app.use(i18n);
+}
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImluZGV4LnRzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCB0eXBlIHsgQXBwIH0gZnJvbSAndnVlJztcbmltcG9ydCB7IGNyZWF0ZVBpbmlhIH0gZnJvbSAncGluaWEnO1xuaW1wb3J0IHZ1ZXRpZnkgZnJvbSAnLi92dWV0aWZ5JztcbmltcG9ydCBpMThuIGZyb20gJy4vaTE4bic7XG5pbXBvcnQgcm91dGVyIGZyb20gJ0Avcm91dGVyJztcblxuZXhwb3J0IGZ1bmN0aW9uIHJlZ2lzdGVyUGx1Z2lucyhhcHA6IEFwcCk6IHZvaWQge1xuICBhcHAudXNlKGNyZWF0ZVBpbmlhKCkpO1xuICBhcHAudXNlKHJvdXRlcik7XG4gIGFwcC51c2UodnVldGlmeSk7XG4gIGFwcC51c2UoaTE4bik7XG59XG4iXSwibWFwcGluZ3MiOiJBQUNBLFNBQVMsbUJBQW1CO0FBQzVCLE9BQU8sYUFBYTtBQUNwQixPQUFPLFVBQVU7QUFDakIsT0FBTyxZQUFZO0FBRVosZ0JBQVMsZ0JBQWdCLEtBQWdCO0FBQzlDLE1BQUksSUFBSSxZQUFZLENBQUM7QUFDckIsTUFBSSxJQUFJLE1BQU07QUFDZCxNQUFJLElBQUksT0FBTztBQUNmLE1BQUksSUFBSSxJQUFJO0FBQ2Q7IiwibmFtZXMiOltdfQ==

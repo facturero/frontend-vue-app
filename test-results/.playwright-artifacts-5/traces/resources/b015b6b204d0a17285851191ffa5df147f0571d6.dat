@@ -1,0 +1,6 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/src/layouts/AppNavigationDrawer.vue?vue&type=style&index=0&scoped=dd7b1159&lang.css");import { updateStyle as __vite__updateStyle, removeStyle as __vite__removeStyle } from "/@vite/client"
+const __vite__id = "C:/Users/sansh/cmr-proyect/frontend/src/layouts/AppNavigationDrawer.vue?vue&type=style&index=0&scoped=dd7b1159&lang.css"
+const __vite__css = "\n.drawer-brand[data-v-dd7b1159] {\n  min-height: 64px;\n}\n.drawer-nav-scroll[data-v-dd7b1159] {\n  flex: 1 1 auto;\n  overflow-y: auto;\n  overflow-x: hidden;\n}\n.drawer-collapse-btn[data-v-dd7b1159] {\n  flex-shrink: 0;\n}\n.lock-icon[data-v-dd7b1159] {\n  position: absolute;\n  bottom: 2px;\n  right: -2px;\n  background: rgba(var(--v-theme-surface), 0.85);\n  border-radius: 50%;\n  padding: 1px;\n}\n"
+__vite__updateStyle(__vite__id, __vite__css)
+import.meta.hot.accept()
+import.meta.hot.prune(() => __vite__removeStyle(__vite__id))

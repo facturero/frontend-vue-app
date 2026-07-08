@@ -16,7 +16,10 @@
     "alreadyRegistered": "Already registered?",
     "descriptionLogin": "Lost access to OneAuth? Worry not. Set up passphrase and backup number to recover OneAuth easily.",
     "descriptionRegister": "Go back to sign in with your existing account.",
-    "errorUnexpected": "Unexpected error"
+    "errorUnexpected": "Unexpected error",
+    "acceptInvite": "Accept invitation",
+    "setPasswordToJoin": "Set a password to join the organization",
+    "acceptAndContinue": "Accept and continue"
   },
   "home": {
     "title": "Home",

@@ -1,0 +1,9 @@
+import { http } from "/src/utils/http.ts";
+export const employeeApi = {
+  list: () => http.get("/users").then((r) => r.data),
+  invite: (body) => http.post("/users/invite", body).then((r) => r.data),
+  assignRole: (userId, roleIds) => http.post(`/users/${userId}/roles`, { roleIds }).then((r) => r.data),
+  disable: (userId) => http.post(`/users/${userId}/disable`).then((r) => r.data)
+};
+
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbImVtcGxveWVlcy50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyBodHRwIH0gZnJvbSAnQC91dGlscy9odHRwJztcbmltcG9ydCB0eXBlIHsgRW1wbG95ZWVTdW1tYXJ5LCBJbnZpdGVFbXBsb3llZUlucHV0IH0gZnJvbSAnQC90eXBlcy9lbXBsb3llZXMnO1xuXG5leHBvcnQgY29uc3QgZW1wbG95ZWVBcGkgPSB7XG4gIGxpc3Q6ICgpID0+IGh0dHAuZ2V0PEVtcGxveWVlU3VtbWFyeVtdPignL3VzZXJzJykudGhlbigocikgPT4gci5kYXRhKSxcblxuICBpbnZpdGU6IChib2R5OiBJbnZpdGVFbXBsb3llZUlucHV0KSA9PlxuICAgIGh0dHAucG9zdDx7IHVzZXJJZDogc3RyaW5nIH0+KCcvdXNlcnMvaW52aXRlJywgYm9keSkudGhlbigocikgPT4gci5kYXRhKSxcblxuICBhc3NpZ25Sb2xlOiAodXNlcklkOiBzdHJpbmcsIHJvbGVJZHM6IHN0cmluZ1tdKSA9PlxuICAgIGh0dHAucG9zdDx2b2lkPihgL3VzZXJzLyR7dXNlcklkfS9yb2xlc2AsIHsgcm9sZUlkcyB9KS50aGVuKChyKSA9PiByLmRhdGEpLFxuXG4gIGRpc2FibGU6ICh1c2VySWQ6IHN0cmluZykgPT5cbiAgICBodHRwLnBvc3Q8dm9pZD4oYC91c2Vycy8ke3VzZXJJZH0vZGlzYWJsZWApLnRoZW4oKHIpID0+IHIuZGF0YSksXG59O1xuIl0sIm1hcHBpbmdzIjoiQUFBQSxTQUFTLFlBQVk7QUFHZCxhQUFNLGNBQWM7QUFBQSxFQUN6QixNQUFNLE1BQU0sS0FBSyxJQUF1QixRQUFRLEVBQUUsS0FBSyxDQUFDLE1BQU0sRUFBRSxJQUFJO0FBQUEsRUFFcEUsUUFBUSxDQUFDLFNBQ1AsS0FBSyxLQUF5QixpQkFBaUIsSUFBSSxFQUFFLEtBQUssQ0FBQyxNQUFNLEVBQUUsSUFBSTtBQUFBLEVBRXpFLFlBQVksQ0FBQyxRQUFnQixZQUMzQixLQUFLLEtBQVcsVUFBVSxNQUFNLFVBQVUsRUFBRSxRQUFRLENBQUMsRUFBRSxLQUFLLENBQUMsTUFBTSxFQUFFLElBQUk7QUFBQSxFQUUzRSxTQUFTLENBQUMsV0FDUixLQUFLLEtBQVcsVUFBVSxNQUFNLFVBQVUsRUFBRSxLQUFLLENBQUMsTUFBTSxFQUFFLElBQUk7QUFDbEU7IiwibmFtZXMiOltdfQ==

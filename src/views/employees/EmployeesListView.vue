@@ -1,18 +1,42 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { useEmployeeStore } from '@/stores/employees';
 import { useRoleStore } from '@/stores/roles';
 import RoleBadge from '@/components/RoleBadge.vue';
+import InviteEmployeeDialog from '@/components/InviteEmployeeDialog.vue';
 
+const route = useRoute();
+const router = useRouter();
 const auth = useAuthStore();
 const emp = useEmployeeStore();
 const rolesStore = useRoleStore();
-const router = useRouter();
 
-const canInvite = auth.can('user:invite');
-const canAssignRole = auth.can('user:assign_role');
+const canInvite = computed(() => auth.can('user:invite'));
+const canAssignRole = computed(() => auth.can('user:assign_role'));
+
+const showInviteDialog = ref(false);
+
+watch(() => route.name, (name) => {
+  showInviteDialog.value = name === 'employees-invite';
+}, { immediate: true });
+
+watch(showInviteDialog, (v) => {
+  if (!v && route.name === 'employees-invite') {
+    router.push({ name: 'employees' });
+  }
+});
+
+function openInvite(): void {
+  emp.error = null;
+  router.push({ name: 'employees-invite' });
+}
+
+function closeInvite(): void {
+  showInviteDialog.value = false;
+  router.push({ name: 'employees' });
+}
 
 onMounted(async () => {
   await Promise.all([
@@ -31,7 +55,7 @@ onMounted(async () => {
         color="primary"
         variant="tonal"
         prepend-icon="mdi-account-plus"
-        @click="router.push({ name: 'employees-invite' })"
+        @click="openInvite"
       >
         Invitar
       </v-btn>
@@ -97,5 +121,7 @@ onMounted(async () => {
     <div v-else class="d-flex justify-center py-8">
       <v-progress-circular indeterminate color="primary" />
     </div>
+
+    <InviteEmployeeDialog v-model="showInviteDialog" />
   </v-container>
 </template>

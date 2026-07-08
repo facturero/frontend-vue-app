@@ -1,0 +1,6 @@
+import { createHotContext as __vite__createHotContext } from "/@vite/client";import.meta.hot = __vite__createHotContext("/node_modules/vuetify/lib/components/VDatePicker/VDatePickerMonths.css");import { updateStyle as __vite__updateStyle, removeStyle as __vite__removeStyle } from "/@vite/client"
+const __vite__id = "C:/Users/sansh/cmr-proyect/frontend/node_modules/vuetify/lib/components/VDatePicker/VDatePickerMonths.css"
+const __vite__css = ".v-date-picker-months {\n  height: 288px;\n}\n\n.v-date-picker-months__content {\n  align-items: center;\n  display: grid;\n  flex: 1 1;\n  height: inherit;\n  justify-content: space-around;\n  grid-template-columns: repeat(2, 1fr);\n  grid-gap: 0px 24px;\n  padding-inline-start: 36px;\n  padding-inline-end: 36px;\n}\n.v-date-picker-months__content .v-btn {\n  text-transform: none;\n  padding-inline-start: 8px;\n  padding-inline-end: 8px;\n}"
+__vite__updateStyle(__vite__id, __vite__css)
+import.meta.hot.accept()
+import.meta.hot.prune(() => __vite__removeStyle(__vite__id))
