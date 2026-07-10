@@ -42,14 +42,26 @@ const uploadError = ref<string | null>(null);
 const uploadedIds = ref<string[]>([]);
 const dragOver = ref(false);
 
-const inputRef = ref<HTMLInputElement | null>(null);
-
 const maxBytes = computed(() => props.maxSizeMB * 1024 * 1024);
 const hasExisting = computed(() => props.existingImages.length > 0);
 const hasPending = computed(() => selectedFiles.value.length > 0);
 
 function openPicker(): void {
-  inputRef.value?.click();
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = props.accept;
+  input.multiple = props.multiple;
+  input.style.display = 'none';
+  input.addEventListener('change', (e: Event) => {
+    const target = e.target as HTMLInputElement;
+    const files = target?.files;
+    if (files && files.length > 0) addFiles(files);
+    // Reset del valor por si el usuario quiere volver a elegir el mismo archivo
+    target.value = '';
+    input.remove();
+  });
+  document.body.appendChild(input);
+  input.click();
 }
 
 function onDragOver(e: DragEvent): void {
@@ -68,11 +80,6 @@ function onDrop(e: DragEvent): void {
   if (files) addFiles(files);
 }
 
-function onInputChange(e: Event): void {
-  const files = (e.target as HTMLInputElement)?.files;
-  if (files) addFiles(files);
-}
-
 async function addFiles(fileList: FileList): Promise<void> {
   uploadError.value = null;
   if (!props.multiple) {
@@ -80,6 +87,7 @@ async function addFiles(fileList: FileList): Promise<void> {
     selectedFiles.value = [];
   }
   const max = props.multiple ? fileList.length : 1;
+  let duplicates = 0;
   for (let i = 0; i < max && i < fileList.length; i++) {
     const file = fileList[i];
     if (!file.type.startsWith('image/')) {
@@ -92,7 +100,26 @@ async function addFiles(fileList: FileList): Promise<void> {
       emit('error', `La imagen no debe superar ${props.maxSizeMB} MB`);
       continue;
     }
+    // Evitar duplicados: mismo nombre + tamaño + fecha de modificación
+    const isDuplicate = selectedFiles.value.some(
+      (s) =>
+        s.file.name === file.name &&
+        s.file.size === file.size &&
+        s.file.lastModified === file.lastModified,
+    );
+    if (isDuplicate) {
+      duplicates++;
+      continue;
+    }
     selectedFiles.value.push({ file, url: URL.createObjectURL(file) });
+  }
+  if (duplicates > 0) {
+    const msg =
+      duplicates === 1
+        ? 'Esa imagen ya está seleccionada'
+        : `${duplicates} imágenes ya estaban seleccionadas`;
+    uploadError.value = msg;
+    emit('error', msg);
   }
   if (selectedFiles.value.length > 0) {
     state.value = STATE.SELECTED;
@@ -193,15 +220,6 @@ watch(() => props.existingImages, () => {
 <template>
   <v-card flat class="image-uploader">
     <v-card-text class="pa-0">
-    <input
-      ref="inputRef"
-      type="file"
-      :accept="accept"
-      :multiple="multiple"
-      class="d-none"
-      @change="onInputChange"
-    />
-
     <!-- IDLE / drop zone (single mode: existing image inside) -->
     <div
       v-if="state === 'idle' && !multiple && hasExisting"
@@ -256,8 +274,15 @@ watch(() => props.existingImages, () => {
       </div>
     </div>
 
-    <!-- SELECTED / multiple mode: show pending thumbnails -->
-    <div v-if="state === 'selected' && multiple" class="d-flex flex-wrap ga-2">
+    <!-- SELECTED / multiple mode: show pending thumbnails + add-more button -->
+    <div
+      v-if="state === 'selected' && multiple"
+      class="drop-zone d-flex flex-wrap align-content-start ga-2 pa-3 rounded-lg border"
+      :class="{ 'drag-over': dragOver }"
+      @dragover="onDragOver"
+      @dragleave="onDragLeave"
+      @drop="onDrop"
+    >
       <div v-for="(item, i) in selectedFiles" :key="i" class="pending-thumb position-relative">
         <v-img :src="item.url" class="pending-img rounded border" cover />
         <v-btn
@@ -269,36 +294,17 @@ watch(() => props.existingImages, () => {
           @click="removePending(i)"
         />
       </div>
-    </div>
-
-    <!-- Existing images gallery (multiple mode) -->
-    <div v-if="state === 'idle' && multiple && hasExisting" class="d-flex flex-wrap ga-2 mt-2">
-      <v-img
-        v-for="img in existingImages"
-        :key="img.id"
-        :src="img.url"
-        max-width="100"
-        max-height="100"
-        cover
-        class="rounded border existing-thumb"
-      />
-    </div>
-    
-    <!-- SELECTED: pending files -->
-    <div v-if="state === 'selected'" class="mt-2">
-      <div class="d-flex flex-wrap ga-2 mb-2">
-        <div v-for="(item, i) in selectedFiles" :key="i" class="pending-thumb position-relative">
-          <v-img :src="item.url" class="pending-img rounded border" cover />
-          <v-btn
-            icon="mdi-close-circle"
-            color="error"
-            variant="text"
-            class="remove-btn"
-            @click="removePending(i)"
-          />
-        </div>
+      <div
+        class="add-more-btn d-flex align-center justify-center rounded-lg border"
+        @click="openPicker"
+      >
+        <v-icon icon="mdi-plus" size="28" color="grey" />
       </div>
     </div>
+    
+    <!-- SELECTED: pending files (single mode) -->
+    <!-- Nota: la miniatura ya se muestra dentro del drop-zone de arriba en modo single,
+         no hace falta duplicarla aquí. Este bloque solo se mantiene por compat, oculto. -->
 
     <!-- UPLOADING -->
     <div v-if="state === 'uploading'" class="mt-2">
@@ -425,5 +431,19 @@ watch(() => props.existingImages, () => {
 
 .existing-thumb {
   object-fit: cover;
+}
+
+.add-more-btn {
+  width: 100px;
+  height: 100px;
+  cursor: pointer;
+  border-style: dashed;
+  border-color: rgba(var(--v-border-color), var(--v-border-opacity));
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.add-more-btn:hover {
+  border-color: rgb(var(--v-theme-primary));
+  background-color: rgba(var(--v-theme-primary), 0.05);
 }
 </style>

@@ -11,6 +11,12 @@ import RolesListView from '@/views/roles/RolesListView.vue';
 import RoleCreateView from '@/views/roles/RoleCreateView.vue';
 import RoleEditView from '@/views/roles/RoleEditView.vue';
 import OrganizationSettingsView from '@/views/organization/OrganizationSettingsView.vue';
+import ProductsListView from '@/views/products/ProductsListView.vue';
+import ProductFormView from '@/views/products/ProductFormView.vue';
+import ProductDetailView from '@/views/products/ProductDetailView.vue';
+import CustomersListView from '@/views/customers/CustomersListView.vue';
+import CustomerFormView from '@/views/customers/CustomerFormView.vue';
+import CustomerDetailView from '@/views/customers/CustomerDetailView.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -72,6 +78,60 @@ const router = createRouter({
       name: 'organization-settings',
       component: OrganizationSettingsView,
       meta: { requiresAuth: true, requiredPermission: 'organization:admin' },
+    },
+
+    {
+      path: '/products',
+      name: 'products',
+      component: ProductsListView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/products/new',
+      name: 'products-create',
+      component: ProductFormView,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/products/:id',
+      name: 'products-detail',
+      component: ProductDetailView,
+      props: true,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/products/:id/edit',
+      name: 'products-edit',
+      component: ProductFormView,
+      props: true,
+      meta: { requiresAuth: true },
+    },
+
+    {
+      path: '/customers',
+      name: 'customers',
+      component: CustomersListView,
+      meta: { requiresAuth: true, requiredPermission: 'customer:read' },
+    },
+    {
+      path: '/customers/new',
+      name: 'customers-create',
+      component: CustomerFormView,
+      meta: { requiresAuth: true, requiredPermission: 'customer:create' },
+    },
+    {
+      path: '/customers/:id',
+      name: 'customers-detail',
+      component: CustomerDetailView,
+      props: true,
+      meta: { requiresAuth: true, requiredPermission: 'customer:read' },
+    },
+    {
+      path: '/customers/:id/edit',
+      name: 'customers-edit',
+      component: CustomerFormView,
+      props: true,
+      meta: { requiresAuth: true, requiredPermission: 'customer:update' },
     },
 
     { path: '/:pathMatch(.*)*', redirect: '/' },

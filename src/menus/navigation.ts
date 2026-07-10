@@ -12,9 +12,9 @@ const items: NavItem[] = [
   { title: 'Roles', icon: 'mdi-shield-account-outline', to: '/roles', permission: 'user:read' },
   { title: 'Organización', icon: 'mdi-domain', to: '/organization/settings', permission: 'organization:admin' },
   { title: 'Mi perfil', icon: 'mdi-account-circle-outline', to: '/profile', permission: 'user:read' },
-  { title: 'Clientes', icon: 'mdi-account-group-outline', to: '/customers', soon: true },
+  { title: 'Clientes', icon: 'mdi-account-group-outline', to: '/customers', permission: 'customer:read' },
   { title: 'Facturas', icon: 'mdi-file-document-outline', to: '/invoices', soon: true },
-  { title: 'Productos', icon: 'mdi-package-variant-closed', to: '/products', soon: true },
+  { title: 'Productos', icon: 'mdi-package-variant-closed', to: '/products', permission: 'product:read' },
 ];
 
 export function getNavigationItems(): NavItem[] {

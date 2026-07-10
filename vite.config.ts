@@ -11,5 +11,10 @@ export default defineConfig({
   },
   server: {
     port: 5173, // coincide con CORS_ORIGIN del gateway y auth-service
+    host: true, // escucha en 0.0.0.0 para que ngrok pueda proxear
+    allowedHosts: [
+      '.ngrok-free.app', // cualquier subdominio gratuito de ngrok
+      '.ngrok.app',      // cualquier subdominio de pago/reservado
+    ],
   },
 });
