@@ -1,32 +1,159 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: ENC[AES256_GCM,data:Jx6f8SDzNsFx4qca1j9UqUkAGlY=,iv:jjRy0CebTgdvJnJ8i9gjKmEhZhvif5dM9ToiQ7kJMDc=,tag:X9++kIYWpH7dv8pYMSYVQg==,type:str]
+kind: ENC[AES256_GCM,data:H8Wu+EfQLQ==,iv:kL7jOWgASndpigUAxQkL2qfoAsE1n0URnoSzKn+iKI0=,tag:W/msn30ia1edJBzxLvJTPg==,type:str]
 metadata:
-  name: crm-ingress
-  annotations:
-    traefik.ingress.kubernetes.io/router.entrypoints: web
+    name: ENC[AES256_GCM,data:jxjErSkc9VAit2Y=,iv:Sj5okAkyyirDkQXq0EsbAL05yf9BJb3f5vywOA3DrrM=,tag:wXaiJFgb7oNDi8blJUykQw==,type:str]
+    annotations:
+        traefik.ingress.kubernetes.io/router.entrypoints: ENC[AES256_GCM,data:V/wJ,iv:hgTSXqE6L7vsbb2zVYj5ffNNvKoM7IxreZ1D+3Oljls=,tag:E/TWxY1o6kOh5WM/PNsmlw==,type:str]
 spec:
-  rules:
-    - host: steep-geology-napping.ngrok-free.dev
-      http:
-        paths:
-          - path: /auth
-            pathType: Prefix
-            backend:
-              service:
-                name: api-gateway-node
-                port:
-                  number: 8080
-          - path: /health
-            pathType: Exact
-            backend:
-              service:
-                name: api-gateway-node
-                port:
-                  number: 8080
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: crm-frontend
-                port:
-                  number: 80
+    rules:
+        - host: ENC[AES256_GCM,data:YP8cc7FU67vcK/XrnDcakum00Pq8ZpEBtlEPqr3tWCJwHh5X,iv:C3Hl/zvpRCt0l2G8vGwYVeSSZVKbllfQUtwRDcaFKsg=,tag:czLD3qcV7BeNSSECWkIH+Q==,type:str]
+          http:
+            paths:
+                - path: ENC[AES256_GCM,data:UE5oQkk=,iv:K776+8+skZzDok+HpacLss05vV0iIsyxCjzdCx8dc90=,tag:odbl/rKsrVE5RKsMIql/zQ==,type:str]
+                  pathType: ENC[AES256_GCM,data:cBcXpBep,iv:kVne9luFsUw+cTRfrM60eASjQNGnhksUedWU0VOzH8k=,tag:mB4/DRDOP5MQqjjkImd5GA==,type:str]
+                  backend:
+                    service:
+                        name: ENC[AES256_GCM,data:0JLwvhtQS6qQKnqUaL2fPQ==,iv:+s4v32et2guovm7qldpxGvNfwM10bfhW9Eeu4wOtCr0=,tag:mQRVjpb9CDGjjV+xv/ikmQ==,type:str]
+                        port:
+                            number: ENC[AES256_GCM,data:0e4FNw==,iv:BmJjn9eaYLZWpHV8nQuSliRMaBKRrHkAiHUxYwJopmE=,tag:ldt2Fkp61Rc05JnF1Utu9w==,type:int]
+                - path: ENC[AES256_GCM,data:k657UbJg,iv:KvzXjxehFZXA61XdOzo8n33Yf3N/2O91DXMfdqH5PZg=,tag:EeQVrw/8NJp/9nLjxjdIlw==,type:str]
+                  pathType: ENC[AES256_GCM,data:cclnT0/m,iv:o3Yfurx/3LdAMGQsXlNzxmYOTHL5IvMe67Zmoi0Q8kw=,tag:qG3+jAzm8djKOTcPCpr1gA==,type:str]
+                  backend:
+                    service:
+                        name: ENC[AES256_GCM,data:Uvb2iOotI3t9+oHFxoeoAg==,iv:GZ15yo4XeERSRebtuPzIHD1aB3J3KTDSM0hweHVyqrw=,tag:PIdZ1isQ4yWEOg1k3msuaw==,type:str]
+                        port:
+                            number: ENC[AES256_GCM,data:uQWyxQ==,iv:doWfSNnyTx9i4Q4bMcUrehM3Qm+IM7HJOYbaYn9owIw=,tag:BHd49X5FvbXtXQlZGOZ+6A==,type:int]
+                - path: ENC[AES256_GCM,data:RpDWIvHn,iv:3HqS0afi4yLUntEiBLeM64I8HFijZL7scv2blF4lOks=,tag:oApa6aKgmq+YkuWm678IlQ==,type:str]
+                  pathType: ENC[AES256_GCM,data:dm2uOEhw,iv:UFNYAN/yZMMIOc/YnWGPg+LON7GiiZhn2hnKaL7Wcqw=,tag:Y2BpCIAxU/G39JUv6/MnTw==,type:str]
+                  backend:
+                    service:
+                        name: ENC[AES256_GCM,data:igaB9D2/smfUnrXpujH6AQ==,iv:+60nNF1J0OfkgdzG/nTtCz1U79JAKDnJOveWQ6c8n48=,tag:Rj19apygLK3l13oXD0Lo2A==,type:str]
+                        port:
+                            number: ENC[AES256_GCM,data:awhyiw==,iv:iVkRSwkqHrbwWNy34U3YBKffbkNijDYhmJq0RBdrIyU=,tag:gd9HK8EsdTGguhyWjIJWoQ==,type:int]
+                - path: ENC[AES256_GCM,data:N3PLmyNARUrPRlCb,iv:nEEokHoZ00bS/qChLYYPa51Kc3Njg68vJVxAI16qHSs=,tag:xmXbZsdcQ/ft/ZdQ9uV39w==,type:str]
+                  pathType: ENC[AES256_GCM,data:UwNiXZA=,iv:qoaC2lty+hLTvUxrrGZ2TPTfaTUvvXtyRvKP6rZoTas=,tag:adqUsT861cnBsOvY+PyaLA==,type:str]
+                  backend:
+                    service:
+                        name: ENC[AES256_GCM,data:jwgQ4CvutCEjtrMIzNRnaQ==,iv:e+9LwLvW4e1ujErwp/iQ5YlMIBWhuhf7+fX9JUIG8wE=,tag:sD8NXlRlkchZNTKjCpDgFQ==,type:str]
+                        port:
+                            number: ENC[AES256_GCM,data:IWl6EQ==,iv:uigIAYfKQqidqkG1Wh9peUgnrAUqhQw+wNsRYuenns0=,tag:nPV7SU/WY3uMY38v35Zxcg==,type:int]
+                - path: ENC[AES256_GCM,data:5v7j69LRVMETReTeiRI=,iv:4fwAgFk4EHB8tEY0FwUd5yk+H6yCGHvDKY7B+JrqY0s=,tag:nSLM3wD2cGwZeX3ZstaDiA==,type:str]
+                  pathType: ENC[AES256_GCM,data:BZpa6JOD,iv:REVcbPzVzMidm3IzHkYLFw4mQRFKNaRXXItMf+Qj61M=,tag:nCYot6ReelNreiD+hjGj1Q==,type:str]
+                  backend:
+                    service:
+                        name: ENC[AES256_GCM,data:43hGJTonr5n2s/wKfuVbEA==,iv:++zHDqFcB1zzvRKw76gg91TY+82uSAlvnFc0zAtUGjQ=,tag:eDN9U5OVsOMKZ015quOa8w==,type:str]
+                        port:
+                            number: ENC[AES256_GCM,data:FyAF8Q==,iv:NVhwgAjwiUJjBKHe9HCOMv6YDfWQ3GRFEacCz23Ppao=,tag:GhfLsfJd42q/4NI/9DcplQ==,type:int]
+                - path: ENC[AES256_GCM,data:K0piXALrDpVg/IR20WSG,iv:Lbcnwx/RiYJ0tOPeRhjW8prIZWxjWQXXy9O0rheqh4Y=,tag:yE7IGn77JC7jlT9w7UV3Pg==,type:str]
+                  pathType: ENC[AES256_GCM,data:2AlwU1WW,iv:2L4v27250M3l+Znd8pnNhRlhPSe3u7YTB+Rr5XosD94=,tag:5amY7aUxPwJrEMFLLOS8Vg==,type:str]
+                  backend:
+                    service:
+                        name: ENC[AES256_GCM,data:LAcxhrHc9Z8CsmgqI4chNQ==,iv:aYlalLDyaCrqLZefs3bOMNTgsVx+8/h1JcUzbXia4aI=,tag:cEG8aAjK2Vqy7wYYaUXJUQ==,type:str]
+                        port:
+                            number: ENC[AES256_GCM,data:VIt2jw==,iv:nvdb1RrDaNgvHElEcJdcyeicTUiBvg+K0FWeZNcXKo8=,tag:S70CzfmMFKE2YBT1feSsGw==,type:int]
+                - path: ENC[AES256_GCM,data:DHN9wLmQSTcwyw==,iv:RVrTT+4wFXz7U6LupuVgvdAYouns2Npl0NVSz5JKCug=,tag:FXzHmcGGr8vYlMe1b4C+pQ==,type:str]
+                  pathType: ENC[AES256_GCM,data:tJDud5ff,iv:nJ9jUOG3EeTg3VyhaTed+o4tZAfUGka4RDOIgs1G3jA=,tag:bFa1qJoa56SVooBWpO9bFQ==,type:str]
+                  backend:
+                    service:
+                        name: ENC[AES256_GCM,data:ExTnbLWXQotxRcNThGXyrQ==,iv:1YGDMcWsIvDxCDiJ9IF3KxPLKMQRCPa1pa0F712fHKU=,tag:aoTy+79mZEdD8QiqyOAB6w==,type:str]
+                        port:
+                            number: ENC[AES256_GCM,data:cpaZ1Q==,iv:Ksz6QL27+YfjR0lQNb+8mdn9yW9oTHHtD8lJ8wNk2b0=,tag:S+CfqVk92lg+fR3VJJxWzw==,type:int]
+                - path: ENC[AES256_GCM,data:SLBJVvnPVplY,iv:hCmXUG8Jm4MeAe13EQEwdJKiVOxlS2vCZvF8DS07aqU=,tag:4Y0NLNbPzGyWII2iBPstMg==,type:str]
+                  pathType: ENC[AES256_GCM,data:8KReqkly,iv:nzHT2M4v9wMLowd97AnWuXdYpynSvs6CErPesgvL10o=,tag:d/WsjrfxSQdqEYOeWSDynA==,type:str]
+                  backend:
+                    service:
+                        name: ENC[AES256_GCM,data:Ibl7P65khETm5Oe7vUYgWA==,iv:GnmZH5nDxzqlDlAs1+1PRajTWml7ObeqdN5qOfJC8go=,tag:y3SOo5HToTOuU8iofNCp8g==,type:str]
+                        port:
+                            number: ENC[AES256_GCM,data:8/vDJw==,iv:oCz4rdEIFNAoLtjj18Eke4kiiwm1GXAgnEmiXrBT8Tg=,tag:/bQvLjtKqWp27FxSK9SArw==,type:int]
+                - path: ENC[AES256_GCM,data:r+wysC+O2QaxEQ==,iv:L1pL2VLaYkW97ZPZIM2k7dm3F16Am47Tz3ITGi6A7z4=,tag:N6cSCakbQ587DirE8qta3Q==,type:str]
+                  pathType: ENC[AES256_GCM,data:ruUG8T5/,iv:12NDrZOtBcL1FtYEfqDrIeLp/sXAbX6UitGAoEMsJ9I=,tag:yTA1RQbzRF8AbdgOvp76BQ==,type:str]
+                  backend:
+                    service:
+                        name: ENC[AES256_GCM,data:FcUwhgSKnUzcseXg87YJPg==,iv:PvPDjxuVHWwyRPi0tWkj6bkCA1o0VzMUJzgKRz80nvE=,tag:/wdfGcvzSiXc03o5I21BHQ==,type:str]
+                        port:
+                            number: ENC[AES256_GCM,data:EmbA3g==,iv:SBys6pC51Di+F6XgNHIzMxRZFBS4eYKWYs0NZLVmfZo=,tag:+LylRkITjTr+Ez5MrU53JA==,type:int]
+                - path: ENC[AES256_GCM,data:8Zs2bOI=,iv:U6R+aN6qmqJ+fQS/78J0e4dmSGmIEyQFpAfGB5gBA6c=,tag:kqGp7O5DLO6OvRLkxT8+pA==,type:str]
+                  pathType: ENC[AES256_GCM,data:jc18zLoF,iv:pfVKplgTe8j2k1J7aaCnti7QiiLyHjia+AgNVCnjrRQ=,tag:rW519AK74ZJoXDscRbS/tg==,type:str]
+                  backend:
+                    service:
+                        name: ENC[AES256_GCM,data:g9yXGZmtxlMCqxi1ekJEKA==,iv:hzwqdNASG/XGa1Vm/a3YmQPhmZhz0qsOvd2/Q3hkL7c=,tag:7sxkt5/YL/JIdmoITcZSYg==,type:str]
+                        port:
+                            number: ENC[AES256_GCM,data:v6NiZA==,iv:HJDdOGhZONVMy2Bdiyk3lEbjfIe0nEwPyU/o1e3gcSc=,tag:P/RK6v7DeInyPbak33R1aA==,type:int]
+                - path: ENC[AES256_GCM,data:8//907OHLp0JV+UhnjniQWHtoGML,iv:tFR+xt2ZvDIGpAXjgNe5OdANfswoyGtDR+MSv9ipKcU=,tag:yhe+dpcQDA0u8kubYZy9Mg==,type:str]
+                  pathType: ENC[AES256_GCM,data:ikXMQH38,iv:HETyLlVfqgJujwoC6M3fPTKLFwGyYM7kkFo7AxPPU1Y=,tag:tNLSzLpa5KGDPdsllCnxmQ==,type:str]
+                  backend:
+                    service:
+                        name: ENC[AES256_GCM,data:c3KixJ+iX5pIMHgqb5eyog==,iv:5/62jS+cqEes0tMOMF3q50qDe8Dbza+nIFLdn1+8QNY=,tag:MhQ9r+8HBBUSYur1kie7yg==,type:str]
+                        port:
+                            number: ENC[AES256_GCM,data:BAU/Kw==,iv:2YQIViQC0TjWMvO7CHusZ053HhiFe5abhTPfWIgL0YQ=,tag:EQZgT2MOa4KGdXmC6MDWkw==,type:int]
+                - path: ENC[AES256_GCM,data:rm8e6eWnMl4V,iv:0IubjY/1SSNK/ANIgvega/pXpCY+cokD0fgUZh5U/Jc=,tag:Rpo02DnV8oid1JSeygrdkA==,type:str]
+                  pathType: ENC[AES256_GCM,data:dr4tbIPL,iv:BJBHmue32qPG9s86hciBl01+qQ9Csdz5RYSx/9n6isA=,tag:ZfWlaSKY/BMmjyiA1EEGsA==,type:str]
+                  backend:
+                    service:
+                        name: ENC[AES256_GCM,data:D/Z8PPIDdOfkzlhyPKgcHw==,iv:zvHzEfpFsyij/iWIlOLsLjMLQ9z+MG6l7UOzNWsqXb0=,tag:7O5KLcWoUptskLcjPdWbRw==,type:str]
+                        port:
+                            number: ENC[AES256_GCM,data:d+8kJg==,iv:Mu98ZaUA2ViRdJYxU2Yy0o+7UZseESUSQDEb/43tS5w=,tag:FRXRZX47Dz8rQYAGwhHK8g==,type:int]
+                - path: ENC[AES256_GCM,data:9J+7tt+Ym8kUpG0=,iv:rk1D/Z1ZpHmS0uG1s339T/Q/39xs08CQRuApE3UKeUY=,tag:WNzrDT3+vbgh6a2vT9Q4/w==,type:str]
+                  pathType: ENC[AES256_GCM,data:U+zhNR+a,iv:qHYfTHfSgN7Nk09OHr59l2hT9e30ZHmOK4CqoBe4F3s=,tag:WsZ1NosWAr98cIHKfhBmNw==,type:str]
+                  backend:
+                    service:
+                        name: ENC[AES256_GCM,data:gSoaHUKlhKLHU3EDe+gzSA==,iv:0hI4tnRmboFCk4cY2ZVBjO8ghwEpOdkRQKg/dB1j1go=,tag:eiq90NRWxWPNbEfznRHTvQ==,type:str]
+                        port:
+                            number: ENC[AES256_GCM,data:zLudTQ==,iv:17jmnn7OPW9gl9qkXzDZgjMDe+fPnNsdUQRph8i/bSQ=,tag:M+I6tiiZYVVli4LZoP/qIg==,type:int]
+                - path: ENC[AES256_GCM,data:BwnVsaYl,iv:J60S4kqMwaqJhzc+GzzQKGSoZaRJTYj9EgUuhdOrkq8=,tag:1gU+6XVE8I5PJVm/qkpyxw==,type:str]
+                  pathType: ENC[AES256_GCM,data:pUZBXW5P,iv:0RiVfrMspMCyaEcso8WpQ8R4u10biWrj2GXn+ReNX4A=,tag:tzki743GlIFRMw0WAHpuRg==,type:str]
+                  backend:
+                    service:
+                        name: ENC[AES256_GCM,data:cPKQHDhwi+0Git3q8PoWxA==,iv:WRtunCdS8uRs3FZg3aFPW5T1SpnRF74CNhkx6Dd3TH4=,tag:SeZzksqKkJSB0aB90O/oSg==,type:str]
+                        port:
+                            number: ENC[AES256_GCM,data:8A23wA==,iv:tIzcfvJy+FoVe5upxYxQjjnqsCA2X225Ad9aQfJgF4c=,tag:7LtQPipYviidvePDyeu6cA==,type:int]
+                - path: ENC[AES256_GCM,data:Ii4TrNA8cOE0+Q==,iv:jtdAQo5OOhCf3sjYWbkhQVIXwRa9ioCeAHVYvxMIDYo=,tag:8bKNiCUbVr+2SEbvLrLDtQ==,type:str]
+                  pathType: ENC[AES256_GCM,data:bj3vff2X,iv:8z7gDTh1cqQKlm+0PGi0oBdn6RQnYw8NRZx3++uN63I=,tag:KvMovBDwFS9zxUsuMSZKsQ==,type:str]
+                  backend:
+                    service:
+                        name: ENC[AES256_GCM,data:ausdIFpuraDaL9NUfPdnSw==,iv:wtw56I4A2aUdf04sMNUL5+RQSNYif9Dv9Y+NL5z4M8s=,tag:SAHAsdcidI60M0NfTJgj8Q==,type:str]
+                        port:
+                            number: ENC[AES256_GCM,data:i/7XkQ==,iv:nHR1GFXYdjWsOC0reVL/IUAHvwi8XflurvHIqDCHc+M=,tag:nvhKrr+uLCHDtheKe+bvEw==,type:int]
+                - path: ENC[AES256_GCM,data:Q83Jib4tRc6VNw==,iv:1VSf84vmv9xk8MnfSHpiA0WgW31HtCB+mxdibqGHarE=,tag:uXsypDvLqmrlWEQUgjFCMQ==,type:str]
+                  pathType: ENC[AES256_GCM,data:LZynSq+J,iv:prXISIHSBhfJ5z1h4xdB6ciCowme5hQTFI3kh/bnlsA=,tag:KJ+C2Zvocr2B6Tntf4QtNw==,type:str]
+                  backend:
+                    service:
+                        name: ENC[AES256_GCM,data:crmX5Phi+q8/VSrhXYTfzA==,iv:/VRfisimaCJmx4qXuftKJzhxQIse9hkjIMn3rhoPn3Q=,tag:/1CHbT4rqOT2wSbmNQh7sg==,type:str]
+                        port:
+                            number: ENC[AES256_GCM,data:9+jpXw==,iv:n1JKTxr2OxnAocIxLXNZ1lP3dNK0YNHxwy2gjcR2jqY=,tag:hvaq863yjMeuGQ/fSQ+2/Q==,type:int]
+                - path: ENC[AES256_GCM,data:5up45Znr,iv:uVlO0kUnxp6qVLfL4IZCb+408bI0p7GKXnbcYfpkMCI=,tag:KK/3uyeIn4sDIfbvnOyugw==,type:str]
+                  pathType: ENC[AES256_GCM,data:VUN8doJI,iv:omOtowg9a1d7uSG5EMdio+BYB57XhA5+MVOQrEM+o+E=,tag:USv8rvy8WSsBMoc04CzyrQ==,type:str]
+                  backend:
+                    service:
+                        name: ENC[AES256_GCM,data:ZLBr23IUqsTFbbQ7ZBENhw==,iv:1rwN+ZOjBGpzYpicpN1xt7LfJEfLZoO1lXnNQGLSALE=,tag:9ZM6gWZlBJ69SDDzswqesA==,type:str]
+                        port:
+                            number: ENC[AES256_GCM,data:jTCoLQ==,iv:KXrqkKzjrUY49vDYzP0qQ98xoc2jTYGbYdDpZFfIY5w=,tag:Nj9NsScx1wGS7iMHpOMarg==,type:int]
+                - path: ENC[AES256_GCM,data:YdaPPSlPYg==,iv:+mIKs3e4t8x0U+NY7+W9NMcb/GjGgVQNc76/Cl6l8E4=,tag:fou1vNmdR74V2HaRUuneTQ==,type:str]
+                  pathType: ENC[AES256_GCM,data:hXqOTFo=,iv:Cfkyymq1+dvSFv1UO2eEGkuhIiF3sTdtcMZFd1ymjwg=,tag:kAK0tsD9fXmreWNHgjh6JQ==,type:str]
+                  backend:
+                    service:
+                        name: ENC[AES256_GCM,data:jRYvE33H+brydH7WdlkF9Q==,iv:QFss8mmYIvH6T6tbNSXe8iDzMc7Fl+2pwYnXCBPbjec=,tag:mPPR9Z1mbHQfSII81R2vTQ==,type:str]
+                        port:
+                            number: ENC[AES256_GCM,data:jPPKuQ==,iv:fP1kvgWTuIuSjGfXZFFJJVZNWCrkUC3B3ZSZIKhL6vE=,tag:OIBqznzM6FV0QXareRB+nQ==,type:int]
+                - path: ENC[AES256_GCM,data:gA==,iv:9a/qwJfrusL3BxfOQ/ST6DlmzfXKuKNh179hqiN3Kw8=,tag:Rx5VwUuTTCZUDGKMOqPvQA==,type:str]
+                  pathType: ENC[AES256_GCM,data:94XF/wJf,iv:jqhbLhmqoDwwJVfF6jsozQ6/fsVIqn6yxeGCxXm9CUY=,tag:UbOhT21kZxP59hskw6u1Lw==,type:str]
+                  backend:
+                    service:
+                        name: ENC[AES256_GCM,data:GHVKlNkpLvMpkiYb,iv:GqvvRLDUE4fA/mOk6KoNNW21Yf9Vj5aZh0aev0Wdg64=,tag:O9TuXdbwZyzKyokkemkpew==,type:str]
+                        port:
+                            number: ENC[AES256_GCM,data:zfE=,iv:MTIzszlcbQqVXlPD+YKZRhWOUeVh5ZHNTt5HUlqCPPc=,tag:ZNOgZ6qyrOeJnoqNYcpdtg==,type:int]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBrcnlxb1RJUTFKTHBmcGVh
+            M3VXUU1HOWF0MXlneFNqS1J6VWlMcFFxSVhNCnZidHkxZTB4elpGQytrWE1Nd1Vm
+            U3VUOHh2dzIzRUpGcEdxNWlTaXNMQUEKLS0tIHRoUzdDdUFDcm1HK0ZTMUpDWFRG
+            aEZpRk1EeU56UmxtNnByMnB0MFNac1EKv2cU1frSXmuJbPVcFw1CFdCXFK8ALavg
+            zHNISNkCquf3h2/mCLYj8CsBobRzOP2aD644LKF/oOHovTfeR7TYVw==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age13jthku4399se3fvnapyzhzs2f3aall30jkx4klz3k7nalkr0wdmsh5a8h5
+    lastmodified: "2026-07-10T23:28:10Z"
+    mac: ENC[AES256_GCM,data:hlgeae+pJsZ9RNuAQcCz9EnBvBvhNlk4m+R/rdjyUJ9fh/dQW+32t8WrIRCRwYxs/O9JqV3lya6jVDwIGWHYhBzY3Qd7jND6XygdAIyKkneuXn/EVIMg19VomWSj4EF1HGnY+TDnmDOrd6eGnkb2RFaOUfvKiTBivjUBY9pkNew=,iv:MVU8tj2llxqlzipev86KVZ/o+0gU/OsZEvOqY+QFGR8=,tag:n5645qXL5f6GJu5YSF8i5A==,type:str]
+    unencrypted_suffix: _unencrypted
+    version: 3.13.2
