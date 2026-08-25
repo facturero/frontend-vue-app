@@ -19,7 +19,13 @@
     "errorUnexpected": "Error inesperado",
     "acceptInvite": "Aceptar invitación",
     "setPasswordToJoin": "Establece una contraseña para unirte a la organización",
-    "acceptAndContinue": "Aceptar y continuar"
+    "acceptAndContinue": "Aceptar y continuar",
+    "resetPassword": "Restablecer contraseña",
+    "setNewPassword": "Crea una nueva contraseña para tu cuenta",
+    "newPassword": "Nueva contraseña",
+    "noResetToken": "No se encontró el enlace de restablecimiento.",
+    "passwordsDontMatch": "Las contraseñas no coinciden.",
+    "passwordTooShort": "La contraseña debe tener al menos 8 caracteres."
   },
   "home": {
     "title": "Inicio",

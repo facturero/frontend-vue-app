@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useEmployeeStore } from '@/stores/employees';
+import { useOrganizationStore } from '@/stores/organization';
 import { extractError } from '@/utils/error';
 import RoleSelect from '@/components/RoleSelect.vue';
 
@@ -8,15 +9,28 @@ defineProps<{ modelValue: boolean }>();
 const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>();
 
 const emp = useEmployeeStore();
+const org = useOrganizationStore();
 const email = ref('');
 const roleIds = ref<string[]>([]);
+const establishmentIds = ref<string[]>([]);
 const error = ref<string | null>(null);
 const inviting = ref(false);
 const success = ref(false);
 
+const establishmentOptions = computed(() =>
+  org.establishments.map((e) => ({ title: `${e.code} — ${e.name}`, value: e.id })),
+);
+
+onMounted(async () => {
+  if (org.establishments.length === 0) {
+    await org.fetchEstablishments();
+  }
+});
+
 function close(): void {
   email.value = '';
   roleIds.value = [];
+  establishmentIds.value = [];
   error.value = null;
   inviting.value = false;
   success.value = false;
@@ -28,7 +42,7 @@ async function submit(): Promise<void> {
   inviting.value = true;
   error.value = null;
   try {
-    await emp.invite(email.value, roleIds.value);
+    await emp.invite(email.value, roleIds.value, establishmentIds.value);
     await emp.fetch();
     success.value = true;
     setTimeout(() => {
@@ -89,6 +103,18 @@ async function submit(): Promise<void> {
           label="Roles"
           multiple
           hide-admin
+        />
+
+        <v-select
+          v-model="establishmentIds"
+          :items="establishmentOptions"
+          label="Establecimientos"
+          variant="outlined"
+          density="compact"
+          multiple
+          class="mt-2"
+          hide-details="auto"
+          data-testid="invite-employee-establishments"
         />
       </v-card-text>
       <v-card-actions>

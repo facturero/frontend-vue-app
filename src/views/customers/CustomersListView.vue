@@ -15,6 +15,22 @@ const tagFilter = ref<string | null>(null);
 const filtersApplied = ref(false);
 
 const canCreate = computed(() => auth.can('customer:create'));
+const canDisable = computed(() => auth.can('customer:update'));
+
+const disableDialog = ref<{ id: string; name: string } | null>(null);
+const disabling = ref(false);
+const showDisableDialog = computed(() => disableDialog.value !== null);
+
+async function confirmDisable(): Promise<void> {
+  if (!disableDialog.value) return;
+  disabling.value = true;
+  try {
+    await store.disable(disableDialog.value.id);
+  } finally {
+    disabling.value = false;
+    disableDialog.value = null;
+  }
+}
 
 const headers = [
   { title: 'Identificación', key: 'identification', sortable: true, align: 'start' as const },
@@ -166,7 +182,12 @@ onMounted(async () => {
         </template>
 
         <template #item.actions="{ item }">
-          <v-btn size="small" variant="text" icon="mdi-eye" @click="viewDetail(item.id)" />
+          <div class="d-flex justify-end ga-1">
+            <v-btn size="small" variant="text" icon="mdi-eye" @click="viewDetail(item.id)" />
+            <v-btn v-if="item.status === 'active' && item.isSystem === false && canDisable"
+              size="small" variant="text" icon="mdi-account-cancel" color="warning"
+              @click="disableDialog = { id: item.id, name: item.businessName }" />
+          </div>
         </template>
 
         <template #no-data>
@@ -176,5 +197,22 @@ onMounted(async () => {
         </template>
       </v-data-table>
     </v-card>
+
+    <v-dialog v-model="showDisableDialog" max-width="400">
+      <v-card>
+        <v-card-title>Deshabilitar cliente</v-card-title>
+        <v-card-text>
+          ¿Estás seguro de deshabilitar a <strong>{{ disableDialog?.name }}</strong>?
+          <p class="text-caption text-medium-emphasis mt-2">El cliente quedará inactivo pero no se eliminará de la base de datos.</p>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn variant="text" @click="disableDialog = null">Cancelar</v-btn>
+          <v-btn color="warning" variant="tonal" :loading="disabling" @click="confirmDisable">
+            Deshabilitar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>

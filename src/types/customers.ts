@@ -14,6 +14,7 @@ export interface Customer {
   phone: string | null;
   type: CustomerType;
   status: CustomerStatus;
+  isSystem: boolean;
   imageFileId: string | null;
   metadata: Record<string, unknown> | null;
 }

@@ -87,15 +87,17 @@ export const useCustomerStore = defineStore('customers', () => {
   }
 
   async function fetchCatalog(): Promise<void> {
-    try {
-      const [ids, tgs] = await Promise.all([
-        customerApi.listIdentificationTypes(),
-        customerApi.listTags(),
-      ]);
-      identificationTypes.value = ids;
-      tags.value = tgs;
-    } catch (e) {
-      error.value = extractError(e);
+    const [idResult, tagResult] = await Promise.allSettled([
+      customerApi.listIdentificationTypes(),
+      customerApi.listTags(),
+    ]);
+    if (idResult.status === 'fulfilled') {
+      identificationTypes.value = idResult.value;
+    } else {
+      error.value = extractError(idResult.reason);
+    }
+    if (tagResult.status === 'fulfilled') {
+      tags.value = tagResult.value;
     }
   }
 

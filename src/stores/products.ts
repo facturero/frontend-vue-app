@@ -22,7 +22,7 @@ export const useProductStore = defineStore('products', () => {
   const saving = ref(false);
   const error = ref<string | null>(null);
 
-  async function fetch(params?: { search?: string; status?: string; type?: string; categoryId?: string }): Promise<void> {
+  async function fetch(params?: { search?: string; status?: string; type?: string; categoryId?: string; establishmentId?: string }): Promise<void> {
     loading.value = true;
     error.value = null;
     try {

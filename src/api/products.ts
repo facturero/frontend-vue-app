@@ -17,7 +17,7 @@ import type {
 } from '@/types/products';
 
 export const productApi = {
-  list: (params?: { search?: string; status?: string; type?: string; categoryId?: string }) =>
+  list: (params?: { search?: string; status?: string; type?: string; categoryId?: string; establishmentId?: string }) =>
     http.get<ProductSummary[]>('/products', { params }).then((r) => r.data),
 
   create: (body: CreateProductInput) =>

@@ -63,6 +63,13 @@ http.interceptors.response.use(
           });
         }
         const newToken = await refreshing;
+        // Sanity check: si el token que acabamos de guardar no está en localStorage,
+        // algo está muy mal (storage bloqueado, otro tab lo pisó). No reintentes.
+        if (getAccessToken() !== newToken) {
+          clearTokens();
+          if (window.location.pathname !== '/login') window.location.href = '/login';
+          return Promise.reject(error);
+        }
         original.headers.Authorization = `Bearer ${newToken}`;
         return http(original);
       } catch {
@@ -70,6 +77,15 @@ http.interceptors.response.use(
         if (window.location.pathname !== '/login') {
           window.location.href = '/login';
         }
+      }
+    }
+
+    // Si es un 401 después de un retry (el refresh trajo un token pero /me sigue fallando),
+    // no hay ciclo válido posible: limpia y expulsa al login. Esto rompe cualquier bucle.
+    if (status === 401 && original?._retry && !isAuthCall) {
+      clearTokens();
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
       }
     }
 

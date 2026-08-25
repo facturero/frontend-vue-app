@@ -3,17 +3,28 @@ import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { useProductStore } from '@/stores/products';
+import { useOrganizationStore } from '@/stores/organization';
 
 const router = useRouter();
 const auth = useAuthStore();
 const store = useProductStore();
+const organizationStore = useOrganizationStore();
 
 const search = ref('');
 const statusFilter = ref<string | null>(null);
 const typeFilter = ref<string | null>(null);
+const establishmentFilter = ref<string | null>(null);
 const filtersApplied = ref(false);
 
 const canCreate = computed(() => auth.can('product:create'));
+
+const establishmentOptions = computed(() => [
+  { title: 'Todos los establecimientos', value: null },
+  ...organizationStore.establishments.map((e) => ({
+    title: `${e.code} — ${e.name}`,
+    value: e.id,
+  })),
+]);
 
 const headers = [
   { title: 'SKU', key: 'sku', sortable: true, align: 'start' as const },
@@ -57,6 +68,7 @@ async function doSearch(): Promise<void> {
       search: search.value || undefined,
       status: statusFilter.value || undefined,
       type: typeFilter.value || undefined,
+      establishmentId: establishmentFilter.value || undefined,
     });
   } finally {
     filtersApplied.value = false;
@@ -75,6 +87,7 @@ onMounted(async () => {
   await Promise.all([
     store.fetch(),
     store.fetchCatalog(),
+    organizationStore.fetchEstablishments(),
   ]);
 });
 </script>
@@ -115,6 +128,11 @@ onMounted(async () => {
               { title: 'Servicio', value: 'service' },
             ]" label="Tipo" variant="outlined" density="compact" hide-details clearable
               @update:model-value="doSearch" />
+          </v-col>
+          <v-col cols="6" sm="3">
+            <v-select v-model="establishmentFilter" :items="establishmentOptions" label="Establecimiento"
+              variant="outlined" density="compact" hide-details clearable
+              @update:model-value="doSearch" data-testid="products-establishment-filter" />
           </v-col>
           <v-col cols="12" sm="1">
             <v-btn variant="text" icon="mdi-refresh" :loading="store.loading" @click="doSearch" />

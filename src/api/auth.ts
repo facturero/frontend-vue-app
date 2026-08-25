@@ -6,6 +6,11 @@ export interface AcceptInviteInput {
   password: string;
 }
 
+export interface ResetPasswordInput {
+  token: string;
+  password: string;
+}
+
 export const authApi = {
   register: (body: Credentials) =>
     http.post<TokenResponse>('/auth/register', {
@@ -33,4 +38,7 @@ export const authApi = {
 
   acceptInvite: (body: AcceptInviteInput) =>
     http.post<TokenResponse>('/auth/accept-invite', body).then((r) => r.data),
+
+  resetPassword: (body: ResetPasswordInput) =>
+    http.post<TokenResponse>('/auth/password-reset', body).then((r) => r.data),
 };

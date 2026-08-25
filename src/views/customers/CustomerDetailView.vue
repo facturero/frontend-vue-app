@@ -252,7 +252,7 @@ onMounted(async () => {
           </v-card>
 
           <!-- Contactos -->
-          <v-card elevation="2" rounded="lg" class="mb-4">
+          <v-card v-if="customer.type === 'company'" elevation="2" rounded="lg" class="mb-4">
             <v-card-title class="text-h6 d-flex align-center">
               Contactos
               <v-spacer />
@@ -292,7 +292,7 @@ onMounted(async () => {
           </v-card>
 
           <!-- Direcciones -->
-          <v-card elevation="2" rounded="lg" class="mb-4">
+          <v-card v-if="customer.type === 'company'" elevation="2" rounded="lg" class="mb-4">
             <v-card-title class="text-h6 d-flex align-center">
               Direcciones
               <v-spacer />

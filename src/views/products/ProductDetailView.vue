@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { useProductStore } from '@/stores/products';
+import { useOrganizationStore } from '@/stores/organization';
 import { productApi } from '@/api/products';
 import ImageUploader from '@/components/ImageUploader.vue';
 
@@ -10,6 +11,7 @@ const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
 const store = useProductStore();
+const organizationStore = useOrganizationStore();
 
 const productId = computed(() => route.params.id as string);
 const canUpdate = computed(() => auth.can('product:update'));
@@ -18,6 +20,17 @@ const disabling = ref(false);
 const product = computed(() => store.current);
 
 const apiUrl = import.meta.env.VITE_API_URL as string;
+
+const productEstablishments = computed(() =>
+  (product.value?.establishmentIds ?? []).map((id) => {
+    const est = organizationStore.establishments.find((e) => e.id === id);
+    return {
+      id,
+      code: est?.code ?? '—',
+      name: est?.name ?? 'Establecimiento',
+    };
+  }),
+);
 
 function imageUrl(fileId: string): string {
   return `${apiUrl}/files/${fileId}/download`;
@@ -106,6 +119,7 @@ onMounted(async () => {
   try {
     await store.fetchById(productId.value);
     await store.fetchCatalog();
+    await organizationStore.fetchEstablishments();
   } catch {
     router.push({ name: 'products' });
   }
@@ -248,6 +262,25 @@ onMounted(async () => {
                 </tbody>
               </v-table>
               <p v-else class="text-body-2 text-medium-emphasis">Sin impuestos asignados</p>
+            </v-card-text>
+          </v-card>
+
+          <v-card elevation="2" rounded="lg" class="mb-4">
+            <v-card-title class="text-h6">Establecimientos</v-card-title>
+            <v-card-text>
+              <div v-if="productEstablishments.length > 0" class="d-flex flex-wrap ga-2">
+                <v-chip
+                  v-for="est in productEstablishments"
+                  :key="est.id"
+                  size="small"
+                  variant="tonal"
+                  color="primary"
+                  data-testid="product-establishment-chip"
+                >
+                  {{ est.code }} — {{ est.name }}
+                </v-chip>
+              </div>
+              <p v-else class="text-body-2 text-medium-emphasis">Sin establecimientos asignados</p>
             </v-card-text>
           </v-card>
 

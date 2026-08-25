@@ -2,6 +2,7 @@
 import { onMounted, ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useProductStore } from '@/stores/products';
+import { useOrganizationStore } from '@/stores/organization';
 import { productApi } from '@/api/products';
 import { extractError } from '@/utils/error';
 import ImageUploader from '@/components/ImageUploader.vue';
@@ -10,6 +11,7 @@ import type { ProductType, CreateProductInput, UpdateProductInput } from '@/type
 const route = useRoute();
 const router = useRouter();
 const store = useProductStore();
+const organizationStore = useOrganizationStore();
 
 const isEdit = computed(() => !!route.params.id);
 const productId = computed(() => route.params.id as string | undefined);
@@ -23,6 +25,8 @@ const currencyCode = ref('USD');
 const priceIncludesTax = ref(false);
 const categoryId = ref<string | null>(null);
 const unitId = ref<string | null>(null);
+const establishmentIds = ref<string[]>([]);
+const establishmentError = ref<string | null>(null);
 const selectedTaxIds = ref<string[]>([]);
 const vatRateId = ref<string | null>(null);
 const saving = ref(false);
@@ -35,6 +39,13 @@ const apiUrl = import.meta.env.VITE_API_URL as string;
 const tempId = crypto.randomUUID();
 
 const imageResourceId = computed(() => productId.value ?? tempId);
+
+const establishmentsOptions = computed(() =>
+  organizationStore.establishments.map((e) => ({
+    title: `${e.code} — ${e.name}`,
+    value: e.id,
+  })),
+);
 
 const existingImages = computed(() =>
   store.current?.images.map((img) => ({
@@ -76,6 +87,7 @@ function onPriceInput(e: Event): void {
 
 onMounted(async () => {
   await store.fetchCatalog();
+  await organizationStore.fetchEstablishments();
   if (isEdit.value && productId.value) {
     try {
       await store.fetchById(productId.value);
@@ -90,6 +102,7 @@ onMounted(async () => {
         priceIncludesTax.value = p.priceIncludesTax;
         categoryId.value = p.categoryId;
         unitId.value = p.unitId;
+        establishmentIds.value = [...p.establishmentIds];
         selectedTaxIds.value = p.taxes.map((t) => t.taxRateId);
         // Extrae la tasa de IVA (kind vat) para el selector principal.
         vatRateId.value = p.taxes.find((t) => t.kind === 'vat')?.taxRateId ?? null;
@@ -103,7 +116,12 @@ onMounted(async () => {
 async function submit(): Promise<void> {
   saving.value = true;
   saveError.value = null;
+  establishmentError.value = null;
   try {
+    if (establishmentIds.value.length === 0) {
+      establishmentError.value = 'Debe asignar al menos un establecimiento.';
+      return;
+    }
     if (isEdit.value && productId.value) {
       const input: UpdateProductInput = {
         name: name.value,
@@ -115,6 +133,7 @@ async function submit(): Promise<void> {
         priceIncludesTax: priceIncludesTax.value,
         categoryId: categoryId.value,
         unitId: unitId.value,
+        establishmentIds: [...establishmentIds.value],
       };
       await store.update(productId.value, input);
       // La lista de impuestos del producto es el IVA seleccionado (único por ahora).
@@ -148,6 +167,7 @@ async function submit(): Promise<void> {
         description: description.value || undefined,
         categoryId: categoryId.value ?? undefined,
         unitId: unitId.value ?? undefined,
+        establishmentIds: [...establishmentIds.value],
         taxRateIds: vatRateId.value ? [vatRateId.value] : undefined,
         priceIncludesTax: priceIncludesTax.value,
       };
@@ -202,7 +222,7 @@ async function submit(): Promise<void> {
           <v-card-text>
             <v-form @submit.prevent="submit">
               <v-row dense>
-                <v-col cols="12" md="8">
+                <v-col cols="12" md="6">
                   <v-text-field
                     v-model="name"
                     label="Nombre del producto"
@@ -211,6 +231,7 @@ async function submit(): Promise<void> {
                     required
                     hide-details="auto"
                     class="mb-4"
+                    data-testid="product-name"
                   />
                 </v-col>
                 <v-col cols="12" md="4">
@@ -221,6 +242,7 @@ async function submit(): Promise<void> {
                     density="compact"
                     hide-details="auto"
                     class="mb-4"
+                    data-testid="product-sku"
                   />
                 </v-col>
               </v-row>
@@ -237,6 +259,7 @@ async function submit(): Promise<void> {
                 required
                 hide-details="auto"
                 class="mb-4"
+                data-testid="product-type"
               />
 
               <v-textarea
@@ -261,6 +284,7 @@ async function submit(): Promise<void> {
                     inputmode="decimal"
                     placeholder="0.00"
                     hide-details="auto"
+                    data-testid="product-price"
                     @input="onPriceInput"
                   />
                 </v-col>
@@ -320,6 +344,23 @@ async function submit(): Promise<void> {
               </v-row>
 
               <v-select
+                v-model="establishmentIds"
+                :items="establishmentsOptions"
+                label="Establecimientos"
+                variant="outlined"
+                density="compact"
+                multiple
+                chips
+                closable-chips
+                :error-messages="establishmentError"
+                required
+                hide-details="auto"
+                class="mb-4"
+                data-testid="product-establishments"
+                hint="El producto se venderá solo en los establecimientos seleccionados (se sincroniza al POS de cada uno)."
+              />
+
+              <v-select
                 v-model="vatRateId"
                 :items="vatRates"
                 item-title="name"
@@ -330,6 +371,7 @@ async function submit(): Promise<void> {
                 hide-details="auto"
                 clearable
                 class="mb-4"
+                data-testid="product-vat"
               />
 
               <v-divider class="my-4" />
@@ -361,7 +403,8 @@ async function submit(): Promise<void> {
                 color="primary"
                 type="submit"
                 :loading="saving || uploading"
-                :disabled="!name || !price"
+                :disabled="!name || !price || establishmentIds.length === 0"
+                data-testid="product-submit"
               >
                 {{ isEdit ? 'Guardar cambios' : 'Crear producto' }}
               </v-btn>

@@ -16,7 +16,16 @@
     "alreadyRegistered": "Déjà inscrit ?",
     "descriptionLogin": "Vous avez perdu l'accès à OneAuth ? Ne vous inquiétez pas. Configurez une phrase de récupération et un numéro de sauvegarde pour récupérer OneAuth facilement.",
     "descriptionRegister": "Reconnectez-vous avec votre compte existant.",
-    "errorUnexpected": "Erreur inattendue"
+    "errorUnexpected": "Erreur inattendue",
+    "acceptInvite": "Accepter l'invitation",
+    "setPasswordToJoin": "Définissez un mot de passe pour rejoindre l'organisation",
+    "acceptAndContinue": "Accepter et continuer",
+    "resetPassword": "Réinitialiser le mot de passe",
+    "setNewPassword": "Créez un nouveau mot de passe pour votre compte",
+    "newPassword": "Nouveau mot de passe",
+    "noResetToken": "Lien de réinitialisation introuvable.",
+    "passwordsDontMatch": "Les mots de passe ne correspondent pas.",
+    "passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères."
   },
   "home": {
     "title": "Accueil",

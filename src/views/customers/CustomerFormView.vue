@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useCustomerStore } from '@/stores/customers';
 import ImageUploader from '@/components/ImageUploader.vue';
@@ -37,7 +37,13 @@ const existingImages = computed(() =>
 
 // Solo se puede escoger un tipo de identificación válido para el país del contexto
 // (viene del read-model alimentado por tax-service).
-const idTypes = computed(() => store.identificationTypes);
+const idTypes = computed(() => {
+  const all = store.identificationTypes;
+  if (type.value === 'company') {
+    return all.filter((t) => t.code === 'RUC' || t.code === 'PASAPORTE' || t.code === 'EXTERIOR');
+  }
+  return all;
+});
 
 const selectedIdType = computed(() =>
   identificationTypeId.value
@@ -45,17 +51,39 @@ const selectedIdType = computed(() =>
     : null,
 );
 
-// Valida el input contra el regex del tipo elegido (si tiene). Feedback en vivo.
+const isConsumidorFinal = computed(() => selectedIdType.value?.code === 'CONSUMIDOR_FINAL');
+
+// Auto-fill y limpiar identificación según tipo seleccionado
+watch(identificationTypeId, (newId, oldId) => {
+  const newType = store.identificationTypes.find((t) => t.id === newId);
+  const oldType = store.identificationTypes.find((t) => t.id === oldId);
+  if (newType?.code === 'CONSUMIDOR_FINAL') {
+    identification.value = '9999999999999';
+  } else if (oldType?.code === 'CONSUMIDOR_FINAL') {
+    identification.value = '';
+  }
+});
 const identificationHint = computed(() => {
   const t = selectedIdType.value;
   if (!t || !identification.value) return '';
   if (!t.regex) return '';
+  const lenMatch = t.regex.match(/\{(\d+)\}/);
+  if (lenMatch && identification.value.length !== parseInt(lenMatch[1])) return '';
   try {
     const re = new RegExp(t.regex);
     if (!re.test(identification.value)) return `Formato inválido para ${t.name}`;
   } catch {
     /* regex mal formado en el catálogo: se ignora en el front, el back lo valida */
   }
+  return '';
+});
+
+const phoneHint = computed(() => {
+  const p = phone.value.trim();
+  if (!p) return '';
+  const clean = p.replace(/[\s\-\(\)]/g, '');
+  if (clean.length === 10 && !/^0\d{9}$/.test(clean)) return 'Formato inválido. Ej: 0991234567';
+  if (clean.length === 9 && !/^[2-7]\d{8}$/.test(clean)) return 'Formato inválido. Ej: 022345678';
   return '';
 });
 
@@ -104,6 +132,7 @@ async function submit(): Promise<void> {
 }
 
 onMounted(async () => {
+  store.current = null;
   await store.fetchCatalog();
   if (isEdit.value && customerId.value) {
     await store.fetchById(customerId.value);
@@ -136,23 +165,29 @@ onMounted(async () => {
       {{ formError }}
     </v-alert>
 
+    <v-alert v-if="store.error" type="warning" density="compact" variant="tonal" closable class="mb-4"
+      @click:close="store.error = null">
+      {{ store.error }}
+    </v-alert>
+
     <v-row>
       <v-col cols="12" md="8">
         <v-card elevation="2" rounded="lg">
           <v-card-text>
             <v-form @submit.prevent="submit">
               <!-- Tipo (persona / empresa) — solo al crear; no editable en edición -->
-              <v-radio-group v-model="type" :disabled="isEdit" inline class="mb-4" hide-details>
+              <v-radio-group v-model="type" :disabled="isEdit" inline class="mb-4" hide-details
+                @update:model-value="(v) => { tradeName = ''; if (v === 'company' && identificationTypeId && !['RUC','PASAPORTE','EXTERIOR'].includes(store.identificationTypes.find(t => t.id === identificationTypeId)?.code ?? '')) identificationTypeId = null; }">
                 <v-radio label="Persona" value="person" />
                 <v-radio label="Empresa" value="company" />
               </v-radio-group>
 
               <v-row dense>
-                <v-col cols="12" md="8">
+                <v-col :cols="type === 'company' ? 'md-8' : '12'">
                   <v-text-field v-model="businessName" :label="type === 'company' ? 'Razón social' : 'Nombre completo'"
                     variant="outlined" density="compact" required hide-details="auto" class="mb-4" />
                 </v-col>
-                <v-col cols="12" md="4">
+                <v-col v-if="type === 'company'" cols="12" md="4">
                   <v-text-field v-model="tradeName" label="Nombre comercial" variant="outlined" density="compact"
                     hide-details="auto" class="mb-4" />
                 </v-col>
@@ -167,7 +202,9 @@ onMounted(async () => {
                 <v-col cols="12" md="4">
                   <v-text-field v-model="identification" label="Número de identificación" variant="outlined"
                     density="compact" :hint="identificationHint" :error="!!identificationHint" persistent-hint
-                    class="mb-4" hide-details="auto"/>
+                    :maxlength="selectedIdType?.regex?.match(/\{(\d+)\}/)?.[1] ?? 20"
+                    :disabled="isConsumidorFinal"
+                    class="mb-4" hide-details="auto" inputmode="numeric" pattern="[0-9]*" />
                 </v-col>
               </v-row>
 
@@ -178,7 +215,9 @@ onMounted(async () => {
                 </v-col>
                 <v-col cols="12" md="6">
                   <v-text-field v-model="phone" label="Teléfono" variant="outlined" density="compact"
-                    hide-details="auto" class="mb-4" />
+                    :hint="phoneHint" :error="!!phoneHint" persistent-hint
+                    maxlength="10" inputmode="numeric" pattern="[0-9]*"
+                    class="mb-4" />
                 </v-col>
               </v-row>
 

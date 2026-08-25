@@ -9,11 +9,11 @@ export const useEmployeeStore = defineStore('employees', () => {
   const loading = ref(false);
   const error = ref<string | null>(null);
 
-  async function fetch(): Promise<void> {
+  async function fetch(establishmentId?: string): Promise<void> {
     loading.value = true;
     error.value = null;
     try {
-      list.value = await employeeApi.list();
+      list.value = await employeeApi.list(establishmentId);
     } catch (e) {
       error.value = extractError(e);
       throw e;
@@ -22,8 +22,8 @@ export const useEmployeeStore = defineStore('employees', () => {
     }
   }
 
-  async function invite(email: string, roleIds: string[]): Promise<string> {
-    const { userId } = await employeeApi.invite({ email, roleIds });
+  async function invite(email: string, roleIds: string[], establishmentIds?: string[]): Promise<string> {
+    const { userId } = await employeeApi.invite({ email, roleIds, establishmentIds });
     return userId;
   }
 
@@ -37,5 +37,15 @@ export const useEmployeeStore = defineStore('employees', () => {
     await employeeApi.disable(userId);
   }
 
-  return { list, loading, error, fetch, invite, assignRole, disable };
+  async function updateEstablishments(userId: string, establishmentIds: string[]): Promise<void> {
+    error.value = null;
+    await employeeApi.updateEstablishments(userId, establishmentIds);
+  }
+
+  async function requestPasswordReset(userId: string): Promise<void> {
+    error.value = null;
+    await employeeApi.requestPasswordReset(userId);
+  }
+
+  return { list, loading, error, fetch, invite, assignRole, disable, updateEstablishments, requestPasswordReset };
 });

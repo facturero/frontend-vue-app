@@ -36,6 +36,7 @@ export interface ProductImage {
 export interface ProductDetail extends ProductSummary {
   description: string | null;
   trackStock: boolean;
+  establishmentIds: string[];
   taxes: ProductTax[];
   images: ProductImage[];
   metadata: Record<string, unknown> | null;
@@ -52,6 +53,7 @@ export interface CreateProductInput {
   description?: string;
   categoryId?: string;
   unitId?: string;
+  establishmentIds: string[];
   taxRateIds?: string[];
   priceIncludesTax?: boolean;
   metadata?: Record<string, unknown>;
@@ -64,6 +66,7 @@ export interface UpdateProductInput {
   type?: ProductType;
   categoryId?: string | null;
   unitId?: string | null;
+  establishmentIds?: string[];
   price?: string;
   currencyCode?: string;
   priceIncludesTax?: boolean;

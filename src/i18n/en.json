@@ -19,7 +19,13 @@
     "errorUnexpected": "Unexpected error",
     "acceptInvite": "Accept invitation",
     "setPasswordToJoin": "Set a password to join the organization",
-    "acceptAndContinue": "Accept and continue"
+    "acceptAndContinue": "Accept and continue",
+    "resetPassword": "Reset password",
+    "setNewPassword": "Create a new password for your account",
+    "newPassword": "New password",
+    "noResetToken": "Reset link not found.",
+    "passwordsDontMatch": "Passwords do not match.",
+    "passwordTooShort": "Password must be at least 8 characters long."
   },
   "home": {
     "title": "Home",
