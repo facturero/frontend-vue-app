@@ -3,10 +3,12 @@ import { computed } from 'vue';
 import { useDisplay } from 'vuetify';
 import { useUiStore } from '@/stores/ui';
 import { useAuthStore } from '@/stores/auth';
+import { usePluginsStore } from '@/stores/plugins';
 import { getNavigationItems } from '@/menus/navigation';
 
 const ui = useUiStore();
 const auth = useAuthStore();
+const plugins = usePluginsStore();
 const { mobile } = useDisplay();
 
 const allowedWhenBlocked = ['/profile', '/organization/settings'];
@@ -14,6 +16,7 @@ const allowedWhenBlocked = ['/profile', '/organization/settings'];
 const items = computed(() =>
   getNavigationItems()
     .filter((item) => !item.permission || auth.can(item.permission))
+    .filter((item) => plugins.isActive(item.plugin))
     .map((item) => ({
       ...item,
       blocked: auth.needsOrgSetup && !allowedWhenBlocked.includes(item.to ?? ''),

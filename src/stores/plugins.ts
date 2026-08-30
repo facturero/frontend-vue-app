@@ -9,6 +9,8 @@ export const usePluginsStore = defineStore('plugins', () => {
   const myPlugins = ref<OrganizationPlugin[]>([]);
   const requests = ref<PluginCustomRequest[]>([]);
   const currentQuote = ref<Quote | null>(null);
+  /** Los plugins de la organización ya se cargaron al menos una vez en esta sesión. */
+  const myLoaded = ref(false);
 
   const loading = ref(false);
   const saving = ref(false);
@@ -19,6 +21,12 @@ export const usePluginsStore = defineStore('plugins', () => {
   const activeCodes = computed(
     () => new Set(myPlugins.value.filter((p) => p.status === 'active').map((p) => p.pluginCode ?? '')),
   );
+
+  /** Un módulo sin código de plugin es parte del núcleo: siempre disponible. */
+  function isActive(pluginCode?: string): boolean {
+    if (!pluginCode) return true;
+    return activeCodes.value.has(pluginCode);
+  }
 
   function setError(e: unknown): void {
     const body = (e as { response?: { data?: ApiErrorBody } })?.response?.data;
@@ -49,11 +57,32 @@ export const usePluginsStore = defineStore('plugins', () => {
     loading.value = true;
     try {
       myPlugins.value = await pluginApi.listMine();
+      myLoaded.value = true;
     } catch (e) {
       setError(e);
     } finally {
       loading.value = false;
     }
+  }
+
+  /**
+   * Carga los plugins de la organización una sola vez. La usa el guard del
+   * router antes de decidir si una ruta es accesible: sin esto, el menú y las
+   * rutas se evaluarían contra una lista vacía y todo parecería desactivado.
+   */
+  async function ensureMyLoaded(): Promise<void> {
+    if (myLoaded.value) return;
+    await fetchMy();
+  }
+
+  /** Al cerrar sesión, lo de la organización anterior no debe sobrevivir. */
+  function reset(): void {
+    catalog.value = [];
+    myPlugins.value = [];
+    requests.value = [];
+    currentQuote.value = null;
+    myLoaded.value = false;
+    clearError();
   }
 
   async function fetchRequests(): Promise<void> {
@@ -138,6 +167,10 @@ export const usePluginsStore = defineStore('plugins', () => {
     errorCode,
     errorDetails,
     activeCodes,
+    myLoaded,
+    isActive,
+    ensureMyLoaded,
+    reset,
     clearError,
     fetchCatalog,
     fetchMy,

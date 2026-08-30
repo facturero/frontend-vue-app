@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import { usePluginsStore } from '@/stores/plugins';
 import { computed, ref } from 'vue';
 import { clearTokens, getAccessToken, setTokens } from '@/utils/http';
 import { extractError } from '@/utils/error';
@@ -96,6 +97,9 @@ export const useAuthStore = defineStore('auth', () => {
     clearTokens();
     user.value = null;
     needsOrg.value = false;
+    // Los plugins son de la organización que acaba de cerrar sesión: si
+    // sobreviven, el menú del siguiente login se arma con datos ajenos.
+    usePluginsStore().reset();
   }
 
   return {

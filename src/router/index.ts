@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { getAccessToken } from '@/utils/http';
 import { connectRealtime, disconnectRealtime } from '@/utils/realtime';
 import { useAuthStore } from '@/stores/auth';
+import { usePluginsStore } from '@/stores/plugins';
 import AuthView from '@/views/AuthView.vue';
 import AcceptInviteView from '@/views/AcceptInviteView.vue';
 import ResetPasswordView from '@/views/ResetPasswordView.vue';
@@ -93,14 +94,14 @@ const router = createRouter({
       path: '/organization/establishments',
       name: 'organization-establishments',
       component: EstablishmentsView,
-      meta: { requiresAuth: true, requiredPermission: 'establishment:read' },
+      meta: { requiresAuth: true, requiredPermission: 'establishment:read', requiredPlugin: 'org.establishments' },
     },
 
     {
       path: '/organization/certificates',
       name: 'organization-certificates',
       component: CertificatesView,
-      meta: { requiresAuth: true, requiredPermission: 'fiscal:manage' },
+      meta: { requiresAuth: true, requiredPermission: 'fiscal:manage', requiredPlugin: 'finance.electronic_certificate' },
     },
 
     {
@@ -134,54 +135,54 @@ const router = createRouter({
       path: '/customers',
       name: 'customers',
       component: CustomersListView,
-      meta: { requiresAuth: true, requiredPermission: 'customer:read' },
+      meta: { requiresAuth: true, requiredPermission: 'customer:read', requiredPlugin: 'crm.contacts' },
     },
     {
       path: '/customers/new',
       name: 'customers-create',
       component: CustomerFormView,
-      meta: { requiresAuth: true, requiredPermission: 'customer:create' },
+      meta: { requiresAuth: true, requiredPermission: 'customer:create', requiredPlugin: 'crm.contacts' },
     },
     {
       path: '/customers/:id',
       name: 'customers-detail',
       component: CustomerDetailView,
       props: true,
-      meta: { requiresAuth: true, requiredPermission: 'customer:read' },
+      meta: { requiresAuth: true, requiredPermission: 'customer:read', requiredPlugin: 'crm.contacts' },
     },
     {
       path: '/customers/:id/edit',
       name: 'customers-edit',
       component: CustomerFormView,
       props: true,
-      meta: { requiresAuth: true, requiredPermission: 'customer:update' },
+      meta: { requiresAuth: true, requiredPermission: 'customer:update', requiredPlugin: 'crm.contacts' },
     },
 
     {
       path: '/invoices',
       name: 'invoices',
       component: InvoiceListView,
-      meta: { requiresAuth: true, requiredPermission: 'invoice:read' },
+      meta: { requiresAuth: true, requiredPermission: 'invoice:read', requiredPlugin: 'finance.electronic_invoicing' },
     },
     {
       path: '/invoices/new',
       name: 'invoices-create',
       component: InvoiceFormView,
-      meta: { requiresAuth: true, requiredPermission: 'invoice:create' },
+      meta: { requiresAuth: true, requiredPermission: 'invoice:create', requiredPlugin: 'finance.electronic_invoicing' },
     },
     {
       path: '/invoices/:id/edit',
       name: 'invoices-edit',
       component: InvoiceFormView,
       props: true,
-      meta: { requiresAuth: true, requiredPermission: 'invoice:update' },
+      meta: { requiresAuth: true, requiredPermission: 'invoice:update', requiredPlugin: 'finance.electronic_invoicing' },
     },
     {
       path: '/invoices/:id',
       name: 'invoices-detail',
       component: InvoiceDetailView,
       props: true,
-      meta: { requiresAuth: true, requiredPermission: 'invoice:read' },
+      meta: { requiresAuth: true, requiredPermission: 'invoice:read', requiredPlugin: 'finance.electronic_invoicing' },
     },
 
         {
@@ -221,6 +222,19 @@ router.beforeEach(async (to) => {
     const requiredPermission = to.meta.requiredPermission as string | undefined;
     if (requiredPermission && !auth.can(requiredPermission)) {
       return { name: 'home' };
+    }
+
+    // Los plugins activos se cargan una vez por sesión: los necesita tanto el
+    // guard de abajo como el menú lateral, que se arma en cada navegación.
+    const plugins = usePluginsStore();
+    await plugins.ensureMyLoaded();
+
+    // Módulos vendibles: además del permiso, la organización debe tener el
+    // plugin activo. El gateway lo vuelve a comprobar (403 PLUGIN_NOT_ACTIVE);
+    // esto solo evita mostrar una vista que no podría cargar datos.
+    const requiredPlugin = to.meta.requiredPlugin as string | undefined;
+    if (requiredPlugin && !plugins.isActive(requiredPlugin)) {
+      return { name: 'plugins' };
     }
   }
 
