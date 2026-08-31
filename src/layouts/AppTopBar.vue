@@ -73,61 +73,59 @@ function logout(): void {
 </script>
 
 <template>
-  <v-toolbar :elevation="mobile ? 0 : 2" density="comfortable" :rounded="mobile ? '0' : 'lg'">
-    <v-card elevation="0" :rounded="mobile ? '0' : 'lg'" flat width="100%" height="100%" class="d-flex align-center px-4">
-      <v-btn icon @click="ui.toggleDrawer()" class="d-lg-none">
-        <v-icon icon="mdi-menu" />
-      </v-btn>
+  <v-app-bar app :elevation="mobile ? 0 : 2" density="comfortable">
+    <v-btn icon @click="ui.toggleDrawer()" class="d-lg-none">
+      <v-icon icon="mdi-menu" />
+    </v-btn>
 
-      <v-spacer></v-spacer>
+    <v-spacer></v-spacer>
 
-      <NotificationBell />
-      <MessageInbox />
+    <NotificationBell />
+    <MessageInbox />
 
-      <LocaleSwitcher />
+    <LocaleSwitcher />
 
-      <v-btn icon @click="toggleTheme">
-        <v-icon :icon="isDark() ? 'mdi-weather-sunny' : 'mdi-weather-night'" />
-      </v-btn>
+    <v-btn icon @click="toggleTheme">
+      <v-icon :icon="isDark() ? 'mdi-weather-sunny' : 'mdi-weather-night'" />
+    </v-btn>
 
-      <v-menu v-model="menuOpen" :close-on-content-click="false" location="bottom end" min-width="220" :offset="8">
-        <template #activator="{ props: menuProps }">
-          <v-btn v-bind="menuProps" icon class="ml-2">
-            <v-avatar :color="avatarUrl ? undefined : 'primary'" size="32">
+    <v-menu v-model="menuOpen" :close-on-content-click="false" location="bottom end" min-width="220" :offset="8">
+      <template #activator="{ props: menuProps }">
+        <v-btn v-bind="menuProps" icon class="ml-2">
+          <v-avatar :color="avatarUrl ? undefined : 'primary'" size="32">
+            <v-img v-if="avatarUrl" :src="avatarUrl" alt="avatar" cover />
+            <span v-else class="text-body-2 font-weight-bold text-white">{{ initials }}</span>
+          </v-avatar>
+        </v-btn>
+      </template>
+
+      <v-card>
+        <v-list density="compact" class="pa-0 rounded-lg">
+        <v-list-item class="py-3">
+          <template #append>
+            <v-avatar :color="avatarUrl ? undefined : 'primary'" size="40">
               <v-img v-if="avatarUrl" :src="avatarUrl" alt="avatar" cover />
               <span v-else class="text-body-2 font-weight-bold text-white">{{ initials }}</span>
             </v-avatar>
-          </v-btn>
-        </template>
+          </template>
+          <v-list-item-title class="font-weight-medium">{{ me?.fullName || me?.email }}</v-list-item-title>
+          <v-list-item-subtitle v-if="me?.fullName" class="text-caption text-medium-emphasis">{{ me?.email }}</v-list-item-subtitle>
+        </v-list-item>
+      </v-list>
 
-        <v-card>
-          <v-list density="compact" class="pa-0 rounded-lg">
-          <v-list-item class="py-3">
-            <template #append>
-              <v-avatar :color="avatarUrl ? undefined : 'primary'" size="40">
-                <v-img v-if="avatarUrl" :src="avatarUrl" alt="avatar" cover />
-                <span v-else class="text-body-2 font-weight-bold text-white">{{ initials }}</span>
-              </v-avatar>
-            </template>
-            <v-list-item-title class="font-weight-medium">{{ me?.fullName || me?.email }}</v-list-item-title>
-            <v-list-item-subtitle v-if="me?.fullName" class="text-caption text-medium-emphasis">{{ me?.email }}</v-list-item-subtitle>
-          </v-list-item>
-        </v-list>
+      <v-divider />
 
-        <v-divider />
+      <v-list density="compact" class="py-0">
+        <v-list-item prepend-icon="mdi-account-outline" :title="$t('common.myProfile')" value="profile"
+          @click="goToProfile" />
+      </v-list>
 
-        <v-list density="compact" class="py-0">
-          <v-list-item prepend-icon="mdi-account-outline" :title="$t('common.myProfile')" value="profile"
-            @click="goToProfile" />
-        </v-list>
+      <v-divider />
 
-        <v-divider />
-
-        <v-list density="compact" class="py-0">
-          <v-list-item prepend-icon="mdi-logout" :title="$t('common.logout')" value="logout" @click="logout" />
-        </v-list>
-        </v-card>
-      </v-menu>
-    </v-card>
-  </v-toolbar>
+      <v-list density="compact" class="py-0">
+        <v-list-item prepend-icon="mdi-logout" :title="$t('common.logout')" value="logout" @click="logout" />
+      </v-list>
+      </v-card>
+    </v-menu>
+  </v-app-bar>
 </template>

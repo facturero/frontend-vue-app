@@ -26,9 +26,9 @@ watch(
   <v-app>
     <template v-if="showShell">
       <AppNavigationDrawer />
+      <AppTopBar />
       <v-main>
         <v-container :fluid="mobile">
-          <AppTopBar />
           <router-view />
         </v-container>
       </v-main>
@@ -40,9 +40,3 @@ watch(
     </template>
   </v-app>
 </template>
-
-<style>
-.layout-content .v-main {
-  padding-top: calc(var(--app-bar-height) + 32px) !important;
-}
-</style>

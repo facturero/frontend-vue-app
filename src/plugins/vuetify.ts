@@ -14,10 +14,13 @@ export default createVuetify({
     messages: { es, en, fr },
   },
   defaults: {
-    VCard: { elevation: 2 },
+    VCard: { elevation: 0, class: 'border' },
     VTextField: { variant: 'outlined', density: 'compact' },
     VSelect: { variant: 'outlined', density: 'compact' },
     VBtn: { variant: 'flat', rounded: 'lg' },
+    VAppBar: { elevation: 0, class: 'border-b' },
+    VNavigationDrawer: { elevation: 0, class: 'border-e' },
+    VList: { class: 'py-1' },
   },
   theme: {
     defaultTheme: 'light',

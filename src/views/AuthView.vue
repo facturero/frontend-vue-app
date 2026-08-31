@@ -54,33 +54,46 @@ function changeEmail(): void {
 </script>
 
 <template>
-  <div class="auth-wrapper d-flex align-center justify-center fill-height bg-background">
-    <v-card
-      max-width="900"
-      class="mx-auto"
-      rounded="lg"
-      style="width: 100%;"
-    >
-      <v-row no-gutters >
-        <!-- Left column: Form -->
-        <v-col cols="12" md="6" class="pa-sm-8 pa-4">
+  <div class="auth-wrapper fill-height">
+    <v-row no-gutters class="fill-height">
+      <!-- Left: brand panel -->
+      <v-col
+        cols="12"
+        md="5"
+        class="pa-8 d-none d-md-flex flex-column auth-panel"
+      >
+        <div class="d-flex align-center">
+          <v-avatar color="primary" variant="tonal" size="36" class="mr-2">
+            <v-icon icon="mdi-shield-lock-outline" size="20" />
+          </v-avatar>
+          <span class="text-subtitle-1 font-weight-bold">CRM</span>
+        </div>
 
-          <v-card-item class="px-0">
-            <v-card-title class="px-0">{{ mode === 'login' ? t('auth.signIn') : t('auth.createAccount') }}</v-card-title>
-            <v-card-subtitle class="px-0">{{ mode === 'login' ? t('auth.toAccessTemplate') : t('auth.registerToGetStarted') }}</v-card-subtitle>
-            <template #append>
-              <a
-                href="#"
-                class="text-body-2 text-medium-emphasis d-block d-md-none"
-                @click.prevent="toggleMode"
-              >
-                {{ mode === 'login' ? t('auth.register') : t('auth.login') }}
-              </a>
-            </template>
-          </v-card-item>
+        <div class="flex-grow-1 d-flex flex-column align-center justify-center text-center">
+          <div class="auth-illustration mb-6">
+            <v-icon icon="mdi-view-dashboard-outline" size="56" color="primary" />
+          </div>
+          <h6 class="text-h6 font-weight-bold mb-2">{{ mode === 'login' ? t('auth.notRegisteredYet') : t('auth.alreadyRegistered') }}</h6>
+          <p class="text-body-2 text-medium-emphasis" style="max-width: 260px;">
+            {{ mode === 'login' ? t('auth.descriptionLogin') : t('auth.descriptionRegister') }}
+          </p>
+        </div>
+      </v-col>
 
-          <v-card-text class="px-0">
-            
+      <!-- Right: form -->
+      <v-col cols="12" md="7" class="pa-sm-8 pa-6 d-flex flex-column justify-center align-center bg-surface">
+        <div class="auth-form-inner">
+        <div class="d-flex justify-end mb-2">
+          <LocaleSwitcher />
+        </div>
+
+        <v-card-item class="px-0">
+          <v-card-title class="px-0 text-h5 font-weight-bold">{{ mode === 'login' ? t('auth.signIn') : t('auth.createAccount') }}</v-card-title>
+          <v-card-subtitle class="px-0">{{ mode === 'login' ? t('auth.toAccessTemplate') : t('auth.registerToGetStarted') }}</v-card-subtitle>
+        </v-card-item>
+
+        <v-card-text class="px-0">
+
             <!-- Error alert -->
             <v-alert
               v-if="auth.error"
@@ -215,56 +228,46 @@ function changeEmail(): void {
             </v-form>
 
             <GoogleSignIn :locale="$i18n.locale" />
-          </v-card-text>
-        </v-col>
 
-        <!-- Right column: Illustration & CTA -->
-        <v-col
-          cols="6"
-          class="pa-8 text-center border-s d-none d-md-flex flex-column align-center justify-center position-relative"
-          style="block-size: 33rem;"
-        >
-
-          <div class="position-absolute top-0 right-0 pa-4">
-            <LocaleSwitcher />
-          </div>
-
-          <template v-if="mode === 'login'">
-            <h6 class="text-body-1 font-weight-semibold mb-3">{{ t('auth.notRegisteredYet') }}</h6>
-            <p class="text-body-2 text-medium-emphasis mb-6" style="max-width: 260px;">
-              {{ t('auth.descriptionLogin') }}
-            </p>
-            <v-btn
-              color="primary"
-              variant="tonal"
-              append-icon="mdi-account-plus"
-              @click="mode = 'register'; step = 'email'"
-            >
-              {{ t('auth.register') }}
-            </v-btn>
-          </template>
-          <template v-else>
-            <h6 class="text-body-1 font-weight-semibold mb-3">{{ t('auth.alreadyRegistered') }}</h6>
-            <p class="text-body-2 text-medium-emphasis mb-6" style="max-width: 260px;">
-              {{ t('auth.descriptionRegister') }}
-            </p>
-            <v-btn
-              color="primary"
-              variant="tonal"
-              append-icon="mdi-login"
-              @click="toggleMode"
-            >
-              {{ t('auth.login') }}
-            </v-btn>
-          </template>
-        </v-col>
-      </v-row>
-    </v-card>
+            <h6 class="text-body-2 text-medium-emphasis d-flex justify-center align-center mt-6">
+              {{ mode === 'login' ? t('auth.notRegisteredYet') : t('auth.alreadyRegistered') }}
+              <a
+                href="#"
+                class="text-primary text-decoration-none font-weight-medium pl-2"
+                @click.prevent="toggleMode"
+              >
+                {{ mode === 'login' ? t('auth.register') : t('auth.login') }}
+              </a>
+            </h6>
+        </v-card-text>
+        </div>
+      </v-col>
+    </v-row>
   </div>
 </template>
 
 <style scoped>
 .fill-height {
   min-height: 100vh;
+}
+
+.auth-panel {
+  background: rgba(var(--v-theme-primary), 0.06);
+}
+
+.auth-form-inner {
+  width: 100%;
+  max-width: 420px;
+}
+
+.auth-illustration {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 96px;
+  block-size: 96px;
+  border-radius: 50%;
+  background: rgb(var(--v-theme-surface));
+  box-shadow: 0 8px 24px -8px rgba(var(--v-theme-primary), 0.35);
 }
 </style>
