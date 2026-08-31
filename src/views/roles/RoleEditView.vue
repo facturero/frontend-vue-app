@@ -51,7 +51,7 @@ async function save(): Promise<void> {
         @click="router.push({ name: 'roles' })"
       />
       <h2 class="text-h5 font-weight-medium">
-        Editar rol: {{ role?.name || props.id }}
+        {{ $t('roles.editTitle', { name: role?.name || props.id }) }}
       </h2>
     </div>
 
@@ -76,7 +76,7 @@ async function save(): Promise<void> {
       class="mb-4"
       @click:close="saved = false"
     >
-      Permisos actualizados
+      {{ $t('roles.permissionsUpdated') }}
     </v-alert>
 
     <template v-if="role">
@@ -86,8 +86,8 @@ async function save(): Promise<void> {
         density="compact"
         variant="tonal"
         class="mb-4"
-        title="Rol de sistema"
-        text="Este rol es del sistema y no puede ser modificado."
+        :title="$t('roles.systemRole')"
+        :text="$t('roles.systemRoleHint')"
       />
 
       <v-row>
@@ -95,12 +95,13 @@ async function save(): Promise<void> {
           <v-card elevation="2" rounded="lg">
             <v-card-text>
               <v-list lines="two" density="comfortable">
-                <v-list-item title="Nombre" :subtitle="role.name" prepend-icon="mdi-shield-account" />
-                <v-list-item title="Descripción" :subtitle="role.description || '—'" prepend-icon="mdi-text" />
-                <v-list-item title="Sistema" prepend-icon="mdi-cog">
+                <v-list-item :title="$t('common.name')" :subtitle="role.name" prepend-icon="mdi-shield-account" />
+                <v-list-item :title="$t('common.description')" :subtitle="role.description || '—'"
+                  prepend-icon="mdi-text" />
+                <v-list-item :title="$t('roles.systemField')" prepend-icon="mdi-cog">
                   <template #subtitle>
                     <v-chip size="x-small" :color="role.isSystem ? 'secondary' : 'success'" variant="tonal">
-                      {{ role.isSystem ? 'Sí' : 'No' }}
+                      {{ role.isSystem ? $t('common.yes') : $t('common.no') }}
                     </v-chip>
                   </template>
                 </v-list-item>
@@ -115,7 +116,7 @@ async function save(): Promise<void> {
                 :loading="saving"
                 @click="save"
               >
-                Guardar cambios
+                {{ $t('common.saveChanges') }}
               </v-btn>
             </v-card-text>
           </v-card>
@@ -123,7 +124,7 @@ async function save(): Promise<void> {
 
         <v-col cols="12" md="7">
           <v-card elevation="2" rounded="lg">
-            <v-card-title>Permisos</v-card-title>
+            <v-card-title>{{ $t('roles.permissions') }}</v-card-title>
             <v-card-text v-if="store.permissions.length > 0">
               <PermissionSelector
                 :permissions="store.permissions"
@@ -140,7 +141,7 @@ async function save(): Promise<void> {
     </template>
 
     <div v-else-if="!store.loading" class="text-center text-medium-emphasis py-8">
-      Rol no encontrado
+      {{ $t('roles.notFound') }}
     </div>
 
     <div v-else class="d-flex justify-center py-8">

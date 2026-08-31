@@ -1,5 +1,11 @@
 export type PluginBuildStatus = 'disponible' | 'en_construccion' | 'descontinuado';
-export type DisplayStatus = 'en_construccion' | 'disponible' | 'comprado' | 'desactivado';
+export type DisplayStatus =
+  | 'en_construccion'
+  | 'disponible'
+  | 'comprado'
+  | 'desactivado'
+  /** Plugin del núcleo: activo para todas las organizaciones, no se compra ni se apaga. */
+  | 'incluido';
 export type ActivationSource = 'direct' | 'dependency';
 export type CustomRequestStatus = 'requested' | 'quoted' | 'created' | 'rejected';
 

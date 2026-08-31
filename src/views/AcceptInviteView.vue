@@ -23,17 +23,17 @@ onMounted(() => {
   if (tkn) {
     token.value = tkn;
   } else {
-    error.value = 'No se encontró el token de invitación.';
+    error.value = t('auth.noInviteToken');
   }
 });
 
 async function submit(): Promise<void> {
   if (password.value !== confirmPassword.value) {
-    error.value = 'Las contraseñas no coinciden.';
+    error.value = t('auth.passwordsDontMatch');
     return;
   }
   if (password.value.length < 8) {
-    error.value = 'La contraseña debe tener al menos 8 caracteres.';
+    error.value = t('auth.passwordTooShort');
     return;
   }
 

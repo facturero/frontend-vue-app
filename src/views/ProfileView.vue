@@ -99,7 +99,9 @@ function onAvatarSuccess(fileIds: string[]): void {
 <template>
   <v-container>
     <div class="d-flex align-center mt-6 mb-4">
-      <h2 class="text-h5 font-weight-medium">{{ isSetup ? 'Completa tu perfil' : 'Mi perfil' }}</h2>
+      <h2 class="text-h5 font-weight-medium">
+        {{ isSetup ? $t('profile.completeTitle') : $t('common.myProfile') }}
+      </h2>
     </div>
 
     <v-row>
@@ -126,7 +128,7 @@ function onAvatarSuccess(fileIds: string[]): void {
         <v-card elevation="2" rounded="lg">
           <v-card-text>
             <p class="text-body-2 text-medium-emphasis mb-4">
-              {{ isSetup ? 'Necesitamos algunos datos para que puedas manejar tu cuenta' : 'Actualiza tus datos personales' }}
+              {{ isSetup ? $t('profile.setupIntro') : $t('profile.editIntro') }}
             </p>
 
             <v-alert
@@ -150,13 +152,13 @@ function onAvatarSuccess(fileIds: string[]): void {
               density="compact"
               @click:close="saved = false"
             >
-              Perfil actualizado
+              {{ $t('profile.updated') }}
             </v-alert>
 
             <v-form @submit.prevent="submit">
               <v-text-field
                 v-model="fullName"
-                label="Nombre completo"
+                :label="$t('customers.fullName')"
                 variant="outlined"
                 density="compact"
                 class="mb-4"
@@ -165,11 +167,11 @@ function onAvatarSuccess(fileIds: string[]): void {
 
               <v-select
                 v-model="identificationType"
-                label="Tipo de identificación"
+                :label="$t('customers.idType')"
                 :items="[
-                  { title: 'Cédula', value: 'cedula' },
-                  { title: 'RUC', value: 'ruc' },
-                  { title: 'Pasaporte', value: 'pasaporte' },
+                  { title: $t('profile.idTypeCedula'), value: 'cedula' },
+                  { title: $t('profile.idTypeRuc'), value: 'ruc' },
+                  { title: $t('profile.idTypePassport'), value: 'pasaporte' },
                 ]"
                 variant="outlined"
                 density="compact"
@@ -179,7 +181,7 @@ function onAvatarSuccess(fileIds: string[]): void {
 
               <v-text-field
                 v-model="identificationNumber"
-                :label="identificationType === 'ruc' ? 'Número de RUC' : 'Número de identificación'"
+                :label="identificationType === 'ruc' ? $t('profile.rucNumber') : $t('customers.idNumber')"
                 variant="outlined"
                 density="compact"
                 class="mb-6"
@@ -193,7 +195,7 @@ function onAvatarSuccess(fileIds: string[]): void {
                 :loading="loading"
                 :disabled="!fullName || !identificationNumber"
               >
-                {{ isSetup ? 'Completar perfil' : 'Guardar cambios' }}
+                {{ isSetup ? $t('profile.completeProfile') : $t('common.saveChanges') }}
               </v-btn>
             </v-form>
           </v-card-text>

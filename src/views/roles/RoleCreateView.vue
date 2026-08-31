@@ -41,7 +41,7 @@ async function submit(): Promise<void> {
         class="mr-2"
         @click="router.push({ name: 'roles' })"
       />
-      <h2 class="text-h5 font-weight-medium">Nuevo rol</h2>
+      <h2 class="text-h5 font-weight-medium">{{ $t('roles.new') }}</h2>
     </div>
 
     <v-alert
@@ -63,7 +63,7 @@ async function submit(): Promise<void> {
             <v-form @submit.prevent="submit">
               <v-text-field
                 v-model="name"
-                label="Nombre del rol"
+                :label="$t('roles.name')"
                 variant="outlined"
                 density="compact"
                 class="mb-4"
@@ -71,7 +71,7 @@ async function submit(): Promise<void> {
               />
               <v-textarea
                 v-model="description"
-                label="Descripción"
+                :label="$t('common.description')"
                 variant="outlined"
                 density="compact"
                 class="mb-6"
@@ -85,7 +85,7 @@ async function submit(): Promise<void> {
                 :loading="loading"
                 :disabled="!name"
               >
-                Crear rol
+                {{ $t('roles.create') }}
               </v-btn>
             </v-form>
           </v-card-text>
@@ -94,7 +94,7 @@ async function submit(): Promise<void> {
 
       <v-col cols="12" md="7">
         <v-card elevation="2" rounded="lg">
-          <v-card-title>Permisos</v-card-title>
+          <v-card-title>{{ $t('roles.permissions') }}</v-card-title>
           <v-card-text v-if="store.permissions.length > 0">
             <PermissionSelector
               :permissions="store.permissions"

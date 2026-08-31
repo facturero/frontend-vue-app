@@ -4,18 +4,23 @@ import { defineStore } from 'pinia';
 export interface RealtimeNotification {
   id: string;
   event: string;
-  title: string;
+  /** Clave i18n; se traduce al renderizar, no al recibir el evento. */
+  titleKey: string;
   detail: string;
   at: number;
 }
 
-const EVENT_TITLES: Record<string, string> = {
-  'plugin.activated': 'Plugin activado',
-  'plugin.deactivated': 'Plugin desactivado',
-  'plugin.created': 'Tu plugin a medida está listo',
-  'plugin.custom_request.created': 'Solicitud enviada',
-  'plugin.custom_request.fulfilled': 'Solicitud atendida',
-  'plugin.custom_request.rejected': 'Solicitud rechazada',
+/**
+ * Clave i18n por evento. Se guarda la clave, no el texto ya traducido: la
+ * notificación puede quedar en la bandeja mientras el usuario cambia de idioma.
+ */
+const EVENT_TITLE_KEYS: Record<string, string> = {
+  'plugin.activated': 'notifications.pluginActivated',
+  'plugin.deactivated': 'notifications.pluginDeactivated',
+  'plugin.created': 'notifications.customPluginReady',
+  'plugin.custom_request.created': 'notifications.requestSent',
+  'plugin.custom_request.fulfilled': 'notifications.requestFulfilled',
+  'plugin.custom_request.rejected': 'notifications.requestRejected',
 };
 
 export const useRealtimeStore = defineStore('realtime', () => {
@@ -27,7 +32,7 @@ export const useRealtimeStore = defineStore('realtime', () => {
     items.value.unshift({
       id: crypto.randomUUID(),
       event,
-      title: EVENT_TITLES[event] ?? 'Actualización de plugins',
+      titleKey: EVENT_TITLE_KEYS[event] ?? 'notifications.pluginsUpdate',
       detail: typeof data.code === 'string' ? String(data.code) : '',
       at: Date.now(),
     });

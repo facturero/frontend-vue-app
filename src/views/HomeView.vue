@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 
+const { t } = useI18n();
 const auth = useAuthStore();
 const router = useRouter();
 const loadError = ref<string | null>(null);
@@ -17,7 +19,7 @@ onMounted(async () => {
     }
   } catch (e) {
     const err = e as { response?: { data?: { message?: string } } };
-    loadError.value = err?.response?.data?.message ?? 'No se pudo cargar /auth/me';
+    loadError.value = err?.response?.data?.message ?? t('home.loadError');
   }
 });
 </script>
@@ -26,12 +28,12 @@ onMounted(async () => {
   <v-container>
     <v-row justify="center">
       <v-col cols="12" md="8" lg="7">
-        <h2 class="text-h5 font-weight-medium mt-6 mb-4">Inicio</h2>
+        <h2 class="text-h5 font-weight-medium mt-6 mb-4">{{ $t('home.title') }}</h2>
 
         <v-card elevation="4" rounded="lg">
           <v-card-title class="d-flex align-center">
             <v-icon icon="mdi-account-circle" class="mr-2" />
-            Sesión activa
+            {{ $t('home.sessionActive') }}
           </v-card-title>
 
           <v-card-text>
@@ -46,19 +48,19 @@ onMounted(async () => {
 
             <template v-if="auth.user">
               <v-list lines="two" density="comfortable">
-                <v-list-item title="User ID" :subtitle="auth.user.id" prepend-icon="mdi-identifier" />
+                <v-list-item :title="$t('home.userIdLabel')" :subtitle="auth.user.id" prepend-icon="mdi-identifier" />
                 <v-list-item
-                  title="Email"
+                  :title="$t('common.email')"
                   :subtitle="auth.user.email"
                   prepend-icon="mdi-email-outline"
                 />
                 <v-list-item
-                  title="Email verificado"
-                  :subtitle="auth.user.emailVerified ? 'Sí' : 'No'"
+                  :title="$t('home.emailVerified')"
+                  :subtitle="auth.user.emailVerified ? $t('common.yes') : $t('common.no')"
                   prepend-icon="mdi-check-decagram-outline"
                 />
                 <v-list-item
-                  title="Proveedor"
+                  :title="$t('home.providerLabel')"
                   :subtitle="auth.user.authProvider"
                   prepend-icon="mdi-account-key-outline"
                 />
@@ -68,7 +70,7 @@ onMounted(async () => {
                 type="success"
                 variant="tonal"
                 class="mt-4"
-                text="GET /auth/me respondió a través del gateway ✔"
+                :text="$t('home.gatewayOk')"
               />
             </template>
 

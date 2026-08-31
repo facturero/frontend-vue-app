@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { usePluginsStore } from '@/stores/plugins';
 import { useAuthStore } from '@/stores/auth';
 import type { CatalogPlugin } from '@/types/plugins';
 
+const { t, locale } = useI18n();
 const store = usePluginsStore();
 const auth = useAuthStore();
 
@@ -24,14 +26,17 @@ const categories = computed(() =>
 const statusOptions = computed(() => {
   const counts: Record<string, number> = {};
   for (const p of store.catalog) counts[p.display_status] = (counts[p.display_status] ?? 0) + 1;
-  const entries = Object.entries(statusMeta) as [CatalogPlugin['display_status'], { label: string; color: string }][];
+  const entries = Object.entries(statusMeta.value) as [
+    CatalogPlugin['display_status'],
+    { label: string; color: string },
+  ][];
   return [
-    { value: 'all', label: `Todos (${store.catalog.length})`, color: 'grey' },
+    { value: 'all', label: t('plugins.allCount', { count: store.catalog.length }), color: 'grey' },
     ...entries
       .filter(([value]) => (counts[value] ?? 0) > 0)
       .map(([value, meta]) => ({
         value,
-        label: `${meta.label} (${counts[value]})`,
+        label: t('plugins.statusCount', { label: meta.label, count: counts[value] }),
         color: meta.color,
       })),
   ];
@@ -67,15 +72,16 @@ const filtered = computed(() => {
   return sorted;
 });
 
-const statusMeta: Record<CatalogPlugin['display_status'], { label: string; color: string }> = {
-  disponible: { label: 'Disponible', color: 'success' },
-  comprado: { label: 'Comprado', color: 'primary' },
-  en_construccion: { label: 'En construcción', color: 'warning' },
-  desactivado: { label: 'Desactivado', color: 'grey' },
-};
+const statusMeta = computed<Record<CatalogPlugin['display_status'], { label: string; color: string }>>(() => ({
+  disponible: { label: t('plugins.status.disponible'), color: 'success' },
+  comprado: { label: t('plugins.status.comprado'), color: 'primary' },
+  en_construccion: { label: t('plugins.status.en_construccion'), color: 'warning' },
+  desactivado: { label: t('plugins.status.desactivado'), color: 'grey' },
+  incluido: { label: t('plugins.status.incluido'), color: 'info' },
+}));
 
 function formatPrice(cents: number, currency: string): string {
-  return new Intl.NumberFormat('es-EC', { style: 'currency', currency }).format(cents / 100);
+  return new Intl.NumberFormat(locale.value, { style: 'currency', currency }).format(cents / 100);
 }
 
 async function openQuote(plugin: CatalogPlugin): Promise<void> {
@@ -117,7 +123,7 @@ async function confirmActivate(): Promise<void> {
         <v-row dense align="end">
           <v-text-field
             v-model="search"
-            label="Buscar plugin"
+            :label="$t('plugins.search')"
             prepend-inner-icon="mdi-magnify"
             variant="outlined"
             density="compact"
@@ -128,7 +134,7 @@ async function confirmActivate(): Promise<void> {
           <v-select
             v-model="categoryFilter"
             :items="categories"
-            label="Categoría"
+            :label="$t('products.category')"
             variant="outlined"
             density="compact"
             hide-details
@@ -138,12 +144,12 @@ async function confirmActivate(): Promise<void> {
           <v-select
             v-model="sortBy"
             :items="[
-              { title: 'Nombre (A-Z)', value: 'name-asc' },
-              { title: 'Nombre (Z-A)', value: 'name-desc' },
-              { title: 'Precio (menor a mayor)', value: 'price-asc' },
-              { title: 'Precio (mayor a menor)', value: 'price-desc' },
+              { title: $t('plugins.sortNameAsc'), value: 'name-asc' },
+              { title: $t('plugins.sortNameDesc'), value: 'name-desc' },
+              { title: $t('plugins.sortPriceAsc'), value: 'price-asc' },
+              { title: $t('plugins.sortPriceDesc'), value: 'price-desc' },
             ]"
-            label="Ordenar por"
+            :label="$t('plugins.sortBy')"
             variant="outlined"
             density="compact"
             hide-details
@@ -169,13 +175,15 @@ async function confirmActivate(): Promise<void> {
         <v-card elevation="2" rounded="lg" class="d-flex flex-column fill-height">
           <v-card-title class="d-flex align-center justify-space-between">
             <span class="text-subtitle-1 font-weight-medium">{{ p.name }}</span>
-            <v-chip v-if="p.is_exclusive" size="x-small" color="deep-purple" variant="tonal">A medida</v-chip>
+            <v-chip v-if="p.is_exclusive" size="x-small" color="deep-purple" variant="tonal">
+              {{ $t('plugins.exclusive') }}
+            </v-chip>
           </v-card-title>
           <v-card-subtitle class="text-caption">{{ p.code }} · {{ p.category }}</v-card-subtitle>
           <v-card-text class="text-body-2 flex-grow-1">
             {{ p.description }}
             <div v-if="p.depends_on.length" class="mt-2 text-caption text-medium-emphasis">
-              Requiere:
+              {{ $t('plugins.requires') }}
               <v-chip
                 v-for="d in p.depends_on"
                 :key="d.code"
@@ -192,7 +200,7 @@ async function confirmActivate(): Promise<void> {
               {{ statusMeta[p.display_status].label }}
             </v-chip>
             <v-spacer />
-            <span class="text-subtitle-2 mr-2">{{ formatPrice(p.priceCents, p.currency) }}/mes</span>
+            <span class="text-subtitle-2 mr-2">{{ formatPrice(p.priceCents, p.currency) }}{{ $t('plugins.perMonth') }}</span>
             <v-btn
               v-if="canActivate && p.display_status === 'disponible'"
               color="primary"
@@ -201,7 +209,7 @@ async function confirmActivate(): Promise<void> {
               :loading="store.loading && activatingCode === p.code"
               @click="openQuote(p)"
             >
-              Activar
+              {{ $t('plugins.activate') }}
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -209,15 +217,15 @@ async function confirmActivate(): Promise<void> {
     </v-row>
 
     <div v-if="!store.loading && !filtered.length" class="text-center text-medium-emphasis mt-8">
-      No hay plugins que coincidan con la búsqueda.
+      {{ $t('plugins.noMatches') }}
     </div>
 
     <v-dialog v-model="quoteDialog" max-width="560">
       <v-card v-if="store.currentQuote">
-        <v-card-title>Activar {{ store.currentQuote.plugin.name }}</v-card-title>
+        <v-card-title>{{ $t('plugins.activateTitle', { name: store.currentQuote.plugin.name }) }}</v-card-title>
         <v-card-text>
           <div class="text-body-2 mb-3">
-            La activación incluye los siguientes plugins requeridos:
+            {{ $t('plugins.quoteIntro') }}
           </div>
           <v-list density="compact" class="bg-grey-lighten-4 rounded-lg mb-3">
             <v-list-item>
@@ -242,28 +250,28 @@ async function confirmActivate(): Promise<void> {
                   variant="tonal"
                   class="mr-2"
                 >
-                  ya activo
+                  {{ $t('plugins.alreadyActive') }}
                 </v-chip>
                 <span class="text-body-2">{{ formatPrice(r.price, r.plugin.currency) }}</span>
               </template>
             </v-list-item>
           </v-list>
           <div class="d-flex justify-end align-center">
-            <span class="text-h6">Total mensual:
+            <span class="text-h6">{{ $t('plugins.monthlyTotal') }}
               {{ formatPrice(store.currentQuote.total_monthly, store.currentQuote.plugin.currency) }}
             </span>
           </div>
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn variant="text" @click="quoteDialog = false">Cancelar</v-btn>
+          <v-btn variant="text" @click="quoteDialog = false">{{ $t('common.cancel') }}</v-btn>
           <v-btn
             color="primary"
             variant="tonal"
             :loading="quoting || store.saving"
             @click="confirmActivate"
           >
-            Confirmar activación
+            {{ $t('plugins.confirmActivation') }}
           </v-btn>
         </v-card-actions>
       </v-card>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useEmployeeStore } from '@/stores/employees';
 import { extractError } from '@/utils/error';
 import type { EmployeeSummary } from '@/types/employees';
@@ -7,6 +8,7 @@ import type { EmployeeSummary } from '@/types/employees';
 const props = defineProps<{ modelValue: boolean; employee: EmployeeSummary | null }>();
 const emit = defineEmits<{ 'update:modelValue': [value: boolean]; saved: [] }>();
 
+const { t } = useI18n();
 const emp = useEmployeeStore();
 const sending = ref(false);
 const error = ref<string | null>(null);
@@ -46,15 +48,15 @@ async function submit(): Promise<void> {
     @update:model-value="(v) => { if (!v) close(); }"
   >
     <v-card elevation="2" rounded="lg">
-      <v-card-title>Restaurar contraseña</v-card-title>
+      <v-card-title>{{ $t('employees.restorePassword') }}</v-card-title>
       <v-card-text>
-        <p v-if="employee" class="text-body-2 text-medium-emphasis mb-3">
-          Se enviará un correo a
-          <strong>{{ employee.email }}</strong>
-          con un enlace de un solo uso para que
-          <strong>{{ employee.fullName || employee.username || 'el empleado' }}</strong>
-          restablezca su contraseña.
-        </p>
+        <i18n-t v-if="employee" keypath="employees.restoreIntro" tag="p"
+          class="text-body-2 text-medium-emphasis mb-3">
+          <template #email><strong>{{ employee.email }}</strong></template>
+          <template #name>
+            <strong>{{ employee.fullName || employee.username || $t('employees.theEmployee') }}</strong>
+          </template>
+        </i18n-t>
 
         <v-alert
           v-if="sent"
@@ -62,7 +64,7 @@ async function submit(): Promise<void> {
           density="compact"
           variant="tonal"
           class="mb-3"
-          text="Correo enviado. El enlace caduca en 2 horas."
+          :text="$t('employees.restoreSent')"
         />
 
         <v-alert
@@ -79,7 +81,7 @@ async function submit(): Promise<void> {
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn variant="text" @click="close">{{ sent ? 'Cerrar' : 'Cancelar' }}</v-btn>
+        <v-btn variant="text" @click="close">{{ sent ? $t('common.close') : $t('common.cancel') }}</v-btn>
         <v-btn
           v-if="!sent"
           color="primary"
@@ -89,7 +91,7 @@ async function submit(): Promise<void> {
           prepend-icon="mdi-email-fast-outline"
           @click="submit"
         >
-          Enviar correo
+          {{ $t('employees.sendEmail') }}
         </v-btn>
       </v-card-actions>
     </v-card>

@@ -19,7 +19,7 @@ onMounted(() => {
 <template>
   <v-container>
     <div class="d-flex align-center justify-space-between mt-6 mb-4">
-      <h2 class="text-h5 font-weight-medium">Roles</h2>
+      <h2 class="text-h5 font-weight-medium">{{ $t('roles.title') }}</h2>
       <v-btn
         v-if="canManage"
         color="primary"
@@ -27,7 +27,7 @@ onMounted(() => {
         prepend-icon="mdi-plus"
         @click="router.push({ name: 'roles-create' })"
       >
-        Nuevo rol
+        {{ $t('roles.new') }}
       </v-btn>
     </div>
 
@@ -57,7 +57,7 @@ onMounted(() => {
               <v-card-title class="d-flex align-center">
                 {{ r.name }}
                 <v-chip v-if="r.isSystem" size="x-small" color="secondary" variant="tonal" class="ml-2">
-                  sistema
+                  {{ $t('roles.system') }}
                 </v-chip>
               </v-card-title>
               <v-card-subtitle v-if="r.description" class="mt-1">
@@ -67,7 +67,7 @@ onMounted(() => {
 
             <v-card-text>
               <div class="text-caption text-medium-emphasis mb-2">
-                Permisos ({{ r.permissions.length }})
+                {{ $t('roles.permissionsCount', { count: r.permissions.length }) }}
               </div>
               <div class="d-flex flex-wrap ga-1">
                 <v-chip
@@ -90,7 +90,7 @@ onMounted(() => {
         <v-col v-if="store.list.length === 0" cols="12">
           <v-card elevation="2" rounded="lg">
             <v-card-text class="text-center text-medium-emphasis py-6">
-              No hay roles configurados
+              {{ $t('roles.empty') }}
             </v-card-text>
           </v-card>
         </v-col>

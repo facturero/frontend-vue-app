@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useProductStore } from '@/stores/products';
 import { useOrganizationStore } from '@/stores/organization';
 import { productApi } from '@/api/products';
@@ -8,6 +9,7 @@ import { extractError } from '@/utils/error';
 import ImageUploader from '@/components/ImageUploader.vue';
 import type { ProductType, CreateProductInput, UpdateProductInput } from '@/types/products';
 
+const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const store = useProductStore();
@@ -119,7 +121,7 @@ async function submit(): Promise<void> {
   establishmentError.value = null;
   try {
     if (establishmentIds.value.length === 0) {
-      establishmentError.value = 'Debe asignar al menos un establecimiento.';
+      establishmentError.value = t('products.establishmentRequired');
       return;
     }
     if (isEdit.value && productId.value) {
@@ -200,7 +202,7 @@ async function submit(): Promise<void> {
         @click="router.push({ name: 'products' })"
       />
       <h2 class="text-h5 font-weight-medium">
-        {{ isEdit ? 'Editar producto' : 'Nuevo producto' }}
+        {{ isEdit ? $t('products.edit') : $t('products.new') }}
       </h2>
     </div>
 
@@ -225,7 +227,7 @@ async function submit(): Promise<void> {
                 <v-col cols="12" md="6">
                   <v-text-field
                     v-model="name"
-                    label="Nombre del producto"
+                    :label="$t('products.name')"
                     variant="outlined"
                     density="compact"
                     required
@@ -250,10 +252,10 @@ async function submit(): Promise<void> {
               <v-select
                 v-model="type"
                 :items="[
-                  { title: 'Producto', value: 'good' },
-                  { title: 'Servicio', value: 'service' },
+                  { title: $t('products.good'), value: 'good' },
+                  { title: $t('products.service'), value: 'service' },
                 ]"
-                label="Tipo"
+                :label="$t('common.type')"
                 variant="outlined"
                 density="compact"
                 required
@@ -264,7 +266,7 @@ async function submit(): Promise<void> {
 
               <v-textarea
                 v-model="description"
-                label="Descripción"
+                :label="$t('common.description')"
                 variant="outlined"
                 density="compact"
                 hide-details="auto"
@@ -276,7 +278,7 @@ async function submit(): Promise<void> {
                 <v-col cols="12" md="4">
                   <v-text-field
                     :model-value="price"
-                    label="Precio"
+                    :label="$t('products.price')"
                     variant="outlined"
                     density="compact"
                     required
@@ -292,7 +294,7 @@ async function submit(): Promise<void> {
                   <v-select
                     v-model="currencyCode"
                     :items="['USD', 'EUR', 'COP', 'PEN', 'MXN']"
-                    label="Moneda"
+                    :label="$t('products.currency')"
                     variant="outlined"
                     density="compact"
                     hide-details="auto"
@@ -301,7 +303,7 @@ async function submit(): Promise<void> {
                 <v-col cols="12" md="4" class="d-flex align-center pl-3">
                   <v-switch
                     v-model="priceIncludesTax"
-                    label="Precio incluye IVA"
+                    :label="$t('products.priceIncludesTax')"
                     density="compact"
                     hide-details
                     inset
@@ -319,7 +321,7 @@ async function submit(): Promise<void> {
                     :items="store.categories"
                     item-title="name"
                     item-value="id"
-                    label="Categoría"
+                    :label="$t('products.category')"
                     variant="outlined"
                     density="compact"
                     hide-details="auto"
@@ -333,7 +335,7 @@ async function submit(): Promise<void> {
                     :items="store.units"
                     item-title="name"
                     item-value="id"
-                    label="Unidad de medida"
+                    :label="$t('products.unit')"
                     variant="outlined"
                     density="compact"
                     hide-details="auto"
@@ -346,7 +348,7 @@ async function submit(): Promise<void> {
               <v-select
                 v-model="establishmentIds"
                 :items="establishmentsOptions"
-                label="Establecimientos"
+                :label="$t('products.establishments')"
                 variant="outlined"
                 density="compact"
                 multiple
@@ -357,7 +359,7 @@ async function submit(): Promise<void> {
                 hide-details="auto"
                 class="mb-4"
                 data-testid="product-establishments"
-                hint="El producto se venderá solo en los establecimientos seleccionados (se sincroniza al POS de cada uno)."
+                :hint="$t('products.establishmentsHint')"
               />
 
               <v-select
@@ -365,7 +367,7 @@ async function submit(): Promise<void> {
                 :items="vatRates"
                 item-title="name"
                 item-value="id"
-                label="IVA"
+                :label="$t('products.vat')"
                 variant="outlined"
                 density="compact"
                 hide-details="auto"
@@ -375,7 +377,7 @@ async function submit(): Promise<void> {
               />
 
               <v-divider class="my-4" />
-              <p class="text-body-2 text-medium-emphasis mb-2">Imágenes</p>
+              <p class="text-body-2 text-medium-emphasis mb-2">{{ $t('common.images') }}</p>
               <div v-if="isEdit && existingImages.length > 0" class="d-flex flex-wrap ga-2 mb-3">
                 <v-img
                   v-for="img in existingImages"
@@ -406,7 +408,7 @@ async function submit(): Promise<void> {
                 :disabled="!name || !price || establishmentIds.length === 0"
                 data-testid="product-submit"
               >
-                {{ isEdit ? 'Guardar cambios' : 'Crear producto' }}
+                {{ isEdit ? $t('common.saveChanges') : $t('products.create') }}
               </v-btn>
             </v-form>
           </v-card-text>

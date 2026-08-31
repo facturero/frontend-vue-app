@@ -114,7 +114,7 @@ function openChangeDialog(): void {
         class="mr-2"
         @click="router.push({ name: 'employees' })"
       />
-      <h2 class="text-h5 font-weight-medium">Detalle del empleado</h2>
+      <h2 class="text-h5 font-weight-medium">{{ $t('employees.detailTitle') }}</h2>
     </div>
 
     <v-alert
@@ -133,12 +133,13 @@ function openChangeDialog(): void {
       <v-card elevation="2" rounded="lg" class="mb-4">
         <v-card-text>
           <v-list lines="two" density="comfortable">
-            <v-list-item title="Email" :subtitle="employee.email" prepend-icon="mdi-email-outline" />
-            <v-list-item title="Usuario" :subtitle="employee.username || '—'" prepend-icon="mdi-account-key-outline" />
+            <v-list-item :title="$t('common.email')" :subtitle="employee.email" prepend-icon="mdi-email-outline" />
+            <v-list-item :title="$t('employees.username')" :subtitle="employee.username || '—'"
+              prepend-icon="mdi-account-key-outline" />
             <v-list-item
-              title="Contraseña"
+              :title="$t('employees.password')"
               :subtitle="canViewPasswords
-                ? (employee.hasPassword ? '*****' : 'No establecida')
+                ? (employee.hasPassword ? '*****' : $t('employees.passwordNotSet'))
                 : '—'"
               :prepend-icon="canViewPasswords
                 ? (employee.hasPassword ? 'mdi-lock-outline' : 'mdi-lock-open-variant-outline')
@@ -152,12 +153,13 @@ function openChangeDialog(): void {
                   prepend-icon="mdi-key-change"
                   @click="openChangeDialog"
                 >
-                  Restaurar contraseña
+                  {{ $t('employees.restorePassword') }}
                 </v-btn>
               </template>
             </v-list-item>
-            <v-list-item title="Nombre" :subtitle="employee.fullName || '—'" prepend-icon="mdi-account-outline" />
-            <v-list-item title="Estado" prepend-icon="mdi-check-circle-outline">
+            <v-list-item :title="$t('common.name')" :subtitle="employee.fullName || '—'"
+              prepend-icon="mdi-account-outline" />
+            <v-list-item :title="$t('common.status')" prepend-icon="mdi-check-circle-outline">
               <template #subtitle>
                 <v-chip-group
                   v-if="canDisable"
@@ -173,7 +175,7 @@ function openChangeDialog(): void {
                     size="x-small"
                     :disabled="disabling"
                   >
-                    activo
+                    {{ $t('employees.statusActive') }}
                   </v-chip>
                   <v-chip
                     :value="1"
@@ -182,7 +184,7 @@ function openChangeDialog(): void {
                     size="x-small"
                     :disabled="disabling"
                   >
-                    desactivado
+                    {{ $t('employees.statusDisabled') }}
                   </v-chip>
                 </v-chip-group>
                 <v-chip
@@ -195,7 +197,7 @@ function openChangeDialog(): void {
                 </v-chip>
               </template>
             </v-list-item>
-            <v-list-item title="Roles" prepend-icon="mdi-shield-account-outline">
+            <v-list-item :title="$t('employees.roles')" prepend-icon="mdi-shield-account-outline">
               <template #subtitle>
                 <RoleBadge v-for="role in employee.roles" :key="role" :name="role" class="mr-1" />
               </template>
@@ -205,7 +207,7 @@ function openChangeDialog(): void {
       </v-card>
 
       <v-card v-if="canAssign" elevation="2" rounded="lg">
-        <v-card-title>Asignar roles</v-card-title>
+        <v-card-title>{{ $t('employees.assignRoles') }}</v-card-title>
         <v-card-text>
           <v-alert
             v-if="isSelf"
@@ -213,7 +215,7 @@ function openChangeDialog(): void {
             density="compact"
             variant="tonal"
             class="mb-4"
-            text="No puedes modificar tus propios roles."
+            :text="$t('employees.cannotEditOwnRoles')"
           />
           <v-alert
             v-else-if="employee?.isOwner"
@@ -221,7 +223,7 @@ function openChangeDialog(): void {
             density="compact"
             variant="tonal"
             class="mb-4"
-            text="No puedes modificar los roles del dueño de la organización."
+            :text="$t('employees.cannotEditOwnerRoles')"
           />
           <RoleSelect
             v-model="selectedRoleIds"
@@ -236,13 +238,13 @@ function openChangeDialog(): void {
             :disabled="selectedRoleIds.length === 0 || cannotModify"
             @click="assignRole"
           >
-            Actualizar roles
+            {{ $t('employees.updateRoles') }}
           </v-btn>
         </v-card-text>
       </v-card>
 
       <v-card v-if="canAssignEstablishments" elevation="2" rounded="lg" class="mt-4">
-        <v-card-title>Establecimientos asignados</v-card-title>
+        <v-card-title>{{ $t('employees.assignedEstablishments') }}</v-card-title>
         <v-card-text>
           <v-alert
             v-if="cannotModify"
@@ -250,12 +252,12 @@ function openChangeDialog(): void {
             density="compact"
             variant="tonal"
             class="mb-4"
-            text="No puedes modificar los establecimientos de esta cuenta."
+            :text="$t('employees.cannotEditEstablishments')"
           />
           <v-select
             v-model="selectedEstablishmentIds"
             :items="establishmentOptions"
-            label="Establecimientos"
+            :label="$t('employees.establishments')"
             variant="outlined"
             density="compact"
             multiple
@@ -271,14 +273,14 @@ function openChangeDialog(): void {
             data-testid="employee-establishments-save"
             @click="updateEstablishments"
           >
-            Actualizar establecimientos
+            {{ $t('employees.updateEstablishments') }}
           </v-btn>
         </v-card-text>
       </v-card>
     </template>
 
     <div v-else-if="!emp.loading" class="text-center text-medium-emphasis py-8">
-      Empleado no encontrado
+      {{ $t('employees.notFound') }}
     </div>
 
     <div v-else class="d-flex justify-center py-8">

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useEmployeeStore } from '@/stores/employees';
 import { useOrganizationStore } from '@/stores/organization';
 import { extractError } from '@/utils/error';
@@ -8,6 +9,7 @@ import RoleSelect from '@/components/RoleSelect.vue';
 defineProps<{ modelValue: boolean }>();
 const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>();
 
+const { t } = useI18n();
 const emp = useEmployeeStore();
 const org = useOrganizationStore();
 const email = ref('');
@@ -64,7 +66,7 @@ async function submit(): Promise<void> {
     @update:model-value="(v) => { if (!v) close(); }"
   >
     <v-card elevation="2" rounded="lg">
-      <v-card-title>Invitar empleado</v-card-title>
+      <v-card-title>{{ $t('employees.inviteTitle') }}</v-card-title>
       <v-card-text>
         <v-alert
           v-if="error"
@@ -85,12 +87,12 @@ async function submit(): Promise<void> {
           variant="tonal"
           class="mb-4"
         >
-          Empleado invitado exitosamente
+          {{ $t('employees.inviteSuccess') }}
         </v-alert>
 
         <v-text-field
           v-model="email"
-          label="Correo electrónico"
+          :label="$t('common.email')"
           type="email"
           variant="outlined"
           density="compact"
@@ -100,7 +102,7 @@ async function submit(): Promise<void> {
 
         <RoleSelect
           v-model="roleIds"
-          label="Roles"
+          :label="t('employees.roles')"
           multiple
           hide-admin
         />
@@ -108,7 +110,7 @@ async function submit(): Promise<void> {
         <v-select
           v-model="establishmentIds"
           :items="establishmentOptions"
-          label="Establecimientos"
+          :label="$t('employees.establishments')"
           variant="outlined"
           density="compact"
           multiple
@@ -119,7 +121,7 @@ async function submit(): Promise<void> {
       </v-card-text>
       <v-card-actions>
         <v-spacer />
-        <v-btn variant="text" @click="close">Cancelar</v-btn>
+        <v-btn variant="text" @click="close">{{ $t('common.cancel') }}</v-btn>
         <v-btn
           color="primary"
           variant="tonal"
@@ -127,7 +129,7 @@ async function submit(): Promise<void> {
           :disabled="!email || roleIds.length === 0"
           @click="submit"
         >
-          Enviar invitación
+          {{ $t('employees.sendInvite') }}
         </v-btn>
       </v-card-actions>
     </v-card>

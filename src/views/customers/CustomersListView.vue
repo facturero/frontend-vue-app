@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { useCustomerStore } from '@/stores/customers';
 
+const { t } = useI18n();
 const router = useRouter();
 const auth = useAuthStore();
 const store = useCustomerStore();
@@ -32,15 +34,16 @@ async function confirmDisable(): Promise<void> {
   }
 }
 
-const headers = [
-  { title: 'Identificación', key: 'identification', sortable: true, align: 'start' as const },
-  { title: 'Nombre / Razón social', key: 'businessName', sortable: true, align: 'start' as const },
-  { title: 'Tipo', key: 'type', sortable: true, align: 'start' as const },
-  { title: 'Email', key: 'email', sortable: false, align: 'start' as const },
-  { title: 'Teléfono', key: 'phone', sortable: false, align: 'start' as const },
-  { title: 'Estado', key: 'status', sortable: true, align: 'start' as const },
-  { title: 'Acciones', key: 'actions', sortable: false, align: 'end' as const },
-] as const;
+// computed y no constante: al cambiar de idioma las cabeceras deben re-renderizarse.
+const headers = computed(() => [
+  { title: t('customers.headers.identification'), key: 'identification', sortable: true, align: 'start' as const },
+  { title: t('customers.headers.businessName'), key: 'businessName', sortable: true, align: 'start' as const },
+  { title: t('common.type'), key: 'type', sortable: true, align: 'start' as const },
+  { title: t('common.email'), key: 'email', sortable: false, align: 'start' as const },
+  { title: t('common.phone'), key: 'phone', sortable: false, align: 'start' as const },
+  { title: t('common.status'), key: 'status', sortable: true, align: 'start' as const },
+  { title: t('common.actions'), key: 'actions', sortable: false, align: 'end' as const },
+]);
 
 const filtered = computed(() => {
   let result = store.list;
@@ -94,9 +97,9 @@ onMounted(async () => {
 <template>
   <v-container>
     <div class="d-flex align-center justify-space-between mt-6 mb-4">
-      <h2 class="text-h5 font-weight-medium">Clientes</h2>
+      <h2 class="text-h5 font-weight-medium">{{ $t('customers.title') }}</h2>
       <v-btn v-if="canCreate" color="primary" variant="tonal" prepend-icon="mdi-plus" @click="goCreate">
-        Nuevo cliente
+        {{ $t('customers.new') }}
       </v-btn>
     </div>
 
@@ -109,30 +112,30 @@ onMounted(async () => {
       <v-card-text>
         <v-row dense align="end">
           <v-col cols="12" sm="4">
-            <v-text-field v-model="search" label="Buscar por nombre, identificación o email" variant="outlined"
+            <v-text-field v-model="search" :label="$t('customers.searchLabel')" variant="outlined"
               density="compact" hide-details prepend-inner-icon="mdi-magnify" clearable @keyup.enter="doSearch" />
           </v-col>
           <v-col cols="6" sm="2">
             <v-select v-model="statusFilter" :items="[
-              { title: 'Todos los estados', value: null },
-              { title: 'Activo', value: 'active' },
-              { title: 'Inactivo', value: 'inactive' },
-            ]" label="Estado" variant="outlined" density="compact" hide-details clearable
+              { title: $t('customers.allStatuses'), value: null },
+              { title: $t('common.active'), value: 'active' },
+              { title: $t('common.inactive'), value: 'inactive' },
+            ]" :label="$t('common.status')" variant="outlined" density="compact" hide-details clearable
               @update:model-value="doSearch" />
           </v-col>
           <v-col cols="6" sm="2">
             <v-select v-model="typeFilter" :items="[
-              { title: 'Todos los tipos', value: null },
-              { title: 'Persona', value: 'person' },
-              { title: 'Empresa', value: 'company' },
-            ]" label="Tipo" variant="outlined" density="compact" hide-details clearable
+              { title: $t('customers.allTypes'), value: null },
+              { title: $t('customers.person'), value: 'person' },
+              { title: $t('customers.company'), value: 'company' },
+            ]" :label="$t('common.type')" variant="outlined" density="compact" hide-details clearable
               @update:model-value="doSearch" />
           </v-col>
           <v-col cols="8" sm="3">
             <v-select v-model="tagFilter" :items="[
-              { title: 'Todas las etiquetas', value: null },
-              ...store.tags.map((t) => ({ title: t.name, value: t.id })),
-            ]" label="Etiqueta" variant="outlined" density="compact" hide-details clearable
+              { title: $t('customers.allTags'), value: null },
+              ...store.tags.map((tag) => ({ title: tag.name, value: tag.id })),
+            ]" :label="$t('customers.tag')" variant="outlined" density="compact" hide-details clearable
               @update:model-value="doSearch" />
           </v-col>
           <v-col cols="4" sm="1">
@@ -163,7 +166,7 @@ onMounted(async () => {
 
         <template #item.type="{ item }">
           <v-chip size="x-small" variant="tonal" :color="item.type === 'company' ? 'primary' : 'info'">
-            {{ item.type === 'company' ? 'Empresa' : 'Persona' }}
+            {{ item.type === 'company' ? $t('customers.company') : $t('customers.person') }}
           </v-chip>
         </template>
 
@@ -177,7 +180,7 @@ onMounted(async () => {
 
         <template #item.status="{ item }">
           <v-chip size="x-small" :color="item.status === 'active' ? 'success' : 'warning'" variant="tonal">
-            {{ item.status === 'active' ? 'Activo' : 'Inactivo' }}
+            {{ item.status === 'active' ? $t('common.active') : $t('common.inactive') }}
           </v-chip>
         </template>
 
@@ -192,7 +195,7 @@ onMounted(async () => {
 
         <template #no-data>
           <div class="text-center text-medium-emphasis pa-6">
-            No hay clientes registrados
+            {{ $t('customers.empty') }}
           </div>
         </template>
       </v-data-table>
@@ -200,16 +203,18 @@ onMounted(async () => {
 
     <v-dialog v-model="showDisableDialog" max-width="400">
       <v-card>
-        <v-card-title>Deshabilitar cliente</v-card-title>
+        <v-card-title>{{ $t('customers.disableTitle') }}</v-card-title>
         <v-card-text>
-          ¿Estás seguro de deshabilitar a <strong>{{ disableDialog?.name }}</strong>?
-          <p class="text-caption text-medium-emphasis mt-2">El cliente quedará inactivo pero no se eliminará de la base de datos.</p>
+          <i18n-t keypath="customers.disableConfirm" tag="span">
+            <template #name><strong>{{ disableDialog?.name }}</strong></template>
+          </i18n-t>
+          <p class="text-caption text-medium-emphasis mt-2">{{ $t('customers.disableHint') }}</p>
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn variant="text" @click="disableDialog = null">Cancelar</v-btn>
+          <v-btn variant="text" @click="disableDialog = null">{{ $t('common.cancel') }}</v-btn>
           <v-btn color="warning" variant="tonal" :loading="disabling" @click="confirmDisable">
-            Deshabilitar
+            {{ $t('customers.disable') }}
           </v-btn>
         </v-card-actions>
       </v-card>

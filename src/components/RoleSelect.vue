@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoleStore } from '@/stores/roles';
 
 const props = defineProps<{
@@ -15,6 +16,7 @@ const emit = defineEmits<{
   'update:modelValue': [value: string | string[] | null];
 }>();
 
+const { t } = useI18n();
 const rolesStore = useRoleStore();
 
 const items = computed(() => {
@@ -45,13 +47,13 @@ onMounted(() => {
     :item-disabled="(item: any) => item.name === 'Administrador'"
     :multiple="multiple ?? false"
     :disabled="disabled ?? false"
-    :label="label ?? 'Roles'"
+    :label="label ?? t('employees.roles')"
     variant="outlined"
     density="compact"
     hide-details="auto"
     chips
     closable-chips
     clearable
-    no-data-text="No hay roles disponibles"
+    :no-data-text="t('roles.noRolesAvailable')"
   />
 </template>

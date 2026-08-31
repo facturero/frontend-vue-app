@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { usePluginsStore } from '@/stores/plugins';
 import { useAuthStore } from '@/stores/auth';
 import type { OrganizationPlugin } from '@/types/plugins';
 
+const { t, locale } = useI18n();
 const store = usePluginsStore();
 const auth = useAuthStore();
 
@@ -13,17 +15,17 @@ const deactivateDialog = ref<OrganizationPlugin | null>(null);
 const showDeactivateDialog = computed(() => deactivateDialog.value !== null);
 const deactivating = ref(false);
 
-const headers = [
-  { title: 'Plugin', key: 'pluginName', sortable: true, align: 'start' as const },
-  { title: 'Código', key: 'pluginCode', sortable: true, align: 'start' as const },
-  { title: 'Origen', key: 'activationSource', sortable: false, align: 'start' as const },
-  { title: 'Estado', key: 'status', sortable: false, align: 'start' as const },
-  { title: 'Activado', key: 'activatedAt', sortable: true, align: 'start' as const },
-  { title: 'Acciones', key: 'actions', sortable: false, align: 'end' as const },
-];
+const headers = computed(() => [
+  { title: t('plugins.headerPlugin'), key: 'pluginName', sortable: true, align: 'start' as const },
+  { title: t('plugins.headerCode'), key: 'pluginCode', sortable: true, align: 'start' as const },
+  { title: t('plugins.headerSource'), key: 'activationSource', sortable: false, align: 'start' as const },
+  { title: t('common.status'), key: 'status', sortable: false, align: 'start' as const },
+  { title: t('plugins.headerActivatedAt'), key: 'activatedAt', sortable: true, align: 'start' as const },
+  { title: t('common.actions'), key: 'actions', sortable: false, align: 'end' as const },
+]);
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('es-EC', { dateStyle: 'medium' });
+  return new Date(iso).toLocaleDateString(locale.value, { dateStyle: 'medium' });
 }
 
 async function confirmDeactivate(): Promise<void> {
@@ -69,7 +71,7 @@ async function confirmDeactivate(): Promise<void> {
             :color="item.activationSource === 'direct' ? 'primary' : 'grey'"
             variant="tonal"
           >
-            {{ item.activationSource === 'direct' ? 'Contratado' : 'Requerido por otro' }}
+            {{ item.activationSource === 'direct' ? $t('plugins.sourceDirect') : $t('plugins.sourceDependency') }}
           </v-chip>
         </template>
 
@@ -79,7 +81,7 @@ async function confirmDeactivate(): Promise<void> {
             :color="item.status === 'active' ? 'success' : 'grey'"
             variant="tonal"
           >
-            {{ item.status === 'active' ? 'Activo' : 'Desactivado' }}
+            {{ item.status === 'active' ? $t('common.active') : $t('plugins.status.desactivado') }}
           </v-chip>
         </template>
 
@@ -100,27 +102,28 @@ async function confirmDeactivate(): Promise<void> {
           </div>
         </template>
 
-        <template #no-data>No tienes plugins activos todavía.</template>
+        <template #no-data>{{ $t('plugins.mineEmpty') }}</template>
       </v-data-table>
     </v-card>
 
     <v-dialog v-model="showDeactivateDialog" max-width="440">
       <v-card v-if="deactivateDialog">
-        <v-card-title>Desactivar plugin</v-card-title>
+        <v-card-title>{{ $t('plugins.deactivateTitle') }}</v-card-title>
         <v-card-text>
-          ¿Desactivar <strong>{{ deactivateDialog.pluginName }}</strong>?
-          Si otros plugins contratados dependen de él, también se desactivarán en cascada.
+          <i18n-t keypath="plugins.deactivateConfirm" tag="span">
+            <template #name><strong>{{ deactivateDialog.pluginName }}</strong></template>
+          </i18n-t>
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn variant="text" @click="deactivateDialog = null">Cancelar</v-btn>
+          <v-btn variant="text" @click="deactivateDialog = null">{{ $t('common.cancel') }}</v-btn>
           <v-btn
             color="warning"
             variant="tonal"
             :loading="deactivating || store.saving"
             @click="confirmDeactivate"
           >
-            Desactivar
+            {{ $t('plugins.deactivate') }}
           </v-btn>
         </v-card-actions>
       </v-card>

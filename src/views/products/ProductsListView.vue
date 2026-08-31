@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { useProductStore } from '@/stores/products';
 import { useOrganizationStore } from '@/stores/organization';
 
+const { t, locale } = useI18n();
 const router = useRouter();
 const auth = useAuthStore();
 const store = useProductStore();
@@ -19,21 +21,21 @@ const filtersApplied = ref(false);
 const canCreate = computed(() => auth.can('product:create'));
 
 const establishmentOptions = computed(() => [
-  { title: 'Todos los establecimientos', value: null },
+  { title: t('products.allEstablishments'), value: null },
   ...organizationStore.establishments.map((e) => ({
     title: `${e.code} — ${e.name}`,
     value: e.id,
   })),
 ]);
 
-const headers = [
+const headers = computed(() => [
   { title: 'SKU', key: 'sku', sortable: true, align: 'start' as const },
-  { title: 'Nombre', key: 'name', sortable: true, align: 'start' as const },
-  { title: 'Tipo', key: 'type', sortable: true, align: 'start' as const },
-  { title: 'Precio', key: 'price', sortable: true, align: 'start' as const },
-  { title: 'Estado', key: 'status', sortable: true, align: 'start' as const },
-  { title: 'Acciones', key: 'actions', sortable: false, align: 'end' as const },
-] as const;
+  { title: t('common.name'), key: 'name', sortable: true, align: 'start' as const },
+  { title: t('common.type'), key: 'type', sortable: true, align: 'start' as const },
+  { title: t('products.price'), key: 'price', sortable: true, align: 'start' as const },
+  { title: t('common.status'), key: 'status', sortable: true, align: 'start' as const },
+  { title: t('common.actions'), key: 'actions', sortable: false, align: 'end' as const },
+]);
 
 const filtered = computed(() => {
   let result = store.list;
@@ -53,12 +55,14 @@ const filtered = computed(() => {
 });
 
 function formatPrice(cents: number, currency: string, includesTax: boolean): string {
-  const amount = (cents / 100).toLocaleString('es-EC', {
+  // El formato de moneda sigue al idioma activo: separadores y posición del
+  // símbolo cambian entre es-EC, en-US y fr-FR.
+  const amount = (cents / 100).toLocaleString(locale.value, {
     style: 'currency',
     currency,
     minimumFractionDigits: 2,
   });
-  return includesTax ? `${amount} (inc. IVA)` : amount;
+  return includesTax ? `${amount} ${t('products.priceIncludesTaxShort')}` : amount;
 }
 
 async function doSearch(): Promise<void> {
@@ -95,9 +99,9 @@ onMounted(async () => {
 <template>
   <v-container>
     <div class="d-flex align-center justify-space-between mt-6 mb-4">
-      <h2 class="text-h5 font-weight-medium">Productos</h2>
+      <h2 class="text-h5 font-weight-medium">{{ $t('products.title') }}</h2>
       <v-btn v-if="canCreate" color="primary" variant="tonal" prepend-icon="mdi-plus" @click="goCreate">
-        Nuevo producto
+        {{ $t('products.new') }}
       </v-btn>
     </div>
 
@@ -110,27 +114,27 @@ onMounted(async () => {
       <v-card-text>
         <v-row dense align="end">
           <v-col cols="12" sm="5">
-            <v-text-field v-model="search" label="Buscar por nombre o SKU" variant="outlined" density="compact"
+            <v-text-field v-model="search" :label="$t('products.searchLabel')" variant="outlined" density="compact"
               hide-details prepend-inner-icon="mdi-magnify" clearable @keyup.enter="doSearch" />
           </v-col>
           <v-col cols="6" sm="3">
             <v-select v-model="statusFilter" :items="[
-              { title: 'Todos los estados', value: null },
-              { title: 'Activo', value: 'active' },
-              { title: 'Inactivo', value: 'inactive' },
-            ]" label="Estado" variant="outlined" density="compact" hide-details clearable
+              { title: $t('products.allStatuses'), value: null },
+              { title: $t('common.active'), value: 'active' },
+              { title: $t('common.inactive'), value: 'inactive' },
+            ]" :label="$t('common.status')" variant="outlined" density="compact" hide-details clearable
               @update:model-value="doSearch" />
           </v-col>
           <v-col cols="6" sm="3">
             <v-select v-model="typeFilter" :items="[
-              { title: 'Todos los tipos', value: null },
-              { title: 'Producto', value: 'good' },
-              { title: 'Servicio', value: 'service' },
-            ]" label="Tipo" variant="outlined" density="compact" hide-details clearable
+              { title: $t('products.allTypes'), value: null },
+              { title: $t('products.good'), value: 'good' },
+              { title: $t('products.service'), value: 'service' },
+            ]" :label="$t('common.type')" variant="outlined" density="compact" hide-details clearable
               @update:model-value="doSearch" />
           </v-col>
           <v-col cols="6" sm="3">
-            <v-select v-model="establishmentFilter" :items="establishmentOptions" label="Establecimiento"
+            <v-select v-model="establishmentFilter" :items="establishmentOptions" :label="$t('organization.establishment')"
               variant="outlined" density="compact" hide-details clearable
               @update:model-value="doSearch" data-testid="products-establishment-filter" />
           </v-col>
@@ -155,7 +159,7 @@ onMounted(async () => {
 
         <template #item.type="{ item }">
           <v-chip size="x-small" variant="tonal" color="info">
-            {{ item.type === 'good' ? 'Producto' : 'Servicio' }}
+            {{ item.type === 'good' ? $t('products.good') : $t('products.service') }}
           </v-chip>
         </template>
 
@@ -165,7 +169,7 @@ onMounted(async () => {
 
         <template #item.status="{ item }">
           <v-chip size="x-small" :color="item.status === 'active' ? 'success' : 'warning'" variant="tonal">
-            {{ item.status === 'active' ? 'Activo' : 'Inactivo' }}
+            {{ item.status === 'active' ? $t('common.active') : $t('common.inactive') }}
           </v-chip>
         </template>
 
@@ -175,7 +179,7 @@ onMounted(async () => {
 
         <template #no-data>
           <div class="text-center text-medium-emphasis pa-6">
-            No hay productos registrados
+            {{ $t('products.empty') }}
           </div>
         </template>
       </v-data-table>

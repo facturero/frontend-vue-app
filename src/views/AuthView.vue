@@ -174,7 +174,7 @@ function changeEmail(): void {
                 />
                 <v-text-field
                   v-model="identification"
-                  label="Cédula / RUC"
+                  :label="$t('auth.idNumberLabel')"
                   variant="outlined"
                   density="compact"
                   class="mb-6"

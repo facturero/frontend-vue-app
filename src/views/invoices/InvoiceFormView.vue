@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useInvoiceStore } from '@/stores/invoices';
 import { useCustomerStore } from '@/stores/customers';
 import { useProductStore } from '@/stores/products';
@@ -8,6 +9,7 @@ import { useOrganizationStore } from '@/stores/organization';
 import { useFiscalStore } from '@/stores/fiscal';
 
 const props = defineProps<{ id?: string }>();
+const { t, locale } = useI18n();
 const router = useRouter();
 const store = useInvoiceStore();
 const customerStore = useCustomerStore();
@@ -65,7 +67,7 @@ const canAddLine = computed(() => {
 function lineItemName(line: { productSnapshot: { name: string } | null; productId: string }): string {
   if (line.productSnapshot?.name) return line.productSnapshot.name;
   const product = productStore.list.find(p => p.id === line.productId);
-  return product?.name || 'Producto sin nombre';
+  return product?.name || t('invoices.unnamedProduct');
 }
 
 // El total de IVA se calcula sumando line.taxes[].amountCents directo de las
@@ -156,7 +158,7 @@ async function selectCustomer() {
     });
     invoiceId.value = invoice.id;
   } catch (e: any) {
-    errorMessage.value = e.message || 'Error al crear la factura';
+    errorMessage.value = e.message || t('invoices.createError');
   }
 }
 
@@ -175,7 +177,7 @@ async function addLine() {
     });
     newLine.value = { productId: '', description: '', quantity: 1, unitPrice: '0.00' };
   } catch (e: any) {
-    errorMessage.value = e.message || 'Error al agregar la línea';
+    errorMessage.value = e.message || t('invoices.addLineError');
   }
 }
 
@@ -195,7 +197,7 @@ async function handleIssue() {
     });
     router.push(`/invoices/${invoiceId.value}`);
   } catch (e: any) {
-    errorMessage.value = e.message || 'Error al emitir la factura';
+    errorMessage.value = e.message || t('invoices.issueError');
   } finally {
     saving.value = false;
   }
@@ -218,7 +220,7 @@ async function submitOrgProfile(): Promise<void> {
     showOrgDialog.value = false;
     quickTaxId.value = '';
   } catch (e: any) {
-    orgDialogError.value = e?.response?.data?.message || e.message || 'No se pudo guardar';
+    orgDialogError.value = e?.response?.data?.message || e.message || t('common.saveError');
   } finally {
     orgDialogSaving.value = false;
   }
@@ -235,7 +237,7 @@ async function submitEstablishment(): Promise<void> {
     quickEstablishmentName.value = '';
     selectedEstablishmentId.value = est.id;
   } catch (e: any) {
-    establishmentDialogError.value = e?.response?.data?.message || e.message || 'No se pudo crear';
+    establishmentDialogError.value = e?.response?.data?.message || e.message || t('common.createError');
   } finally {
     establishmentDialogSaving.value = false;
   }
@@ -251,7 +253,7 @@ async function submitCertificate(): Promise<void> {
     quickCertPassword.value = '';
     quickCertAlias.value = '';
   } catch (e: any) {
-    certDialogError.value = e?.response?.data?.message || e.message || 'No se pudo subir el certificado';
+    certDialogError.value = e?.response?.data?.message || e.message || t('invoices.certUploadError');
   }
 }
 
@@ -275,17 +277,17 @@ onMounted(async () => {
       await store.fetchById(props.id);
       const invoice = store.current;
       if (!invoice) {
-        loadError.value = 'No se encontró la factura';
+        loadError.value = t('invoices.notFound');
         return;
       }
       if (invoice.status !== 'draft') {
-        loadError.value = 'Esta factura ya no es un borrador, no se puede editar.';
+        loadError.value = t('invoices.notDraftAnymore');
         return;
       }
       invoiceId.value = invoice.id;
       selectedCustomerId.value = invoice.customerId;
     } catch (e: any) {
-      loadError.value = e.message || 'No se pudo cargar la factura';
+      loadError.value = e.message || t('invoices.loadError');
     } finally {
       loadingExisting.value = false;
     }
@@ -298,11 +300,11 @@ onMounted(async () => {
     <div class="invoice-topbar">
       <button type="button" class="back-link" @click="goBack">
         <v-icon icon="mdi-arrow-left" size="18" />
-        Volver
+        {{ $t('common.back') }}
       </button>
       <div class="invoice-heading">
-        <span class="eyebrow">Documento electrónico · SRI Ecuador</span>
-        <h1>{{ isEditMode ? 'Editar factura' : 'Nueva factura' }}</h1>
+        <span class="eyebrow">{{ $t('invoices.eyebrow') }}</span>
+        <h1>{{ isEditMode ? $t('invoices.edit') : $t('invoices.new') }}</h1>
       </div>
     </div>
 
@@ -325,8 +327,8 @@ onMounted(async () => {
           <div class="step-head">
             <span class="step-num">1</span>
             <div>
-              <h2>Cliente</h2>
-              <p>¿A quién le estás facturando?</p>
+              <h2>{{ $t('invoices.customer') }}</h2>
+              <p>{{ $t('invoices.step1Question') }}</p>
             </div>
           </div>
 
@@ -334,7 +336,7 @@ onMounted(async () => {
             <v-autocomplete
               v-model="selectedCustomerId"
               :items="customerStore.list.map(c => ({ title: `${c.businessName} (${c.identification})`, value: c.id }))"
-              label="Buscar cliente por nombre o identificación"
+              :label="$t('invoices.searchCustomer')"
               variant="underlined"
               density="compact"
               clearable
@@ -348,7 +350,7 @@ onMounted(async () => {
               :disabled="!selectedCustomerId || hasCustomer"
               @click="selectCustomer"
             >
-              {{ hasCustomer ? 'Cliente confirmado' : 'Confirmar cliente' }}
+              {{ hasCustomer ? $t('invoices.customerConfirmed') : $t('invoices.confirmCustomer') }}
               <v-icon v-if="!hasCustomer" icon="mdi-arrow-right" size="16" />
               <v-icon v-else icon="mdi-check" size="16" />
             </button>
@@ -360,25 +362,25 @@ onMounted(async () => {
           <div class="step-head">
             <span class="step-num">2</span>
             <div>
-              <h2>Líneas</h2>
-              <p>Productos o servicios a incluir.</p>
+              <h2>{{ $t('invoices.lines') }}</h2>
+              <p>{{ $t('invoices.step2Subtitle') }}</p>
             </div>
           </div>
 
           <div class="step-body">
             <div v-if="!hasCustomer" class="empty-hint">
-              Confirma el cliente en el paso 1 para empezar a agregar productos.
+              {{ $t('invoices.confirmCustomerFirst') }}
             </div>
 
             <template v-else>
               <table v-if="hasLines" class="lines-table">
                 <thead>
                   <tr>
-                    <th>Ítem</th>
-                    <th>Descripción</th>
-                    <th class="num">Cant.</th>
-                    <th class="num">Precio</th>
-                    <th class="num">Subtotal</th>
+                    <th>{{ $t('invoices.item') }}</th>
+                    <th>{{ $t('common.description') }}</th>
+                    <th class="num">{{ $t('invoices.qtyShort') }}</th>
+                    <th class="num">{{ $t('products.price') }}</th>
+                    <th class="num">{{ $t('invoices.subtotal') }}</th>
                     <th class="col-action" />
                   </tr>
                 </thead>
@@ -390,7 +392,7 @@ onMounted(async () => {
                     <td class="num mono">{{ (line.unitPriceCents / 100).toFixed(2) }}</td>
                     <td class="num mono">{{ (line.subtotalCents / 100).toFixed(2) }}</td>
                     <td class="col-action">
-                      <button type="button" class="icon-btn" title="Eliminar línea" @click="removeLine(line.id)">
+                      <button type="button" class="icon-btn" :title="$t('invoices.removeLine')" @click="removeLine(line.id)">
                         <v-icon icon="mdi-close" size="16" />
                       </button>
                     </td>
@@ -401,22 +403,22 @@ onMounted(async () => {
               <div class="add-line-row">
                 <v-select
                   v-model="newLine.productId"
-                  :items="productStore.list.filter(p => p.status === 'active').map(p => ({ title: `${p.name} · ${p.type === 'service' ? 'Servicio' : 'Producto'}`, value: p.id }))"
-                  label="Producto o servicio"
+                  :items="productStore.list.filter(p => p.status === 'active').map(p => ({ title: `${p.name} · ${p.type === 'service' ? $t('products.service') : $t('products.good')}`, value: p.id }))"
+                  :label="$t('invoices.productOrService')"
                   variant="underlined"
                   density="compact"
                   class="col-product"
                 />
                 <v-text-field
                   v-model="newLine.description"
-                  label="Descripción (opcional)"
+                  :label="$t('invoices.descriptionOptional')"
                   variant="underlined"
                   density="compact"
                   class="col-description"
                 />
                 <v-text-field
                   v-model.number="newLine.quantity"
-                  label="Cant."
+                  :label="$t('invoices.qtyShort')"
                   type="number"
                   min="1"
                   variant="underlined"
@@ -425,12 +427,13 @@ onMounted(async () => {
                 />
                 <v-text-field
                   v-model="newLine.unitPrice"
-                  label="Precio"
+                  :label="$t('products.price')"
                   variant="underlined"
                   density="compact"
                   class="col-price mono"
                 />
-                <button type="button" class="icon-btn add" title="Agregar línea" :disabled="!canAddLine" @click="addLine">
+                <button type="button" class="icon-btn add" :title="$t('invoices.addLine')" :disabled="!canAddLine"
+                  @click="addLine">
                   <v-icon icon="mdi-plus" size="18" />
                 </button>
               </div>
@@ -443,30 +446,34 @@ onMounted(async () => {
           <div class="step-head">
             <span class="step-num">3</span>
             <div>
-              <h2>Emitir</h2>
-              <p>Revisa los totales y envía al SRI.</p>
+              <h2>{{ $t('invoices.step3') }}</h2>
+              <p>{{ $t('invoices.step3Subtitle') }}</p>
             </div>
           </div>
 
           <div class="step-body">
             <div v-if="!hasLines" class="empty-hint">
-              Agrega al menos una línea de producto para poder emitir la factura.
+              {{ $t('invoices.addLineFirst') }}
             </div>
             <template v-else>
               <div v-if="!orgProfileComplete" class="setup-hint">
                 <v-icon icon="mdi-alert-circle-outline" size="18" class="mr-1" />
-                <span>
-                  Antes de emitir, completa el <strong>RUC y país</strong> de tu organización.
-                </span>
-                <button type="button" class="setup-link" @click="showOrgDialog = true">Completar ahora</button>
+                <i18n-t keypath="invoices.completeProfileHint" tag="span">
+                  <template #field><strong>{{ $t('invoices.taxIdAndCountry') }}</strong></template>
+                </i18n-t>
+                <button type="button" class="setup-link" @click="showOrgDialog = true">
+                  {{ $t('invoices.completeNow') }}
+                </button>
               </div>
 
               <div v-else-if="!hasEstablishments" class="setup-hint">
                 <v-icon icon="mdi-alert-circle-outline" size="18" class="mr-1" />
-                <span>
-                  Necesitás crear al menos un <strong>establecimiento y un punto de emisión</strong> para emitir.
-                </span>
-                <button type="button" class="setup-link" @click="showEstablishmentDialog = true">Crear ahora</button>
+                <i18n-t keypath="invoices.needEstablishmentHint" tag="span">
+                  <template #field><strong>{{ $t('invoices.establishmentAndPoint') }}</strong></template>
+                </i18n-t>
+                <button type="button" class="setup-link" @click="showEstablishmentDialog = true">
+                  {{ $t('invoices.createNow') }}
+                </button>
               </div>
 
               <template v-else>
@@ -474,14 +481,14 @@ onMounted(async () => {
                   <v-select
                     v-model="selectedEstablishmentId"
                     :items="orgStore.establishments.filter(e => e.status === 'active').map(e => ({ title: `${e.code} — ${e.name}`, value: e.id }))"
-                    label="Establecimiento"
+                    :label="$t('organization.establishment')"
                     variant="underlined"
                     density="compact"
                   />
                   <v-select
                     v-model="selectedEmissionPointId"
-                    :items="orgStore.emissionPoints.filter(ep => ep.status === 'active').map(ep => ({ title: `${ep.code} — ${ep.name || 'Punto de emisión'}`, value: ep.id }))"
-                    label="Punto de emisión"
+                    :items="orgStore.emissionPoints.filter(ep => ep.status === 'active').map(ep => ({ title: `${ep.code} — ${ep.name || $t('invoices.emissionPoint')}`, value: ep.id }))"
+                    :label="$t('invoices.emissionPoint')"
                     variant="underlined"
                     density="compact"
                     :disabled="!selectedEstablishmentId"
@@ -489,21 +496,24 @@ onMounted(async () => {
                 </div>
                 <p v-if="selectedEstablishmentId && !selectedEstablishmentHasEmissionPoints" class="setup-hint">
                   <v-icon icon="mdi-alert-circle-outline" size="18" class="mr-1" />
-                  Este establecimiento no tiene puntos de emisión activos.
-                  <button type="button" class="setup-link" @click="showEstablishmentDialog = true">Crear uno</button>
+                  {{ $t('invoices.noEmissionPoints') }}
+                  <button type="button" class="setup-link" @click="showEstablishmentDialog = true">
+                    {{ $t('invoices.createOne') }}
+                  </button>
                 </p>
                 <p v-if="noCertificate" class="setup-hint info">
                   <v-icon icon="mdi-information-outline" size="18" class="mr-1" />
-                  No tenés un certificado electrónico activo — la factura se emite igual, pero el SRI
-                  nunca la va a autorizar hasta que subas uno.
-                  <button type="button" class="setup-link" @click="showCertificateDialog = true">Subir certificado</button>
+                  {{ $t('invoices.noCertificateHint') }}
+                  <button type="button" class="setup-link" @click="showCertificateDialog = true">
+                    {{ $t('invoices.uploadCertificate') }}
+                  </button>
                 </p>
                 <p class="issue-note">
-                  Al emitir, la factura se enviará como documento electrónico y no podrá editarse.
+                  {{ $t('invoices.issueNote') }}
                 </p>
                 <button type="button" class="issue-btn" :disabled="saving || !selectedEstablishmentId || !selectedEmissionPointId" @click="handleIssue">
                   <v-progress-circular v-if="saving" indeterminate size="16" width="2" class="mr-2" />
-                  {{ saving ? 'Emitiendo…' : 'Emitir factura' }}
+                  {{ saving ? $t('invoices.issuing') : $t('invoices.issueInvoice') }}
                 </button>
               </template>
             </template>
@@ -517,10 +527,10 @@ onMounted(async () => {
           <div class="paper-head">
             <div>
               <div class="paper-issuer">{{ issuerName }}</div>
-              <div class="paper-sub">Factura · Documento electrónico</div>
+              <div class="paper-sub">{{ $t('invoices.paperSub') }}</div>
             </div>
             <div class="paper-folio">
-              <span class="folio-label">N.º</span>
+              <span class="folio-label">{{ $t('invoices.folioLabel') }}</span>
               <span class="folio-value mono">{{ folioLabel }}</span>
             </div>
           </div>
@@ -528,17 +538,18 @@ onMounted(async () => {
           <div class="paper-rule" />
 
           <div class="paper-row">
-            <span class="paper-key">Fecha</span>
-            <span class="mono">{{ store.current?.issueDate ? new Date(store.current.issueDate).toLocaleDateString('es-EC') : today }}</span>
+            <span class="paper-key">{{ $t('common.date') }}</span>
+            <span class="mono">{{ store.current?.issueDate ? new Date(store.current.issueDate).toLocaleDateString(locale) :
+              today }}</span>
           </div>
 
           <div class="paper-row">
-            <span class="paper-key">Cliente</span>
+            <span class="paper-key">{{ $t('invoices.customer') }}</span>
             <span v-if="previewCustomer" class="paper-customer">
               {{ previewCustomer.businessName }}
               <small class="mono">{{ previewCustomer.identification }}</small>
             </span>
-            <span v-else class="paper-placeholder">Sin definir</span>
+            <span v-else class="paper-placeholder">{{ $t('invoices.undefined') }}</span>
           </div>
 
           <div class="paper-rule" />
@@ -553,24 +564,24 @@ onMounted(async () => {
             </div>
           </div>
           <div v-else class="paper-placeholder-block">
-            Las líneas que agregues aparecerán aquí.
+            {{ $t('invoices.linesPlaceholder') }}
           </div>
 
           <div class="paper-rule" />
 
           <div class="paper-totals">
             <div class="paper-row small">
-              <span class="paper-key">Subtotal</span>
+              <span class="paper-key">{{ $t('invoices.subtotal') }}</span>
               <span class="mono">{{ currencySymbol }}{{ store.current?.subtotal ?? '0.00' }}</span>
             </div>
             <div class="paper-row small">
-              <span class="paper-key">IVA</span>
+              <span class="paper-key">{{ $t('invoices.taxTotal') }}</span>
               <span class="mono">{{ currencySymbol }}{{ taxTotalDisplay }}</span>
             </div>
           </div>
 
           <div class="paper-total-block">
-            <span class="total-caption">Total a pagar</span>
+            <span class="total-caption">{{ $t('invoices.totalDue') }}</span>
             <div class="total-stamp" :class="{ active: hasLines }">
               <span class="mono">{{ currencySymbol }}{{ totalDisplay }}</span>
             </div>
@@ -582,24 +593,24 @@ onMounted(async () => {
     <!-- Diálogo: completar RUC/país -->
     <v-dialog v-model="showOrgDialog" max-width="420">
       <v-card>
-        <v-card-title>Completar perfil fiscal</v-card-title>
+        <v-card-title>{{ $t('invoices.completeFiscalProfile') }}</v-card-title>
         <v-card-text>
           <v-alert v-if="orgDialogError" type="error" density="compact" variant="tonal" class="mb-4">
             {{ orgDialogError }}
           </v-alert>
           <v-text-field
             v-model="quickTaxId"
-            label="RUC / identificación tributaria"
+            :label="$t('invoices.taxIdLabel')"
             variant="outlined"
             density="compact"
             class="mb-3"
             hide-details="auto"
-            placeholder="Ej. 1793176071001"
+            :placeholder="$t('invoices.taxIdPlaceholder')"
           />
           <v-select
             v-model="quickCountryCode"
             :items="[{ title: 'Ecuador', value: 'EC' }]"
-            label="País"
+            :label="$t('common.country')"
             variant="outlined"
             density="compact"
             hide-details="auto"
@@ -607,9 +618,9 @@ onMounted(async () => {
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn variant="text" @click="showOrgDialog = false">Cancelar</v-btn>
+          <v-btn variant="text" @click="showOrgDialog = false">{{ $t('common.cancel') }}</v-btn>
           <v-btn color="primary" :loading="orgDialogSaving" :disabled="!quickTaxId" @click="submitOrgProfile">
-            Guardar
+            {{ $t('common.save') }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -618,28 +629,28 @@ onMounted(async () => {
     <!-- Diálogo: crear establecimiento + punto de emisión -->
     <v-dialog v-model="showEstablishmentDialog" max-width="420">
       <v-card>
-        <v-card-title>Crear establecimiento</v-card-title>
+        <v-card-title>{{ $t('invoices.createEstablishment') }}</v-card-title>
         <v-card-text>
           <v-alert v-if="establishmentDialogError" type="error" density="compact" variant="tonal" class="mb-4">
             {{ establishmentDialogError }}
           </v-alert>
           <p class="text-caption text-medium-emphasis mb-3">
-            Se crea junto con un punto de emisión "Principal" para que puedas emitir de una.
+            {{ $t('invoices.createEstablishmentHint') }}
           </p>
           <v-text-field
             v-model="quickEstablishmentName"
-            label="Nombre del establecimiento"
+            :label="$t('invoices.establishmentName')"
             variant="outlined"
             density="compact"
             hide-details="auto"
-            placeholder="Ej. Matriz"
+            :placeholder="$t('invoices.establishmentPlaceholder')"
           />
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn variant="text" @click="showEstablishmentDialog = false">Cancelar</v-btn>
+          <v-btn variant="text" @click="showEstablishmentDialog = false">{{ $t('common.cancel') }}</v-btn>
           <v-btn color="primary" :loading="establishmentDialogSaving" :disabled="!quickEstablishmentName" @click="submitEstablishment">
-            Crear
+            {{ $t('common.create') }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -648,16 +659,16 @@ onMounted(async () => {
     <!-- Diálogo: subir certificado .p12 -->
     <v-dialog v-model="showCertificateDialog" max-width="420">
       <v-card>
-        <v-card-title>Subir certificado (.p12)</v-card-title>
+        <v-card-title>{{ $t('invoices.uploadCertificateTitle') }}</v-card-title>
         <v-card-text>
           <v-alert v-if="certDialogError" type="error" density="compact" variant="tonal" class="mb-4">
             {{ certDialogError }}
           </v-alert>
           <p class="text-caption text-medium-emphasis mb-3">
-            El archivo y la contraseña se guardan cifrados.
+            {{ $t('invoices.certEncryptedHint') }}
           </p>
           <v-file-input
-            label="Archivo .p12"
+            :label="$t('invoices.certFile')"
             variant="outlined"
             density="compact"
             accept=".p12,.pfx"
@@ -667,7 +678,7 @@ onMounted(async () => {
           />
           <v-text-field
             v-model="quickCertPassword"
-            label="Contraseña del certificado"
+            :label="$t('invoices.certPassword')"
             type="password"
             variant="outlined"
             density="compact"
@@ -676,18 +687,18 @@ onMounted(async () => {
           />
           <v-text-field
             v-model="quickCertAlias"
-            label="Nombre para identificarlo (opcional)"
+            :label="$t('invoices.certAlias')"
             variant="outlined"
             density="compact"
             hide-details="auto"
-            placeholder="Ej. Firma 2026"
+            :placeholder="$t('invoices.certAliasPlaceholder')"
           />
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn variant="text" @click="showCertificateDialog = false">Cancelar</v-btn>
+          <v-btn variant="text" @click="showCertificateDialog = false">{{ $t('common.cancel') }}</v-btn>
           <v-btn color="primary" :loading="fiscalStore.saving" :disabled="!quickCertFile || !quickCertPassword" @click="submitCertificate">
-            Subir
+            {{ $t('common.upload') }}
           </v-btn>
         </v-card-actions>
       </v-card>

@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { useFiscalStore } from '@/stores/fiscal';
 
+const { t, locale } = useI18n();
 const auth = useAuthStore();
 const store = useFiscalStore();
 
@@ -29,7 +31,7 @@ async function submit(): Promise<void> {
     password.value = '';
     alias.value = '';
   } catch (e: any) {
-    uploadError.value = e?.response?.data?.message || e.message || 'Error al subir el certificado';
+    uploadError.value = e?.response?.data?.message || e.message || t('certificates.uploadError');
   }
 }
 
@@ -59,14 +61,13 @@ onMounted(() => {
   <v-container>
     <div class="d-flex align-center justify-space-between mt-6 mb-4">
       <div>
-        <h2 class="text-h5 font-weight-medium">Certificado electrónico</h2>
+        <h2 class="text-h5 font-weight-medium">{{ $t('certificates.title') }}</h2>
         <p class="text-body-2 text-medium-emphasis mb-0">
-          Necesario para firmar y autorizar tus facturas ante el SRI. Sin un certificado activo, las
-          facturas se emiten comercialmente igual, pero nunca quedan autorizadas por el SRI.
+          {{ $t('certificates.intro') }}
         </p>
       </div>
       <v-btn v-if="canManage" color="primary" prepend-icon="mdi-upload" @click="showUploadDialog = true">
-        Subir certificado
+        {{ $t('invoices.uploadCertificate') }}
       </v-btn>
     </div>
 
@@ -85,23 +86,26 @@ onMounted(() => {
               :color="cert.status === 'active' ? (isExpired(cert.valid_until) ? 'error' : 'success') : 'grey'"
               variant="tonal"
             >
-              {{ cert.status === 'revoked' ? 'Revocado' : isExpired(cert.valid_until) ? 'Vencido' : 'Activo' }}
+              {{ cert.status === 'revoked' ? $t('certificates.statusRevoked') : isExpired(cert.valid_until) ?
+                $t('certificates.statusExpired') : $t('common.active') }}
             </v-chip>
             <v-chip v-if="cert.status === 'active' && isExpiringSoon(cert.valid_until)" size="x-small" color="warning" variant="tonal">
-              Vence pronto
+              {{ $t('certificates.expiringSoon') }}
             </v-chip>
           </v-list-item-title>
           <v-list-item-subtitle>
-            Vigente desde {{ new Date(cert.valid_from).toLocaleDateString('es-EC') }}
-            hasta {{ new Date(cert.valid_until).toLocaleDateString('es-EC') }}
+            {{ $t('certificates.validRange', {
+              from: new Date(cert.valid_from).toLocaleDateString(locale),
+              to: new Date(cert.valid_until).toLocaleDateString(locale),
+            }) }}
           </v-list-item-subtitle>
           <template #append v-if="canManage && cert.status === 'active'">
-            <v-btn icon="mdi-delete-outline" variant="text" size="small" title="Revocar" @click="revoke(cert.id)" />
+            <v-btn icon="mdi-delete-outline" variant="text" size="small" :title="$t('certificates.revoke')" @click="revoke(cert.id)" />
           </template>
         </v-list-item>
         <v-list-item v-if="store.certificates.length === 0 && !store.loading">
           <v-list-item-title class="text-medium-emphasis">
-            No hay ningún certificado cargado todavía.
+            {{ $t('certificates.empty') }}
           </v-list-item-title>
         </v-list-item>
       </v-list>
@@ -109,16 +113,16 @@ onMounted(() => {
 
     <v-dialog v-model="showUploadDialog" max-width="480">
       <v-card>
-        <v-card-title>Subir certificado (.p12)</v-card-title>
+        <v-card-title>{{ $t('invoices.uploadCertificateTitle') }}</v-card-title>
         <v-card-text>
           <v-alert v-if="uploadError" type="error" density="compact" variant="tonal" class="mb-4">
             {{ uploadError }}
           </v-alert>
           <p class="text-caption text-medium-emphasis mb-3">
-            El archivo y la contraseña se guardan cifrados. Nunca se muestran de nuevo tras subirlos.
+            {{ $t('certificates.encryptedHint') }}
           </p>
           <v-file-input
-            label="Archivo .p12"
+            :label="$t('invoices.certFile')"
             variant="outlined"
             density="compact"
             accept=".p12,.pfx"
@@ -128,7 +132,7 @@ onMounted(() => {
           />
           <v-text-field
             v-model="password"
-            label="Contraseña del certificado"
+            :label="$t('invoices.certPassword')"
             type="password"
             variant="outlined"
             density="compact"
@@ -137,18 +141,18 @@ onMounted(() => {
           />
           <v-text-field
             v-model="alias"
-            label="Nombre para identificarlo (opcional)"
+            :label="$t('invoices.certAlias')"
             variant="outlined"
             density="compact"
             hide-details="auto"
-            placeholder="Ej. Firma 2026"
+            :placeholder="$t('invoices.certAliasPlaceholder')"
           />
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn variant="text" @click="showUploadDialog = false">Cancelar</v-btn>
+          <v-btn variant="text" @click="showUploadDialog = false">{{ $t('common.cancel') }}</v-btn>
           <v-btn color="primary" :loading="store.saving" :disabled="!selectedFile || !password" @click="submit">
-            Subir
+            {{ $t('common.upload') }}
           </v-btn>
         </v-card-actions>
       </v-card>

@@ -117,13 +117,14 @@ function logout(): void {
         <v-divider />
 
         <v-list density="compact" class="py-0">
-          <v-list-item prepend-icon="mdi-account-outline" title="Mi perfil" value="profile" @click="goToProfile" />
+          <v-list-item prepend-icon="mdi-account-outline" :title="$t('common.myProfile')" value="profile"
+            @click="goToProfile" />
         </v-list>
 
         <v-divider />
 
         <v-list density="compact" class="py-0">
-          <v-list-item prepend-icon="mdi-logout" title="Cerrar sesión" value="logout" @click="logout" />
+          <v-list-item prepend-icon="mdi-logout" :title="$t('common.logout')" value="logout" @click="logout" />
         </v-list>
         </v-card>
       </v-menu>

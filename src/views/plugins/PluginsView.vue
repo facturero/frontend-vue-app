@@ -19,13 +19,13 @@ onMounted(() => {
 <template>
   <v-container>
     <div class="d-flex align-center justify-space-between mt-6 mb-4">
-      <h2 class="text-h5 font-weight-medium">Plugins</h2>
+      <h2 class="text-h5 font-weight-medium">{{ $t('plugins.title') }}</h2>
     </div>
 
     <v-tabs v-model="tab" color="primary" class="mb-4">
-      <v-tab value="catalog" prepend-icon="mdi-storefront-outline">Catálogo</v-tab>
-      <v-tab value="my" prepend-icon="mdi-puzzle-outline">Mis plugins</v-tab>
-      <v-tab value="custom" prepend-icon="mdi-file-document-edit-outline">A medida</v-tab>
+      <v-tab value="catalog" prepend-icon="mdi-storefront-outline">{{ $t('plugins.tabCatalog') }}</v-tab>
+      <v-tab value="my" prepend-icon="mdi-puzzle-outline">{{ $t('plugins.tabMine') }}</v-tab>
+      <v-tab value="custom" prepend-icon="mdi-file-document-edit-outline">{{ $t('plugins.tabCustom') }}</v-tab>
     </v-tabs>
 
     <v-tabs-window v-model="tab">

@@ -56,15 +56,14 @@ async function submit(): Promise<void> {
 
 <template>
   <v-container>
-    <h2 class="text-h5 font-weight-medium mt-6 mb-4">Configuración de la organización</h2>
+    <h2 class="text-h5 font-weight-medium mt-6 mb-4">{{ $t('organization.settingsTitle') }}</h2>
 
     <v-row>
       <v-col cols="12" md="8" lg="6">
         <v-card elevation="2" rounded="lg">
           <v-card-text>
             <p class="text-body-2 text-medium-emphasis mb-4">
-              Datos fiscales de tu organización. Se usan para emitir facturas y en el perfil de la empresa.
-              El RUC y el país son obligatorios para poder emitir documentos electrónicos.
+              {{ $t('organization.settingsIntro') }}
             </p>
 
             <v-alert
@@ -88,44 +87,44 @@ async function submit(): Promise<void> {
               density="compact"
               @click:close="saved = false"
             >
-              Organización actualizada
+              {{ $t('organization.updated') }}
             </v-alert>
 
             <v-form @submit.prevent="submit">
               <v-text-field
                 v-model="legalName"
-                label="Nombre legal (razón social)"
+                :label="$t('organization.legalName')"
                 variant="outlined"
                 density="compact"
                 class="mb-4"
                 hide-details="auto"
-                placeholder="Ej. Mi Empresa S.A.S."
+                :placeholder="$t('organization.legalNamePlaceholder')"
               />
 
               <v-text-field
                 v-model="tradeName"
-                label="Nombre comercial"
+                :label="$t('customers.tradeName')"
                 variant="outlined"
                 density="compact"
                 class="mb-4"
                 hide-details="auto"
-                placeholder="Ej. MiEmpresa"
+                :placeholder="$t('organization.tradeNamePlaceholder')"
               />
 
               <v-text-field
                 v-model="taxId"
-                label="RUC / identificación tributaria"
+                :label="$t('invoices.taxIdLabel')"
                 variant="outlined"
                 density="compact"
                 class="mb-4"
                 hide-details="auto"
-                placeholder="Ej. 1793176071001"
+                :placeholder="$t('invoices.taxIdPlaceholder')"
               />
 
               <v-select
                 v-model="countryCode"
                 :items="[{ title: 'Ecuador', value: 'EC' }]"
-                label="País"
+                :label="$t('common.country')"
                 variant="outlined"
                 density="compact"
                 class="mb-4"
@@ -134,15 +133,15 @@ async function submit(): Promise<void> {
 
               <v-checkbox
                 v-model="obligadoContabilidad"
-                label="Obligado a llevar contabilidad"
+                :label="$t('organization.accountingObliged')"
                 density="compact"
                 hide-details="auto"
                 class="mb-4"
               />
-              <p class="text-caption text-medium-emphasis mb-4" style="margin-top: -8px;">
-                Depende de tus ingresos/patrimonio según el SRI — marca esta opción si tu empresa está obligada.
-                Afecta el campo <code>obligadoContabilidad</code> de las facturas electrónicas.
-              </p>
+              <i18n-t keypath="organization.accountingHint" tag="p"
+                class="text-caption text-medium-emphasis mb-4" style="margin-top: -8px;">
+                <template #field><code>obligadoContabilidad</code></template>
+              </i18n-t>
 
               <v-btn
                 block
@@ -151,7 +150,7 @@ async function submit(): Promise<void> {
                 :loading="store.saving"
                 :disabled="!legalName || !taxId || !countryCode"
               >
-                Guardar cambios
+                {{ $t('common.saveChanges') }}
               </v-btn>
             </v-form>
           </v-card-text>
@@ -164,13 +163,13 @@ async function submit(): Promise<void> {
         <v-card elevation="2" rounded="lg" class="mt-2">
           <v-card-text class="d-flex align-center justify-space-between">
             <div>
-              <p class="text-body-1 font-weight-medium mb-1">Establecimientos y puntos de emisión</p>
+              <p class="text-body-1 font-weight-medium mb-1">{{ $t('organization.establishmentsCard') }}</p>
               <p class="text-body-2 text-medium-emphasis mb-0">
-                Necesarios para emitir facturas.
+                {{ $t('organization.establishmentsCardHint') }}
               </p>
             </div>
             <v-btn variant="outlined" color="primary" to="/organization/establishments">
-              Gestionar
+              {{ $t('organization.manage') }}
             </v-btn>
           </v-card-text>
         </v-card>
@@ -182,13 +181,13 @@ async function submit(): Promise<void> {
         <v-card elevation="2" rounded="lg" class="mt-2">
           <v-card-text class="d-flex align-center justify-space-between">
             <div>
-              <p class="text-body-1 font-weight-medium mb-1">Certificado electrónico</p>
+              <p class="text-body-1 font-weight-medium mb-1">{{ $t('organization.certificateCard') }}</p>
               <p class="text-body-2 text-medium-emphasis mb-0">
-                Necesario para que el SRI autorice tus facturas.
+                {{ $t('organization.certificateCardHint') }}
               </p>
             </div>
             <v-btn variant="outlined" color="primary" to="/organization/certificates">
-              Gestionar
+              {{ $t('organization.manage') }}
             </v-btn>
           </v-card-text>
         </v-card>

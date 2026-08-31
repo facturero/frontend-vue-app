@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { useEmployeeStore } from '@/stores/employees';
 import { useOrganizationStore } from '@/stores/organization';
@@ -10,6 +11,7 @@ import InviteEmployeeDialog from '@/components/InviteEmployeeDialog.vue';
 import RestorePasswordDialog from '@/components/RestorePasswordDialog.vue';
 import type { EmployeeSummary } from '@/types/employees';
 
+const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
@@ -82,7 +84,7 @@ onMounted(async () => {
 <template>
   <v-container>
     <div class="d-flex align-center justify-space-between mt-6 mb-4">
-      <h2 class="text-h5 font-weight-medium">Empleados</h2>
+      <h2 class="text-h5 font-weight-medium">{{ $t('employees.title') }}</h2>
       <v-btn
         v-if="canInvite"
         color="primary"
@@ -90,7 +92,7 @@ onMounted(async () => {
         prepend-icon="mdi-account-plus"
         @click="openInvite"
       >
-        Invitar
+        {{ $t('employees.invite') }}
       </v-btn>
     </div>
 
@@ -113,13 +115,13 @@ onMounted(async () => {
             <v-select
               v-model="establishmentFilter"
               :items="[
-                { title: 'Todos los establecimientos', value: null },
+                { title: $t('employees.allEstablishments'), value: null },
                 ...organizationStore.establishments.map((e) => ({
                   title: `${e.code} — ${e.name}`,
                   value: e.id,
                 })),
               ]"
-              label="Establecimiento"
+              :label="$t('organization.establishment')"
               variant="outlined"
               density="compact"
               hide-details
@@ -136,14 +138,14 @@ onMounted(async () => {
       <v-table>
         <thead>
           <tr>
-            <th class="text-left font-weight-medium">Nombre</th>
-            <th class="text-left font-weight-medium">Usuario</th>
-            <th v-if="canViewPasswords" class="text-left font-weight-medium">Contraseña</th>
-            <th class="text-left font-weight-medium">Email</th>
-            <th class="text-left font-weight-medium">Roles</th>
-            <th class="text-left font-weight-medium">Establecimientos</th>
-            <th class="text-left font-weight-medium">Estado</th>
-            <th v-if="showActions" class="text-right font-weight-medium">Acciones</th>
+            <th class="text-left font-weight-medium">{{ $t('common.name') }}</th>
+            <th class="text-left font-weight-medium">{{ $t('employees.username') }}</th>
+            <th v-if="canViewPasswords" class="text-left font-weight-medium">{{ $t('employees.password') }}</th>
+            <th class="text-left font-weight-medium">{{ $t('common.email') }}</th>
+            <th class="text-left font-weight-medium">{{ $t('employees.roles') }}</th>
+            <th class="text-left font-weight-medium">{{ $t('employees.establishments') }}</th>
+            <th class="text-left font-weight-medium">{{ $t('common.status') }}</th>
+            <th v-if="showActions" class="text-right font-weight-medium">{{ $t('common.actions') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -152,7 +154,7 @@ onMounted(async () => {
             <td>{{ e.username || '—' }}</td>
             <td v-if="canViewPasswords">
               <span :class="e.hasPassword ? '' : 'text-medium-emphasis'">
-                {{ e.hasPassword ? '*****' : 'No establecida' }}
+                {{ e.hasPassword ? '*****' : $t('employees.passwordNotSet') }}
               </span>
             </td>
             <td>{{ e.email }}</td>
@@ -190,21 +192,21 @@ onMounted(async () => {
                 size="small"
                 variant="text"
                 icon="mdi-key-change"
-                title="Restaurar contraseña"
+                :title="$t('employees.restorePassword')"
                 @click="openRestore(e)"
               />
               <v-btn
                 size="small"
                 variant="text"
                 icon="mdi-account-cog"
-                title="Ver detalle"
+                :title="$t('employees.viewDetail')"
                 @click="router.push({ name: 'employees-detail', params: { id: e.id } })"
               />
             </td>
           </tr>
           <tr v-if="emp.list.length === 0">
             <td :colspan="colCount" class="text-center text-medium-emphasis py-6">
-              No hay empleados registrados
+              {{ $t('employees.empty') }}
             </td>
           </tr>
         </tbody>

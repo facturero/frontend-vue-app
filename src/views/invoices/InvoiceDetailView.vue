@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useInvoiceStore } from '@/stores/invoices';
 import { useAuthStore } from '@/stores/auth';
 import { fileApi } from '@/api/files';
 
 const props = defineProps<{ id: string }>();
+const { t, locale } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const store = useInvoiceStore();
@@ -28,8 +30,9 @@ const docsMaxPolls = 5;
 const docsPollInterval = ref<ReturnType<typeof setInterval> | null>(null);
 
 const statusLabel = (status: string) => {
-  const map: Record<string, string> = { draft: 'Borrador', issued: 'Emitida', voided: 'Anulada' };
-  return map[status] || status;
+  const key = `invoices.status.${status}`;
+  const label = t(key);
+  return label === key ? status : label;
 };
 
 const statusColor = (status: string) => {
@@ -40,7 +43,7 @@ const statusColor = (status: string) => {
 const formatMoney = (cents: number) => (cents / 100).toFixed(2);
 const formatDate = (date: string | null) => {
   if (!date) return '-';
-  return new Date(date).toLocaleDateString('es-EC', { year: 'numeric', month: 'long', day: 'numeric' });
+  return new Date(date).toLocaleDateString(locale.value, { year: 'numeric', month: 'long', day: 'numeric' });
 };
 
 function downloadFile(fileId: string) {
@@ -96,7 +99,7 @@ onMounted(async () => {
     <v-row align="center" class="mb-4">
       <v-col>
         <v-btn variant="text" prepend-icon="mdi-arrow-left" @click="router.push('/invoices')">
-          Volver
+          {{ $t('common.back') }}
         </v-btn>
       </v-col>
       <v-col class="text-right">
@@ -108,7 +111,7 @@ onMounted(async () => {
           class="mr-2"
           @click="router.push(`/invoices/${invoiceId}/edit`)"
         >
-          Editar
+          {{ $t('common.edit') }}
         </v-btn>
         <v-btn
           v-if="store.current?.status === 'issued' && canVoid"
@@ -116,7 +119,7 @@ onMounted(async () => {
           prepend-icon="mdi-cancel"
           @click="voidDialog = true"
         >
-          Anular
+          {{ $t('invoices.void') }}
         </v-btn>
       </v-col>
     </v-row>
@@ -126,7 +129,7 @@ onMounted(async () => {
     <template v-if="store.current">
       <v-card class="mb-4">
         <v-card-title class="d-flex align-center">
-          Factura {{ store.current.number || '— (borrador)' }}
+          {{ $t('invoices.singular') }} {{ store.current.number || $t('invoices.draftSuffix') }}
           <v-chip :color="statusColor(store.current.status)" class="ml-3" size="small">
             {{ statusLabel(store.current.status) }}
           </v-chip>
@@ -134,49 +137,49 @@ onMounted(async () => {
         <v-card-text>
           <v-row>
             <v-col cols="6">
-              <strong>Emisor:</strong><br>
+              <strong>{{ $t('invoices.issuer') }}:</strong><br>
               <template v-if="store.current.issuerSnapshot">
                 {{ store.current.issuerSnapshot.legalName }}<br>
                 {{ store.current.issuerSnapshot.taxId }}<br>
                 {{ store.current.issuerSnapshot.address }}
               </template>
-              <span v-else class="text-grey">Sin datos del emisor</span>
+              <span v-else class="text-grey">{{ $t('invoices.noIssuerData') }}</span>
             </v-col>
             <v-col cols="6">
-              <strong>Cliente:</strong><br>
+              <strong>{{ $t('invoices.customer') }}:</strong><br>
               <template v-if="store.current.customerSnapshot">
                 {{ store.current.customerSnapshot.businessName }}<br>
                 {{ store.current.customerSnapshot.identification }}<br>
                 {{ store.current.customerSnapshot.email }}
               </template>
-              <span v-else class="text-grey">Sin datos del cliente</span>
+              <span v-else class="text-grey">{{ $t('invoices.noCustomerData') }}</span>
             </v-col>
           </v-row>
           <v-row class="mt-2">
             <v-col cols="4">
-              <strong>Fecha emisión:</strong> {{ formatDate(store.current.issueDate) }}
+              <strong>{{ $t('invoices.issueDate') }}:</strong> {{ formatDate(store.current.issueDate) }}
             </v-col>
             <v-col cols="4">
-              <strong>Moneda:</strong> {{ store.current.currencyCode }}
+              <strong>{{ $t('products.currency') }}:</strong> {{ store.current.currencyCode }}
             </v-col>
             <v-col cols="4">
-              <strong>Estado:</strong> {{ statusLabel(store.current.status) }}
+              <strong>{{ $t('common.status') }}:</strong> {{ statusLabel(store.current.status) }}
             </v-col>
           </v-row>
         </v-card-text>
       </v-card>
 
       <v-card class="mb-4">
-        <v-card-title>Líneas</v-card-title>
+        <v-card-title>{{ $t('invoices.lines') }}</v-card-title>
         <v-table>
           <thead>
             <tr>
-              <th>Producto</th>
-              <th>Descripción</th>
-              <th class="text-right">Cantidad</th>
-              <th class="text-right">P. Unitario</th>
-              <th class="text-right">Dto.</th>
-              <th class="text-right">Subtotal</th>
+              <th>{{ $t('products.singular') }}</th>
+              <th>{{ $t('common.description') }}</th>
+              <th class="text-right">{{ $t('invoices.quantity') }}</th>
+              <th class="text-right">{{ $t('invoices.unitPrice') }}</th>
+              <th class="text-right">{{ $t('invoices.discount') }}</th>
+              <th class="text-right">{{ $t('invoices.subtotal') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -191,22 +194,22 @@ onMounted(async () => {
           </tbody>
         </v-table>
         <v-card-text class="text-right">
-          <div><strong>Subtotal:</strong> {{ store.current.subtotal }}</div>
-          <div><strong>IVA:</strong> {{ store.current.taxTotal }}</div>
-          <div class="text-h6"><strong>Total:</strong> {{ store.current.total }}</div>
+          <div><strong>{{ $t('invoices.subtotal') }}:</strong> {{ store.current.subtotal }}</div>
+          <div><strong>{{ $t('invoices.taxTotal') }}:</strong> {{ store.current.taxTotal }}</div>
+          <div class="text-h6"><strong>{{ $t('invoices.total') }}:</strong> {{ store.current.total }}</div>
         </v-card-text>
       </v-card>
 
       <v-card v-if="store.current.status === 'voided'">
-        <v-card-title>Anulacion</v-card-title>
+        <v-card-title>{{ $t('invoices.voidTitle') }}</v-card-title>
         <v-card-text>
-          <p><strong>Motivo:</strong> {{ store.current.voidedReason }}</p>
-          <p><strong>Fecha:</strong> {{ formatDate(store.current.voidedAt) }}</p>
+          <p><strong>{{ $t('invoices.voidReason') }}:</strong> {{ store.current.voidedReason }}</p>
+          <p><strong>{{ $t('common.date') }}:</strong> {{ formatDate(store.current.voidedAt) }}</p>
         </v-card-text>
       </v-card>
 
       <v-card v-if="store.current.status !== 'draft'" class="mb-4">
-        <v-card-title>Documentos</v-card-title>
+        <v-card-title>{{ $t('common.documents') }}</v-card-title>
         <v-card-text>
           <v-progress-linear v-if="docsLoading" indeterminate class="mb-2" />
           <template v-if="documents.length > 0">
@@ -215,7 +218,7 @@ onMounted(async () => {
                 v-for="doc in documents"
                 :key="doc.id"
                 :title="doc.originalName"
-                :subtitle="`${doc.mimeType} - ${new Date(doc.createdAt).toLocaleDateString('es-EC')}`"
+                :subtitle="`${doc.mimeType} - ${new Date(doc.createdAt).toLocaleDateString(locale)}`"
               >
                 <template #append>
                   <v-btn
@@ -225,7 +228,7 @@ onMounted(async () => {
                     prepend-icon="mdi-download"
                     @click="downloadFile(doc.id)"
                   >
-                    Descargar
+                    {{ $t('common.download') }}
                   </v-btn>
                 </template>
               </v-list-item>
@@ -233,7 +236,7 @@ onMounted(async () => {
           </template>
           <p v-else-if="!docsLoading" class="text-grey">
             <v-progress-circular v-if="docsPolling < docsMaxPolls" indeterminate size="14" width="2" class="mr-2" />
-            {{ docsPolling < docsMaxPolls ? 'Generando documentos...' : 'No se encontraron documentos.' }}
+            {{ docsPolling < docsMaxPolls ? $t('invoices.generatingDocs') : $t('invoices.noDocs') }}
           </p>
         </v-card-text>
       </v-card>
@@ -241,15 +244,15 @@ onMounted(async () => {
 
     <v-dialog v-model="voidDialog" max-width="500">
       <v-card>
-        <v-card-title>Anular factura</v-card-title>
+        <v-card-title>{{ $t('invoices.voidInvoice') }}</v-card-title>
         <v-card-text>
-          <v-textarea v-model="voidReason" label="Motivo de anulación" required />
+          <v-textarea v-model="voidReason" :label="$t('invoices.voidReasonLabel')" required />
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn variant="text" @click="voidDialog = false">Cancelar</v-btn>
+          <v-btn variant="text" @click="voidDialog = false">{{ $t('common.cancel') }}</v-btn>
           <v-btn color="error" :disabled="!voidReason" :loading="store.saving" @click="handleVoid">
-            Anular factura
+            {{ $t('invoices.voidInvoice') }}
           </v-btn>
         </v-card-actions>
       </v-card>

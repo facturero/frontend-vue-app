@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { useCustomerStore } from '@/stores/customers';
 import { customerApi } from '@/api/customers';
@@ -8,6 +9,7 @@ import type { ContactInput, AddressInput, AddressType } from '@/types/customers'
 
 const apiUrl = import.meta.env.VITE_API_URL as string;
 
+const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
@@ -20,10 +22,10 @@ const disabling = ref(false);
 const customer = computed(() => store.current);
 
 const idTypeName = computed(() => {
-  const t = store.identificationTypes.find(
-    (t) => t.id === customer.value?.identificationTypeId,
+  const idType = store.identificationTypes.find(
+    (x) => x.id === customer.value?.identificationTypeId,
   );
-  return t?.name ?? '—';
+  return idType?.name ?? '—';
 });
 
 // --------- Contactos ---------
@@ -68,7 +70,7 @@ async function submitContact(): Promise<void> {
 }
 
 async function removeContact(id: string): Promise<void> {
-  if (!confirm('¿Eliminar este contacto?')) return;
+  if (!confirm(t('customers.removeContactConfirm'))) return;
   await customerApi.removeContact(id);
   await store.fetchById(customerId.value);
 }
@@ -119,21 +121,21 @@ async function submitAddress(): Promise<void> {
 }
 
 async function removeAddress(id: string): Promise<void> {
-  if (!confirm('¿Eliminar esta dirección?')) return;
+  if (!confirm(t('customers.removeAddressConfirm'))) return;
   await customerApi.removeAddress(id);
   await store.fetchById(customerId.value);
 }
 
-const addressTypeLabels: Record<AddressType, string> = {
-  billing: 'Facturación',
-  shipping: 'Envío',
-  other: 'Otro',
-};
+const addressTypeLabels = computed<Record<AddressType, string>>(() => ({
+  billing: t('customers.addressType.billing'),
+  shipping: t('customers.addressType.shipping'),
+  other: t('customers.addressType.other'),
+}));
 
 // --------- Etiquetas ---------
 const availableTags = computed(() =>
   store.tags.filter(
-    (t) => !customer.value?.tags.some((ct) => ct.id === t.id),
+    (tag) => !customer.value?.tags.some((ct) => ct.id === tag.id),
   ),
 );
 
@@ -149,7 +151,7 @@ async function removeTag(tagId: string): Promise<void> {
 
 // --------- Acciones principales ---------
 async function disable(): Promise<void> {
-  if (!confirm('¿Desactivar este cliente?')) return;
+  if (!confirm(t('customers.deactivateConfirm'))) return;
   disabling.value = true;
   try {
     await store.disable(customerId.value);
@@ -180,16 +182,16 @@ onMounted(async () => {
       <v-btn variant="text" icon="mdi-arrow-left" class="mr-2"
         @click="router.push({ name: 'customers' })" />
       <h2 class="text-h5 font-weight-medium">
-        {{ customer?.businessName || 'Cliente' }}
+        {{ customer?.businessName || $t('customers.singular') }}
       </h2>
       <v-spacer />
       <v-btn v-if="canUpdate && customer?.status === 'active'" color="error" variant="tonal" size="small"
         prepend-icon="mdi-archive" :loading="disabling" @click="disable" class="mr-2">
-        Desactivar
+        {{ $t('common.deactivate') }}
       </v-btn>
       <v-btn v-if="canUpdate" color="primary" variant="tonal" size="small" prepend-icon="mdi-pencil"
         @click="goEdit">
-        Editar
+        {{ $t('common.edit') }}
       </v-btn>
     </div>
 
@@ -203,48 +205,48 @@ onMounted(async () => {
         <v-col cols="12" md="8">
           <!-- Información general -->
           <v-card elevation="2" rounded="lg" class="mb-4">
-            <v-card-title class="text-h6">Información general</v-card-title>
+            <v-card-title class="text-h6">{{ $t('common.generalInfo') }}</v-card-title>
             <v-card-text>
               <v-row>
                 <v-col cols="6">
-                  <p class="text-caption text-medium-emphasis">Nombre / Razón social</p>
+                  <p class="text-caption text-medium-emphasis">{{ $t('customers.headers.businessName') }}</p>
                   <p class="text-body-1 mb-3">{{ customer.businessName }}</p>
                 </v-col>
                 <v-col cols="6">
-                  <p class="text-caption text-medium-emphasis">Nombre comercial</p>
+                  <p class="text-caption text-medium-emphasis">{{ $t('customers.tradeName') }}</p>
                   <p class="text-body-1 mb-3">{{ customer.tradeName || '—' }}</p>
                 </v-col>
                 <v-col cols="6">
-                  <p class="text-caption text-medium-emphasis">Tipo</p>
+                  <p class="text-caption text-medium-emphasis">{{ $t('common.type') }}</p>
                   <v-chip size="x-small" variant="tonal"
                     :color="customer.type === 'company' ? 'primary' : 'info'" class="mb-3">
-                    {{ customer.type === 'company' ? 'Empresa' : 'Persona' }}
+                    {{ customer.type === 'company' ? $t('customers.company') : $t('customers.person') }}
                   </v-chip>
                 </v-col>
                 <v-col cols="6">
-                  <p class="text-caption text-medium-emphasis">Estado</p>
+                  <p class="text-caption text-medium-emphasis">{{ $t('common.status') }}</p>
                   <v-chip size="x-small" :color="customer.status === 'active' ? 'success' : 'warning'"
                     variant="tonal" class="mb-3">
-                    {{ customer.status === 'active' ? 'Activo' : 'Inactivo' }}
+                    {{ customer.status === 'active' ? $t('common.active') : $t('common.inactive') }}
                   </v-chip>
                 </v-col>
                 <v-col cols="6">
-                  <p class="text-caption text-medium-emphasis">Identificación</p>
+                  <p class="text-caption text-medium-emphasis">{{ $t('customers.headers.identification') }}</p>
                   <p class="text-body-1 mb-3">
                     {{ customer.identification || '—' }}
                     <span class="text-caption text-medium-emphasis">({{ idTypeName }})</span>
                   </p>
                 </v-col>
                 <v-col cols="6">
-                  <p class="text-caption text-medium-emphasis">País</p>
+                  <p class="text-caption text-medium-emphasis">{{ $t('common.country') }}</p>
                   <p class="text-body-1 mb-3">{{ customer.countryCode }}</p>
                 </v-col>
                 <v-col cols="6">
-                  <p class="text-caption text-medium-emphasis">Email</p>
+                  <p class="text-caption text-medium-emphasis">{{ $t('common.email') }}</p>
                   <p class="text-body-1 mb-3">{{ customer.email || '—' }}</p>
                 </v-col>
                 <v-col cols="6">
-                  <p class="text-caption text-medium-emphasis">Teléfono</p>
+                  <p class="text-caption text-medium-emphasis">{{ $t('common.phone') }}</p>
                   <p class="text-body-1 mb-3">{{ customer.phone || '—' }}</p>
                 </v-col>
               </v-row>
@@ -254,21 +256,21 @@ onMounted(async () => {
           <!-- Contactos -->
           <v-card v-if="customer.type === 'company'" elevation="2" rounded="lg" class="mb-4">
             <v-card-title class="text-h6 d-flex align-center">
-              Contactos
+              {{ $t('customers.contacts') }}
               <v-spacer />
               <v-btn v-if="canUpdate" size="small" variant="tonal" color="primary" prepend-icon="mdi-plus"
                 @click="openNewContact">
-                Agregar
+                {{ $t('common.add') }}
               </v-btn>
             </v-card-title>
             <v-card-text>
               <v-table v-if="customer.contacts.length > 0" density="compact">
                 <thead>
                   <tr>
-                    <th class="text-left font-weight-medium">Nombre</th>
-                    <th class="text-left font-weight-medium">Cargo</th>
-                    <th class="text-left font-weight-medium">Email</th>
-                    <th class="text-left font-weight-medium">Teléfono</th>
+                    <th class="text-left font-weight-medium">{{ $t('common.name') }}</th>
+                    <th class="text-left font-weight-medium">{{ $t('customers.position') }}</th>
+                    <th class="text-left font-weight-medium">{{ $t('common.email') }}</th>
+                    <th class="text-left font-weight-medium">{{ $t('common.phone') }}</th>
                     <th />
                   </tr>
                 </thead>
@@ -287,18 +289,18 @@ onMounted(async () => {
                   </tr>
                 </tbody>
               </v-table>
-              <p v-else class="text-body-2 text-medium-emphasis">Sin contactos</p>
+              <p v-else class="text-body-2 text-medium-emphasis">{{ $t('customers.noContacts') }}</p>
             </v-card-text>
           </v-card>
 
           <!-- Direcciones -->
           <v-card v-if="customer.type === 'company'" elevation="2" rounded="lg" class="mb-4">
             <v-card-title class="text-h6 d-flex align-center">
-              Direcciones
+              {{ $t('customers.addresses') }}
               <v-spacer />
               <v-btn v-if="canUpdate" size="small" variant="tonal" color="primary" prepend-icon="mdi-plus"
                 @click="openNewAddress">
-                Agregar
+                {{ $t('common.add') }}
               </v-btn>
             </v-card-title>
             <v-card-text>
@@ -311,14 +313,14 @@ onMounted(async () => {
                           {{ addressTypeLabels[a.type] }}
                         </v-chip>
                         <v-chip v-if="a.isPrimary" size="x-small" color="primary" variant="tonal">
-                          Principal
+                          {{ $t('common.primary') }}
                         </v-chip>
                       </div>
                       <p class="text-body-2 mb-1">{{ a.line1 }}</p>
                       <p v-if="a.line2" class="text-body-2 mb-1">{{ a.line2 }}</p>
                       <p class="text-caption text-medium-emphasis">
                         {{ [a.city, a.province, a.countryCode].filter(Boolean).join(', ') || '—' }}
-                        <span v-if="a.postalCode">· CP {{ a.postalCode }}</span>
+                        <span v-if="a.postalCode">· {{ $t('customers.postalCodeShort') }} {{ a.postalCode }}</span>
                       </p>
                     </div>
                     <div class="d-flex ga-1">
@@ -330,7 +332,7 @@ onMounted(async () => {
                   </div>
                 </v-card>
               </div>
-              <p v-else class="text-body-2 text-medium-emphasis">Sin direcciones</p>
+              <p v-else class="text-body-2 text-medium-emphasis">{{ $t('customers.noAddresses') }}</p>
             </v-card-text>
           </v-card>
         </v-col>
@@ -338,7 +340,7 @@ onMounted(async () => {
         <!-- Sidebar: avatar + etiquetas + metadatos -->
         <v-col cols="12" md="4">
           <v-card v-if="customer.imageFileId" elevation="2" rounded="lg" class="mb-4">
-            <v-card-title class="text-h6">Avatar</v-card-title>
+            <v-card-title class="text-h6">{{ $t('customers.avatar') }}</v-card-title>
             <v-card-text class="d-flex justify-center">
               <v-avatar size="150" rounded="lg">
                 <v-img :src="`${apiUrl}/files/${customer.imageFileId}/download`" alt="avatar" cover />
@@ -347,19 +349,19 @@ onMounted(async () => {
           </v-card>
 
           <v-card elevation="2" rounded="lg" class="mb-4">
-            <v-card-title class="text-h6">Etiquetas</v-card-title>
+            <v-card-title class="text-h6">{{ $t('customers.tags') }}</v-card-title>
             <v-card-text>
               <div class="d-flex flex-wrap ga-2 mb-3">
-                <v-chip v-for="t in customer.tags" :key="t.id" size="small" :color="t.color || 'default'"
-                  variant="tonal" closable @click:close="removeTag(t.id)">
-                  {{ t.name }}
+                <v-chip v-for="tag in customer.tags" :key="tag.id" size="small" :color="tag.color || 'default'"
+                  variant="tonal" closable @click:close="removeTag(tag.id)">
+                  {{ tag.name }}
                 </v-chip>
                 <p v-if="customer.tags.length === 0" class="text-body-2 text-medium-emphasis">
-                  Sin etiquetas
+                  {{ $t('customers.noTags') }}
                 </p>
               </div>
               <v-select v-if="canUpdate && availableTags.length > 0" :items="availableTags" item-title="name"
-                item-value="id" label="Agregar etiqueta" variant="outlined" density="compact" hide-details
+                item-value="id" :label="$t('customers.addTag')" variant="outlined" density="compact" hide-details
                 @update:model-value="assignTag" />
             </v-card-text>
           </v-card>
@@ -374,22 +376,22 @@ onMounted(async () => {
     <!-- Diálogo de contacto -->
     <v-dialog v-model="contactDialog" max-width="500">
       <v-card>
-        <v-card-title>{{ editingContactId ? 'Editar contacto' : 'Nuevo contacto' }}</v-card-title>
+        <v-card-title>{{ editingContactId ? $t('customers.editContact') : $t('customers.newContact') }}</v-card-title>
         <v-card-text>
-          <v-text-field v-model="contactForm.name" label="Nombre" variant="outlined" density="compact"
+          <v-text-field v-model="contactForm.name" :label="$t('common.name')" variant="outlined" density="compact"
             required class="mb-3" hide-details="auto" />
-          <v-text-field v-model="contactForm.position" label="Cargo" variant="outlined" density="compact"
+          <v-text-field v-model="contactForm.position" :label="$t('customers.position')" variant="outlined" density="compact"
             class="mb-3" hide-details="auto" />
-          <v-text-field v-model="contactForm.email" label="Email" type="email" variant="outlined"
+          <v-text-field v-model="contactForm.email" :label="$t('common.email')" type="email" variant="outlined"
             density="compact" class="mb-3" hide-details="auto" />
-          <v-text-field v-model="contactForm.phone" label="Teléfono" variant="outlined" density="compact"
+          <v-text-field v-model="contactForm.phone" :label="$t('common.phone')" variant="outlined" density="compact"
             hide-details="auto" />
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn variant="text" @click="contactDialog = false">Cancelar</v-btn>
+          <v-btn variant="text" @click="contactDialog = false">{{ $t('common.cancel') }}</v-btn>
           <v-btn color="primary" variant="tonal" :loading="contactBusy" @click="submitContact">
-            Guardar
+            {{ $t('common.save') }}
           </v-btn>
         </v-card-actions>
       </v-card>
@@ -398,49 +400,49 @@ onMounted(async () => {
     <!-- Diálogo de dirección -->
     <v-dialog v-model="addressDialog" max-width="600">
       <v-card>
-        <v-card-title>{{ editingAddressId ? 'Editar dirección' : 'Nueva dirección' }}</v-card-title>
+        <v-card-title>{{ editingAddressId ? $t('customers.editAddress') : $t('customers.newAddress') }}</v-card-title>
         <v-card-text>
           <v-row dense>
             <v-col cols="12" md="6">
               <v-select v-model="addressForm.type" :items="[
-                { title: 'Facturación', value: 'billing' },
-                { title: 'Envío', value: 'shipping' },
-                { title: 'Otro', value: 'other' },
-              ]" label="Tipo" variant="outlined" density="compact" class="mb-3" hide-details="auto" />
+                { title: $t('customers.addressType.billing'), value: 'billing' },
+                { title: $t('customers.addressType.shipping'), value: 'shipping' },
+                { title: $t('customers.addressType.other'), value: 'other' },
+              ]" :label="$t('common.type')" variant="outlined" density="compact" class="mb-3" hide-details="auto" />
             </v-col>
             <v-col cols="12" md="6" class="d-flex align-center">
-              <v-switch v-model="addressForm.isPrimary" label="Principal" color="primary" hide-details
+              <v-switch v-model="addressForm.isPrimary" :label="$t('common.primary')" color="primary" hide-details
                 density="compact" class="mt-0" />
             </v-col>
           </v-row>
-          <v-text-field v-model="addressForm.line1" label="Dirección línea 1" variant="outlined"
+          <v-text-field v-model="addressForm.line1" :label="$t('customers.line1')" variant="outlined"
             density="compact" required class="mb-3" hide-details="auto" />
-          <v-text-field v-model="addressForm.line2" label="Dirección línea 2" variant="outlined"
+          <v-text-field v-model="addressForm.line2" :label="$t('customers.line2')" variant="outlined"
             density="compact" class="mb-3" hide-details="auto" />
           <v-row dense>
             <v-col cols="12" md="6">
-              <v-text-field v-model="addressForm.city" label="Ciudad" variant="outlined" density="compact"
+              <v-text-field v-model="addressForm.city" :label="$t('customers.city')" variant="outlined" density="compact"
                 class="mb-3" hide-details="auto" />
             </v-col>
             <v-col cols="12" md="6">
-              <v-text-field v-model="addressForm.province" label="Provincia" variant="outlined"
+              <v-text-field v-model="addressForm.province" :label="$t('customers.province')" variant="outlined"
                 density="compact" class="mb-3" hide-details="auto" />
             </v-col>
             <v-col cols="12" md="6">
-              <v-text-field v-model="addressForm.countryCode" label="País (ISO)" maxlength="2"
+              <v-text-field v-model="addressForm.countryCode" :label="$t('customers.countryIso')" maxlength="2"
                 variant="outlined" density="compact" class="mb-3" hide-details="auto" />
             </v-col>
             <v-col cols="12" md="6">
-              <v-text-field v-model="addressForm.postalCode" label="Código postal" variant="outlined"
+              <v-text-field v-model="addressForm.postalCode" :label="$t('customers.postalCode')" variant="outlined"
                 density="compact" hide-details="auto" />
             </v-col>
           </v-row>
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn variant="text" @click="addressDialog = false">Cancelar</v-btn>
+          <v-btn variant="text" @click="addressDialog = false">{{ $t('common.cancel') }}</v-btn>
           <v-btn color="primary" variant="tonal" :loading="addressBusy" @click="submitAddress">
-            Guardar
+            {{ $t('common.save') }}
           </v-btn>
         </v-card-actions>
       </v-card>

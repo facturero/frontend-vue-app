@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { usePluginsStore } from '@/stores/plugins';
 import { useAuthStore } from '@/stores/auth';
 
+const { t } = useI18n();
 const store = usePluginsStore();
 const auth = useAuthStore();
 
@@ -12,17 +14,17 @@ const requestDialog = ref(false);
 const description = ref('');
 const basedOnCodes = ref<string[]>([]);
 const descriptionRules = [
-  (v: string) => (!!v && v.trim().length >= 10) || 'Describe qué necesitas (mínimo 10 caracteres)',
+  (v: string) => (!!v && v.trim().length >= 10) || t('plugins.descriptionRule'),
 ];
 
 const publicCatalog = computed(() => store.catalog.filter((p) => !p.is_exclusive));
 
-const statusMeta = {
-  requested: { label: 'Solicitado', color: 'info' },
-  quoted: { label: 'Cotizado', color: 'warning' },
-  created: { label: 'Plugin creado', color: 'success' },
-  rejected: { label: 'Rechazado', color: 'error' },
-} as const;
+const statusMeta = computed(() => ({
+  requested: { label: t('plugins.requestStatus.requested'), color: 'info' },
+  quoted: { label: t('plugins.requestStatus.quoted'), color: 'warning' },
+  created: { label: t('plugins.requestStatus.created'), color: 'success' },
+  rejected: { label: t('plugins.requestStatus.rejected'), color: 'error' },
+}));
 
 const selectablePlugins = computed(() =>
   publicCatalog.value.map((p) => ({ title: `${p.name} (${p.code})`, value: p.code })),
@@ -56,7 +58,7 @@ async function submitRequest(): Promise<void> {
 
     <div class="d-flex justify-end mb-3" v-if="canActivate">
       <v-btn color="primary" variant="tonal" prepend-icon="mdi-plus" @click="openRequestDialog">
-        Solicitar plugin a medida
+        {{ $t('plugins.requestCustom') }}
       </v-btn>
     </div>
 
@@ -68,10 +70,10 @@ async function submitRequest(): Promise<void> {
           </template>
           <v-list-item-title class="text-body-2">{{ r.description }}</v-list-item-title>
           <v-list-item-subtitle class="text-caption">
-            Solicitud {{ r.id.slice(0, 8) }}…
-            <template v-if="r.rejectionReason"> · Motivo: {{ r.rejectionReason }}</template>
+            {{ $t('plugins.requestLabel', { id: r.id.slice(0, 8) }) }}
+            <template v-if="r.rejectionReason"> · {{ $t('plugins.requestReason') }}: {{ r.rejectionReason }}</template>
             <template v-if="r.quotedPriceCents != null">
-              · Cotizado: {{ (r.quotedPriceCents / 100).toFixed(2) }} USD
+              · {{ $t('plugins.requestQuoted') }}: {{ (r.quotedPriceCents / 100).toFixed(2) }} USD
             </template>
           </v-list-item-subtitle>
           <template #append>
@@ -82,18 +84,18 @@ async function submitRequest(): Promise<void> {
         </v-list-item>
       </v-list>
       <div v-if="!store.loading && !store.requests.length" class="text-center text-medium-emphasis pa-6">
-        No has solicitado plugins a medida.
+        {{ $t('plugins.requestsEmpty') }}
       </div>
     </v-card>
 
     <v-dialog v-model="requestDialog" max-width="560">
       <v-card>
-        <v-card-title>Solicitar plugin a medida</v-card-title>
+        <v-card-title>{{ $t('plugins.requestCustom') }}</v-card-title>
         <v-card-text>
           <v-textarea
             v-model="description"
-            label="¿Qué necesitas?"
-            placeholder="Ej.: Necesito integración con mi sistema de repartos..."
+            :label="$t('plugins.whatDoYouNeed')"
+            :placeholder="$t('plugins.needPlaceholder')"
             variant="outlined"
             density="compact"
             rows="4"
@@ -102,19 +104,19 @@ async function submitRequest(): Promise<void> {
           <v-select
             v-model="basedOnCodes"
             :items="selectablePlugins"
-            label="Basado en (opcional)"
+            :label="$t('plugins.basedOn')"
             multiple
             chips
             closable-chips
             variant="outlined"
             density="compact"
-            hint="Plugins del catálogo que sirvan de referencia"
+            :hint="$t('plugins.basedOnHint')"
             persistent-hint
           />
         </v-card-text>
         <v-card-actions>
           <v-spacer />
-          <v-btn variant="text" @click="requestDialog = false">Cancelar</v-btn>
+          <v-btn variant="text" @click="requestDialog = false">{{ $t('common.cancel') }}</v-btn>
           <v-btn
             color="primary"
             variant="tonal"
@@ -122,7 +124,7 @@ async function submitRequest(): Promise<void> {
             :loading="store.saving"
             @click="submitRequest"
           >
-            Enviar solicitud
+            {{ $t('plugins.sendRequest') }}
           </v-btn>
         </v-card-actions>
       </v-card>

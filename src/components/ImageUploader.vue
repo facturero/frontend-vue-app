@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { fileApi } from '@/api/files';
 
 interface ExistingImage {
@@ -25,6 +26,8 @@ const props = withDefaults(
     existingImages: () => [],
   },
 );
+
+const { t } = useI18n();
 
 const emit = defineEmits<{
   'upload-success': [fileIds: string[]];
@@ -91,13 +94,13 @@ async function addFiles(fileList: FileList): Promise<void> {
   for (let i = 0; i < max && i < fileList.length; i++) {
     const file = fileList[i];
     if (!file.type.startsWith('image/')) {
-      uploadError.value = 'Solo se permiten imágenes';
-      emit('error', 'Solo se permiten imágenes');
+      uploadError.value = t('uploader.onlyImages');
+      emit('error', t('uploader.onlyImages'));
       continue;
     }
     if (file.size > maxBytes.value) {
-      uploadError.value = `La imagen no debe superar ${props.maxSizeMB} MB`;
-      emit('error', `La imagen no debe superar ${props.maxSizeMB} MB`);
+      uploadError.value = t('uploader.tooLarge', { mb: props.maxSizeMB });
+      emit('error', t('uploader.tooLarge', { mb: props.maxSizeMB }));
       continue;
     }
     // Evitar duplicados: mismo nombre + tamaño + fecha de modificación
@@ -116,8 +119,8 @@ async function addFiles(fileList: FileList): Promise<void> {
   if (duplicates > 0) {
     const msg =
       duplicates === 1
-        ? 'Esa imagen ya está seleccionada'
-        : `${duplicates} imágenes ya estaban seleccionadas`;
+        ? t('uploader.duplicate')
+        : t('uploader.duplicates', { count: duplicates });
     uploadError.value = msg;
     emit('error', msg);
   }
@@ -162,7 +165,7 @@ async function uploadAll(): Promise<string[]> {
       await uploadOne(item.file);
       completed.value++;
     } catch (e) {
-      const msg = (e as { message?: string })?.message ?? 'Error al subir';
+      const msg = (e as { message?: string })?.message ?? t('uploader.uploadError');
       uploadError.value = `${item.file.name}: ${msg}`;
       state.value = STATE.ERROR;
       return [];
@@ -247,7 +250,7 @@ watch(() => props.existingImages, () => {
       @drop="onDrop"
     >
       <v-icon icon="mdi-cloud-upload-outline" :size="48" :color="dragOver ? 'primary' : 'grey'" class="mb-2" />
-      <span class="text-body-2 text-medium-emphasis">Arrastra o haz clic para seleccionar</span>
+      <span class="text-body-2 text-medium-emphasis">{{ $t('uploader.dropHint') }}</span>
     </div>
 
     <!-- SELECTED / single mode: show selected image full card -->
@@ -340,10 +343,10 @@ watch(() => props.existingImages, () => {
     <div v-if="state === 'done' && multiple" class="mt-2 d-flex align-center ga-2">
       <v-icon icon="mdi-check-circle" color="success" />
       <span class="text-body-2 text-success">
-        {{ uploadedIds.length > 1 ? `${uploadedIds.length} imágenes subidas` : 'Imagen subida' }}
+        {{ uploadedIds.length > 1 ? $t('uploader.uploaded', { count: uploadedIds.length }) : $t('uploader.uploadedOne') }}
       </span>
       <v-btn size="small" variant="text" prepend-icon="mdi-refresh" @click="reset">
-        {{ multiple ? 'Añadir más' : 'Cambiar' }}
+        {{ multiple ? $t('uploader.addMore') : $t('uploader.change') }}
       </v-btn>
     </div>
 

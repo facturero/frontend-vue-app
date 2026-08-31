@@ -30,13 +30,14 @@ const items = computed(() =>
     <div class="drawer-nav-scroll">
       <v-list nav density="compact" color="primary">
 
-        <v-list-item prepend-icon="mdi-alpha-c-circle" title="CRM" subtitle="Panel de adm." class="drawer-brand" />
+        <v-list-item prepend-icon="mdi-alpha-c-circle" :title="$t('nav.brand')" :subtitle="$t('nav.brandSubtitle')"
+          class="drawer-brand" />
         <v-divider />
 
-        <template v-for="item in items" :key="item.title">
-          <v-list-item v-if="item.soon" :prepend-icon="item.icon" :title="item.title" disabled rounded="lg">
+        <template v-for="item in items" :key="item.titleKey">
+          <v-list-item v-if="item.soon" :prepend-icon="item.icon" :title="$t(item.titleKey)" disabled rounded="lg">
             <template #append>
-              <v-chip size="x-small" color="secondary" variant="tonal">pronto</v-chip>
+              <v-chip size="x-small" color="secondary" variant="tonal">{{ $t('nav.comingSoon') }}</v-chip>
             </template>
           </v-list-item>
           <v-list-item v-else-if="item.blocked" disabled rounded="lg">
@@ -44,16 +45,16 @@ const items = computed(() =>
               <v-icon :icon="item.icon" class="mr-2" />
               <v-icon icon="mdi-lock-outline" size="x-small" class="lock-icon" />
             </template>
-            <v-list-item-title>{{ item.title }}</v-list-item-title>
+            <v-list-item-title>{{ $t(item.titleKey) }}</v-list-item-title>
           </v-list-item>
-          <v-list-item v-else :to="item.to" :prepend-icon="item.icon" :title="item.title" rounded="lg" />
+          <v-list-item v-else :to="item.to" :prepend-icon="item.icon" :title="$t(item.titleKey)" rounded="lg" />
         </template>
       </v-list>
     </div>
 
     <template #append>
       <v-divider />
-      <v-list-item prepend-icon="mdi-chevron-left" title="Colapsar" @click="ui.toggleRail()"
+      <v-list-item prepend-icon="mdi-chevron-left" :title="$t('nav.collapse')" @click="ui.toggleRail()"
         class="drawer-collapse-btn" />
     </template>
   </v-navigation-drawer>

@@ -24,11 +24,23 @@ export const http = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
+/**
+ * Idioma activo de la interfaz. Se lee de localStorage y no del store de i18n
+ * para que este módulo siga siendo independiente de Vue: el interceptor corre
+ * fuera de cualquier componente.
+ */
+function currentLocale(): string {
+  return localStorage.getItem('app-locale') || 'es';
+}
+
 http.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = getAccessToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  // El backend traduce con esto lo que no vive en el front: nombres y
+  // descripciones del catálogo de plugins, y los mensajes de error.
+  config.headers['Accept-Language'] = currentLocale();
   return config;
 });
 

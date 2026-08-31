@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useInvoiceStore } from '@/stores/invoices';
 import { useAuthStore } from '@/stores/auth';
 
+const { locale } = useI18n();
 const router = useRouter();
 const store = useInvoiceStore();
 const auth = useAuthStore();
@@ -26,7 +28,7 @@ const statusChip = (status: string) => {
 
 const formatDate = (date: string | null) => {
   if (!date) return '-';
-  return new Date(date).toLocaleDateString('es-EC', {
+  return new Date(date).toLocaleDateString(locale.value, {
     year: 'numeric', month: '2-digit', day: '2-digit',
   });
 };
@@ -54,11 +56,11 @@ onMounted(load);
   <v-container fluid>
     <v-row align="center" justify="space-between" class="mb-4">
       <v-col>
-        <h1 class="text-h4">Facturas</h1>
+        <h1 class="text-h4">{{ $t('invoices.title') }}</h1>
       </v-col>
       <v-col class="text-right">
         <v-btn v-if="canCreate" color="primary" prepend-icon="mdi-plus" @click="goCreate">
-          Nueva factura
+          {{ $t('invoices.new') }}
         </v-btn>
       </v-col>
     </v-row>
@@ -70,12 +72,12 @@ onMounted(load);
             <v-select
               v-model="filterStatus"
               :items="[
-                { title: 'Todos', value: '' },
-                { title: 'Borrador', value: 'draft' },
-                { title: 'Emitido', value: 'issued' },
-                { title: 'Anulado', value: 'voided' },
+                { title: $t('common.all'), value: '' },
+                { title: $t('invoices.status.draft'), value: 'draft' },
+                { title: $t('invoices.statusFilter.issued'), value: 'issued' },
+                { title: $t('invoices.statusFilter.voided'), value: 'voided' },
               ]"
-              label="Estado"
+              :label="$t('common.status')"
               clearable
               @update:model-value="load"
             />
@@ -91,14 +93,14 @@ onMounted(load);
         <thead>
           <tr>
             <th>#</th>
-            <th>Cliente</th>
-            <th>Identificación</th>
-            <th>Subtotal</th>
-            <th>IVA</th>
-            <th>Total</th>
-            <th>Estado</th>
-            <th>Fecha</th>
-            <th>Acciones</th>
+            <th>{{ $t('invoices.customer') }}</th>
+            <th>{{ $t('customers.headers.identification') }}</th>
+            <th>{{ $t('invoices.subtotal') }}</th>
+            <th>{{ $t('invoices.taxTotal') }}</th>
+            <th>{{ $t('invoices.total') }}</th>
+            <th>{{ $t('common.status') }}</th>
+            <th>{{ $t('common.date') }}</th>
+            <th>{{ $t('common.actions') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -111,7 +113,7 @@ onMounted(load);
             <td><strong>{{ inv.total }}</strong></td>
             <td>
               <v-chip :color="statusChip(inv.status)" size="small">
-                {{ inv.status === 'draft' ? 'Borrador' : inv.status === 'issued' ? 'Emitida' : 'Anulada' }}
+                {{ $t(`invoices.status.${inv.status}`) }}
               </v-chip>
             </td>
             <td>{{ formatDate(inv.issueDate) }}</td>
@@ -122,13 +124,13 @@ onMounted(load);
                 icon="mdi-pencil"
                 variant="text"
                 size="small"
-                title="Editar borrador"
+                :title="$t('invoices.editDraft')"
                 @click="goEdit(inv.id)"
               />
             </td>
           </tr>
           <tr v-if="store.list.length === 0 && !store.loading">
-            <td colspan="9" class="text-center text-grey">No hay facturas</td>
+            <td colspan="9" class="text-center text-grey">{{ $t('invoices.empty') }}</td>
           </tr>
         </tbody>
       </v-table>

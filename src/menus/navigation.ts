@@ -1,5 +1,6 @@
 export interface NavItem {
-  title: string;
+  /** Clave i18n del rótulo (ej. 'nav.customers'), no el texto ya traducido. */
+  titleKey: string;
   icon: string;
   to?: string;
   permission?: string;
@@ -12,17 +13,17 @@ export interface NavItem {
 }
 
 const items: NavItem[] = [
-  { title: 'Inicio', icon: 'mdi-view-dashboard-outline', to: '/' },
-  { title: 'Empleados', icon: 'mdi-account-multiple-outline', to: '/employees', permission: 'user:read' },
-  { title: 'Roles', icon: 'mdi-shield-account-outline', to: '/roles', permission: 'user:read' },
-  { title: 'Organización', icon: 'mdi-domain', to: '/organization/settings', permission: 'organization:admin' },
-  { title: 'Establecimientos', icon: 'mdi-store-outline', to: '/organization/establishments', permission: 'establishment:read', plugin: 'org.establishments' },
-  { title: 'Certificado electrónico', icon: 'mdi-file-certificate-outline', to: '/organization/certificates', permission: 'fiscal:manage', plugin: 'finance.electronic_certificate' },
-  { title: 'Mi perfil', icon: 'mdi-account-circle-outline', to: '/profile', permission: 'user:read' },
-  { title: 'Clientes', icon: 'mdi-account-group-outline', to: '/customers', permission: 'customer:read', plugin: 'crm.contacts' },
-  { title: 'Facturas', icon: 'mdi-file-document-outline', to: '/invoices', permission: 'invoice:read', plugin: 'finance.electronic_invoicing' },
-  { title: 'Productos', icon: 'mdi-package-variant-closed', to: '/products', permission: 'product:read' },
-  { title: 'Plugins', icon: 'mdi-puzzle-outline', to: '/plugins', permission: 'plugins:read' },
+  { titleKey: 'nav.home', icon: 'mdi-view-dashboard-outline', to: '/' },
+  { titleKey: 'nav.employees', icon: 'mdi-account-multiple-outline', to: '/employees', permission: 'user:read' },
+  { titleKey: 'nav.roles', icon: 'mdi-shield-account-outline', to: '/roles', permission: 'user:read' },
+  { titleKey: 'nav.organization', icon: 'mdi-domain', to: '/organization/settings', permission: 'organization:admin' },
+  { titleKey: 'nav.establishments', icon: 'mdi-store-outline', to: '/organization/establishments', permission: 'establishment:read', plugin: 'org.establishments' },
+  { titleKey: 'nav.certificates', icon: 'mdi-file-certificate-outline', to: '/organization/certificates', permission: 'fiscal:manage', plugin: 'finance.electronic_certificate' },
+  { titleKey: 'nav.profile', icon: 'mdi-account-circle-outline', to: '/profile', permission: 'user:read' },
+  { titleKey: 'nav.customers', icon: 'mdi-account-group-outline', to: '/customers', permission: 'customer:read', plugin: 'crm.contacts' },
+  { titleKey: 'nav.invoices', icon: 'mdi-file-document-outline', to: '/invoices', permission: 'invoice:read', plugin: 'finance.electronic_invoicing' },
+  { titleKey: 'nav.products', icon: 'mdi-package-variant-closed', to: '/products', permission: 'product:read' },
+  { titleKey: 'nav.plugins', icon: 'mdi-puzzle-outline', to: '/plugins', permission: 'plugins:read' },
 ];
 
 export function getNavigationItems(): NavItem[] {
