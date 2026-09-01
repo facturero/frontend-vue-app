@@ -18,16 +18,21 @@
     "noInviteToken": "Le jeton d'invitation est introuvable.",
     "noResetToken": "Lien de réinitialisation introuvable.",
     "notRegisteredYet": "Pas encore inscrit ?",
+    "orSignInWith": "ou connectez-vous avec",
+    "orSignUpWith": "ou inscrivez-vous avec",
     "password": "Mot de passe",
-    "passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères.",
     "passwordsDontMatch": "Les mots de passe ne correspondent pas.",
+    "passwordTooShort": "Le mot de passe doit contenir au moins 8 caractères.",
     "register": "S'inscrire",
     "registerToGetStarted": "Inscrivez-vous pour commencer",
+    "rememberDevice": "Se souvenir de cet appareil",
     "resetPassword": "Réinitialiser le mot de passe",
     "setNewPassword": "Créez un nouveau mot de passe pour votre compte",
     "setPasswordToJoin": "Définissez un mot de passe pour rejoindre l'organisation",
     "signIn": "Connexion",
-    "toAccessTemplate": "Pour accéder au tableau de bord"
+    "toAccessTemplate": "Pour accéder au tableau de bord",
+    "welcomeSubtitle": "Votre tableau de bord",
+    "welcomeTitle": "Bienvenue sur le CRM"
   },
   "certificates": {
     "empty": "Aucun certificat téléversé pour le moment.",

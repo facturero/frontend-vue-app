@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { useProductStore } from '@/stores/products';
 import { useOrganizationStore } from '@/stores/organization';
+import PageHeader from '@/components/ui/PageHeader.vue';
 
 const { t, locale } = useI18n();
 const router = useRouter();
@@ -98,23 +99,24 @@ onMounted(async () => {
 
 <template>
   <v-container>
-    <div class="d-flex align-center justify-space-between mt-6 mb-4">
-      <h2 class="text-h5 font-weight-medium">{{ $t('products.title') }}</h2>
-      <v-btn v-if="canCreate" color="primary" variant="tonal" prepend-icon="mdi-plus" @click="goCreate">
-        {{ $t('products.new') }}
-      </v-btn>
-    </div>
+    <PageHeader :title="$t('products.title')">
+      <template #actions>
+        <v-btn v-if="canCreate" color="primary" variant="tonal" prepend-icon="mdi-plus" @click="goCreate">
+          {{ $t('products.new') }}
+        </v-btn>
+      </template>
+    </PageHeader>
 
-    <v-alert v-if="store.error" type="error" density="compact" variant="tonal" closable class="mb-4"
+    <v-alert v-if="store.error" type="error" closable class="mb-4"
       @click:close="store.error = null">
       {{ store.error }}
     </v-alert>
 
-    <v-card elevation="2" rounded="lg" class="mb-4">
+    <v-card class="mb-4">
       <v-card-text>
         <v-row dense align="end">
           <v-col cols="12" sm="5">
-            <v-text-field v-model="search" :label="$t('products.searchLabel')" variant="outlined" density="compact"
+            <v-text-field v-model="search" :label="$t('products.searchLabel')"
               hide-details prepend-inner-icon="mdi-magnify" clearable @keyup.enter="doSearch" />
           </v-col>
           <v-col cols="6" sm="3">
@@ -122,7 +124,7 @@ onMounted(async () => {
               { title: $t('products.allStatuses'), value: null },
               { title: $t('common.active'), value: 'active' },
               { title: $t('common.inactive'), value: 'inactive' },
-            ]" :label="$t('common.status')" variant="outlined" density="compact" hide-details clearable
+            ]" :label="$t('common.status')" hide-details clearable
               @update:model-value="doSearch" />
           </v-col>
           <v-col cols="6" sm="3">
@@ -130,12 +132,11 @@ onMounted(async () => {
               { title: $t('products.allTypes'), value: null },
               { title: $t('products.good'), value: 'good' },
               { title: $t('products.service'), value: 'service' },
-            ]" :label="$t('common.type')" variant="outlined" density="compact" hide-details clearable
+            ]" :label="$t('common.type')" hide-details clearable
               @update:model-value="doSearch" />
           </v-col>
           <v-col cols="6" sm="3">
-            <v-select v-model="establishmentFilter" :items="establishmentOptions" :label="$t('organization.establishment')"
-              variant="outlined" density="compact" hide-details clearable
+            <v-select v-model="establishmentFilter" :items="establishmentOptions" :label="$t('organization.establishment')" hide-details clearable
               @update:model-value="doSearch" data-testid="products-establishment-filter" />
           </v-col>
           <v-col cols="12" sm="1">
@@ -158,7 +159,7 @@ onMounted(async () => {
         </template>
 
         <template #item.type="{ item }">
-          <v-chip size="x-small" variant="tonal" color="info">
+          <v-chip size="x-small" color="info">
             {{ item.type === 'good' ? $t('products.good') : $t('products.service') }}
           </v-chip>
         </template>
@@ -168,7 +169,7 @@ onMounted(async () => {
         </template>
 
         <template #item.status="{ item }">
-          <v-chip size="x-small" :color="item.status === 'active' ? 'success' : 'warning'" variant="tonal">
+          <v-chip size="x-small" :color="item.status === 'active' ? 'success' : 'warning'">
             {{ item.status === 'active' ? $t('common.active') : $t('common.inactive') }}
           </v-chip>
         </template>

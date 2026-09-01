@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { useCustomerStore } from '@/stores/customers';
+import PageHeader from '@/components/ui/PageHeader.vue';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -96,31 +97,31 @@ onMounted(async () => {
 
 <template>
   <v-container>
-    <div class="d-flex align-center justify-space-between mt-6 mb-4">
-      <h2 class="text-h5 font-weight-medium">{{ $t('customers.title') }}</h2>
-      <v-btn v-if="canCreate" color="primary" variant="tonal" prepend-icon="mdi-plus" @click="goCreate">
-        {{ $t('customers.new') }}
-      </v-btn>
-    </div>
+    <PageHeader :title="$t('customers.title')">
+      <template #actions>
+        <v-btn v-if="canCreate" color="primary" variant="tonal" prepend-icon="mdi-plus" @click="goCreate">
+          {{ $t('customers.new') }}
+        </v-btn>
+      </template>
+    </PageHeader>
 
-    <v-alert v-if="store.error" type="error" density="compact" variant="tonal" closable class="mb-4"
+    <v-alert v-if="store.error" type="error" closable class="mb-4"
       @click:close="store.error = null">
       {{ store.error }}
     </v-alert>
 
-    <v-card elevation="2" rounded="lg" class="mb-4">
+    <v-card class="mb-4">
       <v-card-text>
         <v-row dense align="end">
           <v-col cols="12" sm="4">
-            <v-text-field v-model="search" :label="$t('customers.searchLabel')" variant="outlined"
-              density="compact" hide-details prepend-inner-icon="mdi-magnify" clearable @keyup.enter="doSearch" />
+            <v-text-field v-model="search" :label="$t('customers.searchLabel')" hide-details prepend-inner-icon="mdi-magnify" clearable @keyup.enter="doSearch" />
           </v-col>
           <v-col cols="6" sm="2">
             <v-select v-model="statusFilter" :items="[
               { title: $t('customers.allStatuses'), value: null },
               { title: $t('common.active'), value: 'active' },
               { title: $t('common.inactive'), value: 'inactive' },
-            ]" :label="$t('common.status')" variant="outlined" density="compact" hide-details clearable
+            ]" :label="$t('common.status')" hide-details clearable
               @update:model-value="doSearch" />
           </v-col>
           <v-col cols="6" sm="2">
@@ -128,14 +129,14 @@ onMounted(async () => {
               { title: $t('customers.allTypes'), value: null },
               { title: $t('customers.person'), value: 'person' },
               { title: $t('customers.company'), value: 'company' },
-            ]" :label="$t('common.type')" variant="outlined" density="compact" hide-details clearable
+            ]" :label="$t('common.type')" hide-details clearable
               @update:model-value="doSearch" />
           </v-col>
           <v-col cols="8" sm="3">
             <v-select v-model="tagFilter" :items="[
               { title: $t('customers.allTags'), value: null },
               ...store.tags.map((tag) => ({ title: tag.name, value: tag.id })),
-            ]" :label="$t('customers.tag')" variant="outlined" density="compact" hide-details clearable
+            ]" :label="$t('customers.tag')" hide-details clearable
               @update:model-value="doSearch" />
           </v-col>
           <v-col cols="4" sm="1">
@@ -165,7 +166,7 @@ onMounted(async () => {
         </template>
 
         <template #item.type="{ item }">
-          <v-chip size="x-small" variant="tonal" :color="item.type === 'company' ? 'primary' : 'info'">
+          <v-chip size="x-small" :color="item.type === 'company' ? 'primary' : 'info'">
             {{ item.type === 'company' ? $t('customers.company') : $t('customers.person') }}
           </v-chip>
         </template>
@@ -179,7 +180,7 @@ onMounted(async () => {
         </template>
 
         <template #item.status="{ item }">
-          <v-chip size="x-small" :color="item.status === 'active' ? 'success' : 'warning'" variant="tonal">
+          <v-chip size="x-small" :color="item.status === 'active' ? 'success' : 'warning'">
             {{ item.status === 'active' ? $t('common.active') : $t('common.inactive') }}
           </v-chip>
         </template>

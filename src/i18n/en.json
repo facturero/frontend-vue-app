@@ -18,16 +18,21 @@
     "noInviteToken": "The invitation token was not found.",
     "noResetToken": "Reset link not found.",
     "notRegisteredYet": "Not registered yet?",
+    "orSignInWith": "or sign in with",
+    "orSignUpWith": "or sign up with",
     "password": "Password",
-    "passwordTooShort": "Password must be at least 8 characters long.",
     "passwordsDontMatch": "Passwords do not match.",
+    "passwordTooShort": "Password must be at least 8 characters long.",
     "register": "Register",
     "registerToGetStarted": "Register to get started",
+    "rememberDevice": "Remember this device",
     "resetPassword": "Reset password",
     "setNewPassword": "Create a new password for your account",
     "setPasswordToJoin": "Set a password to join the organization",
     "signIn": "Sign in",
-    "toAccessTemplate": "To access the template"
+    "toAccessTemplate": "To access the template",
+    "welcomeSubtitle": "Your Admin Dashboard",
+    "welcomeTitle": "Welcome to CRM"
   },
   "certificates": {
     "empty": "No certificate uploaded yet.",

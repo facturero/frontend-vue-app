@@ -8,6 +8,7 @@ import { productApi } from '@/api/products';
 import { extractError } from '@/utils/error';
 import ImageUploader from '@/components/ImageUploader.vue';
 import type { ProductType, CreateProductInput, UpdateProductInput } from '@/types/products';
+import PageHeader from '@/components/ui/PageHeader.vue';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -194,23 +195,11 @@ async function submit(): Promise<void> {
 
 <template>
   <v-container>
-    <div class="d-flex align-center mt-6 mb-4">
-      <v-btn
-        variant="text"
-        icon="mdi-arrow-left"
-        class="mr-2"
-        @click="router.push({ name: 'products' })"
-      />
-      <h2 class="text-h5 font-weight-medium">
-        {{ isEdit ? $t('products.edit') : $t('products.new') }}
-      </h2>
-    </div>
+    <PageHeader :title="isEdit ? $t('products.edit') : $t('products.new')" :back-to="{ name: 'products' }" />
 
     <v-alert
       v-if="saveError"
       type="error"
-      density="compact"
-      variant="tonal"
       closable
       class="mb-4"
       @click:close="saveError = null"
@@ -220,7 +209,7 @@ async function submit(): Promise<void> {
 
     <v-row>
       <v-col cols="12" md="10" lg="8">
-        <v-card elevation="2" rounded="lg">
+        <v-card>
           <v-card-text>
             <v-form @submit.prevent="submit">
               <v-row dense>
@@ -228,10 +217,7 @@ async function submit(): Promise<void> {
                   <v-text-field
                     v-model="name"
                     :label="$t('products.name')"
-                    variant="outlined"
-                    density="compact"
                     required
-                    hide-details="auto"
                     class="mb-4"
                     data-testid="product-name"
                   />
@@ -240,9 +226,6 @@ async function submit(): Promise<void> {
                   <v-text-field
                     v-model="sku"
                     label="SKU"
-                    variant="outlined"
-                    density="compact"
-                    hide-details="auto"
                     class="mb-4"
                     data-testid="product-sku"
                   />
@@ -256,10 +239,7 @@ async function submit(): Promise<void> {
                   { title: $t('products.service'), value: 'service' },
                 ]"
                 :label="$t('common.type')"
-                variant="outlined"
-                density="compact"
                 required
-                hide-details="auto"
                 class="mb-4"
                 data-testid="product-type"
               />
@@ -267,9 +247,6 @@ async function submit(): Promise<void> {
               <v-textarea
                 v-model="description"
                 :label="$t('common.description')"
-                variant="outlined"
-                density="compact"
-                hide-details="auto"
                 class="mb-4"
                 rows="2"
               />
@@ -279,13 +256,10 @@ async function submit(): Promise<void> {
                   <v-text-field
                     :model-value="price"
                     :label="$t('products.price')"
-                    variant="outlined"
-                    density="compact"
                     required
                     type="text"
                     inputmode="decimal"
                     placeholder="0.00"
-                    hide-details="auto"
                     data-testid="product-price"
                     @input="onPriceInput"
                   />
@@ -295,9 +269,6 @@ async function submit(): Promise<void> {
                     v-model="currencyCode"
                     :items="['USD', 'EUR', 'COP', 'PEN', 'MXN']"
                     :label="$t('products.currency')"
-                    variant="outlined"
-                    density="compact"
-                    hide-details="auto"
                   />
                 </v-col>
                 <v-col cols="12" md="4" class="d-flex align-center pl-3">
@@ -322,9 +293,6 @@ async function submit(): Promise<void> {
                     item-title="name"
                     item-value="id"
                     :label="$t('products.category')"
-                    variant="outlined"
-                    density="compact"
-                    hide-details="auto"
                     clearable
                     class="mb-4"
                   />
@@ -336,9 +304,6 @@ async function submit(): Promise<void> {
                     item-title="name"
                     item-value="id"
                     :label="$t('products.unit')"
-                    variant="outlined"
-                    density="compact"
-                    hide-details="auto"
                     clearable
                     class="mb-4"
                   />
@@ -349,14 +314,11 @@ async function submit(): Promise<void> {
                 v-model="establishmentIds"
                 :items="establishmentsOptions"
                 :label="$t('products.establishments')"
-                variant="outlined"
-                density="compact"
                 multiple
                 chips
                 closable-chips
                 :error-messages="establishmentError"
                 required
-                hide-details="auto"
                 class="mb-4"
                 data-testid="product-establishments"
                 :hint="$t('products.establishmentsHint')"
@@ -368,9 +330,6 @@ async function submit(): Promise<void> {
                 item-title="name"
                 item-value="id"
                 :label="$t('products.vat')"
-                variant="outlined"
-                density="compact"
-                hide-details="auto"
                 clearable
                 class="mb-4"
                 data-testid="product-vat"

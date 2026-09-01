@@ -6,6 +6,7 @@ import { fileApi } from '@/api/files';
 import ImageUploader from '@/components/ImageUploader.vue';
 import type { Me } from '@/types/auth';
 import type { FileResponse } from '@/types/files';
+import PageHeader from '@/components/ui/PageHeader.vue';
 
 const auth = useAuthStore();
 const router = useRouter();
@@ -98,16 +99,12 @@ function onAvatarSuccess(fileIds: string[]): void {
 
 <template>
   <v-container>
-    <div class="d-flex align-center mt-6 mb-4">
-      <h2 class="text-h5 font-weight-medium">
-        {{ isSetup ? $t('profile.completeTitle') : $t('common.myProfile') }}
-      </h2>
-    </div>
+    <PageHeader :title="isSetup ? $t('profile.completeTitle') : $t('common.myProfile')" />
 
     <v-row>
       <!-- Avatar column -->
       <v-col cols="12" md="4">
-        <v-card elevation="2" rounded="lg">
+        <v-card>
           <v-card-text class="d-flex flex-column align-center">
             <ImageUploader
               ref="imageUploaderRef"
@@ -125,7 +122,7 @@ function onAvatarSuccess(fileIds: string[]): void {
 
       <!-- Profile form column -->
       <v-col cols="12" md="8">
-        <v-card elevation="2" rounded="lg">
+        <v-card>
           <v-card-text>
             <p class="text-body-2 text-medium-emphasis mb-4">
               {{ isSetup ? $t('profile.setupIntro') : $t('profile.editIntro') }}
@@ -134,10 +131,8 @@ function onAvatarSuccess(fileIds: string[]): void {
             <v-alert
               v-if="auth.error"
               type="error"
-              variant="tonal"
               closable
               class="mb-4"
-              density="compact"
               @click:close="auth.error = null"
             >
               {{ auth.error }}
@@ -146,10 +141,8 @@ function onAvatarSuccess(fileIds: string[]): void {
             <v-alert
               v-if="saved"
               type="success"
-              variant="tonal"
               closable
               class="mb-4"
-              density="compact"
               @click:close="saved = false"
             >
               {{ $t('profile.updated') }}
@@ -159,10 +152,7 @@ function onAvatarSuccess(fileIds: string[]): void {
               <v-text-field
                 v-model="fullName"
                 :label="$t('customers.fullName')"
-                variant="outlined"
-                density="compact"
                 class="mb-4"
-                hide-details="auto"
               />
 
               <v-select
@@ -173,19 +163,13 @@ function onAvatarSuccess(fileIds: string[]): void {
                   { title: $t('profile.idTypeRuc'), value: 'ruc' },
                   { title: $t('profile.idTypePassport'), value: 'pasaporte' },
                 ]"
-                variant="outlined"
-                density="compact"
                 class="mb-4"
-                hide-details="auto"
               />
 
               <v-text-field
                 v-model="identificationNumber"
                 :label="identificationType === 'ruc' ? $t('profile.rucNumber') : $t('customers.idNumber')"
-                variant="outlined"
-                density="compact"
                 class="mb-6"
-                hide-details="auto"
               />
 
               <v-btn

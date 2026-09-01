@@ -65,14 +65,12 @@ async function submit(): Promise<void> {
     max-width="500"
     @update:model-value="(v) => { if (!v) close(); }"
   >
-    <v-card elevation="2" rounded="lg">
+    <v-card>
       <v-card-title>{{ $t('employees.inviteTitle') }}</v-card-title>
       <v-card-text>
         <v-alert
           v-if="error"
           type="error"
-          density="compact"
-          variant="tonal"
           closable
           class="mb-4"
           @click:close="error = null"
@@ -83,8 +81,6 @@ async function submit(): Promise<void> {
         <v-alert
           v-if="success"
           type="success"
-          density="compact"
-          variant="tonal"
           class="mb-4"
         >
           {{ $t('employees.inviteSuccess') }}
@@ -94,10 +90,7 @@ async function submit(): Promise<void> {
           v-model="email"
           :label="$t('common.email')"
           type="email"
-          variant="outlined"
-          density="compact"
           class="mb-4"
-          hide-details="auto"
         />
 
         <RoleSelect
@@ -111,11 +104,8 @@ async function submit(): Promise<void> {
           v-model="establishmentIds"
           :items="establishmentOptions"
           :label="$t('employees.establishments')"
-          variant="outlined"
-          density="compact"
           multiple
           class="mt-2"
-          hide-details="auto"
           data-testid="invite-employee-establishments"
         />
       </v-card-text>

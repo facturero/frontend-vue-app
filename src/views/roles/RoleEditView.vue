@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useRoleStore } from '@/stores/roles';
 import PermissionSelector from '@/components/PermissionSelector.vue';
+import PageHeader from '@/components/ui/PageHeader.vue';
 
 const props = defineProps<{ id: string }>();
 const store = useRoleStore();
@@ -43,23 +44,11 @@ async function save(): Promise<void> {
 
 <template>
   <v-container>
-    <div class="d-flex align-center mt-6 mb-4">
-      <v-btn
-        icon="mdi-arrow-left"
-        variant="text"
-        class="mr-2"
-        @click="router.push({ name: 'roles' })"
-      />
-      <h2 class="text-h5 font-weight-medium">
-        {{ $t('roles.editTitle', { name: role?.name || props.id }) }}
-      </h2>
-    </div>
+    <PageHeader :title="$t('roles.editTitle', { name: role?.name || props.id })" :back-to="{ name: 'roles' }" />
 
     <v-alert
       v-if="store.error"
       type="error"
-      density="compact"
-      variant="tonal"
       closable
       class="mb-4"
       @click:close="store.error = null"
@@ -70,8 +59,6 @@ async function save(): Promise<void> {
     <v-alert
       v-if="saved"
       type="success"
-      density="compact"
-      variant="tonal"
       closable
       class="mb-4"
       @click:close="saved = false"
@@ -83,8 +70,6 @@ async function save(): Promise<void> {
       <v-alert
         v-if="isSystem"
         type="info"
-        density="compact"
-        variant="tonal"
         class="mb-4"
         :title="$t('roles.systemRole')"
         :text="$t('roles.systemRoleHint')"
@@ -92,7 +77,7 @@ async function save(): Promise<void> {
 
       <v-row>
         <v-col cols="12" md="5">
-          <v-card elevation="2" rounded="lg">
+          <v-card>
             <v-card-text>
               <v-list lines="two" density="comfortable">
                 <v-list-item :title="$t('common.name')" :subtitle="role.name" prepend-icon="mdi-shield-account" />
@@ -100,7 +85,7 @@ async function save(): Promise<void> {
                   prepend-icon="mdi-text" />
                 <v-list-item :title="$t('roles.systemField')" prepend-icon="mdi-cog">
                   <template #subtitle>
-                    <v-chip size="x-small" :color="role.isSystem ? 'secondary' : 'success'" variant="tonal">
+                    <v-chip size="x-small" :color="role.isSystem ? 'secondary' : 'success'">
                       {{ role.isSystem ? $t('common.yes') : $t('common.no') }}
                     </v-chip>
                   </template>
@@ -123,7 +108,7 @@ async function save(): Promise<void> {
         </v-col>
 
         <v-col cols="12" md="7">
-          <v-card elevation="2" rounded="lg">
+          <v-card>
             <v-card-title>{{ $t('roles.permissions') }}</v-card-title>
             <v-card-text v-if="store.permissions.length > 0">
               <PermissionSelector

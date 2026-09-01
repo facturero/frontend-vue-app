@@ -48,9 +48,6 @@ onMounted(() => {
     :multiple="multiple ?? false"
     :disabled="disabled ?? false"
     :label="label ?? t('employees.roles')"
-    variant="outlined"
-    density="compact"
-    hide-details="auto"
     chips
     closable-chips
     clearable

@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { useFiscalStore } from '@/stores/fiscal';
+import PageHeader from '@/components/ui/PageHeader.vue';
 
 const { t, locale } = useI18n();
 const auth = useAuthStore();
@@ -59,24 +60,20 @@ onMounted(() => {
 
 <template>
   <v-container>
-    <div class="d-flex align-center justify-space-between mt-6 mb-4">
-      <div>
-        <h2 class="text-h5 font-weight-medium">{{ $t('certificates.title') }}</h2>
-        <p class="text-body-2 text-medium-emphasis mb-0">
-          {{ $t('certificates.intro') }}
-        </p>
-      </div>
-      <v-btn v-if="canManage" color="primary" prepend-icon="mdi-upload" @click="showUploadDialog = true">
-        {{ $t('invoices.uploadCertificate') }}
-      </v-btn>
-    </div>
+    <PageHeader :title="$t('certificates.title')" :subtitle="$t('certificates.intro')">
+      <template #actions>
+        <v-btn v-if="canManage" color="primary" prepend-icon="mdi-upload" @click="showUploadDialog = true">
+          {{ $t('invoices.uploadCertificate') }}
+        </v-btn>
+      </template>
+    </PageHeader>
 
-    <v-alert v-if="store.error" type="error" density="compact" variant="tonal" closable class="mb-4"
+    <v-alert v-if="store.error" type="error" closable class="mb-4"
       @click:close="store.error = null">
       {{ store.error }}
     </v-alert>
 
-    <v-card elevation="2" rounded="lg">
+    <v-card>
       <v-list density="compact">
         <v-list-item v-for="cert in store.certificates" :key="cert.id">
           <v-list-item-title class="d-flex align-center ga-2">
@@ -84,12 +81,11 @@ onMounted(() => {
             <v-chip
               size="x-small"
               :color="cert.status === 'active' ? (isExpired(cert.valid_until) ? 'error' : 'success') : 'grey'"
-              variant="tonal"
             >
               {{ cert.status === 'revoked' ? $t('certificates.statusRevoked') : isExpired(cert.valid_until) ?
                 $t('certificates.statusExpired') : $t('common.active') }}
             </v-chip>
-            <v-chip v-if="cert.status === 'active' && isExpiringSoon(cert.valid_until)" size="x-small" color="warning" variant="tonal">
+            <v-chip v-if="cert.status === 'active' && isExpiringSoon(cert.valid_until)" size="x-small" color="warning">
               {{ $t('certificates.expiringSoon') }}
             </v-chip>
           </v-list-item-title>
@@ -115,7 +111,7 @@ onMounted(() => {
       <v-card>
         <v-card-title>{{ $t('invoices.uploadCertificateTitle') }}</v-card-title>
         <v-card-text>
-          <v-alert v-if="uploadError" type="error" density="compact" variant="tonal" class="mb-4">
+          <v-alert v-if="uploadError" type="error" class="mb-4">
             {{ uploadError }}
           </v-alert>
           <p class="text-caption text-medium-emphasis mb-3">
@@ -123,28 +119,19 @@ onMounted(() => {
           </p>
           <v-file-input
             :label="$t('invoices.certFile')"
-            variant="outlined"
-            density="compact"
             accept=".p12,.pfx"
             class="mb-3"
-            hide-details="auto"
             @change="onFileChange"
           />
           <v-text-field
             v-model="password"
             :label="$t('invoices.certPassword')"
             type="password"
-            variant="outlined"
-            density="compact"
             class="mb-3"
-            hide-details="auto"
           />
           <v-text-field
             v-model="alias"
             :label="$t('invoices.certAlias')"
-            variant="outlined"
-            density="compact"
-            hide-details="auto"
             :placeholder="$t('invoices.certAliasPlaceholder')"
           />
         </v-card-text>

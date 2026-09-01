@@ -52,8 +52,8 @@ async function submit(): Promise<void> {
 </script>
 
 <template>
-  <div class="auth-wrapper d-flex align-center justify-center fill-height bg-background">
-    <v-card max-width="480" class="mx-auto" rounded="lg" style="width: 100%;">
+  <div class="auth-wrapper d-flex align-center justify-center h-screen bg-background">
+    <v-card max-width="480" class="mx-auto" style="width: 100%;">
       <v-card-item class="pa-6">
         <v-card-title>{{ t('auth.acceptInvite') }}</v-card-title>
         <v-card-subtitle>{{ t('auth.setPasswordToJoin') }}</v-card-subtitle>
@@ -63,10 +63,8 @@ async function submit(): Promise<void> {
         <v-alert
           v-if="error"
           type="error"
-          variant="tonal"
           closable
           class="mb-4"
-          density="compact"
           @click:close="error = null"
         >
           {{ error }}
@@ -76,25 +74,19 @@ async function submit(): Promise<void> {
           <v-text-field
             v-model="password"
             :label="t('auth.password')"
-            variant="outlined"
-            density="compact"
             class="mb-6"
             :type="showPassword ? 'text' : 'password'"
             :append-inner-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
             @click:append-inner="showPassword = !showPassword"
-            hide-details="auto"
           />
 
           <v-text-field
             v-model="confirmPassword"
             :label="t('auth.confirmPassword')"
-            variant="outlined"
-            density="compact"
             class="mb-6"
             :type="showConfirmPassword ? 'text' : 'password'"
             :append-inner-icon="showConfirmPassword ? 'mdi-eye' : 'mdi-eye-off'"
             @click:append-inner="showConfirmPassword = !showConfirmPassword"
-            hide-details="auto"
           />
 
           <v-btn
@@ -111,9 +103,3 @@ async function submit(): Promise<void> {
     </v-card>
   </div>
 </template>
-
-<style scoped>
-.fill-height {
-  min-height: 100vh;
-}
-</style>

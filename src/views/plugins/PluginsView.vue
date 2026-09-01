@@ -5,6 +5,7 @@ import { usePluginsRealtime } from '@/composable/usePluginsRealtime';
 import PluginCatalogTab from '@/components/plugins/PluginCatalogTab.vue';
 import MyPluginsTab from '@/components/plugins/MyPluginsTab.vue';
 import CustomRequestsTab from '@/components/plugins/CustomRequestsTab.vue';
+import PageHeader from '@/components/ui/PageHeader.vue';
 
 const store = usePluginsStore();
 const tab = ref('catalog');
@@ -18,9 +19,11 @@ onMounted(() => {
 
 <template>
   <v-container>
-    <div class="d-flex align-center justify-space-between mt-6 mb-4">
-      <h2 class="text-h5 font-weight-medium">{{ $t('plugins.title') }}</h2>
-    </div>
+    <PageHeader :title="$t('plugins.title')">
+      <template #actions>
+
+      </template>
+    </PageHeader>
 
     <v-tabs v-model="tab" color="primary" class="mb-4">
       <v-tab value="catalog" prepend-icon="mdi-storefront-outline">{{ $t('plugins.tabCatalog') }}</v-tab>

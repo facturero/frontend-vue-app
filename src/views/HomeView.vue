@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
+import PageHeader from '@/components/ui/PageHeader.vue';
 
 const { t } = useI18n();
 const auth = useAuthStore();
@@ -28,9 +29,9 @@ onMounted(async () => {
   <v-container>
     <v-row justify="center">
       <v-col cols="12" md="8" lg="7">
-        <h2 class="text-h5 font-weight-medium mt-6 mb-4">{{ $t('home.title') }}</h2>
+        <PageHeader :title="$t('home.title')" />
 
-        <v-card elevation="4" rounded="lg">
+        <v-card>
           <v-card-title class="d-flex align-center">
             <v-icon icon="mdi-account-circle" class="mr-2" />
             {{ $t('home.sessionActive') }}
@@ -40,8 +41,6 @@ onMounted(async () => {
             <v-alert
               v-if="loadError"
               type="error"
-              density="compact"
-              variant="tonal"
               class="mb-4"
               :text="loadError"
             />
@@ -68,7 +67,6 @@ onMounted(async () => {
 
               <v-alert
                 type="success"
-                variant="tonal"
                 class="mt-4"
                 :text="$t('home.gatewayOk')"
               />

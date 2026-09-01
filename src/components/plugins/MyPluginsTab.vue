@@ -43,8 +43,6 @@ async function confirmDeactivate(): Promise<void> {
     <v-alert
       v-if="store.error"
       type="error"
-      density="compact"
-      variant="tonal"
       closable
       class="mb-4"
       @click:close="store.clearError()"
@@ -57,7 +55,7 @@ async function confirmDeactivate(): Promise<void> {
       </template>
     </v-alert>
 
-    <v-card elevation="2" rounded="lg">
+    <v-card>
       <v-data-table
         :headers="headers"
         :items="store.myPlugins"
@@ -69,7 +67,6 @@ async function confirmDeactivate(): Promise<void> {
           <v-chip
             size="x-small"
             :color="item.activationSource === 'direct' ? 'primary' : 'grey'"
-            variant="tonal"
           >
             {{ item.activationSource === 'direct' ? $t('plugins.sourceDirect') : $t('plugins.sourceDependency') }}
           </v-chip>
@@ -79,7 +76,6 @@ async function confirmDeactivate(): Promise<void> {
           <v-chip
             size="small"
             :color="item.status === 'active' ? 'success' : 'grey'"
-            variant="tonal"
           >
             {{ item.status === 'active' ? $t('common.active') : $t('plugins.status.desactivado') }}
           </v-chip>

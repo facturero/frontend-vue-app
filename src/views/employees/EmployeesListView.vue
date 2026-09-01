@@ -10,6 +10,7 @@ import RoleBadge from '@/components/RoleBadge.vue';
 import InviteEmployeeDialog from '@/components/InviteEmployeeDialog.vue';
 import RestorePasswordDialog from '@/components/RestorePasswordDialog.vue';
 import type { EmployeeSummary } from '@/types/employees';
+import PageHeader from '@/components/ui/PageHeader.vue';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -83,24 +84,23 @@ onMounted(async () => {
 
 <template>
   <v-container>
-    <div class="d-flex align-center justify-space-between mt-6 mb-4">
-      <h2 class="text-h5 font-weight-medium">{{ $t('employees.title') }}</h2>
-      <v-btn
-        v-if="canInvite"
-        color="primary"
-        variant="tonal"
-        prepend-icon="mdi-account-plus"
-        @click="openInvite"
-      >
-        {{ $t('employees.invite') }}
-      </v-btn>
-    </div>
+    <PageHeader :title="$t('employees.title')">
+      <template #actions>
+        <v-btn
+          v-if="canInvite"
+          color="primary"
+          variant="tonal"
+          prepend-icon="mdi-account-plus"
+          @click="openInvite"
+        >
+          {{ $t('employees.invite') }}
+        </v-btn>
+      </template>
+    </PageHeader>
 
     <v-alert
       v-if="emp.error"
       type="error"
-      density="compact"
-      variant="tonal"
       closable
       class="mb-4"
       @click:close="emp.error = null"
@@ -108,7 +108,7 @@ onMounted(async () => {
       {{ emp.error }}
     </v-alert>
 
-    <v-card elevation="2" rounded="lg" class="mb-4">
+    <v-card class="mb-4">
       <v-card-text>
         <v-row dense align="end">
           <v-col cols="12" sm="4">
@@ -122,8 +122,6 @@ onMounted(async () => {
                 })),
               ]"
               :label="$t('organization.establishment')"
-              variant="outlined"
-              density="compact"
               hide-details
               clearable
               @update:model-value="doSearch"
@@ -134,7 +132,7 @@ onMounted(async () => {
       </v-card-text>
     </v-card>
 
-    <v-card v-if="!emp.loading" elevation="2" rounded="lg">
+    <v-card v-if="!emp.loading">
       <v-table>
         <thead>
           <tr>
@@ -167,7 +165,6 @@ onMounted(async () => {
                   v-for="estId in e.establishmentIds"
                   :key="estId"
                   size="x-small"
-                  variant="tonal"
                   color="secondary"
                   class="mr-1"
                   data-testid="employee-establishment-chip"
@@ -181,7 +178,6 @@ onMounted(async () => {
               <v-chip
                 size="x-small"
                 :color="e.status === 'active' ? 'success' : 'warning'"
-                variant="tonal"
               >
                 {{ e.status }}
               </v-chip>

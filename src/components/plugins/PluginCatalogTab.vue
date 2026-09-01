@@ -104,8 +104,6 @@ async function confirmActivate(): Promise<void> {
     <v-alert
       v-if="store.error"
       type="error"
-      density="compact"
-      variant="tonal"
       closable
       class="mb-4"
       @click:close="store.clearError()"
@@ -118,15 +116,13 @@ async function confirmActivate(): Promise<void> {
       </template>
     </v-alert>
 
-    <v-card elevation="2" rounded="lg" class="mb-4">
+    <v-card class="mb-4">
       <v-card-text class="pb-2">
         <v-row dense align="end">
           <v-text-field
             v-model="search"
             :label="$t('plugins.search')"
             prepend-inner-icon="mdi-magnify"
-            variant="outlined"
-            density="compact"
             hide-details
             clearable
             class="mr-2"
@@ -135,8 +131,6 @@ async function confirmActivate(): Promise<void> {
             v-model="categoryFilter"
             :items="categories"
             :label="$t('products.category')"
-            variant="outlined"
-            density="compact"
             hide-details
             clearable
             class="mr-2"
@@ -150,8 +144,6 @@ async function confirmActivate(): Promise<void> {
               { title: $t('plugins.sortPriceDesc'), value: 'price-desc' },
             ]"
             :label="$t('plugins.sortBy')"
-            variant="outlined"
-            density="compact"
             hide-details
           />
         </v-row>
@@ -172,10 +164,10 @@ async function confirmActivate(): Promise<void> {
 
     <v-row>
       <v-col v-for="p in filtered" :key="p.id" cols="12" sm="6" md="4" lg="3">
-        <v-card elevation="2" rounded="lg" class="d-flex flex-column fill-height">
+        <v-card class="d-flex flex-column fill-height">
           <v-card-title class="d-flex align-center justify-space-between">
             <span class="text-subtitle-1 font-weight-medium">{{ p.name }}</span>
-            <v-chip v-if="p.is_exclusive" size="x-small" color="deep-purple" variant="tonal">
+            <v-chip v-if="p.is_exclusive" size="x-small" color="deep-purple">
               {{ $t('plugins.exclusive') }}
             </v-chip>
           </v-card-title>
@@ -196,7 +188,7 @@ async function confirmActivate(): Promise<void> {
             </div>
           </v-card-text>
           <v-card-actions class="pt-0">
-            <v-chip size="small" :color="statusMeta[p.display_status].color" variant="tonal">
+            <v-chip size="small" :color="statusMeta[p.display_status].color">
               {{ statusMeta[p.display_status].label }}
             </v-chip>
             <v-spacer />
@@ -247,7 +239,6 @@ async function confirmActivate(): Promise<void> {
                   v-if="r.already_active"
                   size="x-small"
                   color="primary"
-                  variant="tonal"
                   class="mr-2"
                 >
                   {{ $t('plugins.alreadyActive') }}

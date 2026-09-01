@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { useCustomerStore } from '@/stores/customers';
 import ImageUploader from '@/components/ImageUploader.vue';
 import type { CreateCustomerInput, UpdateCustomerInput, CustomerType } from '@/types/customers';
+import PageHeader from '@/components/ui/PageHeader.vue';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -155,26 +156,21 @@ onMounted(async () => {
 
 <template>
   <v-container>
-    <div class="d-flex align-center mt-6 mb-4">
-      <v-btn variant="text" icon="mdi-arrow-left" class="mr-2" @click="router.push({ name: 'customers' })" />
-      <h2 class="text-h5 font-weight-medium">
-        {{ isEdit ? $t('customers.edit') : $t('customers.new') }}
-      </h2>
-    </div>
+    <PageHeader :title="isEdit ? $t('customers.edit') : $t('customers.new')" :back-to="{ name: 'customers' }" />
 
-    <v-alert v-if="formError" type="error" density="compact" variant="tonal" closable class="mb-4"
+    <v-alert v-if="formError" type="error" closable class="mb-4"
       @click:close="formError = null">
       {{ formError }}
     </v-alert>
 
-    <v-alert v-if="store.error" type="warning" density="compact" variant="tonal" closable class="mb-4"
+    <v-alert v-if="store.error" type="warning" closable class="mb-4"
       @click:close="store.error = null">
       {{ store.error }}
     </v-alert>
 
     <v-row>
       <v-col cols="12" md="8">
-        <v-card elevation="2" rounded="lg">
+        <v-card>
           <v-card-text>
             <v-form @submit.prevent="submit">
               <!-- Tipo (persona / empresa) — solo al crear; no editable en edición -->
@@ -186,37 +182,33 @@ onMounted(async () => {
 
               <v-row dense>
                 <v-col :cols="type === 'company' ? 'md-8' : '12'">
-                  <v-text-field v-model="businessName" :label="type === 'company' ? $t('customers.legalName') : $t('customers.fullName')"
-                    variant="outlined" density="compact" required hide-details="auto" class="mb-4" />
+                  <v-text-field v-model="businessName" :label="type === 'company' ? $t('customers.legalName') : $t('customers.fullName')" required class="mb-4" />
                 </v-col>
                 <v-col v-if="type === 'company'" cols="12" md="4">
-                  <v-text-field v-model="tradeName" :label="$t('customers.tradeName')" variant="outlined" density="compact"
-                    hide-details="auto" class="mb-4" />
+                  <v-text-field v-model="tradeName" :label="$t('customers.tradeName')" class="mb-4" />
                 </v-col>
               </v-row>
 
               <v-row dense>
                 <v-col cols="12" md="4">
                   <v-select v-model="identificationTypeId" :items="idTypes" item-title="name" item-value="id"
-                    :label="$t('customers.idType')" variant="outlined" density="compact" hide-details="auto" clearable
+                    :label="$t('customers.idType')" clearable
                     class="mb-4" />
                 </v-col>
                 <v-col cols="12" md="4">
-                  <v-text-field v-model="identification" :label="$t('customers.idNumber')" variant="outlined"
-                    density="compact" :hint="identificationHint" :error="!!identificationHint" persistent-hint
+                  <v-text-field v-model="identification" :label="$t('customers.idNumber')" :hint="identificationHint" :error="!!identificationHint" persistent-hint
                     :maxlength="selectedIdType?.regex?.match(/\{(\d+)\}/)?.[1] ?? 20"
                     :disabled="isConsumidorFinal"
-                    class="mb-4" hide-details="auto" inputmode="numeric" pattern="[0-9]*" />
+                    class="mb-4" inputmode="numeric" pattern="[0-9]*" />
                 </v-col>
               </v-row>
 
               <v-row dense>
                 <v-col cols="12" md="6">
-                  <v-text-field v-model="email" :label="$t('common.email')" type="email" variant="outlined" density="compact"
-                    hide-details="auto" class="mb-4" />
+                  <v-text-field v-model="email" :label="$t('common.email')" type="email" class="mb-4" />
                 </v-col>
                 <v-col cols="12" md="6">
-                  <v-text-field v-model="phone" :label="$t('common.phone')" variant="outlined" density="compact"
+                  <v-text-field v-model="phone" :label="$t('common.phone')"
                     :hint="phoneHint" :error="!!phoneHint" persistent-hint
                     maxlength="10" inputmode="numeric" pattern="[0-9]*"
                     class="mb-4" />
@@ -235,7 +227,7 @@ onMounted(async () => {
       </v-col>
 
       <v-col cols="12" md="4">
-        <v-card elevation="2" rounded="lg">
+        <v-card>
           <v-card-title class="text-h6">{{ $t('customers.avatar') }}</v-card-title>
           <v-card-text>
             <ImageUploader

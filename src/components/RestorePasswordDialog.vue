@@ -47,7 +47,7 @@ async function submit(): Promise<void> {
     max-width="440"
     @update:model-value="(v) => { if (!v) close(); }"
   >
-    <v-card elevation="2" rounded="lg">
+    <v-card>
       <v-card-title>{{ $t('employees.restorePassword') }}</v-card-title>
       <v-card-text>
         <i18n-t v-if="employee" keypath="employees.restoreIntro" tag="p"
@@ -61,8 +61,6 @@ async function submit(): Promise<void> {
         <v-alert
           v-if="sent"
           type="success"
-          density="compact"
-          variant="tonal"
           class="mb-3"
           :text="$t('employees.restoreSent')"
         />
@@ -70,8 +68,6 @@ async function submit(): Promise<void> {
         <v-alert
           v-if="error"
           type="error"
-          density="compact"
-          variant="tonal"
           closable
           class="mb-3"
           @click:close="error = null"

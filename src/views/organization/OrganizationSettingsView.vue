@@ -2,6 +2,7 @@
 import { onMounted, ref } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useOrganizationStore } from '@/stores/organization';
+import PageHeader from '@/components/ui/PageHeader.vue';
 
 const auth = useAuthStore();
 const store = useOrganizationStore();
@@ -56,11 +57,11 @@ async function submit(): Promise<void> {
 
 <template>
   <v-container>
-    <h2 class="text-h5 font-weight-medium mt-6 mb-4">{{ $t('organization.settingsTitle') }}</h2>
+    <PageHeader :title="$t('organization.settingsTitle')" />
 
     <v-row>
       <v-col cols="12" md="8" lg="6">
-        <v-card elevation="2" rounded="lg">
+        <v-card>
           <v-card-text>
             <p class="text-body-2 text-medium-emphasis mb-4">
               {{ $t('organization.settingsIntro') }}
@@ -69,10 +70,8 @@ async function submit(): Promise<void> {
             <v-alert
               v-if="store.error"
               type="error"
-              variant="tonal"
               closable
               class="mb-4"
-              density="compact"
               @click:close="store.error = null"
             >
               {{ store.error }}
@@ -81,10 +80,8 @@ async function submit(): Promise<void> {
             <v-alert
               v-if="saved"
               type="success"
-              variant="tonal"
               closable
               class="mb-4"
-              density="compact"
               @click:close="saved = false"
             >
               {{ $t('organization.updated') }}
@@ -94,30 +91,21 @@ async function submit(): Promise<void> {
               <v-text-field
                 v-model="legalName"
                 :label="$t('organization.legalName')"
-                variant="outlined"
-                density="compact"
                 class="mb-4"
-                hide-details="auto"
                 :placeholder="$t('organization.legalNamePlaceholder')"
               />
 
               <v-text-field
                 v-model="tradeName"
                 :label="$t('customers.tradeName')"
-                variant="outlined"
-                density="compact"
                 class="mb-4"
-                hide-details="auto"
                 :placeholder="$t('organization.tradeNamePlaceholder')"
               />
 
               <v-text-field
                 v-model="taxId"
                 :label="$t('invoices.taxIdLabel')"
-                variant="outlined"
-                density="compact"
                 class="mb-4"
-                hide-details="auto"
                 :placeholder="$t('invoices.taxIdPlaceholder')"
               />
 
@@ -125,10 +113,7 @@ async function submit(): Promise<void> {
                 v-model="countryCode"
                 :items="[{ title: 'Ecuador', value: 'EC' }]"
                 :label="$t('common.country')"
-                variant="outlined"
-                density="compact"
                 class="mb-4"
-                hide-details="auto"
               />
 
               <v-checkbox
@@ -160,7 +145,7 @@ async function submit(): Promise<void> {
 
     <v-row>
       <v-col cols="12" md="8" lg="6">
-        <v-card elevation="2" rounded="lg" class="mt-2">
+        <v-card class="mt-2">
           <v-card-text class="d-flex align-center justify-space-between">
             <div>
               <p class="text-body-1 font-weight-medium mb-1">{{ $t('organization.establishmentsCard') }}</p>
@@ -178,7 +163,7 @@ async function submit(): Promise<void> {
 
     <v-row>
       <v-col cols="12" md="8" lg="6">
-        <v-card elevation="2" rounded="lg" class="mt-2">
+        <v-card class="mt-2">
           <v-card-text class="d-flex align-center justify-space-between">
             <div>
               <p class="text-body-1 font-weight-medium mb-1">{{ $t('organization.certificateCard') }}</p>

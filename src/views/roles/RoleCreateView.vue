@@ -3,6 +3,7 @@ import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useRoleStore } from '@/stores/roles';
 import PermissionSelector from '@/components/PermissionSelector.vue';
+import PageHeader from '@/components/ui/PageHeader.vue';
 
 const store = useRoleStore();
 const router = useRouter();
@@ -34,21 +35,11 @@ async function submit(): Promise<void> {
 
 <template>
   <v-container>
-    <div class="d-flex align-center mt-6 mb-4">
-      <v-btn
-        icon="mdi-arrow-left"
-        variant="text"
-        class="mr-2"
-        @click="router.push({ name: 'roles' })"
-      />
-      <h2 class="text-h5 font-weight-medium">{{ $t('roles.new') }}</h2>
-    </div>
+    <PageHeader :title="$t('roles.new')" :back-to="{ name: 'roles' }" />
 
     <v-alert
       v-if="store.error"
       type="error"
-      density="compact"
-      variant="tonal"
       closable
       class="mb-4"
       @click:close="store.error = null"
@@ -58,25 +49,19 @@ async function submit(): Promise<void> {
 
     <v-row>
       <v-col cols="12" md="5">
-        <v-card elevation="2" rounded="lg">
+        <v-card>
           <v-card-text>
             <v-form @submit.prevent="submit">
               <v-text-field
                 v-model="name"
                 :label="$t('roles.name')"
-                variant="outlined"
-                density="compact"
                 class="mb-4"
-                hide-details="auto"
               />
               <v-textarea
                 v-model="description"
                 :label="$t('common.description')"
-                variant="outlined"
-                density="compact"
                 class="mb-6"
                 rows="2"
-                hide-details="auto"
               />
               <v-btn
                 block
@@ -93,7 +78,7 @@ async function submit(): Promise<void> {
       </v-col>
 
       <v-col cols="12" md="7">
-        <v-card elevation="2" rounded="lg">
+        <v-card>
           <v-card-title>{{ $t('roles.permissions') }}</v-card-title>
           <v-card-text v-if="store.permissions.length > 0">
             <PermissionSelector

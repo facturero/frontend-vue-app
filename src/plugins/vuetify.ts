@@ -13,11 +13,41 @@ export default createVuetify({
     locale: 'es',
     messages: { es, en, fr },
   },
+  // ---------------------------------------------------------------------------
+  // FUENTE ÚNICA DE VERDAD DEL UI.
+  // Antes de escribir una prop de estilo en una vista, mírala aquí: si el valor
+  // que necesitas es el mismo, no la escribas. Si necesitas otro valor de forma
+  // recurrente, cámbialo aquí, no en la vista. Ver docs/UI-UX.md.
+  // ---------------------------------------------------------------------------
   defaults: {
-    VCard: { elevation: 0, class: 'border' },
-    VTextField: { variant: 'outlined', density: 'compact' },
-    VSelect: { variant: 'outlined', density: 'compact' },
-    VBtn: { variant: 'flat', rounded: 'lg' },
+    // Superficies
+    VCard: { elevation: 2, rounded: 'lg' },
+    VSheet: { rounded: 'lg' },
+
+    // Acciones
+    VBtn: { variant: 'flat', rounded: 'lg', class: 'text-none' },
+
+    // Campos de formulario: un único par variant + density para todos
+    VTextField: { variant: 'outlined', density: 'compact', hideDetails: 'auto' },
+    VTextarea: { variant: 'outlined', density: 'compact', hideDetails: 'auto' },
+    VSelect: { variant: 'outlined', density: 'compact', hideDetails: 'auto' },
+    VAutocomplete: { variant: 'outlined', density: 'compact', hideDetails: 'auto' },
+    VCombobox: { variant: 'outlined', density: 'compact', hideDetails: 'auto' },
+    VFileInput: { variant: 'outlined', density: 'compact', hideDetails: 'auto' },
+    VCheckbox: { color: 'primary', density: 'compact', hideDetails: 'auto' },
+    VSwitch: { color: 'primary', density: 'compact', hideDetails: 'auto' },
+    VRadioGroup: { color: 'primary', density: 'compact', hideDetails: 'auto' },
+
+    // Feedback
+    VAlert: { variant: 'tonal', density: 'compact', rounded: 'lg' },
+    VChip: { variant: 'tonal' },
+    VDialog: { maxWidth: 480 },
+
+    // Datos
+    VDataTable: { hover: true },
+    VDataTableServer: { hover: true },
+
+    // Navegación
     VAppBar: { elevation: 0, class: 'border-b' },
     VNavigationDrawer: { elevation: 0, class: 'border-e' },
     VList: { class: 'py-1' },
@@ -51,6 +81,9 @@ export default createVuetify({
           // Custom skin
           'skin-bordered-background': '#FAFAFA',
           'skin-bordered-surface': '#FFFFFF',
+
+          // Panel lateral de login / registro -> clase bg-auth-panel
+          'auth-panel': '#EDF2FB',
 
           // Utility
           code: '#F5F5F5',
@@ -108,6 +141,9 @@ export default createVuetify({
           // Custom skin
           'skin-bordered-background': '#111827',
           'skin-bordered-surface': '#202A37',
+
+          // Panel lateral de login / registro -> clase bg-auth-panel
+          'auth-panel': '#18212F',
 
           // Utility
           code: '#343434',
