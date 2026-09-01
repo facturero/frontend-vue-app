@@ -11,13 +11,13 @@ test.describe('Auth — flujo de registro e inicio de sesión', () => {
     const page = await ctx.newPage();
     await page.goto('/login');
 
-    // Click en "Registrarse" de la columna derecha (desktop)
-    await page.getByRole('button', { name: 'Registrarse' }).click();
+    // Cambia a modo registro desde el pie del formulario
+    await page.getByRole('button', { name: 'Crear cuenta', exact: true }).click();
 
     await page.getByLabel('Correo electrónico').fill(TEST_EMAIL);
-    await page.getByRole('textbox', { name: 'Contraseña', exact: true }).fill(TEST_PASSWORD);
-    await page.getByRole('textbox', { name: 'Confirmar contraseña' }).fill(TEST_PASSWORD);
-    await page.getByRole('button', { name: 'Registrarse' }).click();
+    await page.getByLabel('Contraseña', { exact: true }).fill(TEST_PASSWORD);
+    await page.getByLabel('Confirmar contraseña').fill(TEST_PASSWORD);
+    await page.getByRole('button', { name: 'Registrarse', exact: true }).click();
 
     // Redirige a completar perfil (needsOrg)
     await expect(page).toHaveURL('/profile');
@@ -31,9 +31,8 @@ test.describe('Auth — flujo de registro e inicio de sesión', () => {
     await page.goto('/login');
 
     await page.getByLabel('Correo electrónico').fill('admin@admin.com');
-    await page.getByRole('button', { name: 'Siguiente' }).click();
-    await page.getByLabel('Contraseña').fill('Admin123!');
-    await page.getByRole('button', { name: 'Entrar' }).click();
+    await page.getByLabel('Contraseña', { exact: true }).fill('Admin123!');
+    await page.getByRole('button', { name: 'Iniciar sesión', exact: true }).click();
 
     await expect(page).toHaveURL('/');
     await expect(page.getByText('Sesión activa')).toBeVisible();
@@ -47,9 +46,8 @@ test.describe('Auth — flujo de registro e inicio de sesión', () => {
     await page.goto('/login');
 
     await page.getByLabel('Correo electrónico').fill('bad@email.com');
-    await page.getByRole('button', { name: 'Siguiente' }).click();
-    await page.getByLabel('Contraseña').fill('wrongpass');
-    await page.getByRole('button', { name: 'Entrar' }).click();
+    await page.getByLabel('Contraseña', { exact: true }).fill('wrongpass');
+    await page.getByRole('button', { name: 'Iniciar sesión', exact: true }).click();
 
     await expect(page.getByRole('alert')).toBeVisible();
     await ctx.close();

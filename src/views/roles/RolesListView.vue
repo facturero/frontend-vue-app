@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { useRoleStore } from '@/stores/roles';
 import RoleBadge from '@/components/RoleBadge.vue';
+import PageHeader from '@/components/ui/PageHeader.vue';
 
 const auth = useAuthStore();
 const store = useRoleStore();
@@ -18,24 +19,23 @@ onMounted(() => {
 
 <template>
   <v-container>
-    <div class="d-flex align-center justify-space-between mt-6 mb-4">
-      <h2 class="text-h5 font-weight-medium">{{ $t('roles.title') }}</h2>
-      <v-btn
-        v-if="canManage"
-        color="primary"
-        variant="tonal"
-        prepend-icon="mdi-plus"
-        @click="router.push({ name: 'roles-create' })"
-      >
-        {{ $t('roles.new') }}
-      </v-btn>
-    </div>
+    <PageHeader :title="$t('roles.title')">
+      <template #actions>
+        <v-btn
+          v-if="canManage"
+          color="primary"
+          variant="tonal"
+          prepend-icon="mdi-plus"
+          @click="router.push({ name: 'roles-create' })"
+        >
+          {{ $t('roles.new') }}
+        </v-btn>
+      </template>
+    </PageHeader>
 
     <v-alert
       v-if="store.error"
       type="error"
-      density="compact"
-      variant="tonal"
       closable
       class="mb-4"
       @click:close="store.error = null"
@@ -47,8 +47,6 @@ onMounted(() => {
       <v-row>
         <v-col v-for="r in store.list" :key="r.id" cols="12" md="6" lg="4">
           <v-card
-            elevation="2"
-            rounded="lg"
             :disabled="r.isSystem"
             @click="!r.isSystem && canManage && router.push({ name: 'roles-edit', params: { id: r.id } })"
             :class="{ 'cursor-pointer': canManage }"
@@ -56,7 +54,7 @@ onMounted(() => {
             <v-card-item>
               <v-card-title class="d-flex align-center">
                 {{ r.name }}
-                <v-chip v-if="r.isSystem" size="x-small" color="secondary" variant="tonal" class="ml-2">
+                <v-chip v-if="r.isSystem" size="x-small" color="secondary" class="ml-2">
                   {{ $t('roles.system') }}
                 </v-chip>
               </v-card-title>
@@ -88,7 +86,7 @@ onMounted(() => {
         </v-col>
 
         <v-col v-if="store.list.length === 0" cols="12">
-          <v-card elevation="2" rounded="lg">
+          <v-card>
             <v-card-text class="text-center text-medium-emphasis py-6">
               {{ $t('roles.empty') }}
             </v-card-text>
@@ -102,9 +100,3 @@ onMounted(() => {
     </div>
   </v-container>
 </template>
-
-<style scoped>
-.cursor-pointer {
-  cursor: pointer;
-}
-</style>

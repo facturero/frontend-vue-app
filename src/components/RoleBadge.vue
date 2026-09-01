@@ -3,5 +3,5 @@ defineProps<{ name: string }>();
 </script>
 
 <template>
-  <v-chip size="small" color="primary" variant="tonal">{{ name }}</v-chip>
+  <v-chip size="small" color="primary">{{ name }}</v-chip>
 </template>

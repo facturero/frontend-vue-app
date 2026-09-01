@@ -37,7 +37,7 @@ const items = computed(() =>
         <template v-for="item in items" :key="item.titleKey">
           <v-list-item v-if="item.soon" :prepend-icon="item.icon" :title="$t(item.titleKey)" disabled rounded="lg">
             <template #append>
-              <v-chip size="x-small" color="secondary" variant="tonal">{{ $t('nav.comingSoon') }}</v-chip>
+              <v-chip size="x-small" color="secondary">{{ $t('nav.comingSoon') }}</v-chip>
             </template>
           </v-list-item>
           <v-list-item v-else-if="item.blocked" disabled rounded="lg">

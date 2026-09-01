@@ -310,11 +310,11 @@ onMounted(async () => {
 
     <v-progress-linear v-if="loadingExisting" indeterminate class="mb-4" />
 
-    <v-alert v-if="loadError" type="warning" variant="tonal" class="mb-6">
+    <v-alert v-if="loadError" type="warning" class="mb-6">
       {{ loadError }}
     </v-alert>
 
-    <v-alert v-if="errorMessage" type="error" variant="tonal" closable class="mb-6" @click:close="errorMessage = ''">
+    <v-alert v-if="errorMessage" type="error" closable class="mb-6" @click:close="errorMessage = ''">
       {{ errorMessage }}
     </v-alert>
 
@@ -338,7 +338,6 @@ onMounted(async () => {
               :items="customerStore.list.map(c => ({ title: `${c.businessName} (${c.identification})`, value: c.id }))"
               :label="$t('invoices.searchCustomer')"
               variant="underlined"
-              density="compact"
               clearable
               :disabled="hasCustomer"
               :search-input.sync="customerSearch"
@@ -406,14 +405,12 @@ onMounted(async () => {
                   :items="productStore.list.filter(p => p.status === 'active').map(p => ({ title: `${p.name} · ${p.type === 'service' ? $t('products.service') : $t('products.good')}`, value: p.id }))"
                   :label="$t('invoices.productOrService')"
                   variant="underlined"
-                  density="compact"
                   class="col-product"
                 />
                 <v-text-field
                   v-model="newLine.description"
                   :label="$t('invoices.descriptionOptional')"
                   variant="underlined"
-                  density="compact"
                   class="col-description"
                 />
                 <v-text-field
@@ -422,14 +419,12 @@ onMounted(async () => {
                   type="number"
                   min="1"
                   variant="underlined"
-                  density="compact"
                   class="col-qty mono"
                 />
                 <v-text-field
                   v-model="newLine.unitPrice"
                   :label="$t('products.price')"
                   variant="underlined"
-                  density="compact"
                   class="col-price mono"
                 />
                 <button type="button" class="icon-btn add" :title="$t('invoices.addLine')" :disabled="!canAddLine"
@@ -483,14 +478,12 @@ onMounted(async () => {
                     :items="orgStore.establishments.filter(e => e.status === 'active').map(e => ({ title: `${e.code} — ${e.name}`, value: e.id }))"
                     :label="$t('organization.establishment')"
                     variant="underlined"
-                    density="compact"
                   />
                   <v-select
                     v-model="selectedEmissionPointId"
                     :items="orgStore.emissionPoints.filter(ep => ep.status === 'active').map(ep => ({ title: `${ep.code} — ${ep.name || $t('invoices.emissionPoint')}`, value: ep.id }))"
                     :label="$t('invoices.emissionPoint')"
                     variant="underlined"
-                    density="compact"
                     :disabled="!selectedEstablishmentId"
                   />
                 </div>
@@ -595,25 +588,19 @@ onMounted(async () => {
       <v-card>
         <v-card-title>{{ $t('invoices.completeFiscalProfile') }}</v-card-title>
         <v-card-text>
-          <v-alert v-if="orgDialogError" type="error" density="compact" variant="tonal" class="mb-4">
+          <v-alert v-if="orgDialogError" type="error" class="mb-4">
             {{ orgDialogError }}
           </v-alert>
           <v-text-field
             v-model="quickTaxId"
             :label="$t('invoices.taxIdLabel')"
-            variant="outlined"
-            density="compact"
             class="mb-3"
-            hide-details="auto"
             :placeholder="$t('invoices.taxIdPlaceholder')"
           />
           <v-select
             v-model="quickCountryCode"
             :items="[{ title: 'Ecuador', value: 'EC' }]"
             :label="$t('common.country')"
-            variant="outlined"
-            density="compact"
-            hide-details="auto"
           />
         </v-card-text>
         <v-card-actions>
@@ -631,7 +618,7 @@ onMounted(async () => {
       <v-card>
         <v-card-title>{{ $t('invoices.createEstablishment') }}</v-card-title>
         <v-card-text>
-          <v-alert v-if="establishmentDialogError" type="error" density="compact" variant="tonal" class="mb-4">
+          <v-alert v-if="establishmentDialogError" type="error" class="mb-4">
             {{ establishmentDialogError }}
           </v-alert>
           <p class="text-caption text-medium-emphasis mb-3">
@@ -640,9 +627,6 @@ onMounted(async () => {
           <v-text-field
             v-model="quickEstablishmentName"
             :label="$t('invoices.establishmentName')"
-            variant="outlined"
-            density="compact"
-            hide-details="auto"
             :placeholder="$t('invoices.establishmentPlaceholder')"
           />
         </v-card-text>
@@ -661,7 +645,7 @@ onMounted(async () => {
       <v-card>
         <v-card-title>{{ $t('invoices.uploadCertificateTitle') }}</v-card-title>
         <v-card-text>
-          <v-alert v-if="certDialogError" type="error" density="compact" variant="tonal" class="mb-4">
+          <v-alert v-if="certDialogError" type="error" class="mb-4">
             {{ certDialogError }}
           </v-alert>
           <p class="text-caption text-medium-emphasis mb-3">
@@ -669,28 +653,19 @@ onMounted(async () => {
           </p>
           <v-file-input
             :label="$t('invoices.certFile')"
-            variant="outlined"
-            density="compact"
             accept=".p12,.pfx"
             class="mb-3"
-            hide-details="auto"
             @change="onQuickCertFileChange"
           />
           <v-text-field
             v-model="quickCertPassword"
             :label="$t('invoices.certPassword')"
             type="password"
-            variant="outlined"
-            density="compact"
             class="mb-3"
-            hide-details="auto"
           />
           <v-text-field
             v-model="quickCertAlias"
             :label="$t('invoices.certAlias')"
-            variant="outlined"
-            density="compact"
-            hide-details="auto"
             :placeholder="$t('invoices.certAliasPlaceholder')"
           />
         </v-card-text>

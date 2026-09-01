@@ -8,6 +8,7 @@ import { useOrganizationStore } from '@/stores/organization';
 import RoleBadge from '@/components/RoleBadge.vue';
 import RoleSelect from '@/components/RoleSelect.vue';
 import RestorePasswordDialog from '@/components/RestorePasswordDialog.vue';
+import PageHeader from '@/components/ui/PageHeader.vue';
 
 const props = defineProps<{ id: string }>();
 const emp = useEmployeeStore();
@@ -107,21 +108,11 @@ function openChangeDialog(): void {
 
 <template>
   <v-container>
-    <div class="d-flex align-center mt-6 mb-4">
-      <v-btn
-        icon="mdi-arrow-left"
-        variant="text"
-        class="mr-2"
-        @click="router.push({ name: 'employees' })"
-      />
-      <h2 class="text-h5 font-weight-medium">{{ $t('employees.detailTitle') }}</h2>
-    </div>
+    <PageHeader :title="$t('employees.detailTitle')" :back-to="{ name: 'employees' }" />
 
     <v-alert
       v-if="emp.error"
       type="error"
-      density="compact"
-      variant="tonal"
       closable
       class="mb-4"
       @click:close="emp.error = null"
@@ -130,7 +121,7 @@ function openChangeDialog(): void {
     </v-alert>
 
     <template v-if="employee">
-      <v-card elevation="2" rounded="lg" class="mb-4">
+      <v-card class="mb-4">
         <v-card-text>
           <v-list lines="two" density="comfortable">
             <v-list-item :title="$t('common.email')" :subtitle="employee.email" prepend-icon="mdi-email-outline" />
@@ -171,7 +162,6 @@ function openChangeDialog(): void {
                   <v-chip
                     :value="0"
                     color="success"
-                    variant="tonal"
                     size="x-small"
                     :disabled="disabling"
                   >
@@ -180,7 +170,6 @@ function openChangeDialog(): void {
                   <v-chip
                     :value="1"
                     color="warning"
-                    variant="tonal"
                     size="x-small"
                     :disabled="disabling"
                   >
@@ -191,7 +180,6 @@ function openChangeDialog(): void {
                   v-else
                   size="x-small"
                   :color="employee.status === 'active' ? 'success' : 'warning'"
-                  variant="tonal"
                 >
                   {{ employee.status }}
                 </v-chip>
@@ -206,22 +194,18 @@ function openChangeDialog(): void {
         </v-card-text>
       </v-card>
 
-      <v-card v-if="canAssign" elevation="2" rounded="lg">
+      <v-card v-if="canAssign">
         <v-card-title>{{ $t('employees.assignRoles') }}</v-card-title>
         <v-card-text>
           <v-alert
             v-if="isSelf"
             type="info"
-            density="compact"
-            variant="tonal"
             class="mb-4"
             :text="$t('employees.cannotEditOwnRoles')"
           />
           <v-alert
             v-else-if="employee?.isOwner"
             type="info"
-            density="compact"
-            variant="tonal"
             class="mb-4"
             :text="$t('employees.cannotEditOwnerRoles')"
           />
@@ -243,14 +227,12 @@ function openChangeDialog(): void {
         </v-card-text>
       </v-card>
 
-      <v-card v-if="canAssignEstablishments" elevation="2" rounded="lg" class="mt-4">
+      <v-card v-if="canAssignEstablishments" class="mt-4">
         <v-card-title>{{ $t('employees.assignedEstablishments') }}</v-card-title>
         <v-card-text>
           <v-alert
             v-if="cannotModify"
             type="info"
-            density="compact"
-            variant="tonal"
             class="mb-4"
             :text="$t('employees.cannotEditEstablishments')"
           />
@@ -258,8 +240,6 @@ function openChangeDialog(): void {
             v-model="selectedEstablishmentIds"
             :items="establishmentOptions"
             :label="$t('employees.establishments')"
-            variant="outlined"
-            density="compact"
             multiple
             :disabled="cannotModify"
             class="mb-4"

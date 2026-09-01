@@ -7,6 +7,7 @@ import { useProductStore } from '@/stores/products';
 import { useOrganizationStore } from '@/stores/organization';
 import { productApi } from '@/api/products';
 import ImageUploader from '@/components/ImageUploader.vue';
+import PageHeader from '@/components/ui/PageHeader.vue';
 
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -127,44 +128,38 @@ onMounted(async () => {
 
 <template>
   <v-container>
-    <div class="d-flex align-center mt-6 mb-4">
-      <v-btn
-        variant="text"
-        icon="mdi-arrow-left"
-        class="mr-2"
-        @click="router.push({ name: 'products' })"
-      />
-      <h2 class="text-h5 font-weight-medium">{{ product?.name || $t('products.singular') }}</h2>
-      <v-spacer />
-      <v-btn
-        v-if="canUpdate && product?.status === 'active'"
-        color="error"
-        variant="tonal"
-        size="small"
-        prepend-icon="mdi-archive"
-        :loading="disabling"
-        @click="disable"
-        class="mr-2"
-      >
-        {{ $t('common.deactivate') }}
-      </v-btn>
-      <v-btn
-        v-if="canUpdate"
-        color="primary"
-        variant="tonal"
-        size="small"
-        prepend-icon="mdi-pencil"
-        @click="goEdit"
-      >
-        {{ $t('common.edit') }}
-      </v-btn>
-    </div>
+    <PageHeader
+      :title="product?.name || $t('products.singular')"
+      :back-to="{ name: 'products' }"
+    >
+      <template #actions>
+        <v-btn
+          v-if="canUpdate && product?.status === 'active'"
+          color="error"
+          variant="tonal"
+          size="small"
+          prepend-icon="mdi-archive"
+          :loading="disabling"
+          @click="disable"
+        >
+          {{ $t('common.deactivate') }}
+        </v-btn>
+        <v-btn
+          v-if="canUpdate"
+          color="primary"
+          variant="tonal"
+          size="small"
+          prepend-icon="mdi-pencil"
+          @click="goEdit"
+        >
+          {{ $t('common.edit') }}
+        </v-btn>
+      </template>
+    </PageHeader>
 
     <v-alert
       v-if="store.error"
       type="error"
-      density="compact"
-      variant="tonal"
       closable
       class="mb-4"
       @click:close="store.error = null"
@@ -175,8 +170,6 @@ onMounted(async () => {
     <v-alert
       v-if="uploadError"
       type="error"
-      density="compact"
-      variant="tonal"
       closable
       class="mb-4"
       @click:close="uploadError = null"
@@ -187,7 +180,7 @@ onMounted(async () => {
     <div v-if="!store.loading && product">
       <v-row>
         <v-col cols="12" md="8">
-          <v-card elevation="2" rounded="lg" class="mb-4">
+          <v-card class="mb-4">
             <v-card-title class="text-h6">{{ $t('common.generalInfo') }}</v-card-title>
             <v-card-text>
               <v-row>
@@ -201,7 +194,7 @@ onMounted(async () => {
                 </v-col>
                 <v-col cols="6">
                   <p class="text-caption text-medium-emphasis">{{ $t('common.type') }}</p>
-                  <v-chip size="x-small" variant="tonal" color="info" class="mb-3">
+                  <v-chip size="x-small" color="info" class="mb-3">
                     {{ product.type === 'good' ? $t('products.good') : $t('products.service') }}
                   </v-chip>
                 </v-col>
@@ -210,7 +203,6 @@ onMounted(async () => {
                   <v-chip
                     size="x-small"
                     :color="product.status === 'active' ? 'success' : 'warning'"
-                    variant="tonal"
                     class="mb-3"
                   >
                     {{ product.status === 'active' ? $t('common.active') : $t('common.inactive') }}
@@ -240,7 +232,7 @@ onMounted(async () => {
             </v-card-text>
           </v-card>
 
-          <v-card elevation="2" rounded="lg" class="mb-4">
+          <v-card class="mb-4">
             <v-card-title class="text-h6">{{ $t('products.taxes') }}</v-card-title>
             <v-card-text>
               <v-table v-if="product.taxes.length > 0">
@@ -254,7 +246,7 @@ onMounted(async () => {
                   <tr v-for="tax in product.taxes" :key="tax.id">
                     <td>{{ taxRateLabel(tax.taxRateId) }}</td>
                     <td>
-                      <v-chip size="x-small" variant="tonal" color="primary">
+                      <v-chip size="x-small" color="primary">
                         {{ taxKindLabel(tax.kind) }}
                       </v-chip>
                     </td>
@@ -265,7 +257,7 @@ onMounted(async () => {
             </v-card-text>
           </v-card>
 
-          <v-card elevation="2" rounded="lg" class="mb-4">
+          <v-card class="mb-4">
             <v-card-title class="text-h6">{{ $t('products.establishments') }}</v-card-title>
             <v-card-text>
               <div v-if="productEstablishments.length > 0" class="d-flex flex-wrap ga-2">
@@ -273,7 +265,6 @@ onMounted(async () => {
                   v-for="est in productEstablishments"
                   :key="est.id"
                   size="small"
-                  variant="tonal"
                   color="primary"
                   data-testid="product-establishment-chip"
                 >
@@ -284,57 +275,68 @@ onMounted(async () => {
             </v-card-text>
           </v-card>
 
-          <v-card elevation="2" rounded="lg" class="mb-4">
+          <v-card class="mb-4">
             <v-card-title class="text-h6">{{ $t('common.images') }}</v-card-title>
             <v-card-text>
               <div v-if="product.images.length > 0" class="d-flex flex-wrap ga-3 mb-4">
-                <div
+                <v-hover
                   v-for="img in product.images"
                   :key="img.id"
-                  class="image-card position-relative"
+                  v-slot="{ isHovering, props: hoverProps }"
                 >
-                  <v-img
-                    :src="imageUrl(img.fileId)"
-                    :alt="img.alt || $t('products.imageAlt')"
-                    width="140"
-                    height="140"
-                    cover
-                    class="rounded-lg border"
-                  >
-                    <template #placeholder>
-                      <v-skeleton-loader type="image" class="w-100 h-100" />
-                    </template>
-                  </v-img>
-                  <div class="image-overlay d-flex flex-column align-center justify-center ga-1">
-                    <v-btn
-                      v-if="!img.isPrimary"
+                  <div v-bind="hoverProps" class="position-relative rounded-lg overflow-hidden">
+                    <v-img
+                      :src="imageUrl(img.fileId)"
+                      :alt="img.alt || $t('products.imageAlt')"
+                      width="140"
+                      height="140"
+                      cover
+                      class="rounded-lg border"
+                    >
+                      <template #placeholder>
+                        <v-skeleton-loader type="image" class="w-100 h-100" />
+                      </template>
+                    </v-img>
+
+                    <v-overlay
+                      :model-value="isHovering"
+                      contained
+                      scrim="black"
+                      class="align-center justify-center"
+                      persistent
+                      no-click-animation
+                    >
+                      <div class="d-flex flex-column align-center ga-1">
+                        <v-btn
+                          v-if="!img.isPrimary"
+                          size="x-small"
+                          variant="tonal"
+                          color="white"
+                          @click="setPrimary(img.id)"
+                        >
+                          {{ $t('common.primary') }}
+                        </v-btn>
+                        <v-btn
+                          size="x-small"
+                          variant="tonal"
+                          color="error"
+                          @click="removeImage(img.id)"
+                        >
+                          {{ $t('common.delete') }}
+                        </v-btn>
+                      </div>
+                    </v-overlay>
+
+                    <v-chip
+                      v-if="img.isPrimary"
                       size="x-small"
-                      variant="tonal"
-                      color="white"
-                      class="opacity-80"
-                      @click="setPrimary(img.id)"
+                      color="primary"
+                      class="position-absolute top-0 left-0 ma-1"
                     >
                       {{ $t('common.primary') }}
-                    </v-btn>
-                    <v-btn
-                      size="x-small"
-                      variant="tonal"
-                      color="error"
-                      class="opacity-80"
-                      @click="removeImage(img.id)"
-                    >
-                      {{ $t('common.delete') }}
-                    </v-btn>
+                    </v-chip>
                   </div>
-                  <v-chip
-                    v-if="img.isPrimary"
-                    size="x-small"
-                    color="primary"
-                    class="primary-badge"
-                  >
-                    {{ $t('common.primary') }}
-                  </v-chip>
-                </div>
+                </v-hover>
               </div>
               <p v-else class="text-body-2 text-medium-emphasis mb-4">{{ $t('products.noImages') }}</p>
 
@@ -368,7 +370,7 @@ onMounted(async () => {
         </v-col>
 
         <v-col cols="12" md="4">
-          <v-card elevation="2" rounded="lg">
+          <v-card>
             <v-card-title class="text-h6">{{ $t('common.metadata') }}</v-card-title>
             <v-card-text>
               <p class="text-caption text-medium-emphasis">{{ $t('common.createdAt') }}</p>
@@ -386,32 +388,3 @@ onMounted(async () => {
     </div>
   </v-container>
 </template>
-
-<style scoped>
-.image-card {
-  overflow: hidden;
-}
-
-.image-card .image-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.5);
-  opacity: 0;
-  transition: opacity 0.2s;
-  border-radius: 8px;
-}
-
-.image-card:hover .image-overlay {
-  opacity: 1;
-}
-
-.primary-badge {
-  position: absolute;
-  top: 4px;
-  left: 4px;
-}
-
-.opacity-80 {
-  opacity: 0.9;
-}
-</style>

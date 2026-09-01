@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useInvoiceStore } from '@/stores/invoices';
 import { useAuthStore } from '@/stores/auth';
+import PageHeader from '@/components/ui/PageHeader.vue';
 
 const { locale } = useI18n();
 const router = useRouter();
@@ -53,17 +54,20 @@ onMounted(load);
 </script>
 
 <template>
-  <v-container fluid>
-    <v-row align="center" justify="space-between" class="mb-4">
-      <v-col>
-        <h1 class="text-h4">{{ $t('invoices.title') }}</h1>
-      </v-col>
-      <v-col class="text-right">
-        <v-btn v-if="canCreate" color="primary" prepend-icon="mdi-plus" @click="goCreate">
+  <v-container>
+    <PageHeader :title="$t('invoices.title')">
+      <template #actions>
+        <v-btn
+          v-if="canCreate"
+          color="primary"
+          variant="tonal"
+          prepend-icon="mdi-plus"
+          @click="goCreate"
+        >
           {{ $t('invoices.new') }}
         </v-btn>
-      </v-col>
-    </v-row>
+      </template>
+    </PageHeader>
 
     <v-card>
       <v-card-text>

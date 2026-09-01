@@ -47,8 +47,6 @@ async function submitRequest(): Promise<void> {
     <v-alert
       v-if="store.error"
       type="error"
-      density="compact"
-      variant="tonal"
       closable
       class="mb-4"
       @click:close="store.clearError()"
@@ -62,7 +60,7 @@ async function submitRequest(): Promise<void> {
       </v-btn>
     </div>
 
-    <v-card elevation="2" rounded="lg">
+    <v-card>
       <v-list>
         <v-list-item v-for="r in store.requests" :key="r.id">
           <template #prepend>
@@ -77,7 +75,7 @@ async function submitRequest(): Promise<void> {
             </template>
           </v-list-item-subtitle>
           <template #append>
-            <v-chip size="small" :color="statusMeta[r.status].color" variant="tonal">
+            <v-chip size="small" :color="statusMeta[r.status].color">
               {{ statusMeta[r.status].label }}
             </v-chip>
           </template>
@@ -96,8 +94,6 @@ async function submitRequest(): Promise<void> {
             v-model="description"
             :label="$t('plugins.whatDoYouNeed')"
             :placeholder="$t('plugins.needPlaceholder')"
-            variant="outlined"
-            density="compact"
             rows="4"
             :rules="descriptionRules"
           />
@@ -108,8 +104,6 @@ async function submitRequest(): Promise<void> {
             multiple
             chips
             closable-chips
-            variant="outlined"
-            density="compact"
             :hint="$t('plugins.basedOnHint')"
             persistent-hint
           />

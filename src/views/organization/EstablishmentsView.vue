@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { useOrganizationStore } from '@/stores/organization';
 import type { EstablishmentDTO, EmissionPointDTO } from '@/types/organization';
+import PageHeader from '@/components/ui/PageHeader.vue';
 
 const { t } = useI18n();
 const auth = useAuthStore();
@@ -98,16 +99,12 @@ onUnmounted(() => {
 
 <template>
   <v-container>
-    <div class="d-flex align-center justify-space-between mt-6 mb-4">
-      <div>
-        <h2 class="text-h5 font-weight-medium">{{ $t('establishments.title') }}</h2>
-        <p class="text-body-2 text-medium-emphasis mb-0">
-          {{ $t('establishments.intro') }}
-        </p>
-      </div>
-    </div>
+    <PageHeader
+      :title="$t('establishments.title')"
+      :subtitle="$t('establishments.intro')"
+    />
 
-    <v-alert v-if="store.error" type="error" density="compact" variant="tonal" closable class="mb-4"
+    <v-alert v-if="store.error" type="error" closable class="mb-4"
       @click:close="store.error = null">
       {{ store.error }}
     </v-alert>
@@ -115,7 +112,7 @@ onUnmounted(() => {
     <v-row>
       <!-- Establecimientos -->
       <v-col cols="12" md="5">
-        <v-card elevation="2" rounded="lg">
+        <v-card>
           <v-card-title class="d-flex align-center justify-space-between">
             <span class="text-body-1 font-weight-medium">{{ $t('establishments.listTitle') }}</span>
             <v-btn v-if="canCreate" size="small" variant="tonal" color="primary" prepend-icon="mdi-plus"
@@ -133,8 +130,7 @@ onUnmounted(() => {
               <v-list-item-title>{{ est.name }}</v-list-item-title>
               <v-list-item-subtitle>
                 {{ $t('establishments.code', { code: est.code }) }}
-                <v-chip size="x-small" class="ml-2" :color="est.status === 'active' ? 'success' : 'warning'"
-                  variant="tonal">
+                <v-chip size="x-small" class="ml-2" :color="est.status === 'active' ? 'success' : 'warning'">
                   {{ est.status === 'active' ? $t('common.active') : $t('common.inactive') }}
                 </v-chip>
               </v-list-item-subtitle>
@@ -150,7 +146,7 @@ onUnmounted(() => {
 
       <!-- Puntos de emisión del establecimiento seleccionado -->
       <v-col cols="12" md="7">
-        <v-card elevation="2" rounded="lg" v-if="selected">
+        <v-card v-if="selected">
           <v-card-title class="d-flex align-center justify-space-between">
             <span class="text-body-1 font-weight-medium">
               {{ $t('establishments.pointsFor', { name: selected.name }) }}
@@ -164,17 +160,17 @@ onUnmounted(() => {
             <v-list-item v-for="ep in store.emissionPoints" :key="ep.id">
               <v-list-item-title class="d-flex align-center ga-2">
                 {{ ep.name || $t('establishments.pointFallback', { code: ep.code }) }}
-                <v-chip size="x-small" :color="ep.type === 'pos' ? 'indigo' : 'grey'" variant="tonal">
+                <v-chip size="x-small" :color="ep.type === 'pos' ? 'indigo' : 'grey'">
                   {{ ep.type === 'pos' ? $t('establishments.typePos') : $t('establishments.typeWeb') }}
                 </v-chip>
               </v-list-item-title>
               <v-list-item-subtitle class="d-flex align-center ga-2">
                 <span class="text-caption">{{ $t('establishments.code', { code: ep.code }) }}</span>
-                <v-chip size="x-small" :color="ep.status === 'active' ? 'success' : 'warning'" variant="tonal">
+                <v-chip size="x-small" :color="ep.status === 'active' ? 'success' : 'warning'">
                   {{ ep.status === 'active' ? $t('common.active') : $t('common.inactive') }}
                 </v-chip>
                 <template v-if="ep.type === 'pos'">
-                  <v-chip size="x-small" :color="ep.paired ? 'success' : 'amber'" variant="tonal">
+                  <v-chip size="x-small" :color="ep.paired ? 'success' : 'amber'">
                     {{ ep.paired ? $t('establishments.paired') : $t('establishments.unpaired') }}
                   </v-chip>
                 </template>
@@ -212,7 +208,7 @@ onUnmounted(() => {
           </v-card-text>
         </v-card>
 
-        <v-card elevation="2" rounded="lg" v-else>
+        <v-card v-else>
           <v-card-text class="text-medium-emphasis text-center pa-8">
             {{ $t('establishments.pickOne') }}
           </v-card-text>
@@ -228,18 +224,12 @@ onUnmounted(() => {
           <v-text-field
             v-model="newEstablishmentName"
             :label="$t('common.name')"
-            variant="outlined"
-            density="compact"
             class="mb-4"
-            hide-details="auto"
             :placeholder="$t('invoices.establishmentPlaceholder')"
           />
           <v-text-field
             v-model="newEstablishmentAddress"
             :label="$t('establishments.addressOptional')"
-            variant="outlined"
-            density="compact"
-            hide-details="auto"
           />
         </v-card-text>
         <v-card-actions>
@@ -260,10 +250,7 @@ onUnmounted(() => {
           <v-text-field
             v-model="newEmissionPointName"
             :label="$t('establishments.nameOptional')"
-            variant="outlined"
-            density="compact"
             class="mb-4"
-            hide-details="auto"
             :placeholder="$t('establishments.namePlaceholder')"
           />
           <p class="text-caption text-medium-emphasis mb-2">{{ $t('establishments.pointType') }}</p>

@@ -18,16 +18,21 @@
     "noInviteToken": "No se encontró el token de invitación.",
     "noResetToken": "No se encontró el enlace de restablecimiento.",
     "notRegisteredYet": "¿Aún no estás registrado?",
+    "orSignInWith": "o inicia sesión con",
+    "orSignUpWith": "o regístrate con",
     "password": "Contraseña",
-    "passwordTooShort": "La contraseña debe tener al menos 8 caracteres.",
     "passwordsDontMatch": "Las contraseñas no coinciden.",
+    "passwordTooShort": "La contraseña debe tener al menos 8 caracteres.",
     "register": "Registrarse",
     "registerToGetStarted": "Regístrate para empezar",
+    "rememberDevice": "Recordar este dispositivo",
     "resetPassword": "Restablecer contraseña",
     "setNewPassword": "Crea una nueva contraseña para tu cuenta",
     "setPasswordToJoin": "Establece una contraseña para unirte a la organización",
     "signIn": "Iniciar sesión",
-    "toAccessTemplate": "Para acceder al panel"
+    "toAccessTemplate": "Para acceder al panel",
+    "welcomeSubtitle": "Tu panel de administración",
+    "welcomeTitle": "Bienvenido al CRM"
   },
   "certificates": {
     "empty": "No hay ningún certificado cargado todavía.",
