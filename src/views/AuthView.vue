@@ -83,10 +83,7 @@ function toggleMode(): void {
           {{ t('auth.welcomeSubtitle') }}
         </p>
 
-        <GoogleSignIn
-          :locale="$i18n.locale"
-          :divider-label="isLogin ? t('auth.orSignInWith') : t('auth.orSignUpWith')"
-        />
+        <GoogleSignIn :divider-label="isLogin ? t('auth.orSignInWith') : t('auth.orSignUpWith')" />
 
         <v-alert
           v-if="auth.error"

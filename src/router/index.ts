@@ -224,17 +224,23 @@ router.beforeEach(async (to) => {
       return { name: 'home' };
     }
 
-    // Los plugins activos se cargan una vez por sesión: los necesita tanto el
-    // guard de abajo como el menú lateral, que se arma en cada navegación.
-    const plugins = usePluginsStore();
-    await plugins.ensureMyLoaded();
+    // Los plugins son por organización: sin una todavía (usuario en pleno
+    // setup, ej. tras un primer login con Google) esta llamada siempre da
+    // 401 y dispara el logout automático del interceptor. Se salta en las
+    // rutas de configuración de organización, igual que el chequeo de arriba.
+    if (to.name !== 'profile' && to.name !== 'organization-settings') {
+      // Los plugins activos se cargan una vez por sesión: los necesita tanto el
+      // guard de abajo como el menú lateral, que se arma en cada navegación.
+      const plugins = usePluginsStore();
+      await plugins.ensureMyLoaded();
 
-    // Módulos vendibles: además del permiso, la organización debe tener el
-    // plugin activo. El gateway lo vuelve a comprobar (403 PLUGIN_NOT_ACTIVE);
-    // esto solo evita mostrar una vista que no podría cargar datos.
-    const requiredPlugin = to.meta.requiredPlugin as string | undefined;
-    if (requiredPlugin && !plugins.isActive(requiredPlugin)) {
-      return { name: 'plugins' };
+      // Módulos vendibles: además del permiso, la organización debe tener el
+      // plugin activo. El gateway lo vuelve a comprobar (403 PLUGIN_NOT_ACTIVE);
+      // esto solo evita mostrar una vista que no podría cargar datos.
+      const requiredPlugin = to.meta.requiredPlugin as string | undefined;
+      if (requiredPlugin && !plugins.isActive(requiredPlugin)) {
+        return { name: 'plugins' };
+      }
     }
   }
 
