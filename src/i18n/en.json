@@ -477,6 +477,7 @@
     "vat": "VAT"
   },
   "profile": {
+    "changePhoto": "Change photo",
     "completeProfile": "Complete profile",
     "completeTitle": "Complete your profile",
     "editIntro": "Update your personal details",

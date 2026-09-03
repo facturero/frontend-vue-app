@@ -17,6 +17,8 @@ const props = withDefaults(
     maxSizeMB?: number;
     multiple?: boolean;
     existingImages?: ExistingImage[];
+    /** Sin el texto de ayuda ni el borde punteado: para usos pequeños como un avatar circular. */
+    compact?: boolean;
   }>(),
   {
     category: 'avatar',
@@ -24,6 +26,7 @@ const props = withDefaults(
     maxSizeMB: 5,
     multiple: false,
     existingImages: () => [],
+    compact: false,
   },
 );
 
@@ -211,7 +214,7 @@ async function sha256(file: File): Promise<string> {
     .join('');
 }
 
-defineExpose({ uploadAll, hasPending: () => hasPending.value });
+defineExpose({ uploadAll, hasPending: () => hasPending.value, openPicker });
 
 watch(() => props.existingImages, () => {
   if (state.value === STATE.DONE) {
@@ -242,38 +245,56 @@ watch(() => props.existingImages, () => {
     <!-- IDLE / drop zone (empty or multiple) -->
     <div
       v-else-if="state === 'idle'"
-      class="drop-zone d-flex flex-column align-center justify-center pa-6 rounded-lg border"
-      :class="{ 'drag-over': dragOver }"
-      @click="openPicker"
+      class="drop-zone d-flex flex-column align-center justify-center rounded-lg"
+      :class="{ 'drag-over': dragOver, 'pa-6 border': !compact, 'pa-0 compact': compact }"
+      @click="compact ? undefined : openPicker()"
       @dragover="onDragOver"
       @dragleave="onDragLeave"
       @drop="onDrop"
     >
-      <v-icon icon="mdi-cloud-upload-outline" :size="48" :color="dragOver ? 'primary' : 'grey'" class="mb-2" />
-      <span class="text-body-2 text-medium-emphasis">{{ $t('uploader.dropHint') }}</span>
+      <v-icon
+        :icon="compact ? 'mdi-account' : 'mdi-cloud-upload-outline'"
+        :size="compact ? 72 : 48"
+        :color="dragOver ? 'primary' : 'grey'"
+        :class="{ 'mb-2': !compact }"
+      />
+      <span v-if="!compact" class="text-body-2 text-medium-emphasis">{{ $t('uploader.dropHint') }}</span>
     </div>
 
-    <!-- SELECTED / single mode: show selected image full card -->
+    <!-- SELECTED or UPLOADING / single mode: la imagen elegida se queda visible;
+         solo cambia el overlay (cámara para reemplazar, progreso mientras sube). -->
     <div
-      v-if="state === 'selected' && !multiple && selectedFiles.length > 0"
+      v-if="(state === 'selected' || state === 'uploading') && !multiple && selectedFiles.length > 0"
       class="drop-zone single-preview d-flex align-center justify-center rounded-lg border position-relative"
       :class="{ 'drag-over': dragOver }"
-      @click="openPicker"
+      @click="state === 'selected' && !compact ? openPicker() : undefined"
       @dragover="onDragOver"
       @dragleave="onDragLeave"
       @drop="onDrop"
     >
       <v-img :src="selectedFiles[0].url" alt="preview" cover class="preview-img rounded-lg" />
-      <v-btn
-        icon="mdi-close-circle"
-        size="small"
-        color="error"
-        variant="text"
-        class="remove-top-right"
-        @click.stop="removePending(0)"
-      />
-      <div class="overlay-icon d-flex align-center justify-center rounded-lg">
-        <v-icon icon="mdi-camera" size="28" color="white" @click.stop="openPicker" />
+
+      <template v-if="state === 'selected' && !compact">
+        <v-btn
+          icon="mdi-close-circle"
+          size="small"
+          color="error"
+          variant="text"
+          class="remove-top-right"
+          @click.stop="removePending(0)"
+        />
+        <div class="overlay-icon d-flex align-center justify-center rounded-lg">
+          <v-icon icon="mdi-camera" size="28" color="white" @click.stop="openPicker" />
+        </div>
+      </template>
+
+      <div v-else-if="state === 'uploading'" class="overlay-icon overlay-uploading d-flex align-center justify-center rounded-lg">
+        <v-progress-circular
+          :model-value="total > 0 ? (completed / total) * 100 : 0"
+          color="white"
+          size="36"
+          width="3"
+        />
       </div>
     </div>
 
@@ -309,8 +330,8 @@ watch(() => props.existingImages, () => {
     <!-- Nota: la miniatura ya se muestra dentro del drop-zone de arriba en modo single,
          no hace falta duplicarla aquí. Este bloque solo se mantiene por compat, oculto. -->
 
-    <!-- UPLOADING -->
-    <div v-if="state === 'uploading'" class="mt-2">
+    <!-- UPLOADING (modo múltiple: no hay una sola imagen sobre la que superponer el progreso) -->
+    <div v-if="state === 'uploading' && multiple" class="mt-2">
       <v-progress-linear
         :model-value="total > 0 ? (completed / total) * 100 : 0"
         color="primary"
@@ -326,7 +347,7 @@ watch(() => props.existingImages, () => {
     <div
       v-if="state === 'done' && !multiple"
       class="drop-zone single-preview d-flex align-center justify-center rounded-lg border position-relative"
-      @click="reset"
+      @click="compact ? undefined : reset()"
     >
       <img
         v-if="selectedFiles[0]"
@@ -334,7 +355,7 @@ watch(() => props.existingImages, () => {
         alt="preview"
         class="preview-img rounded-lg"
       />
-      <div class="overlay-icon d-flex align-center justify-center rounded-lg">
+      <div v-if="!compact" class="overlay-icon d-flex align-center justify-center rounded-lg">
         <v-icon icon="mdi-camera" size="32" color="white" />
       </div>
     </div>
@@ -374,6 +395,14 @@ watch(() => props.existingImages, () => {
   min-height: 120px;
 }
 
+.drop-zone.compact {
+  border: none;
+  min-height: 0;
+  /* Sin foto todavía: el círculo es solo un placeholder, la acción vive en el
+     badge de cámara que lo acompaña (ver ProfileView.vue). */
+  cursor: default;
+}
+
 .drop-zone.single-preview {
   border-style: solid;
   min-height: 200px;
@@ -403,9 +432,26 @@ watch(() => props.existingImages, () => {
   opacity: 1;
 }
 
+.overlay-uploading {
+  background: rgba(0, 0, 0, 0.45) !important;
+  opacity: 1 !important;
+  cursor: default;
+}
+
 .drop-zone.drag-over {
   border-color: rgb(var(--v-theme-primary));
   background-color: rgba(var(--v-theme-primary), 0.05);
+}
+
+/* Sin imagen todavía: la única señal de que se puede hacer clic era el
+   cursor. Se agrega un realce de color al pasar el mouse. No aplica a
+   .compact: ahí el círculo es un placeholder sin acción propia. */
+.drop-zone:not(.single-preview):not(.compact):hover {
+  background-color: rgba(var(--v-theme-primary), 0.05);
+}
+
+.drop-zone:not(.single-preview):not(.compact):hover .v-icon {
+  color: rgb(var(--v-theme-primary));
 }
 
 .pending-thumb {

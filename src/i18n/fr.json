@@ -477,6 +477,7 @@
     "vat": "TVA"
   },
   "profile": {
+    "changePhoto": "Changer la photo",
     "completeProfile": "Compléter le profil",
     "completeTitle": "Complétez votre profil",
     "editIntro": "Mettez à jour vos informations personnelles",

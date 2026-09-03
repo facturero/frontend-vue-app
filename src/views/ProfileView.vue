@@ -101,30 +101,53 @@ function onAvatarSuccess(fileIds: string[]): void {
   <v-container>
     <PageHeader :title="isSetup ? $t('profile.completeTitle') : $t('common.myProfile')" />
 
-    <v-row>
-      <!-- Avatar column -->
-      <v-col cols="12" md="4">
-        <v-card>
-          <v-card-text class="d-flex flex-column align-center">
-            <ImageUploader
-              ref="imageUploaderRef"
-              style="width: 200px; height: 200px"
-              v-if="userId"
-              resource-type="user"
-              :resource-id="userId"
-              category="avatar"
-              :existing-images="currentAvatarUrl ? [{ id: '', url: currentAvatarUrl }] : []"
-              @upload-success="onAvatarSuccess"
-            />
-          </v-card-text>
-        </v-card>
-      </v-col>
+    <v-sheet :max-width="640" class="mx-auto" color="transparent">
+      <v-card class="overflow-hidden">
+        <div
+          style="height: 120px; background: linear-gradient(135deg, rgb(var(--v-theme-primary)) 0%, rgb(var(--v-theme-info)) 100%)"
+        />
 
-      <!-- Profile form column -->
-      <v-col cols="12" md="8">
-        <v-card>
-          <v-card-text>
-            <p class="text-body-2 text-medium-emphasis mb-4">
+        <v-card-text class="pt-0 pb-8 px-6">
+          <div class="d-flex justify-center">
+            <div class="position-relative" style="width: 148px; margin-top: -74px">
+              <div
+                class="rounded-circle overflow-hidden d-flex align-center justify-center"
+                style="width: 148px; height: 148px; border: 4px solid rgb(var(--v-theme-surface)); box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18); background: rgba(var(--v-theme-primary), 0.08)"
+              >
+                <ImageUploader
+                  v-if="userId"
+                  ref="imageUploaderRef"
+                  style="width: 100%; height: 100%"
+                  resource-type="user"
+                  :resource-id="userId"
+                  category="avatar"
+                  compact
+                  :existing-images="currentAvatarUrl ? [{ id: '', url: currentAvatarUrl }] : []"
+                  @upload-success="onAvatarSuccess"
+                />
+              </div>
+
+              <v-btn
+                v-if="userId"
+                icon="mdi-camera"
+                size="small"
+                rounded="circle"
+                color="primary"
+                elevation="2"
+                class="position-absolute"
+                style="right: 0; bottom: 0; border: 3px solid rgb(var(--v-theme-surface))"
+                :aria-label="$t('profile.changePhoto')"
+                @click="imageUploaderRef?.openPicker()"
+              />
+            </div>
+          </div>
+
+          <div v-if="checking" class="mt-8">
+            <v-skeleton-loader type="text, text, text, button" />
+          </div>
+
+          <div v-else class="mt-8">
+            <p class="text-body-2 text-medium-emphasis text-center mb-6">
               {{ isSetup ? $t('profile.setupIntro') : $t('profile.editIntro') }}
             </p>
 
@@ -148,32 +171,48 @@ function onAvatarSuccess(fileIds: string[]): void {
               {{ $t('profile.updated') }}
             </v-alert>
 
-            <v-form @submit.prevent="submit">
-              <v-text-field
-                v-model="fullName"
-                :label="$t('customers.fullName')"
-                class="mb-4"
-              />
+            <v-form class="d-flex flex-column ga-6" @submit.prevent="submit">
+              <div>
+                <v-label for="profile-full-name" class="text-body-2 font-weight-medium mb-2">
+                  {{ $t('customers.fullName') }}
+                </v-label>
+                <v-text-field
+                  id="profile-full-name"
+                  v-model="fullName"
+                  prepend-inner-icon="mdi-account-outline"
+                />
+              </div>
 
-              <v-select
-                v-model="identificationType"
-                :label="$t('customers.idType')"
-                :items="[
-                  { title: $t('profile.idTypeCedula'), value: 'cedula' },
-                  { title: $t('profile.idTypeRuc'), value: 'ruc' },
-                  { title: $t('profile.idTypePassport'), value: 'pasaporte' },
-                ]"
-                class="mb-4"
-              />
-
-              <v-text-field
-                v-model="identificationNumber"
-                :label="identificationType === 'ruc' ? $t('profile.rucNumber') : $t('customers.idNumber')"
-                class="mb-6"
-              />
+              <v-row>
+                <v-col cols="12" sm="5">
+                  <v-label class="text-body-2 font-weight-medium mb-2">
+                    {{ $t('customers.idType') }}
+                  </v-label>
+                  <v-select
+                    v-model="identificationType"
+                    prepend-inner-icon="mdi-card-account-details-outline"
+                    :items="[
+                      { title: $t('profile.idTypeCedula'), value: 'cedula' },
+                      { title: $t('profile.idTypeRuc'), value: 'ruc' },
+                      { title: $t('profile.idTypePassport'), value: 'pasaporte' },
+                    ]"
+                  />
+                </v-col>
+                <v-col cols="12" sm="7">
+                  <v-label for="profile-id-number" class="text-body-2 font-weight-medium mb-2">
+                    {{ identificationType === 'ruc' ? $t('profile.rucNumber') : $t('customers.idNumber') }}
+                  </v-label>
+                  <v-text-field
+                    id="profile-id-number"
+                    v-model="identificationNumber"
+                    prepend-inner-icon="mdi-identifier"
+                  />
+                </v-col>
+              </v-row>
 
               <v-btn
                 block
+                size="large"
                 color="primary"
                 type="submit"
                 :loading="loading"
@@ -182,9 +221,9 @@ function onAvatarSuccess(fileIds: string[]): void {
                 {{ isSetup ? $t('profile.completeProfile') : $t('common.saveChanges') }}
               </v-btn>
             </v-form>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
+          </div>
+        </v-card-text>
+      </v-card>
+    </v-sheet>
   </v-container>
 </template>
