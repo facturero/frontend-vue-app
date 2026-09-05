@@ -35,7 +35,7 @@ async function submit(): Promise<void> {
 
 <template>
   <v-container>
-    <PageHeader :title="$t('roles.new')" :back-to="{ name: 'roles' }" />
+    <PageHeader :title="$t('roles.new')" />
 
     <v-alert
       v-if="store.error"

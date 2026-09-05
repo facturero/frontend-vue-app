@@ -108,7 +108,7 @@ function openChangeDialog(): void {
 
 <template>
   <v-container>
-    <PageHeader :title="$t('employees.detailTitle')" :back-to="{ name: 'employees' }" />
+    <PageHeader :title="$t('employees.detailTitle')" />
 
     <v-alert
       v-if="emp.error"

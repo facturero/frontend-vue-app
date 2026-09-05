@@ -156,7 +156,7 @@ onMounted(async () => {
 
 <template>
   <v-container>
-    <PageHeader :title="isEdit ? $t('customers.edit') : $t('customers.new')" :back-to="{ name: 'customers' }" />
+    <PageHeader :title="isEdit ? $t('customers.edit') : $t('customers.new')" />
 
     <v-alert v-if="formError" type="error" closable class="mb-4"
       @click:close="formError = null">

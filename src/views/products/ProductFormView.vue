@@ -195,7 +195,7 @@ async function submit(): Promise<void> {
 
 <template>
   <v-container>
-    <PageHeader :title="isEdit ? $t('products.edit') : $t('products.new')" :back-to="{ name: 'products' }" />
+    <PageHeader :title="isEdit ? $t('products.edit') : $t('products.new')" />
 
     <v-alert
       v-if="saveError"

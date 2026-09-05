@@ -181,7 +181,6 @@ onMounted(async () => {
   <v-container>
     <PageHeader
       :title="customer?.businessName || $t('customers.singular')"
-      :back-to="{ name: 'customers' }"
     >
       <template #actions>
         <v-btn v-if="canUpdate && customer?.status === 'active'" color="error" variant="tonal" size="small"

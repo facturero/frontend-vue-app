@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { fileApi } from '@/api/files';
+import avatarPlaceholder from '@/assets/avatar-placeholder.svg';
 
 interface ExistingImage {
   id: string;
@@ -151,7 +152,6 @@ function reset(): void {
   uploadError.value = null;
   uploadedIds.value = [];
   state.value = STATE.IDLE;
-  if (inputRef.value) inputRef.value.value = '';
 }
 
 async function uploadAll(): Promise<string[]> {
@@ -252,13 +252,21 @@ watch(() => props.existingImages, () => {
       @dragleave="onDragLeave"
       @drop="onDrop"
     >
-      <v-icon
-        :icon="compact ? 'mdi-account' : 'mdi-cloud-upload-outline'"
-        :size="compact ? 72 : 48"
-        :color="dragOver ? 'primary' : 'grey'"
-        :class="{ 'mb-2': !compact }"
+      <img
+        v-if="compact"
+        :src="avatarPlaceholder"
+        alt=""
+        class="avatar-placeholder-img"
       />
-      <span v-if="!compact" class="text-body-2 text-medium-emphasis">{{ $t('uploader.dropHint') }}</span>
+      <template v-else>
+        <v-icon
+          icon="mdi-cloud-upload-outline"
+          :size="48"
+          :color="dragOver ? 'primary' : 'grey'"
+          class="mb-2"
+        />
+        <span class="text-body-2 text-medium-emphasis">{{ $t('uploader.dropHint') }}</span>
+      </template>
     </div>
 
     <!-- SELECTED or UPLOADING / single mode: la imagen elegida se queda visible;
@@ -401,6 +409,13 @@ watch(() => props.existingImages, () => {
   /* Sin foto todavía: el círculo es solo un placeholder, la acción vive en el
      badge de cámara que lo acompaña (ver ProfileView.vue). */
   cursor: default;
+}
+
+.avatar-placeholder-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .drop-zone.single-preview {

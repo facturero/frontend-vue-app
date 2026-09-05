@@ -44,7 +44,7 @@ async function save(): Promise<void> {
 
 <template>
   <v-container>
-    <PageHeader :title="$t('roles.editTitle', { name: role?.name || props.id })" :back-to="{ name: 'roles' }" />
+    <PageHeader :title="$t('roles.editTitle', { name: role?.name || props.id })" />
 
     <v-alert
       v-if="store.error"

@@ -130,7 +130,6 @@ onMounted(async () => {
   <v-container>
     <PageHeader
       :title="product?.name || $t('products.singular')"
-      :back-to="{ name: 'products' }"
     >
       <template #actions>
         <v-btn

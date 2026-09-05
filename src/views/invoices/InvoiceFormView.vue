@@ -35,6 +35,7 @@ const customerSearch = ref('');
 const errorMessage = ref('');
 const newLine = ref({ productId: '', description: '', quantity: 1, unitPrice: '0.00' });
 const invoiceId = ref<string | null>(null);
+const creatingDraft = ref(false);
 const saving = ref(false);
 
 const selectedEstablishmentId = ref('');
@@ -96,21 +97,6 @@ const taxTotalDisplay = computed(() => (taxTotalCentsComputed.value / 100).toFix
 const totalDisplay = computed(() => {
   const subtotalCents = store.current?.subtotalCents ?? 0;
   return ((subtotalCents + taxTotalCentsComputed.value) / 100).toFixed(2);
-});
-
-const selectedCustomerObj = computed(() =>
-  customerStore.list.find((c) => c.id === selectedCustomerId.value) || null,
-);
-
-const previewCustomer = computed(() => {
-  if (store.current?.customerSnapshot) return store.current.customerSnapshot;
-  if (selectedCustomerObj.value) {
-    return {
-      businessName: selectedCustomerObj.value.businessName,
-      identification: selectedCustomerObj.value.identification || '—',
-    };
-  }
-  return null;
 });
 
 const issuerName = computed(() => {
@@ -176,6 +162,18 @@ async function selectCustomer() {
     errorMessage.value = e.message || t('invoices.createError');
   }
 }
+
+// Elegir un cliente crea el borrador de una vez, sin un paso de confirmación
+// aparte: no hay nada más que decidir en ese momento.
+watch(selectedCustomerId, async (id) => {
+  if (!id || hasCustomer.value) return;
+  creatingDraft.value = true;
+  try {
+    await selectCustomer();
+  } finally {
+    creatingDraft.value = false;
+  }
+});
 
 async function addLine() {
   if (!invoiceId.value || !canAddLine.value) return;
@@ -311,7 +309,6 @@ onMounted(async () => {
     <PageHeader
       :title="isEditMode ? $t('invoices.edit') : $t('invoices.new')"
       :subtitle="regime.authority ? $t('invoices.eyebrow', { authority: regime.authority }) : undefined"
-      :back-to="{ name: 'invoices' }"
     />
 
     <v-progress-linear v-if="loadingExisting" indeterminate class="mb-4" />
@@ -324,323 +321,248 @@ onMounted(async () => {
       {{ errorMessage }}
     </v-alert>
 
-    <v-row v-if="!loadError">
-      <!-- FORM COLUMN -->
-      <v-col cols="12" lg="8">
-       <v-card>
-        <v-card-title class="text-h6 pa-6 pb-0">
-          {{ $t('invoices.detailsTitle') }}
-        </v-card-title>
+    <v-card v-if="!loadError">
+      <v-card-title class="text-h6 pa-6 pb-0">
+        {{ $t('invoices.detailsTitle') }}
+      </v-card-title>
 
-        <v-card-text class="pa-6">
-          <div class="text-body-2 text-medium-emphasis mb-6">
-            {{ $t('common.date') }}: {{ today }}
-          </div>
+      <v-card-text class="pa-6">
+        <div class="text-body-2 text-medium-emphasis mb-6">
+          {{ $t('invoices.folioLabel') }} {{ folioLabel }} · {{ $t('common.date') }}: {{ today }}
+        </div>
 
-        <!-- STEP 1 -->
-        <section class="inv-step">
-          <div class="step-head">
-            <span class="step-num">1</span>
-            <div>
-              <h2>{{ $t('invoices.customer') }}</h2>
-              <p>{{ $t('invoices.step1Question') }}</p>
-            </div>
-          </div>
+        <!-- Emisor / cliente / estado -->
+        <v-sheet color="grey100" rounded="lg" class="pa-4 mb-6">
+          <v-row dense>
+            <v-col cols="12" md="4">
+              <div class="text-caption text-medium-emphasis mb-1">{{ $t('invoices.issuer') }}</div>
+              <div class="font-weight-medium">{{ issuerName }}</div>
+            </v-col>
+            <v-col cols="12" md="5">
+              <v-autocomplete
+                v-model="selectedCustomerId"
+                :items="customerStore.list.map(c => ({ title: `${c.businessName} (${c.identification})`, value: c.id }))"
+                :label="$t('invoices.customer')"
+                :placeholder="$t('invoices.searchCustomer')"
+                clearable
+                :disabled="hasCustomer"
+                :loading="creatingDraft"
+                :search-input.sync="customerSearch"
+                :filter="customFilter"
+              />
+            </v-col>
+            <v-col cols="12" md="3" class="d-flex align-center">
+              <v-chip v-if="hasCustomer" color="lightwarning" variant="flat" size="small">
+                {{ $t('invoices.status.draft') }}
+              </v-chip>
+            </v-col>
+          </v-row>
+        </v-sheet>
 
-          <div class="step-body">
-           <v-sheet color="grey100" rounded="lg" class="pa-4 mb-4">
-            <v-autocomplete
-              v-model="selectedCustomerId"
-              :items="customerStore.list.map(c => ({ title: `${c.businessName} (${c.identification})`, value: c.id }))"
-              :label="$t('invoices.searchCustomer')"
-              variant="underlined"
-              clearable
-              :disabled="hasCustomer"
-              :search-input.sync="customerSearch"
-              :filter="customFilter"
-            />
-            <v-btn
-              variant="outlined"
-              rounded="pill"
-              :append-icon="hasCustomer ? 'mdi-check' : 'mdi-arrow-right'"
-              :disabled="!selectedCustomerId || hasCustomer"
-              @click="selectCustomer"
-            >
-              {{ hasCustomer ? $t('invoices.customerConfirmed') : $t('invoices.confirmCustomer') }}
-            </v-btn>
-           </v-sheet>
-          </div>
-        </section>
+        <!-- Líneas -->
+        <div class="text-subtitle-2 font-weight-medium mb-2">{{ $t('invoices.lines') }}</div>
 
-        <!-- STEP 2 -->
-        <section class="inv-step" :class="{ 'is-disabled': !hasCustomer }">
-          <div class="step-head">
-            <span class="step-num">2</span>
-            <div>
-              <h2>{{ $t('invoices.lines') }}</h2>
-              <p>{{ $t('invoices.step2Subtitle') }}</p>
-            </div>
-          </div>
-
-          <div class="step-body">
-            <div v-if="!hasCustomer" class="empty-hint">
-              {{ $t('invoices.confirmCustomerFirst') }}
-            </div>
-
-            <template v-else>
-              <v-table v-if="hasLines" density="compact" class="mb-4 bg-transparent">
-                <thead>
-                  <tr>
-                    <th>{{ $t('invoices.item') }}</th>
-                    <th>{{ $t('common.description') }}</th>
-                    <th class="text-right">{{ $t('invoices.qtyShort') }}</th>
-                    <th class="text-right">{{ $t('products.price') }}</th>
-                    <th class="text-right">{{ $t('invoices.subtotal') }}</th>
-                    <th />
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="line in (store.current?.lines || [])" :key="line.id">
-                    <td>{{ lineItemName(line) }}</td>
-                    <td class="text-medium-emphasis">{{ line.description }}</td>
-                    <td class="text-right mono">{{ line.quantity }}</td>
-                    <td class="text-right mono">{{ (line.unitPriceCents / 100).toFixed(2) }}</td>
-                    <td class="text-right mono">{{ (line.subtotalCents / 100).toFixed(2) }}</td>
-                    <td class="text-right">
-                      <v-btn
-                        icon="mdi-close"
-                        variant="text"
-                        size="x-small"
-                        :title="$t('invoices.removeLine')"
-                        @click="removeLine(line.id)"
-                      />
-                    </td>
-                  </tr>
-                </tbody>
-              </v-table>
-
-              <v-row align="end" dense>
-                <v-col cols="12" sm="4">
-                  <v-select
-                    v-model="newLine.productId"
-                    :items="productStore.list.filter(p => p.status === 'active').map(p => ({ title: `${p.name} · ${p.type === 'service' ? $t('products.service') : $t('products.good')}`, value: p.id }))"
-                    :label="$t('invoices.productOrService')"
-                    variant="underlined"
-                  />
-                </v-col>
-                <v-col cols="12" sm="4">
-                  <v-text-field
-                    v-model="newLine.description"
-                    :label="$t('invoices.descriptionOptional')"
-                    variant="underlined"
-                  />
-                </v-col>
-                <v-col cols="4" sm="1">
-                  <v-text-field
-                    v-model.number="newLine.quantity"
-                    :label="$t('invoices.qtyShort')"
-                    type="number"
-                    min="1"
-                    variant="underlined"
-                    class="mono"
-                  />
-                </v-col>
-                <v-col cols="6" sm="2">
-                  <v-text-field
-                    v-model="newLine.unitPrice"
-                    :label="$t('products.price')"
-                    variant="underlined"
-                    class="mono"
-                  />
-                </v-col>
-                <v-col cols="2" sm="1" class="text-right">
-                  <v-btn
-                    icon="mdi-plus"
-                    variant="outlined"
-                    size="small"
-                    :title="$t('invoices.addLine')"
-                    :disabled="!canAddLine"
-                    @click="addLine"
-                  />
-                </v-col>
-              </v-row>
-            </template>
-          </div>
-        </section>
-
-        <!-- STEP 3 -->
-        <section class="inv-step" :class="{ 'is-disabled': !hasLines }">
-          <div class="step-head">
-            <span class="step-num">3</span>
-            <div>
-              <h2>{{ $t('invoices.step3') }}</h2>
-              <!-- Sin país configurado no hay autoridad que nombrar: texto genérico. -->
-              <p>
-                {{ regime.authority
-                  ? $t('invoices.step3Subtitle', { authority: regime.authority })
-                  : $t('invoices.step3SubtitleGeneric') }}
-              </p>
-            </div>
-          </div>
-
-          <div class="step-body">
-            <div v-if="!hasLines" class="empty-hint">
-              {{ $t('invoices.addLineFirst') }}
-            </div>
-            <template v-else>
-              <v-alert v-if="!orgProfileComplete" type="warning" class="mb-4">
-                <div class="d-flex flex-wrap align-center ga-2">
-                  <i18n-t keypath="invoices.completeProfileHint" tag="span">
-                    <template #field><strong>{{ $t('invoices.taxIdAndCountry') }}</strong></template>
-                  </i18n-t>
-                  <v-btn variant="text" size="small" class="ml-auto" @click="showOrgDialog = true">
-                    {{ $t('invoices.completeNow') }}
-                  </v-btn>
-                </div>
-              </v-alert>
-
-              <v-alert v-else-if="!hasEstablishments" type="warning" class="mb-4">
-                <div class="d-flex flex-wrap align-center ga-2">
-                  <i18n-t keypath="invoices.needEstablishmentHint" tag="span">
-                    <template #field><strong>{{ $t('invoices.establishmentAndPoint') }}</strong></template>
-                  </i18n-t>
-                  <v-btn variant="text" size="small" class="ml-auto" @click="showEstablishmentDialog = true">
-                    {{ $t('invoices.createNow') }}
-                  </v-btn>
-                </div>
-              </v-alert>
-
-              <template v-else>
-                <v-sheet color="grey100" rounded="lg" class="d-flex ga-3 pa-4 mb-4">
-                  <v-select
-                    v-model="selectedEstablishmentId"
-                    :items="orgStore.establishments.filter(e => e.status === 'active').map(e => ({ title: `${e.code} — ${e.name}`, value: e.id }))"
-                    :label="$t('organization.establishment')"
-                    variant="underlined"
-                  />
-                  <v-select
-                    v-model="selectedEmissionPointId"
-                    :items="orgStore.emissionPoints.filter(ep => ep.status === 'active').map(ep => ({ title: `${ep.code} — ${ep.name || $t('invoices.emissionPoint')}`, value: ep.id }))"
-                    :label="$t('invoices.emissionPoint')"
-                    variant="underlined"
-                    :disabled="!selectedEstablishmentId"
-                  />
-                </v-sheet>
-
-                <v-alert
-                  v-if="selectedEstablishmentId && !selectedEstablishmentHasEmissionPoints"
-                  type="warning"
-                  class="mb-4"
-                >
-                  <div class="d-flex flex-wrap align-center ga-2">
-                    <span>{{ $t('invoices.noEmissionPoints') }}</span>
-                    <v-btn variant="text" size="small" class="ml-auto" @click="showEstablishmentDialog = true">
-                      {{ $t('invoices.createOne') }}
-                    </v-btn>
-                  </div>
-                </v-alert>
-
-                <v-alert
-                  v-if="regime.requiresSigningCertificate && noCertificate"
-                  type="info"
-                  class="mb-4"
-                >
-                  <div class="d-flex flex-wrap align-center ga-2">
-                    <span>{{ $t('invoices.noCertificateHint') }}</span>
-                    <v-btn variant="text" size="small" class="ml-auto" @click="showCertificateDialog = true">
-                      {{ $t('invoices.uploadCertificate') }}
-                    </v-btn>
-                  </div>
-                </v-alert>
-
-                <p class="text-body-2 text-medium-emphasis mb-4">
-                  {{ $t('invoices.issueNote') }}
-                </p>
+        <v-table class="mb-2 bg-transparent">
+          <thead>
+            <tr>
+              <th>{{ $t('invoices.item') }}</th>
+              <th>{{ $t('common.description') }}</th>
+              <th class="text-right">{{ $t('invoices.qtyShort') }}</th>
+              <th class="text-right">{{ $t('products.price') }}</th>
+              <th class="text-right">{{ $t('invoices.subtotal') }}</th>
+              <th />
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="line in (store.current?.lines || [])" :key="line.id">
+              <td>{{ lineItemName(line) }}</td>
+              <td class="text-medium-emphasis">{{ line.description }}</td>
+              <td class="text-right mono">{{ line.quantity }}</td>
+              <td class="text-right mono">{{ (line.unitPriceCents / 100).toFixed(2) }}</td>
+              <td class="text-right mono">{{ (line.subtotalCents / 100).toFixed(2) }}</td>
+              <td class="text-right">
                 <v-btn
+                  icon="mdi-delete-outline"
+                  variant="text"
+                  size="x-small"
+                  color="error"
+                  :title="$t('invoices.removeLine')"
+                  @click="removeLine(line.id)"
+                />
+              </td>
+            </tr>
+            <tr class="line-input-row">
+              <td style="min-width: 220px">
+                <v-select
+                  v-model="newLine.productId"
+                  :items="productStore.list.filter(p => p.status === 'active').map(p => ({ title: `${p.name} · ${p.type === 'service' ? $t('products.service') : $t('products.good')}`, value: p.id }))"
+                  :placeholder="$t('invoices.productOrService')"
+                  hide-details
+                  :disabled="!hasCustomer"
+                />
+              </td>
+              <td style="min-width: 220px">
+                <v-text-field
+                  v-model="newLine.description"
+                  :placeholder="$t('invoices.descriptionOptional')"
+                  hide-details
+                  :disabled="!hasCustomer"
+                />
+              </td>
+              <td style="width: 100px">
+                <v-text-field
+                  v-model.number="newLine.quantity"
+                  type="number"
+                  min="1"
+                  hide-details
+                  class="mono"
+                  :disabled="!hasCustomer"
+                />
+              </td>
+              <td style="width: 130px">
+                <v-text-field
+                  v-model="newLine.unitPrice"
+                  hide-details
+                  class="mono"
+                  :disabled="!hasCustomer"
+                />
+              </td>
+              <td class="text-right mono text-medium-emphasis">—</td>
+              <td class="text-right">
+                <v-btn
+                  icon="mdi-plus"
+                  variant="tonal"
                   color="primary"
-                  size="large"
-                  :loading="saving"
-                  :disabled="!selectedEstablishmentId || !selectedEmissionPointId"
-                  @click="handleIssue"
-                >
-                  {{ saving ? $t('invoices.issuing') : $t('invoices.issueInvoice') }}
-                </v-btn>
-              </template>
-            </template>
-          </div>
-        </section>
-        </v-card-text>
-       </v-card>
-      </v-col>
+                  size="small"
+                  :title="$t('invoices.addLine')"
+                  :disabled="!hasCustomer || !canAddLine"
+                  @click="addLine"
+                />
+              </td>
+            </tr>
+          </tbody>
+        </v-table>
 
-      <!-- PREVIEW COLUMN -->
-      <v-col cols="12" lg="4" class="invoice-preview">
-        <div class="invoice-paper" :class="{ 'is-issued': hasLines }">
-          <div class="paper-head">
-            <div>
-              <div class="paper-issuer">{{ issuerName }}</div>
-              <div class="paper-sub">{{ $t('invoices.paperSub') }}</div>
-            </div>
-            <div class="paper-folio">
-              <span class="folio-label">{{ $t('invoices.folioLabel') }}</span>
-              <span class="folio-value mono">{{ folioLabel }}</span>
-            </div>
-          </div>
+        <p v-if="!hasCustomer" class="text-caption text-medium-emphasis mb-6">
+          {{ $t('invoices.confirmCustomerFirst') }}
+        </p>
 
-          <div class="paper-rule" />
-
-          <div class="paper-row">
-            <span class="paper-key">{{ $t('common.date') }}</span>
-            <span class="mono">{{ store.current?.issueDate ? new Date(store.current.issueDate).toLocaleDateString(locale) :
-              today }}</span>
-          </div>
-
-          <div class="paper-row">
-            <span class="paper-key">{{ $t('invoices.customer') }}</span>
-            <span v-if="previewCustomer" class="paper-customer">
-              {{ previewCustomer.businessName }}
-              <small class="mono">{{ previewCustomer.identification }}</small>
-            </span>
-            <span v-else class="paper-placeholder">{{ $t('invoices.undefined') }}</span>
-          </div>
-
-          <div class="paper-rule" />
-
-          <div v-if="hasLines" class="paper-lines">
-            <div v-for="line in (store.current?.lines || [])" :key="line.id" class="paper-line">
-              <div class="paper-line-desc">
-                <span>{{ lineItemName(line) }}</span>
-                <span class="mono qty">×{{ line.quantity }}</span>
-              </div>
-              <span class="mono">{{ currencySymbol }}{{ (line.subtotalCents / 100).toFixed(2) }}</span>
-            </div>
-          </div>
-          <div v-else class="paper-placeholder-block">
-            {{ $t('invoices.linesPlaceholder') }}
-          </div>
-
-          <div class="paper-rule" />
-
-          <div class="paper-totals">
-            <div class="paper-row small">
-              <span class="paper-key">{{ $t('invoices.subtotal') }}</span>
+        <!-- Totales -->
+        <div class="d-flex justify-end mb-6">
+          <div class="totals-block">
+            <div class="d-flex justify-space-between text-body-2 text-medium-emphasis py-1">
+              <span>{{ $t('invoices.subtotal') }}</span>
               <span class="mono">{{ currencySymbol }}{{ store.current?.subtotal ?? '0.00' }}</span>
             </div>
-            <div class="paper-row small">
-              <span class="paper-key">{{ $t('invoices.taxTotal') }}</span>
+            <div class="d-flex justify-space-between text-body-2 text-medium-emphasis py-1">
+              <span>{{ $t('invoices.taxTotal') }}</span>
               <span class="mono">{{ currencySymbol }}{{ taxTotalDisplay }}</span>
             </div>
-          </div>
-
-          <div class="paper-total-block">
-            <span class="total-caption">{{ $t('invoices.totalDue') }}</span>
-            <div class="total-stamp" :class="{ active: hasLines }">
+            <v-divider class="my-2" />
+            <div class="d-flex justify-space-between text-h6 font-weight-bold">
+              <span>{{ $t('invoices.totalDue') }}</span>
               <span class="mono">{{ currencySymbol }}{{ totalDisplay }}</span>
             </div>
           </div>
         </div>
-      </v-col>
-    </v-row>
+
+        <v-divider class="mb-6" />
+
+        <!-- Emisión -->
+        <div class="text-subtitle-2 font-weight-medium mb-1">{{ $t('invoices.step3') }}</div>
+        <p class="text-caption text-medium-emphasis mb-4">
+          {{ regime.authority
+            ? $t('invoices.step3Subtitle', { authority: regime.authority })
+            : $t('invoices.step3SubtitleGeneric') }}
+        </p>
+
+        <v-alert v-if="!orgProfileComplete" type="warning" class="mb-4">
+          <div class="d-flex flex-wrap align-center ga-2">
+            <i18n-t keypath="invoices.completeProfileHint" tag="span">
+              <template #field><strong>{{ $t('invoices.taxIdAndCountry') }}</strong></template>
+            </i18n-t>
+            <v-btn variant="text" size="small" class="ml-auto" @click="showOrgDialog = true">
+              {{ $t('invoices.completeNow') }}
+            </v-btn>
+          </div>
+        </v-alert>
+
+        <v-alert v-else-if="!hasEstablishments" type="warning" class="mb-4">
+          <div class="d-flex flex-wrap align-center ga-2">
+            <i18n-t keypath="invoices.needEstablishmentHint" tag="span">
+              <template #field><strong>{{ $t('invoices.establishmentAndPoint') }}</strong></template>
+            </i18n-t>
+            <v-btn variant="text" size="small" class="ml-auto" @click="showEstablishmentDialog = true">
+              {{ $t('invoices.createNow') }}
+            </v-btn>
+          </div>
+        </v-alert>
+
+        <template v-else>
+          <v-sheet color="grey100" rounded="lg" class="d-flex ga-3 pa-4 mb-4">
+            <v-select
+              v-model="selectedEstablishmentId"
+              :items="orgStore.establishments.filter(e => e.status === 'active').map(e => ({ title: `${e.code} — ${e.name}`, value: e.id }))"
+              :label="$t('organization.establishment')"
+            />
+            <v-select
+              v-model="selectedEmissionPointId"
+              :items="orgStore.emissionPoints.filter(ep => ep.status === 'active').map(ep => ({ title: `${ep.code} — ${ep.name || $t('invoices.emissionPoint')}`, value: ep.id }))"
+              :label="$t('invoices.emissionPoint')"
+              :disabled="!selectedEstablishmentId"
+            />
+          </v-sheet>
+
+          <v-alert
+            v-if="selectedEstablishmentId && !selectedEstablishmentHasEmissionPoints"
+            type="warning"
+            class="mb-4"
+          >
+            <div class="d-flex flex-wrap align-center ga-2">
+              <span>{{ $t('invoices.noEmissionPoints') }}</span>
+              <v-btn variant="text" size="small" class="ml-auto" @click="showEstablishmentDialog = true">
+                {{ $t('invoices.createOne') }}
+              </v-btn>
+            </div>
+          </v-alert>
+
+          <v-alert
+            v-if="regime.requiresSigningCertificate && noCertificate"
+            type="info"
+            class="mb-4"
+          >
+            <div class="d-flex flex-wrap align-center ga-2">
+              <span>{{ $t('invoices.noCertificateHint') }}</span>
+              <v-btn variant="text" size="small" class="ml-auto" @click="showCertificateDialog = true">
+                {{ $t('invoices.uploadCertificate') }}
+              </v-btn>
+            </div>
+          </v-alert>
+        </template>
+
+        <p v-if="!hasLines" class="text-caption text-medium-emphasis mb-4">
+          {{ $t('invoices.addLineFirst') }}
+        </p>
+        <p v-else class="text-body-2 text-medium-emphasis mb-4">
+          {{ $t('invoices.issueNote') }}
+        </p>
+
+        <div class="d-flex ga-3 justify-end">
+          <v-btn variant="outlined" :to="{ name: 'invoices' }">
+            {{ $t('common.cancel') }}
+          </v-btn>
+          <v-btn
+            color="primary"
+            size="large"
+            :loading="saving"
+            :disabled="!hasLines || !selectedEstablishmentId || !selectedEmissionPointId"
+            @click="handleIssue"
+          >
+            {{ saving ? $t('invoices.issuing') : $t('invoices.issueInvoice') }}
+          </v-btn>
+        </div>
+      </v-card-text>
+    </v-card>
 
     <!-- Diálogo: completar RUC/país -->
     <v-dialog v-model="showOrgDialog" max-width="420">
@@ -742,142 +664,28 @@ onMounted(async () => {
 
 <style scoped>
 /*
- * Sólo queda aquí lo que no se puede expresar con utilidades de Vuetify: la
- * previsualización con aspecto de papel (troquelado, reglas punteadas y el
- * sello rotado del total). Todo lo demás —botones, tabla, avisos, rejilla—
- * usa componentes del sistema.
- *
- * Los colores salen de tokens del tema, nunca de hex fijos: así la vista
- * funciona igual en claro y en oscuro.
+ * Sólo lo que no se puede expresar con utilidades de Vuetify: el ancho máximo
+ * del formulario y la fuente monoespaciada para cifras. Todo lo demás
+ * —tarjeta, tabla, avisos, chips— usa componentes y tokens del sistema.
  */
 .invoice-workspace {
-  max-width: 1180px;
+  max-width: 960px;
 }
 
-/* Cifras alineadas en columna; usa la mono del sistema, sin fuente externa. */
 .mono {
   font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', 'Roboto Mono', monospace;
   font-variant-numeric: tabular-nums;
 }
 
-.inv-step {
-  border-top: 1px solid rgb(var(--v-theme-borderColor));
-  padding: 28px 0;
-  transition: opacity 0.2s ease;
-}
-.inv-step:first-child { border-top: none; padding-top: 0; }
-.inv-step.is-disabled { opacity: 0.45; }
-
-.step-head { display: flex; gap: 14px; margin-bottom: 18px; }
-.step-num {
-  flex: none;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  border: 1px solid currentColor;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-}
-.step-head h2 { font-size: 16px; font-weight: 600; margin: 0 0 2px; }
-.step-head p { font-size: 13px; color: rgba(var(--v-theme-on-surface), 0.6); margin: 0; }
-.step-body { padding-left: 40px; }
-
-/* Previsualización: hoja de papel */
-.invoice-preview { position: sticky; top: 24px; align-self: start; }
-.invoice-paper {
-  background: rgb(var(--v-theme-surface));
-  border: 1px solid rgb(var(--v-theme-borderColor));
-  border-radius: 3px;
-  padding: 30px 26px 26px;
-  position: relative;
-  box-shadow: var(--surface-shadow);
-}
-/* Borde troquelado inferior, como un recibo. */
-.invoice-paper::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -6px;
-  height: 12px;
-  background-image: radial-gradient(circle, rgb(var(--v-theme-background)) 3px, transparent 3.6px);
-  background-size: 16px 12px;
-  background-position: 4px 0;
+.totals-block {
+  min-width: 260px;
 }
 
-.paper-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-.paper-issuer { font-size: 15px; font-weight: 600; }
-.paper-sub { font-size: 11.5px; color: rgba(var(--v-theme-on-surface), 0.6); margin-top: 2px; }
-.paper-folio { text-align: right; }
-.folio-label {
-  display: block;
-  font-size: 10px;
-  letter-spacing: 0.1em;
-  color: rgba(var(--v-theme-on-surface), 0.38);
-}
-.folio-value { font-size: 12.5px; }
-
-.paper-rule { border-top: 1px dashed rgb(var(--v-theme-borderColor)); margin: 16px 0; }
-
-.paper-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  font-size: 13.5px;
-  margin-bottom: 8px;
-}
-.paper-row.small { font-size: 12.5px; color: rgba(var(--v-theme-on-surface), 0.6); }
-.paper-key { color: rgba(var(--v-theme-on-surface), 0.6); }
-.paper-customer { text-align: right; display: flex; flex-direction: column; }
-.paper-customer small { color: rgba(var(--v-theme-on-surface), 0.6); font-size: 11px; }
-.paper-placeholder { color: rgba(var(--v-theme-on-surface), 0.38); font-style: italic; font-size: 13px; }
-.paper-placeholder-block {
-  color: rgba(var(--v-theme-on-surface), 0.38);
-  font-size: 12.5px;
-  font-style: italic;
-  padding: 18px 0;
-  text-align: center;
-}
-
-.paper-lines { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
-.paper-line { display: flex; justify-content: space-between; font-size: 13px; }
-.paper-line-desc { display: flex; gap: 6px; }
-.paper-line-desc .qty { color: rgba(var(--v-theme-on-surface), 0.38); font-size: 11.5px; }
-
-.paper-totals { margin-top: 4px; }
-.paper-total-block { display: flex; flex-direction: column; align-items: flex-end; margin-top: 18px; }
-.total-caption {
-  font-size: 10.5px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: rgba(var(--v-theme-on-surface), 0.38);
-  margin-bottom: 8px;
-}
-/* Sello del total: gris hasta que hay líneas, entonces pasa a "success". */
-.total-stamp {
-  position: relative;
-  border: 2px solid rgba(var(--v-theme-on-surface), 0.38);
-  border-radius: 8px;
-  padding: 8px 20px;
-  font-size: 18px;
-  font-weight: 600;
-  color: rgba(var(--v-theme-on-surface), 0.38);
-  transform: rotate(-3deg);
-  transition: color 0.25s ease, border-color 0.25s ease;
-}
-.total-stamp::before {
-  content: '';
-  position: absolute;
-  inset: 4px;
-  border: 1px solid currentColor;
-  border-radius: 5px;
-  opacity: 0.4;
-}
-.total-stamp.active {
-  color: rgb(var(--v-theme-success));
-  border-color: rgb(var(--v-theme-success));
-  background: rgb(var(--v-theme-lightsuccess));
+/* La fila de captura lleva campos completos, no texto: necesita más aire
+   vertical que las filas de sólo lectura de la tabla. */
+.line-input-row > td {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  vertical-align: middle;
 }
 </style>
