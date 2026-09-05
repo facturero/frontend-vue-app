@@ -6,11 +6,24 @@
     <title>CRM · Prueba de Auth</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <style>
       html { font-size: 15px; }
-      :root { --v-font-family: 'Inter', sans-serif; }
+      :root {
+        --v-font-family: 'Plus Jakarta Sans', sans-serif;
+        /* Tokens visuales de superficie. Ver docs/PLAN-MODERNIZE.md. */
+        --surface-radius: 7px;
+        --surface-shadow: 0 0 2px rgba(145, 158, 171, 0.3), 0 12px 24px -4px rgba(145, 158, 171, 0.12);
+      }
       body { font-family: var(--v-font-family); }
+
+      /* Aplicado por el default de VCard/VSheet en plugins/vuetify.ts.
+         La especificidad extra es necesaria: Vuetify marca elevation-0 con
+         `!important`, y con la misma especificidad gana la del framework. */
+      .v-application .v-card.card-surface {
+        border-radius: var(--surface-radius) !important;
+        box-shadow: var(--surface-shadow) !important;
+      }
     </style>
   </head>
   <body>

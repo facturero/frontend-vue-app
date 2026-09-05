@@ -1,83 +1,144 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
+import { useCustomerStore } from '@/stores/customers';
+import { useEmployeeStore } from '@/stores/employees';
+import { useProductStore } from '@/stores/products';
+import { useInvoiceStore } from '@/stores/invoices';
 import PageHeader from '@/components/ui/PageHeader.vue';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const auth = useAuthStore();
 const router = useRouter();
+const customers = useCustomerStore();
+const employees = useEmployeeStore();
+const products = useProductStore();
+const invoices = useInvoiceStore();
+
+const loading = ref(true);
 const loadError = ref<string | null>(null);
+
+const todayLabel = computed(() =>
+  new Date().toLocaleDateString(locale.value, { weekday: 'long', day: 'numeric', month: 'long' }),
+);
+
+const activeCustomers = computed(() => customers.list.filter((c) => c.status === 'active').length);
+const activeEmployees = computed(() => employees.list.filter((e) => e.status === 'active').length);
+const activeProducts = computed(() => products.list.filter((p) => p.status === 'active').length);
+const issuedInvoices = computed(() => invoices.list.filter((i) => i.status === 'issued').length);
+
+const cards = computed(() =>
+  [
+    {
+      key: 'customers',
+      label: t('home.activeCustomers'),
+      icon: 'mdi-account-group-outline',
+      bg: 'lightprimary',
+      fg: 'primary',
+      permission: 'customer:read',
+      value: activeCustomers.value,
+    },
+    {
+      key: 'employees',
+      label: t('home.activeEmployees'),
+      icon: 'mdi-account-tie-outline',
+      bg: 'lightinfo',
+      fg: 'info',
+      permission: 'user:read',
+      value: activeEmployees.value,
+    },
+    {
+      key: 'products',
+      label: t('home.activeProducts'),
+      icon: 'mdi-package-variant-closed',
+      bg: 'lightsuccess',
+      fg: 'success',
+      permission: 'product:read',
+      value: activeProducts.value,
+    },
+    {
+      key: 'invoices',
+      label: t('home.issuedInvoices'),
+      icon: 'mdi-file-document-outline',
+      bg: 'lightwarning',
+      fg: 'warning',
+      permission: 'invoice:read',
+      value: issuedInvoices.value,
+    },
+  ].filter((c) => auth.can(c.permission)),
+);
 
 onMounted(async () => {
   try {
     await auth.fetchMe();
     if (auth.needsOrg) {
       router.replace({ name: 'profile' });
-    } else if (auth.needsOrgSetup) {
-      router.replace({ name: 'organization-settings' });
+      return;
     }
+    if (auth.needsOrgSetup) {
+      router.replace({ name: 'organization-settings' });
+      return;
+    }
+    const tasks: Promise<void>[] = [];
+    if (auth.can('customer:read')) tasks.push(customers.fetch());
+    if (auth.can('user:read')) tasks.push(employees.fetch());
+    if (auth.can('product:read')) tasks.push(products.fetch());
+    if (auth.can('invoice:read')) tasks.push(invoices.fetch());
+    await Promise.all(tasks).catch(() => {
+      /* fallback silencioso: las tarjetas muestran 0 si un servicio falla */
+    });
   } catch (e) {
     const err = e as { response?: { data?: { message?: string } } };
     loadError.value = err?.response?.data?.message ?? t('home.loadError');
+  } finally {
+    loading.value = false;
   }
 });
 </script>
 
 <template>
   <v-container>
-    <v-row justify="center">
-      <v-col cols="12" md="8" lg="7">
-        <PageHeader :title="$t('home.title')" />
+    <PageHeader :title="$t('home.title')" />
 
-        <v-card>
-          <v-card-title class="d-flex align-center">
-            <v-icon icon="mdi-account-circle" class="mr-2" />
-            {{ $t('home.sessionActive') }}
-          </v-card-title>
+    <v-alert v-if="loadError" type="error" class="mb-4" :text="loadError" />
 
+    <v-row v-if="loading" dense>
+      <v-col cols="12" class="text-center py-12">
+        <v-progress-circular indeterminate color="primary" />
+      </v-col>
+    </v-row>
+
+    <v-row v-else dense>
+      <v-col v-for="c in cards" :key="c.key" cols="12" sm="6" lg="3">
+        <v-card class="fill-height">
           <v-card-text>
-            <v-alert
-              v-if="loadError"
-              type="error"
-              class="mb-4"
-              :text="loadError"
-            />
-
-            <template v-if="auth.user">
-              <v-list lines="two" density="comfortable">
-                <v-list-item :title="$t('home.userIdLabel')" :subtitle="auth.user.id" prepend-icon="mdi-identifier" />
-                <v-list-item
-                  :title="$t('common.email')"
-                  :subtitle="auth.user.email"
-                  prepend-icon="mdi-email-outline"
-                />
-                <v-list-item
-                  :title="$t('home.emailVerified')"
-                  :subtitle="auth.user.emailVerified ? $t('common.yes') : $t('common.no')"
-                  prepend-icon="mdi-check-decagram-outline"
-                />
-                <v-list-item
-                  :title="$t('home.providerLabel')"
-                  :subtitle="auth.user.authProvider"
-                  prepend-icon="mdi-account-key-outline"
-                />
-              </v-list>
-
-              <v-alert
-                type="success"
-                class="mt-4"
-                :text="$t('home.gatewayOk')"
-              />
-            </template>
-
-            <div v-else-if="!loadError" class="d-flex justify-center py-8">
-              <v-progress-circular indeterminate color="primary" />
+            <div class="d-flex align-center ga-4">
+              <v-sheet :color="c.bg" class="w-13 h-13 d-flex align-center justify-center">
+                <v-icon :icon="c.icon" :color="c.fg" size="26" />
+              </v-sheet>
+              <div>
+                <div class="text-body-2 text-medium-emphasis">{{ c.label }}</div>
+                <div class="text-h5 font-weight-bold">{{ c.value }}</div>
+              </div>
             </div>
           </v-card-text>
         </v-card>
       </v-col>
     </v-row>
+
+    <v-card class="mt-6">
+      <v-card-text>
+        <div class="text-h6 font-weight-bold mb-1">
+          <i18n-t keypath="home.welcome" tag="span">
+            <template #org>{{ auth.user?.orgName || auth.user?.email }}</template>
+          </i18n-t>
+        </div>
+        <i18n-t keypath="home.today" tag="span" class="text-body-2 text-medium-emphasis">
+          <template #date>{{ todayLabel }}</template>
+        </i18n-t>
+      </v-card-text>
+    </v-card>
   </v-container>
 </template>

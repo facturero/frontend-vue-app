@@ -216,20 +216,14 @@
     "viewCode": "Voir le code"
   },
   "home": {
-    "activeSession": "Session active",
-    "email": "E-mail",
-    "emailVerified": "E-mail vérifié",
-    "gatewayOk": "GET /auth/me a répondu via la passerelle ✔",
+    "activeCustomers": "Clients actifs",
+    "activeEmployees": "Employés actifs",
+    "activeProducts": "Produits actifs",
+    "issuedInvoices": "Factures émises",
     "loadError": "Impossible de charger /auth/me",
-    "loadSuccess": "GET /auth/me a répondu via la passerelle ✓",
-    "no": "Non",
-    "provider": "Fournisseur",
-    "providerLabel": "Fournisseur",
-    "sessionActive": "Session active",
     "title": "Accueil",
-    "userId": "ID utilisateur",
-    "userIdLabel": "ID utilisateur",
-    "yes": "Oui"
+    "today": "Aujourd'hui, {date}",
+    "welcome": "Bienvenue sur {org}"
   },
   "invoices": {
     "addLine": "Ajouter une ligne",
@@ -263,7 +257,7 @@
     "establishmentAndPoint": "établissement et un point d'émission",
     "establishmentName": "Nom de l'établissement",
     "establishmentPlaceholder": "Ex. Siège",
-    "eyebrow": "Document électronique · SRI Équateur",
+    "eyebrow": "Document électronique · {authority}",
     "folioLabel": "N°",
     "generatingDocs": "Génération des documents…",
     "issueDate": "Date d'émission",
@@ -304,7 +298,7 @@
     "step1Question": "À qui facturez-vous ?",
     "step2Subtitle": "Produits ou services à inclure.",
     "step3": "Émettre",
-    "step3Subtitle": "Vérifiez les totaux et envoyez à l'administration fiscale.",
+    "step3Subtitle": "Vérifiez les totaux et envoyez à {authority}.",
     "subtotal": "Sous-total",
     "taxIdAndCountry": "numéro fiscal et pays",
     "taxIdLabel": "Numéro d'identification fiscale",
@@ -322,7 +316,9 @@
     "voidInvoice": "Annuler la facture",
     "voidReason": "Motif",
     "voidReasonLabel": "Motif de l'annulation",
-    "voidTitle": "Annulation"
+    "voidTitle": "Annulation",
+    "detailsTitle": "Détails de la facture",
+    "step3SubtitleGeneric": "Vérifiez les totaux et émettez la facture."
   },
   "messages": {
     "empty": "Aucun message"
@@ -330,19 +326,16 @@
   "nav": {
     "brand": "CRM",
     "brandSubtitle": "Panneau d'admin.",
-    "certificates": "Certificat électronique",
     "collapse": "Réduire",
     "comingSoon": "bientôt",
     "customers": "Clients",
     "employees": "Employés",
-    "establishments": "Établissements",
     "home": "Accueil",
     "invoices": "Factures",
-    "organization": "Organisation",
     "plugins": "Plugins",
     "products": "Produits",
-    "profile": "Mon profil",
-    "roles": "Rôles"
+    "roles": "Rôles",
+    "settings": "Paramètres"
   },
   "notifications": {
     "customPluginReady": "Votre plugin sur mesure est prêt",

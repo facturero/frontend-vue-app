@@ -26,6 +26,7 @@ import InvoiceListView from '@/views/invoices/InvoiceListView.vue';
 import InvoiceDetailView from '@/views/invoices/InvoiceDetailView.vue';
 import InvoiceFormView from '@/views/invoices/InvoiceFormView.vue';
 import PluginsView from '@/views/plugins/PluginsView.vue';
+import AccountSettingsView from '@/views/settings/AccountSettingsView.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -38,6 +39,17 @@ const router = createRouter({
       path: '/profile',
       name: 'profile',
       component: CompleteProfileView,
+      meta: { requiresAuth: true },
+    },
+
+    {
+      // Ajustes consolidados (arquetipo F): las 4 rutas sueltas viven como
+      // pestañas. ?tab=profile|organization|establishments|certificates
+      // aterriza directo en una pestaña; las rutas sueltas se mantienen como
+      // deep-links (onboarding /profile y /organization/settings).
+      path: '/settings',
+      name: 'settings',
+      component: AccountSettingsView,
       meta: { requiresAuth: true },
     },
 

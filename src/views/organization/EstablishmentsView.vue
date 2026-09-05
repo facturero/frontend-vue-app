@@ -10,6 +10,10 @@ const { t } = useI18n();
 const auth = useAuthStore();
 const store = useOrganizationStore();
 
+// `embedded`: la vista vive dentro de Ajustes (arquetipo F) como pestaña, sin
+// container ni PageHeader propios.
+const props = defineProps<{ embedded?: boolean }>();
+
 const canCreate = computed(() => auth.can('establishment:create'));
 
 const selected = ref<EstablishmentDTO | null>(null);
@@ -98,8 +102,10 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <v-container>
+  <!-- El wrapper cambia según el modo: en Ajustes (embedded) no hay container propio. -->
+  <component :is="props.embedded ? 'div' : 'v-container'">
     <PageHeader
+      v-if="!props.embedded"
       :title="$t('establishments.title')"
       :subtitle="$t('establishments.intro')"
     />
@@ -130,7 +136,7 @@ onUnmounted(() => {
               <v-list-item-title>{{ est.name }}</v-list-item-title>
               <v-list-item-subtitle>
                 {{ $t('establishments.code', { code: est.code }) }}
-                <v-chip size="x-small" class="ml-2" :color="est.status === 'active' ? 'success' : 'warning'">
+                <v-chip size="x-small" class="ml-2" variant="flat" :color="est.status === 'active' ? 'lightsuccess' : 'lightwarning'">
                   {{ est.status === 'active' ? $t('common.active') : $t('common.inactive') }}
                 </v-chip>
               </v-list-item-subtitle>
@@ -160,17 +166,17 @@ onUnmounted(() => {
             <v-list-item v-for="ep in store.emissionPoints" :key="ep.id">
               <v-list-item-title class="d-flex align-center ga-2">
                 {{ ep.name || $t('establishments.pointFallback', { code: ep.code }) }}
-                <v-chip size="x-small" :color="ep.type === 'pos' ? 'indigo' : 'grey'">
+                <v-chip size="x-small" variant="flat" :color="ep.type === 'pos' ? 'lightinfo' : 'lightsecondary'">
                   {{ ep.type === 'pos' ? $t('establishments.typePos') : $t('establishments.typeWeb') }}
                 </v-chip>
               </v-list-item-title>
               <v-list-item-subtitle class="d-flex align-center ga-2">
                 <span class="text-caption">{{ $t('establishments.code', { code: ep.code }) }}</span>
-                <v-chip size="x-small" :color="ep.status === 'active' ? 'success' : 'warning'">
+                <v-chip size="x-small" variant="flat" :color="ep.status === 'active' ? 'lightsuccess' : 'lightwarning'">
                   {{ ep.status === 'active' ? $t('common.active') : $t('common.inactive') }}
                 </v-chip>
                 <template v-if="ep.type === 'pos'">
-                  <v-chip size="x-small" :color="ep.paired ? 'success' : 'amber'">
+                  <v-chip size="x-small" variant="flat" :color="ep.paired ? 'lightsuccess' : 'lightwarning'">
                     {{ ep.paired ? $t('establishments.paired') : $t('establishments.unpaired') }}
                   </v-chip>
                 </template>
@@ -297,5 +303,5 @@ onUnmounted(() => {
         </v-card-actions>
       </v-card>
     </v-dialog>
-  </v-container>
+  </component>
 </template>

@@ -16,7 +16,9 @@
       <v-list density="compact" max-height="360" class="py-0">
         <v-list-item v-for="n in realtime.items" :key="n.id" @click="goToPlugins()">
           <template #prepend>
-            <v-icon :icon="iconFor(n.event)" />
+            <v-avatar color="lightprimary" size="36" class="mr-2">
+              <v-icon :icon="iconFor(n.event)" color="primary" size="20" />
+            </v-avatar>
           </template>
           <v-list-item-title class="text-body-2">{{ $t(n.titleKey) }}</v-list-item-title>
           <v-list-item-subtitle class="text-caption">

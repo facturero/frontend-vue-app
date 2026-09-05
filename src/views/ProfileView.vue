@@ -11,6 +11,10 @@ import PageHeader from '@/components/ui/PageHeader.vue';
 const auth = useAuthStore();
 const router = useRouter();
 
+// `embedded`: la vista vive dentro de Ajustes (arquetipo F) como pestaña, sin
+// su container ni su PageHeader, que ya pone la vista contenedora.
+const props = defineProps<{ embedded?: boolean }>();
+
 const fullName = ref('');
 const identificationType = ref('cedula');
 const identificationNumber = ref('');
@@ -98,8 +102,10 @@ function onAvatarSuccess(fileIds: string[]): void {
 </script>
 
 <template>
-  <v-container>
-    <PageHeader :title="isSetup ? $t('profile.completeTitle') : $t('common.myProfile')" />
+  <!-- El wrapper cambia según el modo: en Ajustes (embedded) el contenido ya
+       vive dentro del v-card-text contenedor, así que no hay container propio. -->
+  <component :is="props.embedded ? 'div' : 'v-container'">
+    <PageHeader v-if="!props.embedded" :title="isSetup ? $t('profile.completeTitle') : $t('common.myProfile')" />
 
     <v-sheet :max-width="640" class="mx-auto" color="transparent">
       <v-card class="overflow-hidden">
@@ -225,5 +231,5 @@ function onAvatarSuccess(fileIds: string[]): void {
         </v-card-text>
       </v-card>
     </v-sheet>
-  </v-container>
+  </component>
 </template>

@@ -20,8 +20,9 @@ export default createVuetify({
   // recurrente, cámbialo aquí, no en la vista. Ver docs/UI-UX.md.
   // ---------------------------------------------------------------------------
   defaults: {
-    // Superficies
-    VCard: { elevation: 2, rounded: 'lg' },
+    // Superficies. Sin elevación de Vuetify: el radio (7px) y la sombra suave
+    // los aporta la clase `card-surface`, definida en index.html.
+    VCard: { elevation: 0, class: 'card-surface' },
     VSheet: { rounded: 'lg' },
 
     // Acciones
@@ -48,8 +49,10 @@ export default createVuetify({
     VDataTableServer: { hover: true },
 
     // Navegación
+    // Sin sombras ni bordes: el armazón se separa del contenido por color de
+    // fondo (surface blanco sobre background gris), no por líneas.
     VAppBar: { elevation: 0, class: 'border-b' },
-    VNavigationDrawer: { elevation: 0, class: 'border-e' },
+    VNavigationDrawer: { elevation: 0 },
     VList: { class: 'py-1' },
   },
   theme: {
@@ -59,18 +62,35 @@ export default createVuetify({
         dark: false,
         colors: {
           // Base
-          primary: '#078DEE',
-          'primary-darken-1': '#1F5592',
+          primary: '#5D87FF',
+          'primary-darken-1': '#4570EA',
 
-          secondary: '#6D788D',
-          'secondary-darken-1': '#018786',
+          secondary: '#49BEFF',
+          'secondary-darken-1': '#23AFDB',
 
-          success: '#02CA4B',
-          info: '#06B6D4',
-          warning: '#EAB308',
-          error: '#FB4141',
+          success: '#13DEB9',
+          info: '#539BFF',
+          warning: '#FFAE1F',
+          error: '#FA896B',
 
-          background: '#F8FAFC',
+          // Fondos tonales suaves: chips, alertas, badges y cabeceras de
+          // sección. Sin ellos el conjunto se ve plano — son la mitad del
+          // carácter visual. Uso: color="lightprimary".
+          lightprimary: '#ECF2FF',
+          lightsecondary: '#E8F7FF',
+          lightsuccess: '#E6FFFA',
+          lightinfo: '#EBF3FE',
+          lightwarning: '#FEF5E5',
+          lighterror: '#FDEDE8',
+
+          // Bordes y estados
+          borderColor: '#E5EAEF',
+          inputBorder: '#DFE5EF',
+          hoverColor: '#F6F9FC',
+          grey100: '#F2F6FA',
+          grey200: '#EAEFF4',
+
+          background: '#F2F6FA',
           surface: '#FFFFFF',
 
           // Surface variants
@@ -101,8 +121,16 @@ export default createVuetify({
           'on-warning': '#FFFFFF',
           'on-error': '#FFFFFF',
 
-          'on-background': '#3F404D',
-          'on-surface': '#3F404D',
+          // Los fondos tonales llevan texto del color base, no blanco.
+          'on-lightprimary': '#5D87FF',
+          'on-lightsecondary': '#49BEFF',
+          'on-lightsuccess': '#13DEB9',
+          'on-lightinfo': '#539BFF',
+          'on-lightwarning': '#FFAE1F',
+          'on-lighterror': '#FA896B',
+
+          'on-background': '#2A3547',
+          'on-surface': '#2A3547',
           'on-surface-light': '#000000',
           'on-surface-bright': '#000000',
           'on-surface-variant': '#EEEEEE',
@@ -119,19 +147,33 @@ export default createVuetify({
         dark: true,
         colors: {
           // Base
-          primary: '#078DEE',
-          'primary-darken-1': '#277CC1',
+          primary: '#5D87FF',
+          'primary-darken-1': '#4570EA',
 
-          secondary: '#6D788D',
-          'secondary-darken-1': '#48A9A6',
+          secondary: '#49BEFF',
+          'secondary-darken-1': '#23AFDB',
 
-          success: '#02CA4B',
-          info: '#06B6D4',
-          warning: '#EAB308',
-          error: '#FB4141',
+          success: '#13DEB9',
+          info: '#539BFF',
+          warning: '#FFAE1F',
+          error: '#FA896B',
 
-          background: '#121212',
-          surface: '#1E1E1E',
+          // En oscuro los tonales son versiones apagadas, no claras.
+          lightprimary: '#253662',
+          lightsecondary: '#1C455D',
+          lightsuccess: '#1B3C48',
+          lightinfo: '#223662',
+          lightwarning: '#4D3A2A',
+          lighterror: '#4B313D',
+
+          borderColor: '#333F55',
+          inputBorder: '#465670',
+          hoverColor: '#333F55',
+          grey100: '#333F55',
+          grey200: '#465670',
+
+          background: '#2A3447',
+          surface: '#2A3447',
 
           // Surface variants
           'surface-light': '#424242',
@@ -161,8 +203,16 @@ export default createVuetify({
           'on-warning': '#FFFFFF',
           'on-error': '#FFFFFF',
 
-          'on-background': '#E6E6F1',
-          'on-surface': '#E6E6F1',
+          // Sobre tonales oscuros el texto va en el color base, que resalta.
+          'on-lightprimary': '#5D87FF',
+          'on-lightsecondary': '#49BEFF',
+          'on-lightsuccess': '#13DEB9',
+          'on-lightinfo': '#539BFF',
+          'on-lightwarning': '#FFAE1F',
+          'on-lighterror': '#FA896B',
+
+          'on-background': '#EAEFF4',
+          'on-surface': '#EAEFF4',
           'on-surface-light': '#FFFFFF',
           'on-surface-bright': '#000000',
           'on-surface-variant': '#000000',

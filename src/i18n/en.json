@@ -216,20 +216,14 @@
     "viewCode": "View code"
   },
   "home": {
-    "activeSession": "Active session",
-    "email": "Email",
-    "emailVerified": "Email verified",
-    "gatewayOk": "GET /auth/me responded through the gateway ✔",
+    "activeCustomers": "Active customers",
+    "activeEmployees": "Active employees",
+    "activeProducts": "Active products",
+    "issuedInvoices": "Issued invoices",
     "loadError": "Could not load /auth/me",
-    "loadSuccess": "GET /auth/me responded through the gateway ✓",
-    "no": "No",
-    "provider": "Provider",
-    "providerLabel": "Provider",
-    "sessionActive": "Active session",
     "title": "Home",
-    "userId": "User ID",
-    "userIdLabel": "User ID",
-    "yes": "Yes"
+    "today": "Today, {date}",
+    "welcome": "Welcome to {org}"
   },
   "invoices": {
     "addLine": "Add line",
@@ -263,7 +257,7 @@
     "establishmentAndPoint": "establishment and one emission point",
     "establishmentName": "Establishment name",
     "establishmentPlaceholder": "E.g. Head office",
-    "eyebrow": "Electronic document · SRI Ecuador",
+    "eyebrow": "Electronic document · {authority}",
     "folioLabel": "No.",
     "generatingDocs": "Generating documents…",
     "issueDate": "Issue date",
@@ -304,7 +298,7 @@
     "step1Question": "Who are you invoicing?",
     "step2Subtitle": "Products or services to include.",
     "step3": "Issue",
-    "step3Subtitle": "Review the totals and send to the tax authority.",
+    "step3Subtitle": "Review the totals and send to {authority}.",
     "subtotal": "Subtotal",
     "taxIdAndCountry": "tax ID and country",
     "taxIdLabel": "Tax ID number",
@@ -322,7 +316,9 @@
     "voidInvoice": "Void invoice",
     "voidReason": "Reason",
     "voidReasonLabel": "Reason for voiding",
-    "voidTitle": "Voiding"
+    "voidTitle": "Voiding",
+    "detailsTitle": "Invoice details",
+    "step3SubtitleGeneric": "Review the totals and issue the invoice."
   },
   "messages": {
     "empty": "No messages"
@@ -330,19 +326,16 @@
   "nav": {
     "brand": "CRM",
     "brandSubtitle": "Admin panel",
-    "certificates": "Digital certificate",
     "collapse": "Collapse",
     "comingSoon": "coming soon",
     "customers": "Customers",
     "employees": "Employees",
-    "establishments": "Establishments",
     "home": "Home",
     "invoices": "Invoices",
-    "organization": "Organization",
     "plugins": "Plugins",
     "products": "Products",
-    "profile": "My profile",
-    "roles": "Roles"
+    "roles": "Roles",
+    "settings": "Settings"
   },
   "notifications": {
     "customPluginReady": "Your custom plugin is ready",

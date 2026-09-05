@@ -72,12 +72,12 @@ const filtered = computed(() => {
   return sorted;
 });
 
-const statusMeta = computed<Record<CatalogPlugin['display_status'], { label: string; color: string }>>(() => ({
-  disponible: { label: t('plugins.status.disponible'), color: 'success' },
-  comprado: { label: t('plugins.status.comprado'), color: 'primary' },
-  en_construccion: { label: t('plugins.status.en_construccion'), color: 'warning' },
-  desactivado: { label: t('plugins.status.desactivado'), color: 'grey' },
-  incluido: { label: t('plugins.status.incluido'), color: 'info' },
+const statusMeta = computed<Record<CatalogPlugin['display_status'], { label: string; color: string; variant: 'flat' | 'tonal' }>>(() => ({
+  disponible: { label: t('plugins.status.disponible'), color: 'lightsuccess', variant: 'flat' },
+  comprado: { label: t('plugins.status.comprado'), color: 'lightprimary', variant: 'flat' },
+  en_construccion: { label: t('plugins.status.en_construccion'), color: 'lightwarning', variant: 'flat' },
+  desactivado: { label: t('plugins.status.desactivado'), color: 'grey', variant: 'tonal' },
+  incluido: { label: t('plugins.status.incluido'), color: 'lightinfo', variant: 'flat' },
 }));
 
 function formatPrice(cents: number, currency: string): string {
@@ -188,7 +188,7 @@ async function confirmActivate(): Promise<void> {
             </div>
           </v-card-text>
           <v-card-actions class="pt-0">
-            <v-chip size="small" :color="statusMeta[p.display_status].color">
+            <v-chip size="small" :color="statusMeta[p.display_status].color" :variant="statusMeta[p.display_status].variant">
               {{ statusMeta[p.display_status].label }}
             </v-chip>
             <v-spacer />

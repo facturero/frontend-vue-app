@@ -2,6 +2,13 @@ import { test, expect } from '@playwright/test';
 
 const UNIQUE = Date.now();
 
+// Vuetify 3.7 duplica los <label> de un campo (label + floating label), así que
+// getByLabel() resuelve 2 elementos. Para los v-select hay que pulsar el `.v-field`
+// que contiene el label; para los v-text-field basta con `.first()`.
+function fieldByLabel(page: import('@playwright/test').Page, label: string) {
+  return page.locator('.v-field').filter({ has: page.getByText(label, { exact: true }) });
+}
+
 test.describe('Clientes — listado', () => {
 
   test('la tabla de clientes se muestra con las columnas correctas', async ({ page }) => {
@@ -27,16 +34,16 @@ test.describe('Clientes — listado', () => {
   test('filtros de búsqueda y estado funcionan', async ({ page }) => {
     await page.goto('/customers');
 
-    const searchInput = page.getByLabel('Buscar por nombre, identificación o email');
+    const searchInput = page.getByLabel('Buscar por nombre, identificación o email').first();
     await expect(searchInput).toBeVisible();
     await searchInput.fill('test');
     await searchInput.press('Enter');
 
-    const statusSelect = page.getByLabel('Estado');
-    await expect(statusSelect).toBeVisible();
+    const statusField = fieldByLabel(page, 'Estado');
+    await expect(statusField).toBeVisible();
 
-    const typeSelect = page.getByLabel('Tipo');
-    await expect(typeSelect).toBeVisible();
+    const typeField = fieldByLabel(page, 'Tipo');
+    await expect(typeField).toBeVisible();
   });
 });
 
@@ -52,50 +59,48 @@ test.describe('Clientes — crear persona', () => {
     await expect(personRadio).toBeChecked();
 
     // Razón social (nombre completo para persona)
-    const nameInput = page.getByLabel('Nombre completo');
+    const nameInput = fieldByLabel(page, 'Nombre completo').locator('input');
     await expect(nameInput).toBeVisible();
     await nameInput.fill(`Persona E2E ${UNIQUE}`);
 
     // Seleccionar tipo de identificación: Cédula
-    const idTypeSelect = page.getByLabel('Tipo de identificación');
-    await idTypeSelect.click();
+    await fieldByLabel(page, 'Tipo de identificación').click();
     await page.getByRole('option', { name: /cédula/i }).click();
 
-    // Ingresar cédula válida (10 dígitos)
-    const idInput = page.getByLabel('Número de identificación');
+    // Ingresar cédula válida (10 dígitos, única por ejecución)
+    const idInput = fieldByLabel(page, 'Número de identificación').locator('input');
     await expect(idInput).toBeEnabled();
-    await idInput.fill('1712345678');
+    await idInput.fill('17' + String(UNIQUE).slice(-8));
 
     // Email
-    await page.getByLabel('Email').fill(`persona${UNIQUE}@test.com`);
+    await fieldByLabel(page, 'Correo electrónico').locator('input').fill(`persona${UNIQUE}@test.com`);
 
     // Teléfono válido (10 dígitos, empieza con 0)
-    await page.getByLabel('Teléfono').fill('0991234567');
+    await fieldByLabel(page, 'Teléfono').locator('input').fill('0991234567');
 
     // Nombre comercial NO debe verse para persona
-    await expect(page.getByLabel('Nombre comercial')).not.toBeVisible();
+    await expect(fieldByLabel(page, 'Nombre comercial')).not.toBeVisible();
 
     // Crear
     await page.getByRole('button', { name: 'Crear cliente' }).click();
 
     // Redirige al detalle
     await expect(page).toHaveURL(/\/customers\/[\w-]+$/);
-    await expect(page.getByText(`Persona E2E ${UNIQUE}`)).toBeVisible();
+    await expect(page.getByText(`Persona E2E ${UNIQUE}`).first()).toBeVisible();
   });
 
   test('crear persona con Consumidor Final auto-llena identificación y la deshabilita', async ({ page }) => {
     await page.goto('/customers/new');
 
-    const nameInput = page.getByLabel('Nombre completo');
+    const nameInput = fieldByLabel(page, 'Nombre completo').locator('input');
     await nameInput.fill(`Consumidor Final E2E ${UNIQUE}`);
 
     // Seleccionar Consumidor Final
-    const idTypeSelect = page.getByLabel('Tipo de identificación');
-    await idTypeSelect.click();
+    await fieldByLabel(page, 'Tipo de identificación').click();
     await page.getByRole('option', { name: /consumidor final/i }).click();
 
     // La identificación se auto-llena y el campo está deshabilitado
-    const idInput = page.getByLabel('Número de identificación');
+    const idInput = fieldByLabel(page, 'Número de identificación').locator('input');
     await expect(idInput).toBeDisabled();
     await expect(idInput).toHaveValue('9999999999999');
 
@@ -111,21 +116,20 @@ test.describe('Clientes — crear empresa', () => {
     await page.goto('/customers/new');
 
     // Cambiar a empresa
-    await page.getByLabel('Empresa').click();
+    await page.getByLabel('Empresa').first().click();
 
     // Nombre comercial DEBE verse para empresa
-    await expect(page.getByLabel('Nombre comercial')).toBeVisible();
+    await expect(page.getByLabel('Nombre comercial').first()).toBeVisible();
 
     // Razón social
-    await page.getByLabel('Razón social').fill(`Empresa E2E ${UNIQUE}`);
+    await fieldByLabel(page, 'Razón social').locator('input').fill(`Empresa E2E ${UNIQUE}`);
 
     // Nombre comercial
-    await page.getByLabel('Nombre comercial').fill(`Empresa Comercial ${UNIQUE}`);
+    await fieldByLabel(page, 'Nombre comercial').locator('input').fill(`Empresa Comercial ${UNIQUE}`);
 
     // Verificar que solo aparecen RUC, Pasaporte, Exterior en el select
-    const idTypeSelect = page.getByLabel('Tipo de identificación');
-    await idTypeSelect.click();
-    const options = page.locator('.v-list-item-title');
+    await fieldByLabel(page, 'Tipo de identificación').click();
+    const options = page.locator('.v-overlay-container .v-list-item-title');
     const optionTexts = await options.allTextContents();
     for (const text of optionTexts) {
       expect(text).toMatch(/ruc|pasaporte|exterior/i);
@@ -133,18 +137,18 @@ test.describe('Clientes — crear empresa', () => {
     await page.keyboard.press('Escape');
 
     // Seleccionar RUC
-    await idTypeSelect.click();
+    await fieldByLabel(page, 'Tipo de identificación').click();
     await page.getByRole('option', { name: /ruc/i }).click();
 
-    // Ingresar RUC válido (13 dígitos)
-    const idInput = page.getByLabel('Número de identificación');
+    // Ingresar RUC válido (13 dígitos, único por ejecución)
+    const idInput = fieldByLabel(page, 'Número de identificación').locator('input');
     await expect(idInput).toBeEnabled();
-    await idInput.fill('1792123456001');
+    await idInput.fill('179' + String(UNIQUE).slice(-7) + '001');
 
     // Crear
     await page.getByRole('button', { name: 'Crear cliente' }).click();
     await expect(page).toHaveURL(/\/customers\/[\w-]+$/);
-    await expect(page.getByText(`Empresa E2E ${UNIQUE}`)).toBeVisible();
+    await expect(page.getByText(`Empresa E2E ${UNIQUE}`).first()).toBeVisible();
   });
 });
 
@@ -154,13 +158,12 @@ test.describe('Clientes — filtrado de tipos de identificación', () => {
     await page.goto('/customers/new');
 
     // Persona: puede seleccionar Cédula
-    const idTypeSelect = page.getByLabel('Tipo de identificación');
-    await idTypeSelect.click();
+    await fieldByLabel(page, 'Tipo de identificación').click();
     await page.getByRole('option', { name: /cédula/i }).click();
 
     // Cambiar a empresa: el tipo inválido se limpia
-    await page.getByLabel('Empresa').click();
-    await expect(idTypeSelect).toHaveValue('');
+    await page.getByLabel('Empresa').first().click();
+    await expect(fieldByLabel(page, 'Tipo de identificación').locator('input')).toHaveValue('');
   });
 });
 
@@ -169,7 +172,7 @@ test.describe('Clientes — validación de teléfono', () => {
   test('teléfono móvil inválido muestra hint de error', async ({ page }) => {
     await page.goto('/customers/new');
 
-    const phoneInput = page.getByLabel('Teléfono');
+    const phoneInput = fieldByLabel(page, 'Teléfono').locator('input');
     await phoneInput.fill('0991234567');
 
     // No debería mostrar error para formato válido
@@ -197,7 +200,7 @@ test.describe('Clientes — detalle', () => {
 
       await expect(page).toHaveURL(/\/customers\/[\w-]+$/);
       await expect(page.getByText('Información general')).toBeVisible();
-      await expect(page.getByText('Etiquetas')).toBeVisible();
+      await expect(page.getByText('Etiquetas').first()).toBeVisible();
     }
   });
 
@@ -228,8 +231,8 @@ test.describe('Clientes — detalle', () => {
       await companyChip.getByRole('button', { name: '' }).first().click();
       await expect(page).toHaveURL(/\/customers\/[\w-]+$/);
 
-      await expect(page.getByText('Contactos')).toBeVisible();
-      await expect(page.getByText('Direcciones')).toBeVisible();
+      await expect(page.getByText('Contactos').first()).toBeVisible();
+      await expect(page.getByText('Direcciones').first()).toBeVisible();
     }
   });
 });
@@ -262,7 +265,7 @@ test.describe('Clientes — imagen no persiste entre creaciones', () => {
   test('al crear un cliente nuevo no se muestra imagen del anterior', async ({ page }) => {
     // Crear primer cliente
     await page.goto('/customers/new');
-    await page.getByLabel('Nombre completo').fill(`Cliente Imagen 1 ${UNIQUE}`);
+    await page.getByLabel('Nombre completo').first().fill(`Cliente Imagen 1 ${UNIQUE}`);
     await page.getByRole('button', { name: 'Crear cliente' }).click();
     await expect(page).toHaveURL(/\/customers\/[\w-]+$/);
 

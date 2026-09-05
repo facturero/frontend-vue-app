@@ -20,9 +20,9 @@ const canUpdate = computed(() => auth.can('invoice:update'));
 
 const statusChip = (status: string) => {
   const map: Record<string, string> = {
-    draft: 'warning',
-    issued: 'success',
-    voided: 'error',
+    draft: 'lightwarning',
+    issued: 'lightsuccess',
+    voided: 'lighterror',
   };
   return map[status] || 'grey';
 };
@@ -60,7 +60,6 @@ onMounted(load);
         <v-btn
           v-if="canCreate"
           color="primary"
-          variant="tonal"
           prepend-icon="mdi-plus"
           @click="goCreate"
         >
@@ -116,7 +115,7 @@ onMounted(load);
             <td>{{ inv.taxTotal }}</td>
             <td><strong>{{ inv.total }}</strong></td>
             <td>
-              <v-chip :color="statusChip(inv.status)" size="small">
+              <v-chip :color="statusChip(inv.status)" size="small" variant="flat">
                 {{ $t(`invoices.status.${inv.status}`) }}
               </v-chip>
             </td>

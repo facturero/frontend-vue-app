@@ -89,7 +89,6 @@ onMounted(async () => {
         <v-btn
           v-if="canInvite"
           color="primary"
-          variant="tonal"
           prepend-icon="mdi-account-plus"
           @click="openInvite"
         >
@@ -165,7 +164,8 @@ onMounted(async () => {
                   v-for="estId in e.establishmentIds"
                   :key="estId"
                   size="x-small"
-                  color="secondary"
+                  color="lightsecondary"
+                  variant="flat"
                   class="mr-1"
                   data-testid="employee-establishment-chip"
                 >
@@ -177,7 +177,8 @@ onMounted(async () => {
             <td>
               <v-chip
                 size="x-small"
-                :color="e.status === 'active' ? 'success' : 'warning'"
+                variant="flat"
+                :color="e.status === 'active' ? 'lightsuccess' : 'lightwarning'"
               >
                 {{ e.status }}
               </v-chip>

@@ -216,20 +216,14 @@
     "viewCode": "Ver código"
   },
   "home": {
-    "activeSession": "Sesión activa",
-    "email": "Correo electrónico",
-    "emailVerified": "Correo verificado",
-    "gatewayOk": "GET /auth/me respondió a través del gateway ✔",
+    "activeCustomers": "Clientes activos",
+    "activeEmployees": "Empleados activos",
+    "activeProducts": "Productos activos",
+    "issuedInvoices": "Facturas emitidas",
     "loadError": "No se pudo cargar /auth/me",
-    "loadSuccess": "GET /auth/me respondió a través del gateway ✓",
-    "no": "No",
-    "provider": "Proveedor",
-    "providerLabel": "Proveedor",
-    "sessionActive": "Sesión activa",
     "title": "Inicio",
-    "userId": "ID de usuario",
-    "userIdLabel": "ID de usuario",
-    "yes": "Sí"
+    "today": "Hoy, {date}",
+    "welcome": "Bienvenido a {org}"
   },
   "invoices": {
     "addLine": "Agregar línea",
@@ -263,7 +257,7 @@
     "establishmentAndPoint": "establecimiento y un punto de emisión",
     "establishmentName": "Nombre del establecimiento",
     "establishmentPlaceholder": "Ej. Matriz",
-    "eyebrow": "Documento electrónico · SRI Ecuador",
+    "eyebrow": "Documento electrónico · {authority}",
     "folioLabel": "N.º",
     "generatingDocs": "Generando documentos…",
     "issueDate": "Fecha emisión",
@@ -304,7 +298,7 @@
     "step1Question": "¿A quién le estás facturando?",
     "step2Subtitle": "Productos o servicios a incluir.",
     "step3": "Emitir",
-    "step3Subtitle": "Revisa los totales y envía al SRI.",
+    "step3Subtitle": "Revisa los totales y envía a {authority}.",
     "subtotal": "Subtotal",
     "taxIdAndCountry": "RUC y país",
     "taxIdLabel": "RUC / identificación tributaria",
@@ -322,7 +316,9 @@
     "voidInvoice": "Anular factura",
     "voidReason": "Motivo",
     "voidReasonLabel": "Motivo de anulación",
-    "voidTitle": "Anulación"
+    "voidTitle": "Anulación",
+    "detailsTitle": "Datos de la factura",
+    "step3SubtitleGeneric": "Revisa los totales y emite la factura."
   },
   "messages": {
     "empty": "Sin mensajes"
@@ -330,19 +326,16 @@
   "nav": {
     "brand": "CRM",
     "brandSubtitle": "Panel de adm.",
-    "certificates": "Certificado electrónico",
     "collapse": "Colapsar",
     "comingSoon": "pronto",
     "customers": "Clientes",
     "employees": "Empleados",
-    "establishments": "Establecimientos",
     "home": "Inicio",
     "invoices": "Facturas",
-    "organization": "Organización",
     "plugins": "Plugins",
     "products": "Productos",
-    "profile": "Mi perfil",
-    "roles": "Roles"
+    "roles": "Roles",
+    "settings": "Ajustes"
   },
   "notifications": {
     "customPluginReady": "Tu plugin a medida está listo",

@@ -101,7 +101,7 @@ onMounted(async () => {
   <v-container>
     <PageHeader :title="$t('products.title')">
       <template #actions>
-        <v-btn v-if="canCreate" color="primary" variant="tonal" prepend-icon="mdi-plus" @click="goCreate">
+        <v-btn v-if="canCreate" color="primary" prepend-icon="mdi-plus" @click="goCreate">
           {{ $t('products.new') }}
         </v-btn>
       </template>
@@ -159,7 +159,7 @@ onMounted(async () => {
         </template>
 
         <template #item.type="{ item }">
-          <v-chip size="x-small" color="info">
+          <v-chip size="x-small" variant="flat" color="lightinfo">
             {{ item.type === 'good' ? $t('products.good') : $t('products.service') }}
           </v-chip>
         </template>
@@ -169,7 +169,7 @@ onMounted(async () => {
         </template>
 
         <template #item.status="{ item }">
-          <v-chip size="x-small" :color="item.status === 'active' ? 'success' : 'warning'">
+          <v-chip size="x-small" variant="flat" :color="item.status === 'active' ? 'lightsuccess' : 'lightwarning'">
             {{ item.status === 'active' ? $t('common.active') : $t('common.inactive') }}
           </v-chip>
         </template>

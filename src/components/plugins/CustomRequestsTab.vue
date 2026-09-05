@@ -20,10 +20,10 @@ const descriptionRules = [
 const publicCatalog = computed(() => store.catalog.filter((p) => !p.is_exclusive));
 
 const statusMeta = computed(() => ({
-  requested: { label: t('plugins.requestStatus.requested'), color: 'info' },
-  quoted: { label: t('plugins.requestStatus.quoted'), color: 'warning' },
-  created: { label: t('plugins.requestStatus.created'), color: 'success' },
-  rejected: { label: t('plugins.requestStatus.rejected'), color: 'error' },
+  requested: { label: t('plugins.requestStatus.requested'), color: 'lightinfo', variant: 'flat' as const },
+  quoted: { label: t('plugins.requestStatus.quoted'), color: 'lightwarning', variant: 'flat' as const },
+  created: { label: t('plugins.requestStatus.created'), color: 'lightsuccess', variant: 'flat' as const },
+  rejected: { label: t('plugins.requestStatus.rejected'), color: 'lighterror', variant: 'flat' as const },
 }));
 
 const selectablePlugins = computed(() =>
@@ -75,7 +75,7 @@ async function submitRequest(): Promise<void> {
             </template>
           </v-list-item-subtitle>
           <template #append>
-            <v-chip size="small" :color="statusMeta[r.status].color">
+            <v-chip size="small" :color="statusMeta[r.status].color" :variant="statusMeta[r.status].variant">
               {{ statusMeta[r.status].label }}
             </v-chip>
           </template>

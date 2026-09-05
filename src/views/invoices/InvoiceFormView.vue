@@ -7,6 +7,8 @@ import { useCustomerStore } from '@/stores/customers';
 import { useProductStore } from '@/stores/products';
 import { useOrganizationStore } from '@/stores/organization';
 import { useFiscalStore } from '@/stores/fiscal';
+import PageHeader from '@/components/ui/PageHeader.vue';
+import { getFiscalRegime, supportedCountries } from '@/config/fiscalRegimes';
 
 const props = defineProps<{ id?: string }>();
 const { t, locale } = useI18n();
@@ -16,6 +18,13 @@ const customerStore = useCustomerStore();
 const productStore = useProductStore();
 const orgStore = useOrganizationStore();
 const fiscalStore = useFiscalStore();
+
+/**
+ * Todo lo específico del país sale de aquí, no de constantes en la vista: qué
+ * organismo autoriza, si hay establecimientos, qué tipo de documento se crea.
+ * Ver src/config/fiscalRegimes.ts.
+ */
+const regime = computed(() => getFiscalRegime(orgStore.org?.countryCode));
 
 const isEditMode = computed(() => !!props.id);
 const loadingExisting = ref(false);
@@ -114,7 +123,13 @@ const currencySymbol = computed(() => (store.current?.currencyCode === 'USD' ? '
 
 const folioLabel = computed(() => store.current?.number || 'BORRADOR');
 
-const today = new Date().toLocaleDateString('es-EC', { year: 'numeric', month: 'short', day: '2-digit' });
+const today = computed(() =>
+  new Date().toLocaleDateString(regime.value.locale || locale.value, {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+  }),
+);
 
 function customFilter(item: { title: string }, queryText: string): boolean {
   if (!queryText || queryText.length < 2) return false;
@@ -153,8 +168,8 @@ async function selectCustomer() {
   try {
     const invoice = await store.create({
       customerId: selectedCustomerId.value,
-      documentTypeId: '024ce4f5-baf1-4d04-9a7c-189076230390',
-      currencyCode: 'USD',
+      documentTypeId: regime.value.invoiceDocumentTypeId,
+      currencyCode: regime.value.currencyCode,
     });
     invoiceId.value = invoice.id;
   } catch (e: any) {
@@ -201,10 +216,6 @@ async function handleIssue() {
   } finally {
     saving.value = false;
   }
-}
-
-function goBack() {
-  router.push('/invoices');
 }
 
 async function submitOrgProfile(): Promise<void> {
@@ -296,17 +307,12 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="invoice-workspace">
-    <div class="invoice-topbar">
-      <button type="button" class="back-link" @click="goBack">
-        <v-icon icon="mdi-arrow-left" size="18" />
-        {{ $t('common.back') }}
-      </button>
-      <div class="invoice-heading">
-        <span class="eyebrow">{{ $t('invoices.eyebrow') }}</span>
-        <h1>{{ isEditMode ? $t('invoices.edit') : $t('invoices.new') }}</h1>
-      </div>
-    </div>
+  <v-container class="invoice-workspace">
+    <PageHeader
+      :title="isEditMode ? $t('invoices.edit') : $t('invoices.new')"
+      :subtitle="regime.authority ? $t('invoices.eyebrow', { authority: regime.authority }) : undefined"
+      :back-to="{ name: 'invoices' }"
+    />
 
     <v-progress-linear v-if="loadingExisting" indeterminate class="mb-4" />
 
@@ -318,9 +324,18 @@ onMounted(async () => {
       {{ errorMessage }}
     </v-alert>
 
-    <div v-if="!loadError" class="invoice-grid">
+    <v-row v-if="!loadError">
       <!-- FORM COLUMN -->
-      <div class="invoice-form">
+      <v-col cols="12" lg="8">
+       <v-card>
+        <v-card-title class="text-h6 pa-6 pb-0">
+          {{ $t('invoices.detailsTitle') }}
+        </v-card-title>
+
+        <v-card-text class="pa-6">
+          <div class="text-body-2 text-medium-emphasis mb-6">
+            {{ $t('common.date') }}: {{ today }}
+          </div>
 
         <!-- STEP 1 -->
         <section class="inv-step">
@@ -333,6 +348,7 @@ onMounted(async () => {
           </div>
 
           <div class="step-body">
+           <v-sheet color="grey100" rounded="lg" class="pa-4 mb-4">
             <v-autocomplete
               v-model="selectedCustomerId"
               :items="customerStore.list.map(c => ({ title: `${c.businessName} (${c.identification})`, value: c.id }))"
@@ -343,16 +359,16 @@ onMounted(async () => {
               :search-input.sync="customerSearch"
               :filter="customFilter"
             />
-            <button
-              type="button"
-              class="ghost-btn"
+            <v-btn
+              variant="outlined"
+              rounded="pill"
+              :append-icon="hasCustomer ? 'mdi-check' : 'mdi-arrow-right'"
               :disabled="!selectedCustomerId || hasCustomer"
               @click="selectCustomer"
             >
               {{ hasCustomer ? $t('invoices.customerConfirmed') : $t('invoices.confirmCustomer') }}
-              <v-icon v-if="!hasCustomer" icon="mdi-arrow-right" size="16" />
-              <v-icon v-else icon="mdi-check" size="16" />
-            </button>
+            </v-btn>
+           </v-sheet>
           </div>
         </section>
 
@@ -372,66 +388,82 @@ onMounted(async () => {
             </div>
 
             <template v-else>
-              <table v-if="hasLines" class="lines-table">
+              <v-table v-if="hasLines" density="compact" class="mb-4 bg-transparent">
                 <thead>
                   <tr>
                     <th>{{ $t('invoices.item') }}</th>
                     <th>{{ $t('common.description') }}</th>
-                    <th class="num">{{ $t('invoices.qtyShort') }}</th>
-                    <th class="num">{{ $t('products.price') }}</th>
-                    <th class="num">{{ $t('invoices.subtotal') }}</th>
-                    <th class="col-action" />
+                    <th class="text-right">{{ $t('invoices.qtyShort') }}</th>
+                    <th class="text-right">{{ $t('products.price') }}</th>
+                    <th class="text-right">{{ $t('invoices.subtotal') }}</th>
+                    <th />
                   </tr>
                 </thead>
                 <tbody>
                   <tr v-for="line in (store.current?.lines || [])" :key="line.id">
                     <td>{{ lineItemName(line) }}</td>
-                    <td class="text-soft">{{ line.description }}</td>
-                    <td class="num mono">{{ line.quantity }}</td>
-                    <td class="num mono">{{ (line.unitPriceCents / 100).toFixed(2) }}</td>
-                    <td class="num mono">{{ (line.subtotalCents / 100).toFixed(2) }}</td>
-                    <td class="col-action">
-                      <button type="button" class="icon-btn" :title="$t('invoices.removeLine')" @click="removeLine(line.id)">
-                        <v-icon icon="mdi-close" size="16" />
-                      </button>
+                    <td class="text-medium-emphasis">{{ line.description }}</td>
+                    <td class="text-right mono">{{ line.quantity }}</td>
+                    <td class="text-right mono">{{ (line.unitPriceCents / 100).toFixed(2) }}</td>
+                    <td class="text-right mono">{{ (line.subtotalCents / 100).toFixed(2) }}</td>
+                    <td class="text-right">
+                      <v-btn
+                        icon="mdi-close"
+                        variant="text"
+                        size="x-small"
+                        :title="$t('invoices.removeLine')"
+                        @click="removeLine(line.id)"
+                      />
                     </td>
                   </tr>
                 </tbody>
-              </table>
+              </v-table>
 
-              <div class="add-line-row">
-                <v-select
-                  v-model="newLine.productId"
-                  :items="productStore.list.filter(p => p.status === 'active').map(p => ({ title: `${p.name} · ${p.type === 'service' ? $t('products.service') : $t('products.good')}`, value: p.id }))"
-                  :label="$t('invoices.productOrService')"
-                  variant="underlined"
-                  class="col-product"
-                />
-                <v-text-field
-                  v-model="newLine.description"
-                  :label="$t('invoices.descriptionOptional')"
-                  variant="underlined"
-                  class="col-description"
-                />
-                <v-text-field
-                  v-model.number="newLine.quantity"
-                  :label="$t('invoices.qtyShort')"
-                  type="number"
-                  min="1"
-                  variant="underlined"
-                  class="col-qty mono"
-                />
-                <v-text-field
-                  v-model="newLine.unitPrice"
-                  :label="$t('products.price')"
-                  variant="underlined"
-                  class="col-price mono"
-                />
-                <button type="button" class="icon-btn add" :title="$t('invoices.addLine')" :disabled="!canAddLine"
-                  @click="addLine">
-                  <v-icon icon="mdi-plus" size="18" />
-                </button>
-              </div>
+              <v-row align="end" dense>
+                <v-col cols="12" sm="4">
+                  <v-select
+                    v-model="newLine.productId"
+                    :items="productStore.list.filter(p => p.status === 'active').map(p => ({ title: `${p.name} · ${p.type === 'service' ? $t('products.service') : $t('products.good')}`, value: p.id }))"
+                    :label="$t('invoices.productOrService')"
+                    variant="underlined"
+                  />
+                </v-col>
+                <v-col cols="12" sm="4">
+                  <v-text-field
+                    v-model="newLine.description"
+                    :label="$t('invoices.descriptionOptional')"
+                    variant="underlined"
+                  />
+                </v-col>
+                <v-col cols="4" sm="1">
+                  <v-text-field
+                    v-model.number="newLine.quantity"
+                    :label="$t('invoices.qtyShort')"
+                    type="number"
+                    min="1"
+                    variant="underlined"
+                    class="mono"
+                  />
+                </v-col>
+                <v-col cols="6" sm="2">
+                  <v-text-field
+                    v-model="newLine.unitPrice"
+                    :label="$t('products.price')"
+                    variant="underlined"
+                    class="mono"
+                  />
+                </v-col>
+                <v-col cols="2" sm="1" class="text-right">
+                  <v-btn
+                    icon="mdi-plus"
+                    variant="outlined"
+                    size="small"
+                    :title="$t('invoices.addLine')"
+                    :disabled="!canAddLine"
+                    @click="addLine"
+                  />
+                </v-col>
+              </v-row>
             </template>
           </div>
         </section>
@@ -442,7 +474,12 @@ onMounted(async () => {
             <span class="step-num">3</span>
             <div>
               <h2>{{ $t('invoices.step3') }}</h2>
-              <p>{{ $t('invoices.step3Subtitle') }}</p>
+              <!-- Sin país configurado no hay autoridad que nombrar: texto genérico. -->
+              <p>
+                {{ regime.authority
+                  ? $t('invoices.step3Subtitle', { authority: regime.authority })
+                  : $t('invoices.step3SubtitleGeneric') }}
+              </p>
             </div>
           </div>
 
@@ -451,28 +488,30 @@ onMounted(async () => {
               {{ $t('invoices.addLineFirst') }}
             </div>
             <template v-else>
-              <div v-if="!orgProfileComplete" class="setup-hint">
-                <v-icon icon="mdi-alert-circle-outline" size="18" class="mr-1" />
-                <i18n-t keypath="invoices.completeProfileHint" tag="span">
-                  <template #field><strong>{{ $t('invoices.taxIdAndCountry') }}</strong></template>
-                </i18n-t>
-                <button type="button" class="setup-link" @click="showOrgDialog = true">
-                  {{ $t('invoices.completeNow') }}
-                </button>
-              </div>
+              <v-alert v-if="!orgProfileComplete" type="warning" class="mb-4">
+                <div class="d-flex flex-wrap align-center ga-2">
+                  <i18n-t keypath="invoices.completeProfileHint" tag="span">
+                    <template #field><strong>{{ $t('invoices.taxIdAndCountry') }}</strong></template>
+                  </i18n-t>
+                  <v-btn variant="text" size="small" class="ml-auto" @click="showOrgDialog = true">
+                    {{ $t('invoices.completeNow') }}
+                  </v-btn>
+                </div>
+              </v-alert>
 
-              <div v-else-if="!hasEstablishments" class="setup-hint">
-                <v-icon icon="mdi-alert-circle-outline" size="18" class="mr-1" />
-                <i18n-t keypath="invoices.needEstablishmentHint" tag="span">
-                  <template #field><strong>{{ $t('invoices.establishmentAndPoint') }}</strong></template>
-                </i18n-t>
-                <button type="button" class="setup-link" @click="showEstablishmentDialog = true">
-                  {{ $t('invoices.createNow') }}
-                </button>
-              </div>
+              <v-alert v-else-if="!hasEstablishments" type="warning" class="mb-4">
+                <div class="d-flex flex-wrap align-center ga-2">
+                  <i18n-t keypath="invoices.needEstablishmentHint" tag="span">
+                    <template #field><strong>{{ $t('invoices.establishmentAndPoint') }}</strong></template>
+                  </i18n-t>
+                  <v-btn variant="text" size="small" class="ml-auto" @click="showEstablishmentDialog = true">
+                    {{ $t('invoices.createNow') }}
+                  </v-btn>
+                </div>
+              </v-alert>
 
               <template v-else>
-                <div class="emission-selects">
+                <v-sheet color="grey100" rounded="lg" class="d-flex ga-3 pa-4 mb-4">
                   <v-select
                     v-model="selectedEstablishmentId"
                     :items="orgStore.establishments.filter(e => e.status === 'active').map(e => ({ title: `${e.code} — ${e.name}`, value: e.id }))"
@@ -486,36 +525,56 @@ onMounted(async () => {
                     variant="underlined"
                     :disabled="!selectedEstablishmentId"
                   />
-                </div>
-                <p v-if="selectedEstablishmentId && !selectedEstablishmentHasEmissionPoints" class="setup-hint">
-                  <v-icon icon="mdi-alert-circle-outline" size="18" class="mr-1" />
-                  {{ $t('invoices.noEmissionPoints') }}
-                  <button type="button" class="setup-link" @click="showEstablishmentDialog = true">
-                    {{ $t('invoices.createOne') }}
-                  </button>
-                </p>
-                <p v-if="noCertificate" class="setup-hint info">
-                  <v-icon icon="mdi-information-outline" size="18" class="mr-1" />
-                  {{ $t('invoices.noCertificateHint') }}
-                  <button type="button" class="setup-link" @click="showCertificateDialog = true">
-                    {{ $t('invoices.uploadCertificate') }}
-                  </button>
-                </p>
-                <p class="issue-note">
+                </v-sheet>
+
+                <v-alert
+                  v-if="selectedEstablishmentId && !selectedEstablishmentHasEmissionPoints"
+                  type="warning"
+                  class="mb-4"
+                >
+                  <div class="d-flex flex-wrap align-center ga-2">
+                    <span>{{ $t('invoices.noEmissionPoints') }}</span>
+                    <v-btn variant="text" size="small" class="ml-auto" @click="showEstablishmentDialog = true">
+                      {{ $t('invoices.createOne') }}
+                    </v-btn>
+                  </div>
+                </v-alert>
+
+                <v-alert
+                  v-if="regime.requiresSigningCertificate && noCertificate"
+                  type="info"
+                  class="mb-4"
+                >
+                  <div class="d-flex flex-wrap align-center ga-2">
+                    <span>{{ $t('invoices.noCertificateHint') }}</span>
+                    <v-btn variant="text" size="small" class="ml-auto" @click="showCertificateDialog = true">
+                      {{ $t('invoices.uploadCertificate') }}
+                    </v-btn>
+                  </div>
+                </v-alert>
+
+                <p class="text-body-2 text-medium-emphasis mb-4">
                   {{ $t('invoices.issueNote') }}
                 </p>
-                <button type="button" class="issue-btn" :disabled="saving || !selectedEstablishmentId || !selectedEmissionPointId" @click="handleIssue">
-                  <v-progress-circular v-if="saving" indeterminate size="16" width="2" class="mr-2" />
+                <v-btn
+                  color="primary"
+                  size="large"
+                  :loading="saving"
+                  :disabled="!selectedEstablishmentId || !selectedEmissionPointId"
+                  @click="handleIssue"
+                >
                   {{ saving ? $t('invoices.issuing') : $t('invoices.issueInvoice') }}
-                </button>
+                </v-btn>
               </template>
             </template>
           </div>
         </section>
-      </div>
+        </v-card-text>
+       </v-card>
+      </v-col>
 
       <!-- PREVIEW COLUMN -->
-      <aside class="invoice-preview">
+      <v-col cols="12" lg="4" class="invoice-preview">
         <div class="invoice-paper" :class="{ 'is-issued': hasLines }">
           <div class="paper-head">
             <div>
@@ -580,8 +639,8 @@ onMounted(async () => {
             </div>
           </div>
         </div>
-      </aside>
-    </div>
+      </v-col>
+    </v-row>
 
     <!-- Diálogo: completar RUC/país -->
     <v-dialog v-model="showOrgDialog" max-width="420">
@@ -599,7 +658,7 @@ onMounted(async () => {
           />
           <v-select
             v-model="quickCountryCode"
-            :items="[{ title: 'Ecuador', value: 'EC' }]"
+            :items="supportedCountries()"
             :label="$t('common.country')"
           />
         </v-card-text>
@@ -678,193 +737,147 @@ onMounted(async () => {
         </v-card-actions>
       </v-card>
     </v-dialog>
-  </div>
+  </v-container>
 </template>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
-
+/*
+ * Sólo queda aquí lo que no se puede expresar con utilidades de Vuetify: la
+ * previsualización con aspecto de papel (troquelado, reglas punteadas y el
+ * sello rotado del total). Todo lo demás —botones, tabla, avisos, rejilla—
+ * usa componentes del sistema.
+ *
+ * Los colores salen de tokens del tema, nunca de hex fijos: así la vista
+ * funciona igual en claro y en oscuro.
+ */
 .invoice-workspace {
-  --ink: #1c1f26;
-  --ink-soft: #70757f;
-  --ink-faint: #a3a8b3;
-  --line: #e3e6eb;
-  --paper: #f8fafc;
-  --surface: #ffffff;
-  --accent: #078dee;
-  --stamp: #1f6f54;
-  --stamp-soft: #e7f1ec;
-  font-family: 'Inter', sans-serif;
-  color: var(--ink);
   max-width: 1180px;
-  margin: 0 auto;
-  padding: 32px 24px 64px;
 }
 
-.mono { font-family: 'JetBrains Mono', ui-monospace, monospace; font-variant-numeric: tabular-nums; }
-
-/* Topbar */
-.invoice-topbar { margin-bottom: 28px; }
-.back-link {
-  display: inline-flex; align-items: center; gap: 4px;
-  background: none; border: none; cursor: pointer;
-  color: var(--ink-soft); font-size: 13px; padding: 0 0 14px; letter-spacing: .01em;
-  transition: color .15s ease;
-}
-.back-link:hover { color: var(--ink); }
-.invoice-heading .eyebrow {
-  display: block; font-size: 11px; letter-spacing: .12em; text-transform: uppercase;
-  color: var(--ink-faint); margin-bottom: 4px;
-}
-.invoice-heading h1 { font-size: 26px; font-weight: 600; letter-spacing: -0.01em; margin: 0; }
-
-/* Grid */
-.invoice-grid { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 48px; align-items: start; }
-@media (max-width: 1100px) {
-  .invoice-grid { grid-template-columns: 1fr; }
-  .invoice-preview { max-width: 420px; }
+/* Cifras alineadas en columna; usa la mono del sistema, sin fuente externa. */
+.mono {
+  font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', 'Roboto Mono', monospace;
+  font-variant-numeric: tabular-nums;
 }
 
-/* Steps */
-.invoice-form { display: flex; flex-direction: column; gap: 8px; }
-.inv-step { border-top: 1px solid var(--line); padding: 28px 0; transition: opacity .2s ease; }
+.inv-step {
+  border-top: 1px solid rgb(var(--v-theme-borderColor));
+  padding: 28px 0;
+  transition: opacity 0.2s ease;
+}
 .inv-step:first-child { border-top: none; padding-top: 0; }
-.inv-step.is-disabled { opacity: .45; }
+.inv-step.is-disabled { opacity: 0.45; }
 
 .step-head { display: flex; gap: 14px; margin-bottom: 18px; }
 .step-num {
-  flex: none; width: 26px; height: 26px; border-radius: 50%;
-  border: 1px solid var(--ink); display: flex; align-items: center; justify-content: center;
-  font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
 }
 .step-head h2 { font-size: 16px; font-weight: 600; margin: 0 0 2px; }
-.step-head p { font-size: 13px; color: var(--ink-soft); margin: 0; }
-
+.step-head p { font-size: 13px; color: rgba(var(--v-theme-on-surface), 0.6); margin: 0; }
 .step-body { padding-left: 40px; }
-.empty-hint { font-size: 13.5px; color: var(--ink-soft); padding: 8px 0 4px; }
 
-/* Buttons */
-.ghost-btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  background: none; border: 1px solid var(--ink); border-radius: 999px;
-  padding: 8px 18px; font-size: 13px; font-weight: 500; color: var(--ink);
-  cursor: pointer; transition: background .15s ease, color .15s ease;
-}
-.ghost-btn:hover:not(:disabled) { background: var(--ink); color: #fff; }
-.ghost-btn:disabled { opacity: .35; cursor: not-allowed; }
-
-.issue-btn {
-  display: inline-flex; align-items: center; justify-content: center;
-  background: var(--accent); color: #fff; border: none; border-radius: 8px;
-  padding: 13px 26px; font-size: 14px; font-weight: 600; letter-spacing: .01em;
-  cursor: pointer; transition: filter .15s ease;
-}
-.issue-btn:hover:not(:disabled) { filter: brightness(0.93); }
-.issue-btn:disabled { opacity: .5; cursor: not-allowed; }
-.issue-note { font-size: 13px; color: var(--ink-soft); margin: 0 0 16px; }
-
-.icon-btn {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 30px; height: 30px; border-radius: 6px; border: 1px solid transparent;
-  background: none; color: var(--ink-soft); cursor: pointer;
-}
-.icon-btn:hover { background: var(--paper); color: var(--ink); }
-.icon-btn.add { border-color: var(--ink); color: var(--ink); align-self: flex-end; margin-bottom: 8px; }
-.icon-btn.add:hover:not(:disabled) { background: var(--ink); color: #fff; }
-.icon-btn.add:disabled { opacity: .3; cursor: not-allowed; }
-
-/* Lines table */
-.lines-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 13.5px; }
-.lines-table th {
-  text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .06em;
-  color: var(--ink-faint); font-weight: 500; padding-bottom: 8px; border-bottom: 1px solid var(--line);
-}
-.lines-table td { padding: 10px 0; border-bottom: 1px solid var(--line); vertical-align: middle; }
-.lines-table th.num, .lines-table td.num { text-align: right; }
-.lines-table .text-soft { color: var(--ink-soft); }
-.lines-table .col-action { width: 32px; }
-
-.add-line-row { display: flex; gap: 12px; align-items: flex-end; }
-.add-line-row .col-product { flex: 1.4; }
-.add-line-row .col-description { flex: 1.6; }
-.add-line-row .col-qty { flex: 0.6; }
-.add-line-row .col-price { flex: 0.8; }
-
-.emission-selects { display: flex; gap: 12px; margin-bottom: 16px; }
-.emission-selects > * { flex: 1; }
-
-.setup-hint {
-  display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px;
-  background: #fff8e6; border: 1px solid #f0ddaa; color: #7a5c00;
-  border-radius: 8px; padding: 12px 14px; font-size: 13.5px; margin-bottom: 16px;
-}
-.setup-hint.info { background: #eaf3fb; border-color: #bcdaf0; color: #1a5a8a; }
-.setup-hint .setup-link {
-  color: var(--accent); font-weight: 600; text-decoration: none; margin-left: auto;
-  white-space: nowrap; background: none; border: none; padding: 0; font-size: inherit;
-  font-family: inherit; cursor: pointer;
-}
-.setup-hint .setup-link:hover { text-decoration: underline; }
-
-/* Preview */
-.invoice-preview { position: sticky; top: 24px; }
+/* Previsualización: hoja de papel */
+.invoice-preview { position: sticky; top: 24px; align-self: start; }
 .invoice-paper {
-  background: var(--surface);
-  border: 1px solid var(--line);
+  background: rgb(var(--v-theme-surface));
+  border: 1px solid rgb(var(--v-theme-borderColor));
   border-radius: 3px;
   padding: 30px 26px 26px;
   position: relative;
-  box-shadow: 0 1px 2px rgba(28, 31, 38, 0.04), 0 16px 32px -18px rgba(28, 31, 38, 0.18);
+  box-shadow: var(--surface-shadow);
 }
+/* Borde troquelado inferior, como un recibo. */
 .invoice-paper::after {
   content: '';
-  position: absolute; left: 0; right: 0; bottom: -6px; height: 12px;
-  background-image: radial-gradient(circle, var(--paper) 3px, transparent 3.6px);
-  background-size: 16px 12px; background-position: 4px 0;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -6px;
+  height: 12px;
+  background-image: radial-gradient(circle, rgb(var(--v-theme-background)) 3px, transparent 3.6px);
+  background-size: 16px 12px;
+  background-position: 4px 0;
 }
 
 .paper-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
 .paper-issuer { font-size: 15px; font-weight: 600; }
-.paper-sub { font-size: 11.5px; color: var(--ink-soft); margin-top: 2px; }
+.paper-sub { font-size: 11.5px; color: rgba(var(--v-theme-on-surface), 0.6); margin-top: 2px; }
 .paper-folio { text-align: right; }
-.folio-label { display: block; font-size: 10px; letter-spacing: .1em; color: var(--ink-faint); }
+.folio-label {
+  display: block;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: rgba(var(--v-theme-on-surface), 0.38);
+}
 .folio-value { font-size: 12.5px; }
 
-.paper-rule { border-top: 1px dashed var(--line); margin: 16px 0; }
+.paper-rule { border-top: 1px dashed rgb(var(--v-theme-borderColor)); margin: 16px 0; }
 
-.paper-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 13.5px; margin-bottom: 8px; }
-.paper-row.small { font-size: 12.5px; color: var(--ink-soft); }
-.paper-key { color: var(--ink-soft); }
+.paper-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 13.5px;
+  margin-bottom: 8px;
+}
+.paper-row.small { font-size: 12.5px; color: rgba(var(--v-theme-on-surface), 0.6); }
+.paper-key { color: rgba(var(--v-theme-on-surface), 0.6); }
 .paper-customer { text-align: right; display: flex; flex-direction: column; }
-.paper-customer small { color: var(--ink-soft); font-size: 11px; }
-.paper-placeholder { color: var(--ink-faint); font-style: italic; font-size: 13px; }
+.paper-customer small { color: rgba(var(--v-theme-on-surface), 0.6); font-size: 11px; }
+.paper-placeholder { color: rgba(var(--v-theme-on-surface), 0.38); font-style: italic; font-size: 13px; }
 .paper-placeholder-block {
-  color: var(--ink-faint); font-size: 12.5px; font-style: italic;
-  padding: 18px 0; text-align: center;
+  color: rgba(var(--v-theme-on-surface), 0.38);
+  font-size: 12.5px;
+  font-style: italic;
+  padding: 18px 0;
+  text-align: center;
 }
 
 .paper-lines { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
 .paper-line { display: flex; justify-content: space-between; font-size: 13px; }
 .paper-line-desc { display: flex; gap: 6px; }
-.paper-line-desc .qty { color: var(--ink-faint); font-size: 11.5px; }
+.paper-line-desc .qty { color: rgba(var(--v-theme-on-surface), 0.38); font-size: 11.5px; }
 
 .paper-totals { margin-top: 4px; }
-
 .paper-total-block { display: flex; flex-direction: column; align-items: flex-end; margin-top: 18px; }
-.total-caption { font-size: 10.5px; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-faint); margin-bottom: 8px; }
+.total-caption {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(var(--v-theme-on-surface), 0.38);
+  margin-bottom: 8px;
+}
+/* Sello del total: gris hasta que hay líneas, entonces pasa a "success". */
 .total-stamp {
   position: relative;
-  border: 2px solid var(--ink-faint);
+  border: 2px solid rgba(var(--v-theme-on-surface), 0.38);
   border-radius: 8px;
   padding: 8px 20px;
-  font-size: 18px; font-weight: 600;
-  color: var(--ink-faint);
+  font-size: 18px;
+  font-weight: 600;
+  color: rgba(var(--v-theme-on-surface), 0.38);
   transform: rotate(-3deg);
-  transition: color .25s ease, border-color .25s ease;
+  transition: color 0.25s ease, border-color 0.25s ease;
 }
 .total-stamp::before {
-  content: ''; position: absolute; inset: 4px; border: 1px solid currentColor;
-  border-radius: 5px; opacity: .4;
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px solid currentColor;
+  border-radius: 5px;
+  opacity: 0.4;
 }
-.total-stamp.active { color: var(--stamp); border-color: var(--stamp); background: var(--stamp-soft); }
+.total-stamp.active {
+  color: rgb(var(--v-theme-success));
+  border-color: rgb(var(--v-theme-success));
+  background: rgb(var(--v-theme-lightsuccess));
+}
 </style>

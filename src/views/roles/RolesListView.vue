@@ -24,7 +24,6 @@ onMounted(() => {
         <v-btn
           v-if="canManage"
           color="primary"
-          variant="tonal"
           prepend-icon="mdi-plus"
           @click="router.push({ name: 'roles-create' })"
         >
@@ -54,7 +53,7 @@ onMounted(() => {
             <v-card-item>
               <v-card-title class="d-flex align-center">
                 {{ r.name }}
-                <v-chip v-if="r.isSystem" size="x-small" color="secondary" class="ml-2">
+                <v-chip v-if="r.isSystem" size="x-small" color="lightsecondary" variant="flat" class="ml-2">
                   {{ $t('roles.system') }}
                 </v-chip>
               </v-card-title>

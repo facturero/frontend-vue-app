@@ -7,7 +7,7 @@ test.describe('Roles — flujo completo', () => {
   test('crear un rol nuevo y redirige a la edición', async ({ page }) => {
     await page.goto('/roles');
 
-    await expect(page.getByText('Roles')).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Roles' })).toBeVisible();
 
     await page.getByRole('button', { name: 'Nuevo rol' }).click();
     await expect(page).toHaveURL('/roles/new');
@@ -25,7 +25,8 @@ test.describe('Roles — flujo completo', () => {
 
     // Redirige a la vista de edición
     await expect(page).toHaveURL(/\/roles\/[\w-]+\/edit/);
-    await expect(page.getByText(ROL_NAME)).toBeVisible();
+    // El nombre aparece en el encabezado y en el resumen; basta con que uno sea visible
+    await expect(page.getByText(ROL_NAME).first()).toBeVisible();
   });
 
   test('rol de sistema se muestra como no editable en la lista', async ({ page }) => {
@@ -54,6 +55,8 @@ test.describe('Roles — flujo completo', () => {
     // Toggle del primer permiso
     const checkboxes = page.locator('.permission-selector input[type="checkbox"]');
     const firstCheckbox = checkboxes.first();
+    // Alterna el estado: si ya está marcado, lo desmarcamos para que el guardado sea significativo
+    if (await firstCheckbox.isChecked()) await firstCheckbox.uncheck();
     await firstCheckbox.check();
 
     await page.getByRole('button', { name: 'Guardar cambios' }).click();

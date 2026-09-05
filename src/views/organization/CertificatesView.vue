@@ -9,6 +9,11 @@ const { t, locale } = useI18n();
 const auth = useAuthStore();
 const store = useFiscalStore();
 
+// `embedded`: la vista vive dentro de Ajustes (arquetipo F) como pestaña, sin
+// container ni PageHeader propios. La acción de subir certificado pasa a un
+// botón de la pestaña, no del PageHeader.
+const props = defineProps<{ embedded?: boolean }>();
+
 const canManage = computed(() => auth.can('fiscal:manage'));
 
 const showUploadDialog = ref(false);
@@ -59,8 +64,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <v-container>
-    <PageHeader :title="$t('certificates.title')" :subtitle="$t('certificates.intro')">
+  <!-- El wrapper cambia según el modo: en Ajustes (embedded) no hay container propio. -->
+  <component :is="props.embedded ? 'div' : 'v-container'">
+    <PageHeader v-if="!props.embedded" :title="$t('certificates.title')" :subtitle="$t('certificates.intro')">
       <template #actions>
         <v-btn v-if="canManage" color="primary" prepend-icon="mdi-upload" @click="showUploadDialog = true">
           {{ $t('invoices.uploadCertificate') }}
@@ -74,18 +80,26 @@ onMounted(() => {
     </v-alert>
 
     <v-card>
+      <v-card-title v-if="props.embedded" class="d-flex align-center justify-space-between">
+        <span class="text-body-1 font-weight-medium">{{ $t('certificates.title') }}</span>
+        <v-btn v-if="canManage" size="small" variant="tonal" color="primary" prepend-icon="mdi-upload"
+          @click="showUploadDialog = true">
+          {{ $t('invoices.uploadCertificate') }}
+        </v-btn>
+      </v-card-title>
       <v-list density="compact">
         <v-list-item v-for="cert in store.certificates" :key="cert.id">
           <v-list-item-title class="d-flex align-center ga-2">
             {{ cert.alias }}
             <v-chip
               size="x-small"
-              :color="cert.status === 'active' ? (isExpired(cert.valid_until) ? 'error' : 'success') : 'grey'"
+              variant="flat"
+              :color="cert.status === 'active' ? (isExpired(cert.valid_until) ? 'lighterror' : 'lightsuccess') : 'lightsecondary'"
             >
               {{ cert.status === 'revoked' ? $t('certificates.statusRevoked') : isExpired(cert.valid_until) ?
                 $t('certificates.statusExpired') : $t('common.active') }}
             </v-chip>
-            <v-chip v-if="cert.status === 'active' && isExpiringSoon(cert.valid_until)" size="x-small" color="warning">
+            <v-chip v-if="cert.status === 'active' && isExpiringSoon(cert.valid_until)" size="x-small" variant="flat" color="lightwarning">
               {{ $t('certificates.expiringSoon') }}
             </v-chip>
           </v-list-item-title>
@@ -144,5 +158,5 @@ onMounted(() => {
         </v-card-actions>
       </v-card>
     </v-dialog>
-  </v-container>
+  </component>
 </template>

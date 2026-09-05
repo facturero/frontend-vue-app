@@ -5,7 +5,7 @@ import { usePluginsStore } from '@/stores/plugins';
 import { useAuthStore } from '@/stores/auth';
 import type { OrganizationPlugin } from '@/types/plugins';
 
-const { t, locale } = useI18n();
+const { locale } = useI18n();
 const store = usePluginsStore();
 const auth = useAuthStore();
 
@@ -14,15 +14,6 @@ const canActivate = computed(() => auth.can('plugins:manage'));
 const deactivateDialog = ref<OrganizationPlugin | null>(null);
 const showDeactivateDialog = computed(() => deactivateDialog.value !== null);
 const deactivating = ref(false);
-
-const headers = computed(() => [
-  { title: t('plugins.headerPlugin'), key: 'pluginName', sortable: true, align: 'start' as const },
-  { title: t('plugins.headerCode'), key: 'pluginCode', sortable: true, align: 'start' as const },
-  { title: t('plugins.headerSource'), key: 'activationSource', sortable: false, align: 'start' as const },
-  { title: t('common.status'), key: 'status', sortable: false, align: 'start' as const },
-  { title: t('plugins.headerActivatedAt'), key: 'activatedAt', sortable: true, align: 'start' as const },
-  { title: t('common.actions'), key: 'actions', sortable: false, align: 'end' as const },
-]);
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString(locale.value, { dateStyle: 'medium' });
@@ -55,52 +46,54 @@ async function confirmDeactivate(): Promise<void> {
       </template>
     </v-alert>
 
-    <v-card>
-      <v-data-table
-        :headers="headers"
-        :items="store.myPlugins"
-        :loading="store.loading"
-        item-value="pluginId"
-        :items-per-page="10"
-      >
-        <template #item.activationSource="{ item }">
-          <v-chip
-            size="x-small"
-            :color="item.activationSource === 'direct' ? 'primary' : 'grey'"
+    <v-row>
+      <v-col v-for="p in store.myPlugins" :key="p.pluginId" cols="12" sm="6" lg="4">
+        <v-card class="d-flex flex-column fill-height">
+          <v-card-title class="d-flex align-center justify-space-between">
+            <span class="text-subtitle-1 font-weight-medium">{{ p.pluginName }}</span>
+            <v-chip
+              size="x-small"
+              :color="p.status === 'active' ? 'lightsuccess' : 'grey'"
+              :variant="p.status === 'active' ? 'flat' : 'tonal'"
+            >
+              {{ p.status === 'active' ? $t('common.active') : $t('plugins.status.desactivado') }}
+            </v-chip>
+          </v-card-title>
+          <v-card-subtitle class="text-caption">{{ p.pluginCode }}</v-card-subtitle>
+          <v-card-text class="text-caption text-medium-emphasis flex-grow-1">
+            <div>
+              {{ $t('plugins.headerActivatedAt') }}: {{ formatDate(p.activatedAt) }}
+            </div>
+            <v-chip
+              size="x-small"
+              class="mt-2"
+              :color="p.activationSource === 'direct' ? 'lightprimary' : 'lightinfo'"
+              variant="flat"
+            >
+              {{ p.activationSource === 'direct' ? $t('plugins.sourceDirect') : $t('plugins.sourceDependency') }}
+            </v-chip>
+          </v-card-text>
+          <v-card-actions
+            v-if="canActivate && p.activationSource === 'direct' && p.status === 'active'"
+            class="pt-0"
           >
-            {{ item.activationSource === 'direct' ? $t('plugins.sourceDirect') : $t('plugins.sourceDependency') }}
-          </v-chip>
-        </template>
-
-        <template #item.status="{ item }">
-          <v-chip
-            size="small"
-            :color="item.status === 'active' ? 'success' : 'grey'"
-          >
-            {{ item.status === 'active' ? $t('common.active') : $t('plugins.status.desactivado') }}
-          </v-chip>
-        </template>
-
-        <template #item.activatedAt="{ item }">
-          {{ formatDate(item.activatedAt) }}
-        </template>
-
-        <template #item.actions="{ item }">
-          <div class="d-flex justify-end ga-1">
+            <v-spacer />
             <v-btn
-              v-if="canActivate && item.activationSource === 'direct' && item.status === 'active'"
               icon="mdi-puzzle-remove"
               color="warning"
               variant="text"
               size="small"
-              @click="deactivateDialog = item"
+              :title="$t('plugins.deactivate')"
+              @click="deactivateDialog = p"
             />
-          </div>
-        </template>
+          </v-card-actions>
+        </v-card>
+      </v-col>
+    </v-row>
 
-        <template #no-data>{{ $t('plugins.mineEmpty') }}</template>
-      </v-data-table>
-    </v-card>
+    <div v-if="!store.loading && !store.myPlugins.length" class="text-center text-medium-emphasis pa-6">
+      {{ $t('plugins.mineEmpty') }}
+    </div>
 
     <v-dialog v-model="showDeactivateDialog" max-width="440">
       <v-card v-if="deactivateDialog">

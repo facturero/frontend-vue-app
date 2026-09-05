@@ -26,7 +26,7 @@ existe una utilidad.
 `src/plugins/vuetify.ts` ya fija esto para toda la app:
 
 ```
-VCard          elevation 2, rounded lg
+VCard          elevation 0 + clase card-surface (radio 7px, sombra suave)
 VBtn           variant flat, rounded lg, sin MAYÚSCULAS (text-none)
 campos*        variant outlined, density compact, hide-details auto
 VAlert         variant tonal, density compact, rounded lg
@@ -37,6 +37,50 @@ VDataTable     hover
 ```
 
 \* `v-text-field`, `v-textarea`, `v-select`, `v-autocomplete`, `v-combobox`, `v-file-input`
+
+### Colores tonales
+
+Además de los colores base hay una familia `light*` para fondos suaves:
+`lightprimary`, `lightsecondary`, `lightsuccess`, `lightinfo`, `lightwarning`,
+`lighterror`.
+
+Úsalos en paneles, chips de estado y avisos — nunca escribas un hex a mano:
+
+```vue
+<v-sheet color="lightsuccess" class="pa-4">…</v-sheet>
+<v-chip color="lightwarning">Pendiente</v-chip>
+```
+
+**Los chips de estado sobre `light*` llevan `variant="flat"`.** El default de
+`v-chip` es `tonal`, que pinta el fondo con el propio color al 12%: sobre un
+token pálido el texto se vuelve ilegible. Con `flat` el fondo es el tono y el
+texto sale del token emparejado `on-light*` (el color base). Ejemplo real:
+
+```vue
+<v-chip color="lightwarning" variant="flat">Pendiente</v-chip>
+```
+
+Es la excepción a "no sobreescribir": cambiar el default a `flat` apagaría
+todos los chips con colores base de golpe, así que `flat` se decide en cada
+chip de estado, nunca en la vista.
+
+Funcionan en claro y en oscuro porque son tokens del tema, no colores fijos.
+
+**Tipos y estados en las tablas de listado usan esta misma familia.** Empleados,
+clientes, productos, facturas y roles pintan sus chips con `light*` + `flat`
+según la semántica:
+
+- estado positivo → `lightsuccess` (Activo, Emitida, Vendedor en RoleBadge)
+- estado intermedio/parado → `lightwarning` (Inactivo, Borrador)
+- estado negativo/final → `lighterror` (Anulada)
+- "tipo"/etiqueta neutra → `lightinfo` (persona, bien/servicio); empresa → `lightprimary`
+- etiqueta de sistema → `lightsecondary` (Sistema, establecimientos)
+
+Ejemplo real en `CustomersListView.vue`:
+
+```vue
+<v-chip size="x-small" variant="flat" color="lightsuccess">Activo</v-chip>
+```
 
 **Antes de escribir una prop de estilo, mírala en esa lista.** Si el valor
 coincide, no la escribas — repetirla es exactamente cómo empiezan las
@@ -57,7 +101,7 @@ Toda vista de nivel superior tiene la misma forma:
   <v-container>
     <PageHeader :title="$t('modulo.title')" :subtitle="$t('modulo.subtitle')">
       <template #actions>
-        <v-btn color="primary" variant="tonal" prepend-icon="mdi-plus" @click="crear">
+        <v-btn color="primary" prepend-icon="mdi-plus" @click="crear">
           {{ $t('modulo.new') }}
         </v-btn>
       </template>
@@ -82,7 +126,32 @@ Reglas fijas:
   Así el nivel de encabezado y el margen inferior son idénticos en todas partes.
 - Los errores van en un `v-alert` justo debajo del encabezado, no dentro de la
   tarjeta.
-- La acción principal va en `#actions`, alineada a la derecha.
+- La acción principal va en `#actions`, alineada a la derecha, **sólida**
+  (sin `variant`, que ya es `flat` por defecto). No uses `tonal` ahí: el panel
+  del `PageHeader` ya es tonal y un botón tonal encima queda lavado.
+- El título del `PageHeader` lleva `text-high-emphasis`. Sobre `lightprimary`
+  el texto heredaría `on-lightprimary` — el propio azul — y perdería contraste.
+
+### Ajustes con pestañas (arquetipo F)
+
+La configuración vive en **una sola página de nivel superior**: `/settings`
+(`AccountSettingsView.vue`). El menú lateral tiene un único ítem «Ajustes», no
+los 4 sueltos.
+
+- `AccountSettingsView` pone el `PageHeader` y una tarjeta con `v-tabs` (icono
+  + texto, `grow`); cada pestaña monta una de las vistas originales.
+- Las vistas que actúan como pestaña aceptan la prop `embedded`:
+  omiten su `<v-container>` y su `PageHeader` (los pone la contenedora) y
+  usan `<component :is="embedded ? 'div' : 'v-container'">` para el wrapper.
+- El cambio de pestaña remonta la vista (`:key`), así cada pestaña vuelve a
+  montarse limpia: sin datos stale y deteniendo el polling de emparejamiento al
+  salir.
+- Deep-links: `/settings?tab=profile|organization|establishments|certificates`.
+  Las rutas sueltas `/profile` y `/organization/settings` se conservan para el
+  onboarding (`needsOrgSetup` las usa) y muestran la vista sola.
+- En modo `embedded`, los accesos redundantes se repliegan: la tarjeta de
+  acceso rápido a Establecimientos/Certificado desaparece (ahora son pestañas
+  hermanas) y el botón «Subir certificado» pasa al título de su tarjeta.
 
 ---
 
@@ -106,7 +175,7 @@ un solo valor en el padre en vez de N valores que se pueden desincronizar.
 
 | Rol | Clase |
 |---|---|
-| Título de página | `text-h5 font-weight-medium` (lo pone `PageHeader`) |
+| Título de página | `text-h5 font-weight-bold` (lo pone `PageHeader`) |
 | Título de tarjeta / sección | `text-h6` |
 | Texto normal | por defecto |
 | Texto secundario | `text-body-2 text-medium-emphasis` |

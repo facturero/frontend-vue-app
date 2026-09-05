@@ -7,6 +7,11 @@ import PageHeader from '@/components/ui/PageHeader.vue';
 const auth = useAuthStore();
 const store = useOrganizationStore();
 
+// `embedded`: la vista vive dentro de Ajustes (arquetipo F) como pestaña, sin
+// container ni PageHeader propios. Se omiten también las tarjetas de acceso
+// rápido a Establecimientos/Certificado: en Ajustes son pestañas hermanas.
+const props = defineProps<{ embedded?: boolean }>();
+
 const legalName = ref('');
 const tradeName = ref('');
 const taxId = ref('');
@@ -56,8 +61,9 @@ async function submit(): Promise<void> {
 </script>
 
 <template>
-  <v-container>
-    <PageHeader :title="$t('organization.settingsTitle')" />
+  <!-- El wrapper cambia según el modo: en Ajustes (embedded) no hay container propio. -->
+  <component :is="props.embedded ? 'div' : 'v-container'">
+    <PageHeader v-if="!props.embedded" :title="$t('organization.settingsTitle')" />
 
     <v-row>
       <v-col cols="12" md="8" lg="6">
@@ -143,7 +149,7 @@ async function submit(): Promise<void> {
       </v-col>
     </v-row>
 
-    <v-row>
+    <v-row v-if="!props.embedded">
       <v-col cols="12" md="8" lg="6">
         <v-card class="mt-2">
           <v-card-text class="d-flex align-center justify-space-between">
@@ -161,7 +167,7 @@ async function submit(): Promise<void> {
       </v-col>
     </v-row>
 
-    <v-row>
+    <v-row v-if="!props.embedded">
       <v-col cols="12" md="8" lg="6">
         <v-card class="mt-2">
           <v-card-text class="d-flex align-center justify-space-between">
@@ -178,5 +184,5 @@ async function submit(): Promise<void> {
         </v-card>
       </v-col>
     </v-row>
-  </v-container>
+  </component>
 </template>

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
-import { useDisplay } from 'vuetify';
 import { useUiStore } from '@/stores/ui';
 import { useAuthStore } from '@/stores/auth';
 import { useThemeToggle } from '@/composable/useThemeToggle';
@@ -15,7 +14,6 @@ const ui = useUiStore();
 const auth = useAuthStore();
 const router = useRouter();
 const { toggleTheme, isDark } = useThemeToggle();
-const { mobile } = useDisplay();
 
 const avatarUrl = ref<string | null>(null);
 const menuOpen = ref(false);
@@ -73,7 +71,7 @@ function logout(): void {
 </script>
 
 <template>
-  <v-app-bar app :elevation="mobile ? 0 : 2" density="comfortable">
+  <v-app-bar app density="comfortable">
     <v-btn icon @click="ui.toggleDrawer()" class="d-lg-none">
       <v-icon icon="mdi-menu" />
     </v-btn>

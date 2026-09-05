@@ -27,8 +27,9 @@ const items = computed(() =>
 <template>
   <v-navigation-drawer v-model="ui.drawer" :rail="!mobile && ui.rail" :permanent="!mobile" :temporary="mobile"
     expand-on-hover>
-    <div class="drawer-nav-scroll">
-      <v-list nav density="compact" color="primary">
+    <div class="flex-grow-1 overflow-y-auto overflow-x-hidden">
+      <!-- Sin `color`: el ítem activo se pinta como píldora sólida (ver <style>). -->
+      <v-list nav density="compact">
 
         <v-list-item prepend-icon="mdi-alpha-c-circle" :title="$t('nav.brand')" :subtitle="$t('nav.brandSubtitle')"
           class="drawer-brand" />
@@ -55,7 +56,7 @@ const items = computed(() =>
     <template #append>
       <v-divider />
       <v-list-item prepend-icon="mdi-chevron-left" :title="$t('nav.collapse')" @click="ui.toggleRail()"
-        class="drawer-collapse-btn" />
+        class="flex-shrink-0" />
     </template>
   </v-navigation-drawer>
 </template>
@@ -65,14 +66,18 @@ const items = computed(() =>
   min-height: 64px;
 }
 
-.drawer-nav-scroll {
-  flex: 1 1 auto;
-  overflow-y: auto;
-  overflow-x: hidden;
+/*
+ * Ítem activo como píldora sólida en vez del resaltado tenue de Vuetify.
+ * `!important` es necesario: Vuetify aplica el suyo con mayor especificidad
+ * mediante la capa de overlay del propio v-list-item.
+ */
+.v-list-item--active {
+  background-color: rgb(var(--v-theme-primary)) !important;
+  color: rgb(var(--v-theme-on-primary)) !important;
 }
 
-.drawer-collapse-btn {
-  flex-shrink: 0;
+.v-list-item--active :deep(.v-list-item__overlay) {
+  opacity: 0;
 }
 
 .lock-icon {
