@@ -77,12 +77,21 @@ export const useCustomerStore = defineStore('customers', () => {
 
   async function disable(id: string): Promise<void> {
     error.value = null;
-    await customerApi.disable(id);
-    list.value = list.value.map((c) =>
-      c.id === id ? { ...c, status: 'inactive' as const } : c,
-    );
-    if (current.value && current.value.id === id) {
-      current.value = { ...current.value, status: 'inactive' };
+    try {
+      await customerApi.disable(id);
+      list.value = list.value.map((c) =>
+        c.id === id ? { ...c, status: 'inactive' as const } : c,
+      );
+      if (current.value && current.value.id === id) {
+        current.value = { ...current.value, status: 'inactive' };
+      }
+    } catch (e) {
+      // Hallazgo #16 (TEST-PLAN.md): sin este catch, un 403 (ej. al deshabilitar
+      // CONSUMIDOR FINAL, CannotDisableSystemCustomerError) nunca llegaba a
+      // `error` y la UI no mostraba nada — fallo silencioso. Mismo patrón que
+      // el resto de acciones del store.
+      error.value = extractError(e);
+      throw e;
     }
   }
 

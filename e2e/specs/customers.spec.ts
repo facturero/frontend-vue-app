@@ -1,13 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { fieldByLabel } from '../support/fields';
 
 const UNIQUE = Date.now();
-
-// Vuetify 3.7 duplica los <label> de un campo (label + floating label), así que
-// getByLabel() resuelve 2 elementos. Para los v-select hay que pulsar el `.v-field`
-// que contiene el label; para los v-text-field basta con `.first()`.
-function fieldByLabel(page: import('@playwright/test').Page, label: string) {
-  return page.locator('.v-field').filter({ has: page.getByText(label, { exact: true }) });
-}
 
 test.describe('Clientes — listado', () => {
 
@@ -274,9 +268,116 @@ test.describe('Clientes — imagen no persiste entre creaciones', () => {
 
     // La sección de avatar no debe tener imagen previa
     // El componente ImageUploader no debería mostrar imagen existente
-    await expect(page.getByText('Avatar')).toBeVisible();
+    // Timeout generoso: recarga completa de página con bundle grande
+    // (~1MB JS sin code-splitting) — bajo carga (suite completa corriendo)
+    // puede tardar más que el default de 5s sin que sea un bug real.
+    await expect(page.getByText('Avatar')).toBeVisible({ timeout: 15000 });
     // No debería haber un v-img con src de imagen
     const avatarImg = page.locator('.v-img img[src*="files"]');
     await expect(avatarImg).toHaveCount(0);
+  });
+});
+
+test.describe('Clientes — protección de CONSUMIDOR FINAL', () => {
+
+  async function goToConsumidorFinal(page: import('@playwright/test').Page): Promise<void> {
+    await page.goto('/customers');
+    const searchInput = page.getByLabel('Buscar por nombre, identificación o email').first();
+    await searchInput.fill('CONSUMIDOR FINAL');
+    await searchInput.press('Enter');
+    const row = page.getByRole('row').filter({ hasText: 'CONSUMIDOR FINAL' }).first();
+    await expect(row).toBeVisible({ timeout: 5000 });
+    await row.getByRole('button').first().click();
+    await expect(page).toHaveURL(/\/customers\/[\w-]+$/);
+  }
+
+  test('desactivar CONSUMIDOR FINAL falla mostrando el error al usuario (hallazgo #16 corregido)', async ({ page }) => {
+    // TEST-PLAN.md §3: un cliente is_system:true no se puede deshabilitar
+    // (CannotDisableSystemCustomerError, 403). El botón "Desactivar" NO está
+    // oculto para clientes de sistema en la UI — el bloqueo real ocurre en el
+    // backend.
+    //
+    // Hallazgo #16 (TEST-PLAN.md): `disable()` en stores/customers.ts era la
+    // ÚNICA acción sin try/catch — el 403 nunca llegaba a `store.error` y la
+    // vista no mostraba nada (fallo silencioso). CORREGIDO el 2026-09-06:
+    // ahora captura como sus hermanas (`error.value = extractError(e)`), y
+    // CustomerDetailView.vue ya renderiza ese error en su `<v-alert>`. Este
+    // assert se actualizó A PROPÓSITO porque el bug se corrigió — antes
+    // afirmaba el fallo silencioso (getByRole('alert') contaba 0).
+    await goToConsumidorFinal(page);
+
+    page.on('dialog', (dialog) => dialog.accept());
+    await page.getByRole('button', { name: 'Desactivar' }).click();
+    await expect(page.getByRole('alert')).toBeVisible();
+    // ...y el cliente tampoco quedó desactivado (el backend sí lo bloqueó).
+    await expect(page.getByText('Activo')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Desactivar' })).toBeVisible();
+  });
+
+  test('editar la identificación de CONSUMIDOR FINAL falla (CannotEditSystemCustomerError)', async ({ page }) => {
+    // TEST-PLAN.md §3: update-customer.ts solo bloquea cambiar
+    // identificationTypeId/identification en un cliente de sistema — el resto
+    // de campos si se pueden editar.
+    //
+    // CORRECCIÓN (el supuesto original de este test era incorrecto):
+    // CustomerFormView.vue SÍ deshabilita el campo "Número de identificación"
+    // en modo edición — pero no por ser un cliente de sistema, sino siempre
+    // que el tipo de identificación seleccionado sea "Consumidor final"
+    // (:disabled="isConsumidorFinal", CustomerFormView.vue:201). Por eso
+    // `idInput.fill()` colgaba hasta el timeout: el input nunca se habilita.
+    //
+    // El camino real por UI para disparar el guard del backend es cambiar el
+    // SELECT "Tipo de identificación" a otro tipo (p.ej. Cédula) — el watcher
+    // (CustomerFormView.vue:60-67) limpia y habilita "Número de
+    // identificación" al dejar de ser Consumidor final, permitiendo escribir
+    // un ID nuevo y disparando el 403 al guardar.
+    await goToConsumidorFinal(page);
+    await page.getByRole('button', { name: 'Editar' }).click();
+    await expect(page).toHaveURL(/\/customers\/[\w-]+\/edit/);
+
+    await fieldByLabel(page, 'Tipo de identificación').click();
+    await page.getByRole('option', { name: /cédula/i }).click();
+
+    const idInput = fieldByLabel(page, 'Número de identificación').locator('input');
+    await idInput.fill('9999999999998');
+    await page.getByRole('button', { name: /guardar/i }).click();
+
+    await expect(page.getByText('No se puede modificar el cliente del sistema.')).toBeVisible({ timeout: 5000 });
+  });
+});
+
+test.describe('Clientes — direcciones', () => {
+
+  test('marcar dos direcciones como principales no corrige la anterior', async ({ page }) => {
+    // TEST-PLAN.md §3: no hay regla de "una sola dirección primaria" en el
+    // backend — add-address.ts no despriorriza otras direcciones del cliente.
+    await page.goto('/customers/new');
+    await page.getByLabel('Empresa').first().click();
+    await fieldByLabel(page, 'Razón social').locator('input').fill(`Empresa Direcciones E2E ${UNIQUE}`);
+    await fieldByLabel(page, 'Tipo de identificación').click();
+    await page.getByRole('option', { name: /ruc/i }).click();
+    await fieldByLabel(page, 'Número de identificación').locator('input').fill('179' + String(UNIQUE).slice(-7) + '002');
+    await page.getByRole('button', { name: 'Crear cliente' }).click();
+    await expect(page).toHaveURL(/\/customers\/[\w-]+$/);
+
+    async function addPrimaryAddress(line1: string): Promise<void> {
+      // "Agregar" también existe en la tarjeta de Contactos — el título y el
+      // botón viven en el mismo v-card-title, así que basta acotar ahí.
+      const addressesTitle = page.locator('.v-card-title', { hasText: 'Direcciones' });
+      await addressesTitle.getByRole('button', { name: 'Agregar' }).click();
+      await expect(page.getByText('Nueva dirección')).toBeVisible();
+      await fieldByLabel(page, 'Dirección línea 1').locator('input').fill(line1);
+      const primarySwitch = page.getByRole('checkbox', { name: 'Principal' });
+      if (!(await primarySwitch.isChecked())) await primarySwitch.click();
+      await page.getByRole('button', { name: 'Guardar' }).click();
+      await expect(page.getByText('Nueva dirección')).not.toBeVisible({ timeout: 5000 });
+    }
+
+    await addPrimaryAddress(`Dirección A ${UNIQUE}`);
+    await addPrimaryAddress(`Dirección B ${UNIQUE}`);
+
+    // Comportamiento HOY (gap de dominio): ambas quedan marcadas "Principal".
+    const primaryChips = page.locator('.v-chip', { hasText: 'Principal' });
+    await expect(primaryChips).toHaveCount(2);
   });
 });
