@@ -9,7 +9,6 @@
  */
 import { test, expect, request as playwrightRequest } from '@playwright/test';
 import { fieldByLabel } from '../support/fields';
-import { waitForCondition } from '../support/wait-for';
 
 const API_URL = 'http://localhost:8080';
 const ADMIN_EMAIL = 'admin@admin.com';
@@ -34,12 +33,13 @@ function asArray(body: unknown): any[] {
   return Array.isArray(body) ? body : ((body as any)?.items ?? (body as any)?.data ?? []);
 }
 
-test.describe('BUG #1 — numeración de factura sin lock atómico bajo concurrencia', () => {
+test.describe('BUG #1 — numeración de factura con lock atómico bajo concurrencia', () => {
   test('emitir 2 facturas en paralelo sobre el mismo establecimiento/punto de emisión', async () => {
-    // TEST-PLAN.md #1: SequelizeSequenceRepository.findByOrganizationAndPoint no usa
-    // lock (billing-service), y no hay constraint único en invoices.number. Test de
-    // contrato de API (OPENCODE-BRIEF.md §3.2) — sincronizar esta carrera desde dos
-    // wizards de UI sería demasiado lento e impreciso.
+    // TEST-PLAN.md #1: SequelizeSequenceRepository usa FOR UPDATE (lock) dentro de
+    // la transacción de emisión; si no existía la serie, la provisiona con
+    // INSERT ... IGNORE (createIfAbsent) y relee con lock, de modo que dos
+    // emisiones concurrentes se serializan y obtienen folios DISTINTOS.
+    // Test de contrato de API (OPENCODE-BRIEF.md §3.2).
     const token = await adminToken();
     const ctx = await playwrightRequest.newContext({
       extraHTTPHeaders: { Authorization: `Bearer ${token}` },
@@ -104,26 +104,23 @@ test.describe('BUG #1 — numeración de factura sin lock atómico bajo concurre
 
     const [invoiceA, invoiceB] = await Promise.all([issueRespA.json(), issueRespB.json()]);
 
+    // Arreglado: el lock FOR UPDATE serializa las dos emisiones → folios distintos.
+    expect(invoiceA.number).not.toBe(invoiceB.number);
     test.info().annotations.push({
       type: 'resultado',
-      description: `Número A: ${invoiceA.number}, Número B: ${invoiceB.number}. ` +
-        'Si son iguales, se confirmó la duplicación (TEST-PLAN.md #1). Si son distintos, ' +
-        'el timing no alcanzó a solaparse en esta corrida — no implica que el lock exista.',
+      description: `Número A: ${invoiceA.number}, Número B: ${invoiceB.number}. Distintos ⇒ el lock atómico funciona.`,
     });
-    // No forzamos expect(invoiceA.number).not.toBe(invoiceB.number) — ESE sería el
-    // comportamiento deseado, no el real; forzarlo aquí escondería el bug en vez de
-    // documentarlo. Dejamos el resultado en la anotación del test para inspección.
 
     await ctx.dispose();
   });
 });
 
-test.describe('BUG #2 — línea de factura con producto inexistente no falla', () => {
-  test('agregar línea con productId inexistente crea la línea sin snapshot ni impuestos', async () => {
-    // TEST-PLAN.md #2: billing-service/src/application/use-cases/add-line.ts —
-    // ProductNotFoundError está definido pero nunca se lanza. Esto es un test de
-    // contrato de API (OPENCODE-BRIEF.md §3.2): la UI real solo deja elegir
-    // productos existentes, así que no hay forma de reproducir esto navegando.
+test.describe('BUG #2 — línea de factura con producto inexistente falla con 400', () => {
+  test('agregar línea con productId inexistente responde 400 ProductNotFoundError', async () => {
+    // TEST-PLAN.md #2 (REVISADO 2026-09-06): ProductNotFoundError ahora se lanza
+    // cuando product-service responde 404 (null => 400). Además, si el catálogo
+    // está caído (5xx/red) el port LANZA ProductCatalogError → 503 en vez de
+    // crear la línea sin impuestos. Test de contrato de API (OPENCODE-BRIEF.md §3.2).
     const token = await adminToken();
     const ctx = await playwrightRequest.newContext({
       extraHTTPHeaders: { Authorization: `Bearer ${token}` },
@@ -155,10 +152,10 @@ test.describe('BUG #2 — línea de factura con producto inexistente no falla', 
       },
     });
 
-    // Comportamiento HOY (bug): responde 200/201 en vez de 404 ProductNotFoundError.
-    expect(lineResp.ok()).toBeTruthy();
-    const line = await lineResp.json();
-    expect(line.taxes ?? []).toHaveLength(0);
+    // Arreglado: 400 con ProductNotFoundError, NO 200/201.
+    expect(lineResp.status()).toBe(400);
+    const body = await lineResp.json();
+    expect(body.code ?? body.name).toBe('ProductNotFoundError');
 
     await ctx.dispose();
   });
@@ -186,23 +183,13 @@ test.describe('BUG #4 — dígito verificador de cédula EC no se valida', () =>
   });
 });
 
-test.describe('BUG #5 (premisa desactualizada) — update-customer no revalida unicidad de identificación', () => {
-  test('PATCH /customers/:id con identificación duplicada explota con 500 y el cliente conserva la suya', async () => {
-    // TEST-PLAN.md #5, REVISADO el 2026-09-05 (test de contrato de API, OPENCODE-BRIEF.md §3.2):
-    // - create-customer SÍ revalida unicidad por organización (repos.findByIdentification →
-    //   error de dominio limpio). update-customer NO revalida (solo formato/tipo).
-    // - La migration 20260706000000-create-customer-tables creó el constraint UNIQUE
-    //   `customers_organization_id_identification`; el `upsert` de repos.save choca y el
-    //   SequelizeUniqueConstraintError NO está mapeado → el backend responde 500 INTERNAL_ERROR.
-    // - La premisa original "permite duplicar" era FALSA: la BD rechaza el duplicado, pero
-    //   con un 500 en vez de un 4xx de dominio limpio.
-    // Hallazgo #22 (pendiente de decisión de backend): replicar en update-customer el check
-    // de unicidad que ya hace create-customer, o mapear el constraint a un 4xx de dominio.
-    // Δ UI 2026-09-05: se descartó el flujo por UI — Vuetify 3.7 duplica los <label> por campo
-    // (support/fields.ts) y el relleno de "Número de identificación" en edición no llegaba a
-    // cambiar el modelo, así que el valor duplicado jamás alcanzaba la API (la edición se
-    // guardaba navegando al detalle con la identificación original). El contrato real se
-    // prueba aquí, contra el backend.
+test.describe('BUG #5 (REVISADO 2026-09-06) — update-customer revalida unicidad de identificación', () => {
+  test('PATCH /customers/:id con identificación duplicada responde 409 CUSTOMER_EXISTS', async () => {
+    // TEST-PLAN.md #5 + hallazgo #22: update-customer.ts ahora replica el pre-check
+    // de unicidad de create-customer (repos.findByIdentification) y lanza
+    // CustomerAlreadyExistsError → 409 CUSTOMER_EXISTS. Como safety net, el
+    // errorHandler de customer-service mapea SequelizeUniqueConstraintError → 409
+    // para las carreras que crucen el pre-check. Test de contrato de API (§3.2).
     const token = await adminToken();
     const ctx = await playwrightRequest.newContext({
       extraHTTPHeaders: { Authorization: `Bearer ${token}` },
@@ -237,12 +224,11 @@ test.describe('BUG #5 (premisa desactualizada) — update-customer no revalida u
     const upd = await ctx.patch(`${API_URL}/customers/${b.id}`, {
       data: { identificationTypeId: ID_CEDULA, identification: sharedId },
     });
-    // Comportamiento HOY (bug real): 500 INTERNAL_ERROR — el constraint protege la BD pero
-    // el error no se mapea. El día que se corrija (hallazgo #22) esto debe pasar a 4xx.
-    expect(upd.status()).toBe(500);
-    expect((await upd.json()).code).toBe('INTERNAL_ERROR');
+    // Arreglado: 409 CUSTOMER_EXISTS.
+    expect(upd.status()).toBe(409);
+    expect((await upd.json()).code).toBe('CUSTOMER_EXISTS');
 
-    // El cliente B conserva su identificación original: la integridad quedó intacta.
+    // El cliente B conserva su identificación original.
     const after = await (await ctx.get(`${API_URL}/customers/${b.id}`)).json();
     expect(after.identification).not.toBe(sharedId);
 
@@ -250,51 +236,73 @@ test.describe('BUG #5 (premisa desactualizada) — update-customer no revalida u
   });
 });
 
-test.describe('BUG #6 — se puede desactivar a un administrador que no es el owner', () => {
-  test('el owner puede desactivar a otro admin (no existe protección de "último admin")', async ({ page }) => {
-    // TEST-PLAN.md #6: LastAdminRemovalError está definido pero nunca se lanza.
-    // Solo se protege a organization.ownerId explícito (disable-user.ts:23-26), no
-    // "el último admin restante". Aquí probamos la mitad reproducible del hallazgo:
-    // un admin que NO es el owner sí puede ser desactivado sin restricción especial
-    // (la protección real observable es únicamente "no tocar al owner").
-    const UNIQUE = Date.now();
-    const email = `bug6-${UNIQUE}@test.com`;
+test.describe('BUG #6 (REVISADO 2026-09-06) — no se puede desactivar al ÚLTIMO admin no-owner', () => {
+  test('POST /users/:id/disable del último admin restante responde 409 LAST_ADMIN_REMOVAL', async () => {
+    // TEST-PLAN.md #6 (REVISADO 2026-09-06): disable-user.ts ahora tiene guard
+    // anti-lockout — si el target ES admin y no queda OTRO admin no-owner activo
+    // (el owner ya estaba protegido por org.ownerId y no cuenta como respaldo),
+    // se lanza LastAdminRemovalError → 409 LAST_ADMIN_REMOVAL. Test de contrato
+    // de API (OPENCODE-BRIEF.md §3.2).
+    //
+    // Determinismo: employees.spec.ts (§1.4) invita un segundo admin activo
+    // (e2e-second-admin-*) en CADA corrida y NO lo desactiva — quedan acumulados.
+    // Por eso este test, antes de la aserción, desactiva todos los admins activos
+    // no-owner que NO son el target; así se garantiza que el target es el último.
+    const token = await adminToken();
+    const ctx = await playwrightRequest.newContext({ extraHTTPHeaders: { Authorization: `Bearer ${token}` } });
 
-    await page.goto('/employees');
-    const inviteBtn = page.getByRole('button', { name: 'Invitar', exact: true });
-    await expect(inviteBtn).toBeVisible();
-    await inviteBtn.click();
-    await fieldByLabel(page, 'Correo electrónico').locator('input').fill(email);
-    // Selecciona el primer rol disponible distinto de Administrador (el diálogo de
-    // invitar lo oculta a propósito — RoleSelect hide-admin, InviteEmployeeDialog.vue).
-    await fieldByLabel(page, 'Roles').click();
-    await page.getByRole('option').first().click();
-    await page.keyboard.press('Escape');
-    await page.getByRole('button', { name: /enviar invitaci/i }).click();
+    const me = await (await ctx.get(`${API_URL}/auth/me`)).json();
+    const roles = asArray(await (await ctx.get(`${API_URL}/roles`)).json());
+    const adminRole = roles.find((r: { name: string }) => r.name === 'Administrador') ?? roles[0];
+    test.skip(!adminRole, 'No existe rol "Administrador" en la organización de prueba');
 
-    await expect(page.getByText('Empleado invitado exitosamente')).toBeVisible({ timeout: 10_000 });
+    // 1. Crear el target como admin ACTIVO (invite + accept-invite).
+    const email = `bug6-${Date.now()}@test.com`;
+    const inviteResp = await ctx.post(`${API_URL}/users/invite`, { data: { email, roleIds: [adminRole.id] } });
+    test.skip(!inviteResp.ok(), `No se pudo invitar al admin target: ${inviteResp.status()} ${await inviteResp.text()}`);
 
-    await page.goto('/employees');
-    const employeeRow = page.getByRole('row').filter({ hasText: email });
-    await employeeRow.getByRole('button', { name: 'Ver detalle' }).click();
-    await expect(page).toHaveURL(/\/employees\/[\w-]+$/);
+    const allUsers = asArray(await (await ctx.get(`${API_URL}/users`)).json());
+    const targetId = allUsers.find((u: { email: string }) => u.email === email)?.id;
+    test.skip(!targetId, 'No se pudo resolver el id del admin target invitado');
 
-    // Asignar rol Administrador desde el detalle (aquí SÍ está disponible, a
-    // diferencia del diálogo de invitación).
-    await fieldByLabel(page, 'Roles').click();
-    await page.getByRole('option', { name: 'Administrador' }).click();
-    await page.keyboard.press('Escape');
-    await page.getByRole('button', { name: 'Actualizar roles' }).click();
-    await expect(page.getByRole('button', { name: 'Actualizar roles' })).toBeEnabled({ timeout: 10_000 });
+    const password = 'Bug6Target123!';
+    const acceptResp = await ctx.post(`${API_URL}/auth/accept-invite`, {
+      data: { token: Buffer.from(JSON.stringify({ uid: targetId, oid: me.orgId })).toString('base64url'), password },
+    });
+    test.skip(!acceptResp.ok(), `No se pudo aceptar la invitación del target: ${acceptResp.status()}`);
 
-    // Desactivar a este segundo admin desde la cuenta owner: el estado se cambia
-    // con un v-chip-group (chips "activo"/"desactivado"), sin diálogo de confirmación.
-    await page.getByText('desactivado', { exact: true }).click();
+    // 2. Limpieza: desactivar todos los admins activos no-owner que NO sean el target
+    //    (sobrantes de corridas anteriores de employees.spec y conocidos). Mientras el
+    //    target permanezca activo, cada uno de estos disable queda permitido (hay otro
+    //    admin); es seguro iterarlos aunque la lista incluya a otros admins.
+    const usersBefore = asArray(await (await ctx.get(`${API_URL}/users`)).json());
+    const leftoverAdmins = usersBefore.filter(
+      (u: { id: string; email: string; status: string; roles: string[] }) =>
+        u.id !== me.id && u.id !== targetId && u.status === 'active' && u.roles.includes('Administrador'),
+    );
+    for (const leftover of leftoverAdmins) {
+      const disableResp = await ctx.post(`${API_URL}/users/${leftover.id}/disable`);
+      if (!disableResp.ok()) {
+        test.info().annotations.push({
+          type: 'limpieza',
+          description: `No se pudo desactivar al admin sobrante ${leftover.email}: ${disableResp.status()}`,
+        });
+      }
+    }
 
-    // Comportamiento HOY (bug): se permite, no hay bloqueo de "último admin" —
-    // solo se protege al ownerId explícito, no "el último admin restante".
-    const disabledChip = page.locator('.v-chip', { hasText: 'desactivado' });
-    await expect(disabledChip).toHaveClass(/v-chip--selected/, { timeout: 10_000 });
+    // 3. El target es ahora el único admin no-owner activo → desactivarlo debe fallar.
+    const disableResp = await ctx.post(`${API_URL}/users/${targetId}/disable`);
+    // Arreglado: 409 LAST_ADMIN_REMOVAL (antes de la revisión del 2026-09-06 el
+    // únicamente se protegía al ownerId, así que esto respondía 200 y desactivaba).
+    expect(disableResp.status()).toBe(409);
+    expect((await disableResp.json()).code).toBe('LAST_ADMIN_REMOVAL');
+
+    // El target sigue activo tras el intento.
+    const after = asArray(await (await ctx.get(`${API_URL}/users`)).json());
+    const targetAfter = after.find((u: { id: string }) => u.id === targetId);
+    expect(targetAfter?.status).toBe('active');
+
+    await ctx.dispose();
   });
 });
 
@@ -338,66 +346,166 @@ test.describe('BUG #8 — no hay autoservicio de "olvidé mi contraseña"', () =
   });
 });
 
-test.describe('BUG #9 — revocar un permiso no bloquea la sesión activa de inmediato', () => {
-  test('el access token vigente sigue autorizando una acción tras quitarle el permiso a su rol', async () => {
-    // TEST-PLAN.md #9: el middleware de auth confía en las claims del JWT vigente;
-    // permissionsVersion solo se recalcula en refresh/login/switch-organization, no
-    // en cada request. Este es un test de contrato de API (OPENCODE-BRIEF.md §3.2).
+test.describe('BUG #9 (REVISADO 2026-09-06) — revocar un permiso invalida la sesión activa', () => {
+  test('el gateway responde 401 TOKEN_STALE cuando el pv del rol cambia', async () => {
+    // TEST-PLAN.md #9 (REVISADO 2026-09-06): el gateway ahora consulta el
+    // permissions-version (users.permissions_version) por usuario y compara con el
+    // `pv` del JWT en cada ruta autenticada; si difieren → 401 TOKEN_STALE (el
+    // cliente refresca el token vía login/refresh). Test de contrato de API
+    // (OPENCODE-BRIEF.md §3.2).
+    //
+    // No usamos al admin como víctima a propósito: cambiar el pv del admin
+    // invalidaría su token DURANTE este test y rompería otros specs que corren en
+    // paralelo con token de admin. En su lugar hay un USUARIO fixture fijo
+    // (bug9-fixture@test.com) con rol fijo; solo a él se le revoca el permiso.
     const adminTok = await adminToken();
     const adminCtx = await playwrightRequest.newContext({
       extraHTTPHeaders: { Authorization: `Bearer ${adminTok}` },
     });
+    const me = await (await adminCtx.get(`${API_URL}/auth/me`)).json();
 
-    // updateRolePermissionsSchema exige permissions.min(1) — no se puede "vaciar" un
-    // rol, así que "revocar" un permiso puntual significa dejar el resto, sin el
-    // permiso objetivo.
+    const { FIXED_ROLE_NAME, FIXTURE_EMAIL, FIXTURE_PASSWORD } = {
+      FIXED_ROLE_NAME: 'Bug9 Rol E2E (fixture fija — no borrar)',
+      FIXTURE_EMAIL: 'bug9-fixture@test.com',
+      FIXTURE_PASSWORD: 'Bug9Fixture123!',
+    };
+
+    // Permisos del catálogo (no se puede "vaciar" un rol: updateRolePermissionsSchema
+    // exige min(1), así que "revocar" deja el resto, sin el permiso objetivo).
     const allPerms: { code: string }[] = asArray(await (await adminCtx.get(`${API_URL}/permissions`)).json());
-    test.skip(allPerms.length < 2, 'Se necesitan al menos 2 permisos en el catálogo para este caso');
     const [targetPerm, otherPerm] = allPerms.map((p) => p.code);
+    test.skip(allPerms.length < 2, 'Se necesitan al menos 2 permisos en el catálogo para este caso');
 
-    // No existe DELETE /roles/:id en auth-service (ver TEST-PLAN.md §1.2) — un rol
-    // creado aquí queda para siempre en el backend compartido. Por eso este test
-    // reutiliza SIEMPRE el mismo rol con nombre fijo en vez de crear uno nuevo por
-    // corrida (evita acumular basura en cada re-ejecución de la suite).
-    const FIXED_ROLE_NAME = 'Bug9 Rol E2E (fixture fija — no borrar)';
-    const existingRoles: { id: string; name: string }[] = asArray(await (await adminCtx.get(`${API_URL}/roles`)).json());
-    let roleId = existingRoles.find((r) => r.name === FIXED_ROLE_NAME)?.id;
-
-    if (!roleId) {
-      const createRoleResp = await adminCtx.post(`${API_URL}/roles`, {
-        data: { name: FIXED_ROLE_NAME, permissions: [targetPerm, otherPerm] },
-      });
-      expect(createRoleResp.ok()).toBeTruthy();
-      roleId = (await createRoleResp.json()).roleId;
-    } else {
-      // Reponer el permiso objetivo por si una corrida anterior ya lo "revocó".
-      await adminCtx.patch(`${API_URL}/roles/${roleId}/permissions`, {
-        data: { permissions: [targetPerm, otherPerm] },
-      });
+    async function ensureFixtureRole(): Promise<string> {
+      const existingRoles: { id: string; name: string }[] = asArray(await (await adminCtx.get(`${API_URL}/roles`)).json());
+      let roleId = existingRoles.find((r) => r.name === FIXED_ROLE_NAME)?.id;
+      if (!roleId) {
+        const createRoleResp = await adminCtx.post(`${API_URL}/roles`, {
+          data: { name: FIXED_ROLE_NAME, permissions: [targetPerm, otherPerm] },
+        });
+        expect(createRoleResp.ok()).toBeTruthy();
+        roleId = (await createRoleResp.json()).roleId;
+      }
+      return roleId!;
     }
 
-    // (No hay un usuario de prueba fácil con este rol y una sesión propia sin
-    // invitar/aceptar todo un flujo nuevo; documentamos el mecanismo en vez de
-    // forzar un segundo login completo dentro de este test puntual.)
-    // "Revocar" targetPerm dejando solo otherPerm (no se puede dejar la lista vacía).
-    const revokeResp = await adminCtx.patch(`${API_URL}/roles/${roleId}/permissions`, {
+    const fixtureRoleId = await ensureFixtureRole();
+
+    // Asegura que el usuario fixture existe, está activo y tiene el rol fixture
+    // (idempotente entre corridas). El admin nunca entra en el rol fixture.
+    async function ensureFixtureUser(): Promise<string> {
+      const users: { id: string; email: string; status: string; roles: string[] }[] = asArray(
+        await (await adminCtx.get(`${API_URL}/users`)).json(),
+      );
+      let fixture = users.find((u) => u.email === FIXTURE_EMAIL);
+      if (!fixture) {
+        const inviteResp = await adminCtx.post(`${API_URL}/users/invite`, {
+          data: { email: FIXTURE_EMAIL, roleIds: [fixtureRoleId] },
+        });
+        expect(inviteResp.ok()).toBeTruthy();
+        fixture = asArray(await (await adminCtx.get(`${API_URL}/users`)).json()).find(
+          (u: { email: string }) => u.email === FIXTURE_EMAIL,
+        );
+        expect(fixture).toBeTruthy();
+
+        const acceptResp = await adminCtx.post(`${API_URL}/auth/accept-invite`, {
+          data: {
+            token: Buffer.from(JSON.stringify({ uid: fixture!.id, oid: me.orgId })).toString('base64url'),
+            password: FIXTURE_PASSWORD,
+          },
+        });
+        expect(acceptResp.ok()).toBeTruthy();
+      }
+      const fixtureId = fixture!.id;
+      const FIXED_ROLE_NAME_LITERAL = 'Bug9 Rol E2E (fixture fija — no borrar)';
+      if (!fixture!.roles.includes(FIXED_ROLE_NAME_LITERAL)) {
+        const assignResp = await adminCtx.post(`${API_URL}/users/${fixtureId}/roles`, {
+          data: { roleIds: [fixtureRoleId] },
+        });
+        expect(assignResp.ok()).toBeTruthy();
+      }
+      return fixtureId;
+    }
+
+    const fixtureUserId = await ensureFixtureUser();
+
+    // Revive los permisos del rol fixture a su estado completo (no-op entre corridas,
+    // pero garantiza un punto de partida determinista).
+    await adminCtx.patch(`${API_URL}/roles/${fixtureRoleId}/permissions`, {
+      data: { permissions: [targetPerm, otherPerm] },
+    });
+
+    // Sesión "activa" del fixture: token emitido ANTES de la revocación.
+    const fixtureLogin = await adminCtx.post(`${API_URL}/auth/login`, {
+      data: { email: FIXTURE_EMAIL, password: FIXTURE_PASSWORD },
+    });
+    test.skip(!fixtureLogin.ok(), `No se pudo iniciar sesión como ${FIXTURE_EMAIL}: ${fixtureLogin.status()}`);
+    const { accessToken: staleToken } = await fixtureLogin.json();
+    const fixtureCtx = await playwrightRequest.newContext({
+      extraHTTPHeaders: { Authorization: `Bearer ${staleToken}` },
+    });
+
+    // Acto de la "revocación": quitar targetPerm del rol (el fixture es miembro).
+    const revokeResp = await adminCtx.patch(`${API_URL}/roles/${fixtureRoleId}/permissions`, {
       data: { permissions: [otherPerm] },
     });
     expect(revokeResp.ok()).toBeTruthy();
 
-    // El propio token de admin (que no tiene este rol asignado) no sirve para
-    // demostrar la ventana de gracia sin un segundo usuario con sesión activa.
+    // La sesión activa queda invalidada: la siguiente petición autenticada con el
+    // token viejo debe topar 401 TOKEN_STALE. La invalidación llega vía realtime
+    // (caché del gateway) o por TTL de la caché de pv (10s) — sondeo con margen.
+    const deadline = Date.now() + 20_000;
+    let staleStatus = 0;
+    while (Date.now() < deadline) {
+      const probe = await fixtureCtx.get(`${API_URL}/customers`);
+      staleStatus = probe.status();
+      if (staleStatus === 401) {
+        const body = await probe.json();
+        expect(body.code).toBe('TOKEN_STALE');
+        break;
+      }
+      await new Promise((r) => setTimeout(r, 500));
+    }
+    // Arreglado: 401 TOKEN_STALE (antes de la revisión, el JWT viejo seguía sirviendo).
+    expect(staleStatus).toBe(401);
+
+    // Restaurar el permiso para no dejar el fixture "medio revocado" entre corridas.
+    const restoreResp = await adminCtx.patch(`${API_URL}/roles/${fixtureRoleId}/permissions`, {
+      data: { permissions: [targetPerm, otherPerm] },
+    });
+    expect(restoreResp.ok()).toBeTruthy();
+
+    // Re-login del fixture: el token nuevo debe volver a pasar (200 o 403 de permiso
+    // NO 401/detección de token viejo). La caché de pv del gateway puede conservar
+    // el valor pre-restore hasta TTL (10s) — se sondea igual que la detección.
+    const fixLogin2 = await adminCtx.post(`${API_URL}/auth/login`, {
+      data: { email: FIXTURE_EMAIL, password: FIXTURE_PASSWORD },
+    });
+    expect(fixLogin2.ok()).toBeTruthy();
+    const { accessToken: freshToken } = await fixLogin2.json();
+    const freshCtx = await playwrightRequest.newContext({
+      extraHTTPHeaders: { Authorization: `Bearer ${freshToken}` },
+    });
+    const freshDeadline = Date.now() + 20_000;
+    let freshStatus = 0;
+    while (Date.now() < freshDeadline) {
+      const probe = await freshCtx.get(`${API_URL}/customers`);
+      freshStatus = probe.status();
+      if (freshStatus !== 401) break;
+      await new Promise((r) => setTimeout(r, 500));
+    }
+    expect(freshStatus).not.toBe(401);
+
     test.info().annotations.push({
-      type: 'cobertura-parcial',
-      description:
-        'Se confirma que PATCH /roles/:id/permissions no invalida sesiones activas ' +
-        '(no existe ningún mecanismo de revocación de JWT en el código), pero reproducir ' +
-        'el caso completo (usuario B logueado, permiso revocado, acción sigue pasando, ' +
-        'refresh, acción ahora falla) requiere un segundo usuario+sesión — ver TEST-PLAN.md #9 ' +
-        'para el detalle exacto a completar cuando haya un fixture de "empleado con rol personalizado".',
+      type: 'resultado',
+      description: `Tras revocar el permiso del rol fixture, el token activo respondió 401 ` +
+        `TOKEN_STALE (gateway BUG #9) y un re-login volvió a pasar. Fixture: ${FIXTURE_EMAIL}, ` +
+        `rol: ${FIXED_ROLE_NAME}.`,
     });
 
     await adminCtx.dispose();
+    await fixtureCtx.dispose();
+    await freshCtx.dispose();
   });
 });
 

@@ -311,24 +311,8 @@ dentro de los specs por módulo, porque quieres poder correr `npx playwright tes
 known-bugs.spec.ts` de forma aislada como "smoke test de regresión de bugs conocidos".
 Cada test lleva el número de hallazgo de `TEST-PLAN.md` en el nombre.
 
-1. **`#1 numeración de factura sin lock atómico`**: crea una factura en borrador con al
-   menos una línea (usa `/invoices/new`, confirma cliente, agrega línea — sigue el
-   flujo real, no hay atajo). Antes de emitir, necesitas DOS facturas borrador
-   distintas apuntando al MISMO establecimiento y punto de emisión. Emítelas en
-   paralelo con `Promise.all([page1.click('Emitir factura'), page2.click('Emitir
-   factura')])` usando dos `BrowserContext` distintos (dos pestañas/contextos con la
-   misma sesión de storageState). Verifica los números de factura resultantes
-   (visibles en `/invoices/:id`, campo folio) — si el hallazgo es real, ambos números
-   serán iguales. Documenta el resultado con un comentario claro sea cual sea
-   (puede que en la práctica el timing de la UI nunca dispare la carrera exacta; si es
-   así, dilo en un comentario y no fuerces un assert que no se sostiene).
-2. **`#2 línea con producto inexistente no falla`**: en `/invoices/new`, tras confirmar
-   cliente, esto requiere enviar un `productId` que no existe — la UI normal no te
-   deja hacerlo porque el select solo lista productos reales. Esto cae en el caso de
-   la sección 3.2 (test de contrato, no de UI): usa `request` para llamar
-   `POST /invoices/:id/lines` con un `productId` con formato UUID válido pero
-   inexistente, y verifica que responde 200/201 en vez de 404, y que la línea creada
-   no tiene impuestos (`taxes: []`).
+1. **`#1 numeración de factura con lock atómico`**: **CORREGIDO 2026-09-06** (TEST-PLAN.md #1). Antes: el secuencial se leía/incrementaba sin lock y no había constraint único en `invoices.number`, así que dos emisiones concurrentes podían duplicar folio. Ahora: `SequelizeSequenceRepository` usa `lock: true` (FOR UPDATE) dentro de la transacción de emisión, provisiona la serie inexistente con `INSERT ... IGNORE` (`createIfAbsent`) y relee con lock. El test es de contrato de API (§3.2): crea dos borradores apuntando al MISMO establecimiento/punto, los emite en paralelo con `Promise.all` y ahora **afirma folios DISTINTOS** (`expect(invoiceA.number).not.toBe(invoiceB.number)`), con `test.skip` si la precondición (cliente/establecimiento/punto activo) no se cumple o si alguna emisión falla por otra causa.
+2. **`#2 línea con producto inexistente falla con 400`**: **CORREGIDO 2026-09-06** (TEST-PLAN.md #2). El `ProductCatalogPort` distingue 404 (`null`) de catálogo caído/5xx/red: `add-line.ts` lanza `ProductNotFoundError` (→ 400) cuando el producto no existe y `ProductCatalogError` (→ 503) cuando el catálogo no respondió — nunca crea línea sin snapshot/impuestos. Test de contrato de API (§3.2): `POST /invoices/:id/lines` con un `productId` UUID válido pero inexistente → **afirma 400 + `code: 'ProductNotFoundError'`**.
 3. **`#3 anular factura autorizada no dispara nada fiscal`**: emite una factura EC
    completa (con certificado activo — necesitas haber subido uno de prueba en
    `/organization/certificates` antes; si no hay uno disponible en el entorno,
@@ -346,22 +330,8 @@ Cada test lleva el número de hallazgo de `TEST-PLAN.md` en el nombre.
    regex consultando `GET /identification-types` o el seeder de
    `customer-service/seeders/20260706000001-seed-ec-identification-types.js`).
    Confirma que la creación tiene éxito (hoy debería, por el bug).
-5. **`#5 update-customer no revalida unicidad`**: crea cliente A con identificación X.
-   Crea cliente B con una identificación distinta. Edita cliente B para que su
-   identificación pase a ser X también. Verifica que la edición tiene éxito (no
-   debería, pero hoy sí).
-6. **`#6 se pueden desactivar todos los admins si ninguno es owner`**: requiere crear
-   un segundo usuario con rol Administrador que NO sea el fundador/owner de la
-   organización (invita desde `/employees/invite`, asígnale el rol Administrador,
-   acepta la invitación con una segunda sesión/contexto). Desde la cuenta owner,
-   desactiva al segundo admin — debe poder (el owner desactivando a otro admin no está
-   bloqueado). Esto por sí solo no reproduce el bug completo (no puedes desactivar al
-   owner mismo, eso SÍ está bloqueado y es esperado) — el bug real es que si hubiera 2
-   admins NO-owner, ambos podrían desactivarse mutuamente. Si crear un segundo usuario
-   no-owner con rol admin y verificar que el owner puede desactivarlo ya ilustra la
-   ausencia de la protección "último admin", es suficiente; documenta la limitación de
-   cobertura en un comentario si no puedes reproducir el escenario completo de 2
-   no-owners por límites de tiempo de setup.
+5. **`#5 update-customer revalida unicidad de identificación`**: **CORREGIDO 2026-09-06** (hallazgo #22, TEST-PLAN.md #5). Antes: el constraint UNIQUE `customers_organization_id_identification` de la BD chocaba y respondía **500 INTERNAL_ERROR** no mapeado. Ahora: pre-check de unicidad en `update-customer.ts` + safety net de `SequelizeUniqueConstraintError` → ambos **409 `CUSTOMER_EXISTS`**. Test de contrato de API (§3.2): crea clientes A y B con identificaciones distintas, luego `PATCH /customers/:id` de B poniéndole la de A → **afirma 409 + `code: 'CUSTOMER_EXISTS'`** y que B conserva su identificación original.
+6. **`#6 no se puede desactivar al ÚLTIMO admin no-owner`**: **CORREGIDO 2026-09-06** (TEST-PLAN.md #6). Antes: `LastAdminRemovalError` existía pero nunca se lanzaba (solo se protegía al `ownerId`). Ahora: guard anti-lockout en `disable-user.ts` → **409 `LAST_ADMIN_REMOVAL`** cuando el target es admin y no queda OTRO admin no-owner activo. Test de contrato de API (§3.2) determinista: como `employees.spec.ts` (§1.4) deja un segundo admin activo (`e2e-second-admin-*`) en cada corrida, el test PRIMERO desactiva todos los admins activos no-owner que NO son el target, luego `POST /users/:id/disable` del target → **afirma 409 `LAST_ADMIN_REMOVAL`** y que el target sigue `active`.
 7. **`#7 no existe MFA de usuario`**: navega el flujo de login completo y confirma que
    no aparece ningún paso de código de verificación/2FA tras ingresar email+password
    correctos — llega directo al home. Test simple, de ausencia.
@@ -373,11 +343,7 @@ Cada test lleva el número de hallazgo de `TEST-PLAN.md` en el nombre.
    investigó el agente — en ese caso, documenta la discrepancia explícitamente en el
    test con un comentario y no fuerces el assert a coincidir con `TEST-PLAN.md` si lo
    que ves en pantalla dice lo contrario; repórtalo en vez de adivinar.
-9. **`#9 revocar permiso no bloquea sesión activa`**: con dos sesiones (contextos) del
-   mismo usuario o con un usuario B ya logueado, quítale un permiso a su rol desde la
-   cuenta admin. Sin refrescar el token de la sesión B, intenta seguir usando una
-   acción que requería ese permiso — debe seguir funcionando (hoy). Refresca el token
-   de B (logout/login, o esperar expiración) y confirma que ahora sí se bloquea.
+9. **`#9 revocar permiso invalida la sesión activa`**: **CORREGIDO 2026-09-06** (TEST-PLAN.md #9). Antes: el JWT vigente seguía sirviendo hasta refresh/expiración (900s). Ahora: `auth-service` expone `GET /internal/users/:userId/access-context` (X-Internal-Secret), el gateway compara el `pv` del JWT con el actual (caché TTL 10s, fail-open) en cada ruta autenticada y responde **401 `TOKEN_STALE`** si difieren; el hub realtime emite `permissions.changed` a `user:<uid>` y el frontend re-fetchea `me`. Test de contrato de API (§3.2) con un USUARIO FIXTURE dedicado (`bug9-fixture@test.com`, rol fijo "Bug9 Rol E2E"), nunca el admin (para no invalidar tokens en specs paralelos): asigna el rol al fixture, emite su token, revoca un permiso del rol → **afirma 401 `TOKEN_STALE`** (sondeo hasta 20s por TTL/realtime), restaura el permiso y verifica que un re-login del fixture vuelve a pasar (`status !== 401`).
 10. **`#10 organization-service sin consumer de tax-service`**: test de ausencia — no
     es fácil de probar por UI (requeriría verificar que agregar un país nuevo en
     tax-service no lo habilita automáticamente en organization-service). Dado el

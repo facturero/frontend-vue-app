@@ -1,6 +1,7 @@
 import { io, type Socket } from 'socket.io-client';
 import { getAccessToken } from '@/utils/http';
 import { useRealtimeStore } from '@/stores/realtime';
+import { useAuthStore } from '@/stores/auth';
 
 let socket: Socket | null = null;
 
@@ -32,6 +33,19 @@ export function connectRealtime(): void {
       useRealtimeStore().pushPluginEvent(data);
     } catch {
       // pinia aún no activa (no debería ocurrir tras el login)
+    }
+  });
+
+  socket.on('permissions.changed', () => {
+    // Tus roles/permisos (o estado) cambiaron desde otro lugar (BUG #9):
+    // el gateway emite esto en tu sala `user:<uid>` y aquí refrescamos el
+    // store de auth al instante. El token viejo quedaría stale y cualquier
+    // request respondería 401 TOKEN_STALE hasta re-autenticar (el interceptor
+    // de http.ts refresca solo con el refresh token).
+    try {
+      void useAuthStore().fetchMe();
+    } catch {
+      // pinia aún no activa; el próximo fetchMe de la app deja el store al día
     }
   });
 }
