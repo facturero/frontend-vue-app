@@ -332,17 +332,49 @@
     "settings": "Ajustes"
   },
   "notifications": {
+    "accountDisabled": "Tu cuenta fue desactivada",
+    "accountEnabled": "Tu cuenta fue reactivada",
     "customPluginReady": "Tu plugin a medida está listo",
     "empty": "Sin notificaciones",
     "hoursAgo": "hace {n} h",
+    "invoiceIssued": "Factura emitida",
+    "invoiceVoided": "Factura anulada",
+    "invited": "Has sido invitado a la organización",
     "justNow": "hace un momento",
+    "markAllRead": "Marcar todas como leídas",
     "minutesAgo": "hace {n} min",
+    "passwordResetRequested": "Se solicitó restablecer tu contraseña",
     "pluginActivated": "Plugin activado",
     "pluginDeactivated": "Plugin desactivado",
     "pluginsUpdate": "Actualización de plugins",
     "requestFulfilled": "Solicitud atendida",
     "requestRejected": "Solicitud rechazada",
-    "requestSent": "Solicitud enviada"
+    "requestSent": "Solicitud enviada",
+    "title": "Notificaciones"
+  },
+  "notificationPrefs": {
+    "app": "App",
+    "legend": "Elige qué notificaciones recibir por cada plugin: la campana (App) dentro del panel o por correo (Correo). Lo no tocado aplica el valor por defecto.",
+    "noProviders": "No hay notificaciones disponibles para tus plugins activos.",
+    "provider": {
+      "billing_invoice_issued": "Factura emitida",
+      "billing_invoice_issued_desc": "Avísame cuando se emita una factura electrónica.",
+      "billing_invoice_voided": "Factura anulada",
+      "billing_invoice_voided_desc": "Avísame cuando se anule una factura electrónica.",
+      "identity_disabled": "Cuenta desactivada",
+      "identity_disabled_desc": "Avísame cuando desactiven mi cuenta.",
+      "identity_enabled": "Cuenta reactivada",
+      "identity_enabled_desc": "Avísame cuando reactiven mi cuenta.",
+      "identity_invited": "Invitación a la organización",
+      "identity_invited_desc": "Avísame cuando me inviten a una organización.",
+      "identity_password_reset": "Restablecimiento de contraseña",
+      "identity_password_reset_desc": "Avísame cuando se solicite restablecer mi contraseña."
+    },
+    "reset": "Restablecer",
+    "saved": "Preferencias guardadas.",
+    "smtp": "Correo",
+    "tabTitle": "Notificaciones",
+    "title": "Notificaciones"
   },
   "organization": {
     "accountingHint": "Depende de tus ingresos/patrimonio según el SRI — marca esta opción si tu empresa está obligada. Afecta el campo {field} de las facturas electrónicas.",

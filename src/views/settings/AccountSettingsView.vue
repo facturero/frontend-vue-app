@@ -8,6 +8,7 @@ import ProfileView from '@/views/ProfileView.vue';
 import OrganizationSettingsView from '@/views/organization/OrganizationSettingsView.vue';
 import EstablishmentsView from '@/views/organization/EstablishmentsView.vue';
 import CertificatesView from '@/views/organization/CertificatesView.vue';
+import NotificationPreferencesView from '@/views/settings/NotificationPreferencesView.vue';
 
 interface SettingsTab {
   key: string;
@@ -51,6 +52,13 @@ const tabs: SettingsTab[] = [
     icon: 'mdi-file-certificate-outline',
     component: CertificatesView,
     visible: auth.can('fiscal:manage') && plugins.isActive('finance.electronic_certificate'),
+  },
+  {
+    key: 'notifications',
+    titleKey: 'notificationPrefs.tabTitle',
+    icon: 'mdi-bell-outline',
+    component: NotificationPreferencesView,
+    visible: true,
   },
 ];
 

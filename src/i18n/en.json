@@ -332,17 +332,49 @@
     "settings": "Settings"
   },
   "notifications": {
+    "accountDisabled": "Your account was disabled",
+    "accountEnabled": "Your account was re-enabled",
     "customPluginReady": "Your custom plugin is ready",
     "empty": "No notifications",
     "hoursAgo": "{n} h ago",
+    "invoiceIssued": "Invoice issued",
+    "invoiceVoided": "Invoice voided",
+    "invited": "You were invited to the organization",
     "justNow": "just now",
+    "markAllRead": "Mark all as read",
     "minutesAgo": "{n} min ago",
+    "passwordResetRequested": "A password reset was requested",
     "pluginActivated": "Plugin activated",
     "pluginDeactivated": "Plugin deactivated",
     "pluginsUpdate": "Plugins update",
     "requestFulfilled": "Request fulfilled",
     "requestRejected": "Request rejected",
-    "requestSent": "Request sent"
+    "requestSent": "Request sent",
+    "title": "Notifications"
+  },
+  "notificationPrefs": {
+    "app": "App",
+    "legend": "Choose which notifications to receive per plugin: in-app (App) or by email. Untouched settings use the default.",
+    "noProviders": "No notifications are available for your active plugins.",
+    "provider": {
+      "billing_invoice_issued": "Invoice issued",
+      "billing_invoice_issued_desc": "Notify me when an electronic invoice is issued.",
+      "billing_invoice_voided": "Invoice voided",
+      "billing_invoice_voided_desc": "Notify me when an electronic invoice is voided.",
+      "identity_disabled": "Account disabled",
+      "identity_disabled_desc": "Notify me when my account is disabled.",
+      "identity_enabled": "Account re-enabled",
+      "identity_enabled_desc": "Notify me when my account is re-enabled.",
+      "identity_invited": "Organization invitation",
+      "identity_invited_desc": "Notify me when I'm invited to an organization.",
+      "identity_password_reset": "Password reset",
+      "identity_password_reset_desc": "Notify me when a password reset is requested."
+    },
+    "reset": "Reset",
+    "saved": "Preferences saved.",
+    "smtp": "Email",
+    "tabTitle": "Notifications",
+    "title": "Notifications"
   },
   "organization": {
     "accountingHint": "It depends on your income/assets according to the tax authority — check this option if your company is required to. It affects the {field} field on electronic invoices.",

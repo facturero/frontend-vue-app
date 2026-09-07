@@ -332,17 +332,49 @@
     "settings": "Paramètres"
   },
   "notifications": {
+    "accountDisabled": "Votre compte a été désactivé",
+    "accountEnabled": "Votre compte a été réactivé",
     "customPluginReady": "Votre plugin sur mesure est prêt",
     "empty": "Aucune notification",
     "hoursAgo": "il y a {n} h",
+    "invoiceIssued": "Facture émise",
+    "invoiceVoided": "Facture annulée",
+    "invited": "Vous avez été invité à l'organisation",
     "justNow": "à l'instant",
+    "markAllRead": "Tout marquer comme lu",
     "minutesAgo": "il y a {n} min",
+    "passwordResetRequested": "Une réinitialisation de mot de passe a été demandée",
     "pluginActivated": "Plugin activé",
     "pluginDeactivated": "Plugin désactivé",
     "pluginsUpdate": "Mise à jour des plugins",
     "requestFulfilled": "Demande traitée",
     "requestRejected": "Demande refusée",
-    "requestSent": "Demande envoyée"
+    "requestSent": "Demande envoyée",
+    "title": "Notifications"
+  },
+  "notificationPrefs": {
+    "app": "App",
+    "legend": "Choisissez les notifications à recevoir par plugin : dans l'application (App) ou par courriel. Le non touché conserve la valeur par défaut.",
+    "noProviders": "Aucune notification n'est disponible pour vos plugins actifs.",
+    "provider": {
+      "billing_invoice_issued": "Facture émise",
+      "billing_invoice_issued_desc": "Prévenez-moi quand une facture électronique est émise.",
+      "billing_invoice_voided": "Facture annulée",
+      "billing_invoice_voided_desc": "Prévenez-moi quand une facture électronique est annulée.",
+      "identity_disabled": "Compte désactivé",
+      "identity_disabled_desc": "Prévenez-moi quand mon compte est désactivé.",
+      "identity_enabled": "Compte réactivé",
+      "identity_enabled_desc": "Prévenez-moi quand mon compte est réactivé.",
+      "identity_invited": "Invitation à l'organisation",
+      "identity_invited_desc": "Prévenez-moi quand je suis invité à une organisation.",
+      "identity_password_reset": "Réinitialisation du mot de passe",
+      "identity_password_reset_desc": "Prévenez-moi quand une réinitialisation de mot de passe est demandée."
+    },
+    "reset": "Réinitialiser",
+    "saved": "Préférences enregistrées.",
+    "smtp": "Courriel",
+    "tabTitle": "Notifications",
+    "title": "Notifications"
   },
   "organization": {
     "accountingHint": "Cela dépend de vos revenus/patrimoine selon l'administration fiscale — cochez cette option si votre entreprise y est tenue. Cela affecte le champ {field} des factures électroniques.",
