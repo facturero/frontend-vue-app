@@ -1,4 +1,114 @@
 {
+  "audit": {
+    "allDomains": "All modules",
+    "detail": {
+      "title": "Event details",
+      "occurredAt": "Occurred at",
+      "requestId": "Request ID",
+      "payload": "Event data",
+      "redactedNotice": "Sensitive data (tokens, access links, passwords) is stored redacted.",
+      "truncatedNotice": "The original event was too large: only the main fields were kept.",
+      "noPayload": "This event stored no additional data."
+    },
+    "domain": {
+      "identity": "Users and roles",
+      "billing": "Billing",
+      "customer": "Customers",
+      "product": "Products",
+      "organization": "Organization",
+      "plugin": "Modules",
+      "tax": "Taxes",
+      "document": "Documents"
+    },
+    "empty": "No activity recorded with these filters",
+    "event": {
+      "auth_credential_linked_google": "Google account linked",
+      "billing_invoice_created": "Invoice created",
+      "billing_invoice_issued": "Invoice issued",
+      "billing_invoice_line_added": "Invoice line added",
+      "billing_invoice_line_removed": "Invoice line removed",
+      "billing_invoice_updated": "Invoice updated",
+      "billing_invoice_voided": "Invoice voided",
+      "customer_address_added": "Address added",
+      "customer_address_deleted": "Address deleted",
+      "customer_address_updated": "Address updated",
+      "customer_contact_added": "Contact added",
+      "customer_contact_deleted": "Contact deleted",
+      "customer_contact_updated": "Contact updated",
+      "customer_customer_created": "Customer created",
+      "customer_customer_disabled": "Customer disabled",
+      "customer_customer_updated": "Customer updated",
+      "customer_tag_assigned": "Tag assigned",
+      "customer_tag_created": "Tag created",
+      "customer_tag_removed": "Tag removed",
+      "document_file_attached": "Document attached",
+      "document_file_metadata_updated": "Document metadata updated",
+      "document_file_removed": "Document removed",
+      "document_file_upload_requested": "Document upload requested",
+      "identity_pos_device_provisioned": "POS device provisioned",
+      "identity_role_created": "Role created",
+      "identity_role_updated": "Role permissions updated",
+      "identity_user_accepted_invite": "Invitation accepted",
+      "identity_user_created": "User created",
+      "identity_user_disabled": "User disabled",
+      "identity_user_enabled": "User re-enabled",
+      "identity_user_establishments_updated": "User establishments updated",
+      "identity_user_invited": "User invited",
+      "identity_user_password_reset_completed": "Password reset completed",
+      "identity_user_password_reset_requested": "Password reset requested",
+      "identity_user_profile_completed": "Profile completed",
+      "identity_user_role_assigned": "Role assigned",
+      "organization_billing_point_created": "Emission point created",
+      "organization_billing_point_paired": "Terminal paired",
+      "organization_billing_point_unlinked": "Terminal unlinked",
+      "organization_country_added": "Country enabled for the organization",
+      "organization_establishment_created": "Establishment created",
+      "organization_establishment_updated": "Establishment updated",
+      "organization_org_updated": "Organization updated",
+      "plugin_activated": "Module activated",
+      "plugin_created": "Custom module created",
+      "plugin_custom_request_created": "Module request sent",
+      "plugin_custom_request_fulfilled": "Module request fulfilled",
+      "plugin_custom_request_rejected": "Module request rejected",
+      "plugin_deactivated": "Module deactivated",
+      "product_category_created": "Category created",
+      "product_category_deleted": "Category deleted",
+      "product_category_updated": "Category updated",
+      "product_product_created": "Product created",
+      "product_product_disabled": "Product disabled",
+      "product_product_updated": "Product updated",
+      "product_unit_created": "Unit created",
+      "product_unit_updated": "Unit updated",
+      "tax_country_enabled": "Country enabled",
+      "tax_country_updated": "Country updated",
+      "tax_document_type_upserted": "Document type saved",
+      "tax_identification_type_upserted": "Identification type saved",
+      "tax_tax_rate_upserted": "Tax rate saved"
+    },
+    "filters": {
+      "domain": "Module",
+      "search": "Search",
+      "searchHint": "Searches the event details and the author email",
+      "from": "From",
+      "to": "To",
+      "userId": "User ID",
+      "userIdHint": "Filter by who performed the action",
+      "targetId": "Item ID",
+      "targetIdHint": "Filter by the affected item",
+      "includePlatform": "Include platform changes",
+      "reset": "Clear filters"
+    },
+    "headers": {
+      "occurredAt": "Date",
+      "action": "Action",
+      "actor": "Author",
+      "target": "Item",
+      "ip": "IP"
+    },
+    "subtitle": "Who did what, when and from where. Read-only.",
+    "system": "System",
+    "title": "Audit log"
+  },
   "auth": {
     "acceptAndContinue": "Accept and continue",
     "acceptInvite": "Accept invitation",
@@ -318,6 +428,7 @@
     "empty": "No messages"
   },
   "nav": {
+    "audit": "Audit log",
     "brand": "CRM",
     "brandSubtitle": "Admin panel",
     "collapse": "Collapse",
@@ -535,5 +646,48 @@
     "uploadError": "Upload error",
     "uploaded": "{count} images uploaded",
     "uploadedOne": "Image uploaded"
+  },
+  "tour": {
+    "help": "View app guide",
+    "progress": "{current} / {total}",
+    "next": "Next",
+    "prev": "Back",
+    "done": "Finish",
+    "welcome": {
+      "title": "Welcome back",
+      "desc": "We'll walk you through the key areas of your CRM so you get off to a great start. You can exit anytime and relaunch the guide from the help icon."
+    },
+    "home": {
+      "title": "Home",
+      "desc": "This is your dashboard: at a glance you see active customers, employees, products and invoices."
+    },
+    "menu": {
+      "title": "Side menu",
+      "desc": "Navigate between modules from here. Each module appears according to your permissions and your organization's active plugins."
+    },
+    "customers": {
+      "title": "Customers",
+      "desc": "Manage your contacts and accounts: this is where your buyers are registered."
+    },
+    "products": {
+      "title": "Products",
+      "desc": "Your product catalog, categories and units of measure. This is what you'll invoice."
+    },
+    "invoices": {
+      "title": "Invoices",
+      "desc": "Issue and manage your electronic invoicing."
+    },
+    "settings": {
+      "title": "Settings",
+      "desc": "Set up your account, organization, establishments and certificate from this view."
+    },
+    "plugins": {
+      "title": "Plugins",
+      "desc": "Activate the extra modules your organization needs here."
+    },
+    "finish": {
+      "title": "All set!",
+      "desc": "You know the essentials now. If anything slips your mind, press the help icon at the top right to see the guide again."
+    }
   }
 }

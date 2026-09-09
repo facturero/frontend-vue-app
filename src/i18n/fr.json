@@ -1,4 +1,114 @@
 {
+  "audit": {
+    "allDomains": "Tous les modules",
+    "detail": {
+      "title": "Détail de l'événement",
+      "occurredAt": "Survenu le",
+      "requestId": "ID de requête",
+      "payload": "Données de l'événement",
+      "redactedNotice": "Les données sensibles (jetons, liens d'accès, mots de passe) sont stockées censurées.",
+      "truncatedNotice": "L'événement d'origine était trop volumineux : seuls les champs principaux ont été conservés.",
+      "noPayload": "Cet événement n'a stocké aucune donnée supplémentaire."
+    },
+    "domain": {
+      "identity": "Utilisateurs et rôles",
+      "billing": "Facturation",
+      "customer": "Clients",
+      "product": "Produits",
+      "organization": "Organisation",
+      "plugin": "Modules",
+      "tax": "Taxes",
+      "document": "Documents"
+    },
+    "empty": "Aucune activité enregistrée avec ces filtres",
+    "event": {
+      "auth_credential_linked_google": "Compte Google lié",
+      "billing_invoice_created": "Facture créée",
+      "billing_invoice_issued": "Facture émise",
+      "billing_invoice_line_added": "Ligne ajoutée à la facture",
+      "billing_invoice_line_removed": "Ligne supprimée de la facture",
+      "billing_invoice_updated": "Facture modifiée",
+      "billing_invoice_voided": "Facture annulée",
+      "customer_address_added": "Adresse ajoutée",
+      "customer_address_deleted": "Adresse supprimée",
+      "customer_address_updated": "Adresse modifiée",
+      "customer_contact_added": "Contact ajouté",
+      "customer_contact_deleted": "Contact supprimé",
+      "customer_contact_updated": "Contact modifié",
+      "customer_customer_created": "Client créé",
+      "customer_customer_disabled": "Client désactivé",
+      "customer_customer_updated": "Client modifié",
+      "customer_tag_assigned": "Étiquette assignée",
+      "customer_tag_created": "Étiquette créée",
+      "customer_tag_removed": "Étiquette retirée",
+      "document_file_attached": "Document joint",
+      "document_file_metadata_updated": "Métadonnées du document modifiées",
+      "document_file_removed": "Document supprimé",
+      "document_file_upload_requested": "Téléversement de document demandé",
+      "identity_pos_device_provisioned": "Terminal POS provisionné",
+      "identity_role_created": "Rôle créé",
+      "identity_role_updated": "Permissions du rôle modifiées",
+      "identity_user_accepted_invite": "Invitation acceptée",
+      "identity_user_created": "Utilisateur créé",
+      "identity_user_disabled": "Utilisateur désactivé",
+      "identity_user_enabled": "Utilisateur réactivé",
+      "identity_user_establishments_updated": "Établissements de l'utilisateur modifiés",
+      "identity_user_invited": "Utilisateur invité",
+      "identity_user_password_reset_completed": "Mot de passe réinitialisé",
+      "identity_user_password_reset_requested": "Réinitialisation de mot de passe demandée",
+      "identity_user_profile_completed": "Profil complété",
+      "identity_user_role_assigned": "Rôle assigné",
+      "organization_billing_point_created": "Point d'émission créé",
+      "organization_billing_point_paired": "Terminal appairé",
+      "organization_billing_point_unlinked": "Terminal dissocié",
+      "organization_country_added": "Pays activé pour l'organisation",
+      "organization_establishment_created": "Établissement créé",
+      "organization_establishment_updated": "Établissement modifié",
+      "organization_org_updated": "Organisation modifiée",
+      "plugin_activated": "Module activé",
+      "plugin_created": "Module sur mesure créé",
+      "plugin_custom_request_created": "Demande de module envoyée",
+      "plugin_custom_request_fulfilled": "Demande de module traitée",
+      "plugin_custom_request_rejected": "Demande de module refusée",
+      "plugin_deactivated": "Module désactivé",
+      "product_category_created": "Catégorie créée",
+      "product_category_deleted": "Catégorie supprimée",
+      "product_category_updated": "Catégorie modifiée",
+      "product_product_created": "Produit créé",
+      "product_product_disabled": "Produit désactivé",
+      "product_product_updated": "Produit modifié",
+      "product_unit_created": "Unité créée",
+      "product_unit_updated": "Unité modifiée",
+      "tax_country_enabled": "Pays activé",
+      "tax_country_updated": "Pays modifié",
+      "tax_document_type_upserted": "Type de document enregistré",
+      "tax_identification_type_upserted": "Type d'identification enregistré",
+      "tax_tax_rate_upserted": "Taux de taxe enregistré"
+    },
+    "filters": {
+      "domain": "Module",
+      "search": "Rechercher",
+      "searchHint": "Recherche dans le détail de l'événement et l'e-mail de l'auteur",
+      "from": "Du",
+      "to": "Au",
+      "userId": "ID d'utilisateur",
+      "userIdHint": "Filtrer par l'auteur de l'action",
+      "targetId": "ID de l'élément",
+      "targetIdHint": "Filtrer par l'élément concerné",
+      "includePlatform": "Inclure les changements de plateforme",
+      "reset": "Effacer les filtres"
+    },
+    "headers": {
+      "occurredAt": "Date",
+      "action": "Action",
+      "actor": "Auteur",
+      "target": "Élément",
+      "ip": "IP"
+    },
+    "subtitle": "Qui a fait quoi, quand et d'où. Lecture seule.",
+    "system": "Système",
+    "title": "Journal d'audit"
+  },
   "auth": {
     "acceptAndContinue": "Accepter et continuer",
     "acceptInvite": "Accepter l'invitation",
@@ -318,6 +428,7 @@
     "empty": "Aucun message"
   },
   "nav": {
+    "audit": "Journal d'audit",
     "brand": "CRM",
     "brandSubtitle": "Panneau d'admin.",
     "collapse": "Réduire",
@@ -535,5 +646,48 @@
     "uploadError": "Erreur de téléversement",
     "uploaded": "{count} images téléversées",
     "uploadedOne": "Image téléversée"
+  },
+  "tour": {
+    "help": "Voir le guide de l'application",
+    "progress": "{current} / {total}",
+    "next": "Suivant",
+    "prev": "Précédent",
+    "done": "Terminer",
+    "welcome": {
+      "title": "Bienvenue",
+      "desc": "Nous allons vous montrer les zones clés de votre CRM pour bien démarrer. Vous pouvez quitter à tout moment et relancer le guide depuis l'icône d'aide."
+    },
+    "home": {
+      "title": "Accueil",
+      "desc": "Voici votre tableau de bord : d'un coup d'œil, vous voyez les clients, employés, produits et factures actifs."
+    },
+    "menu": {
+      "title": "Menu latéral",
+      "desc": "Naviguez entre les modules depuis ici. Chaque module apparaît selon vos permissions et les plugins actifs de votre organisation."
+    },
+    "customers": {
+      "title": "Clients",
+      "desc": "Gérez vos contacts et comptes : c'est ici que vos acheteurs sont enregistrés."
+    },
+    "products": {
+      "title": "Produits",
+      "desc": "Votre catalogue de produits, catégories et unités de mesure. C'est ce que vous facturerez."
+    },
+    "invoices": {
+      "title": "Factures",
+      "desc": "Émettez et gérez votre facturation électronique."
+    },
+    "settings": {
+      "title": "Réglages",
+      "desc": "Configurez votre compte, organisation, établissements et certificat depuis cette vue."
+    },
+    "plugins": {
+      "title": "Plugins",
+      "desc": "Activez ici les modules supplémentaires dont votre organisation a besoin."
+    },
+    "finish": {
+      "title": "C'est tout !",
+      "desc": "Vous connaissez l'essentiel. Si besoin, appuyez sur l'icône d'aide en haut à droite pour revoir le guide."
+    }
   }
 }

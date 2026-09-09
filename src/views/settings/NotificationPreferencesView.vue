@@ -94,10 +94,10 @@ async function saveAll(): Promise<void> {
       <p class="text-body-2 text-medium-emphasis">{{ $t('notificationPrefs.legend') }}</p>
     </v-sheet>
 
-    <v-alert v-if="store.error" type="error" class="mb-4" variant="tonal">
+    <v-alert v-if="store.error" type="error" class="mb-4">
       {{ store.error }}
     </v-alert>
-    <v-alert v-if="saved" type="success" class="mb-4" variant="tonal">
+    <v-alert v-if="saved" type="success" class="mb-4">
       {{ $t('notificationPrefs.saved') }}
     </v-alert>
 

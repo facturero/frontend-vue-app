@@ -210,3 +210,21 @@ márgenes en un `v-sheet` interior.
 6. Míralas en claro **y** en oscuro: usar tokens (`text-medium-emphasis`,
    `bg-surface`) en vez de colores fijos es lo que hace que el modo oscuro
    funcione solo.
+
+---
+
+## 8. Tour guiado (driver.js)
+
+El tour de la aplicación vive en `src/composable/useAppTour.ts` y su estilo en
+`src/styles/tour.css`.
+
+- **Colores del popover:** nunca escribas un color aquí. driver.js monta el
+  popover fuera del `.v-application` de Vuetify, así que no hereda los
+  `--v-theme-*`; el composable vuelca los tokens activos del tema a `--tour-*`
+  en `:root` y `tour.css` los consume. Funciona igual en claro y en oscuro.
+- **Pasos:** cada paso es una ruta y respeta permisos (`auth.can`) y plugins
+  activos (`plugins.isActive`), igual que el menú lateral. Si añades un paso,
+  réplica ese filtrado y reusa `PageHeader` como ancla (`<main h1>`).
+- **Navegación:** entre pasos de rutas distintas el tour empuja la ruta con
+  vue-router y reanuda el highlight al montar la vista (ver hooks
+  `onNextClick`/`onPrevClick` y la reanudación en `router.afterEach`).

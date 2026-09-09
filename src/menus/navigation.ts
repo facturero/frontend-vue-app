@@ -18,12 +18,13 @@ const items: NavItem[] = [
   { titleKey: 'nav.roles', icon: 'mdi-shield-account-outline', to: '/roles', permission: 'user:read' },
   { titleKey: 'nav.customers', icon: 'mdi-account-group-outline', to: '/customers', permission: 'customer:read', plugin: 'crm.contacts' },
   { titleKey: 'nav.invoices', icon: 'mdi-file-document-outline', to: '/invoices', permission: 'invoice:read', plugin: 'finance.electronic_invoicing' },
-  { titleKey: 'nav.products', icon: 'mdi-package-variant-closed', to: '/products', permission: 'product:read' },
+  { titleKey: 'nav.products', icon: 'mdi-package-variant-closed', to: '/products', permission: 'product:read', plugin: 'infra.catalog_products' },
   // Arquetipo F: el menú ya no tiene 4 ítems de configuración sueltos; uno
   // solo (Ajustes) abre la vista de pestañas. Perfil, Organización,
   // Establecimientos y Certificado se reparten como pestañas internas.
   { titleKey: 'nav.settings', icon: 'mdi-cog-outline', to: '/settings' },
   { titleKey: 'nav.plugins', icon: 'mdi-puzzle-outline', to: '/plugins', permission: 'plugins:read' },
+  { titleKey: 'nav.audit', icon: 'mdi-clipboard-text-clock-outline', to: '/audit-logs', permission: 'audit:read' },
 ];
 
 export function getNavigationItems(): NavItem[] {

@@ -1,4 +1,114 @@
 {
+  "audit": {
+    "allDomains": "Todos los módulos",
+    "detail": {
+      "title": "Detalle del evento",
+      "occurredAt": "Ocurrió el",
+      "requestId": "ID de petición",
+      "payload": "Datos del evento",
+      "redactedNotice": "Los datos sensibles (tokens, enlaces de acceso, contraseñas) se guardan censurados.",
+      "truncatedNotice": "El evento original era demasiado grande: solo se conservaron los campos principales.",
+      "noPayload": "Este evento no guardó datos adicionales."
+    },
+    "domain": {
+      "identity": "Usuarios y roles",
+      "billing": "Facturación",
+      "customer": "Clientes",
+      "product": "Productos",
+      "organization": "Organización",
+      "plugin": "Módulos",
+      "tax": "Impuestos",
+      "document": "Documentos"
+    },
+    "empty": "No hay actividad registrada con estos filtros",
+    "event": {
+      "auth_credential_linked_google": "Cuenta de Google vinculada",
+      "billing_invoice_created": "Factura creada",
+      "billing_invoice_issued": "Factura emitida",
+      "billing_invoice_line_added": "Línea añadida a la factura",
+      "billing_invoice_line_removed": "Línea eliminada de la factura",
+      "billing_invoice_updated": "Factura modificada",
+      "billing_invoice_voided": "Factura anulada",
+      "customer_address_added": "Dirección añadida",
+      "customer_address_deleted": "Dirección eliminada",
+      "customer_address_updated": "Dirección modificada",
+      "customer_contact_added": "Contacto añadido",
+      "customer_contact_deleted": "Contacto eliminado",
+      "customer_contact_updated": "Contacto modificado",
+      "customer_customer_created": "Cliente creado",
+      "customer_customer_disabled": "Cliente desactivado",
+      "customer_customer_updated": "Cliente modificado",
+      "customer_tag_assigned": "Etiqueta asignada",
+      "customer_tag_created": "Etiqueta creada",
+      "customer_tag_removed": "Etiqueta quitada",
+      "document_file_attached": "Documento adjuntado",
+      "document_file_metadata_updated": "Metadatos del documento modificados",
+      "document_file_removed": "Documento eliminado",
+      "document_file_upload_requested": "Subida de documento solicitada",
+      "identity_pos_device_provisioned": "Terminal POS aprovisionado",
+      "identity_role_created": "Rol creado",
+      "identity_role_updated": "Permisos del rol modificados",
+      "identity_user_accepted_invite": "Invitación aceptada",
+      "identity_user_created": "Usuario creado",
+      "identity_user_disabled": "Usuario desactivado",
+      "identity_user_enabled": "Usuario reactivado",
+      "identity_user_establishments_updated": "Establecimientos del usuario modificados",
+      "identity_user_invited": "Usuario invitado",
+      "identity_user_password_reset_completed": "Contraseña restablecida",
+      "identity_user_password_reset_requested": "Restablecimiento de contraseña solicitado",
+      "identity_user_profile_completed": "Perfil completado",
+      "identity_user_role_assigned": "Rol asignado",
+      "organization_billing_point_created": "Punto de emisión creado",
+      "organization_billing_point_paired": "Terminal emparejado",
+      "organization_billing_point_unlinked": "Terminal desvinculado",
+      "organization_country_added": "País habilitado en la organización",
+      "organization_establishment_created": "Establecimiento creado",
+      "organization_establishment_updated": "Establecimiento modificado",
+      "organization_org_updated": "Organización modificada",
+      "plugin_activated": "Módulo activado",
+      "plugin_created": "Módulo a medida creado",
+      "plugin_custom_request_created": "Solicitud de módulo enviada",
+      "plugin_custom_request_fulfilled": "Solicitud de módulo atendida",
+      "plugin_custom_request_rejected": "Solicitud de módulo rechazada",
+      "plugin_deactivated": "Módulo desactivado",
+      "product_category_created": "Categoría creada",
+      "product_category_deleted": "Categoría eliminada",
+      "product_category_updated": "Categoría modificada",
+      "product_product_created": "Producto creado",
+      "product_product_disabled": "Producto desactivado",
+      "product_product_updated": "Producto modificado",
+      "product_unit_created": "Unidad creada",
+      "product_unit_updated": "Unidad modificada",
+      "tax_country_enabled": "País habilitado",
+      "tax_country_updated": "País modificado",
+      "tax_document_type_upserted": "Tipo de comprobante guardado",
+      "tax_identification_type_upserted": "Tipo de identificación guardado",
+      "tax_tax_rate_upserted": "Tasa de impuesto guardada"
+    },
+    "filters": {
+      "domain": "Módulo",
+      "search": "Buscar",
+      "searchHint": "Busca en el detalle del evento y en el correo del autor",
+      "from": "Desde",
+      "to": "Hasta",
+      "userId": "ID de usuario",
+      "userIdHint": "Filtra por quién ejecutó la acción",
+      "targetId": "ID del elemento",
+      "targetIdHint": "Filtra por el elemento afectado",
+      "includePlatform": "Incluir cambios de plataforma",
+      "reset": "Limpiar filtros"
+    },
+    "headers": {
+      "occurredAt": "Fecha",
+      "action": "Acción",
+      "actor": "Autor",
+      "target": "Elemento",
+      "ip": "IP"
+    },
+    "subtitle": "Quién hizo qué, cuándo y desde dónde. Solo lectura.",
+    "system": "Sistema",
+    "title": "Bitácora de auditoría"
+  },
   "auth": {
     "acceptAndContinue": "Aceptar y continuar",
     "acceptInvite": "Aceptar invitación",
@@ -318,6 +428,7 @@
     "empty": "Sin mensajes"
   },
   "nav": {
+    "audit": "Auditoría",
     "brand": "CRM",
     "brandSubtitle": "Panel de adm.",
     "collapse": "Colapsar",
@@ -535,5 +646,48 @@
     "uploadError": "Error al subir",
     "uploaded": "{count} imágenes subidas",
     "uploadedOne": "Imagen subida"
+  },
+  "tour": {
+    "help": "Ver guía de la aplicación",
+    "progress": "{current} / {total}",
+    "next": "Siguiente",
+    "prev": "Anterior",
+    "done": "Finalizar",
+    "welcome": {
+      "title": "Bienvenido de nuevo",
+      "desc": "Te mostramos los rincones principales de tu CRM para que empieces con buen pie. Puedes salir cuando quieras y relanzar la guía desde la campana de ayuda."
+    },
+    "home": {
+      "title": "Inicio",
+      "desc": "Este es tu panel de control: de un vistazo ves los clientes, empleados, productos y facturas activos."
+    },
+    "menu": {
+      "title": "Menú lateral",
+      "desc": "Navega entre módulos desde aquí. Cada módulo se muestra según tus permisos y los plugins activos en tu organización."
+    },
+    "customers": {
+      "title": "Clientes",
+      "desc": "Gestiona tus contactos y cuentas: aquí se registra quién te compra."
+    },
+    "products": {
+      "title": "Productos",
+      "desc": "Tu catálogo de productos, categorías y unidades de medida. Es lo que podrás facturar."
+    },
+    "invoices": {
+      "title": "Facturas",
+      "desc": "Emite y administra la facturación electrónica de tu negocio."
+    },
+    "settings": {
+      "title": "Ajustes",
+      "desc": "Configura tu cuenta, organización, establecimientos y certificado desde esta vista."
+    },
+    "plugins": {
+      "title": "Plugins",
+      "desc": "Aquí activas los módulos adicionales que tu organización necesita."
+    },
+    "finish": {
+      "title": "¡Listo!",
+      "desc": "Ya conoces lo esencial. Si algo se te escapa, pulsa el icono de ayuda arriba a la derecha para volver a ver la guía."
+    }
   }
 }

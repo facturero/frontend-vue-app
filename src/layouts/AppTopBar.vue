@@ -8,12 +8,14 @@ import { fileApi } from '@/api/files';
 import LocaleSwitcher from '@/components/LocaleSwitcher.vue';
 import NotificationBell from '@/components/NotificationBell.vue';
 import MessageInbox from '@/components/MessageInbox.vue';
+import { useAppTour } from '@/composable/useAppTour';
 import type { Me } from '@/types/auth';
 
 const ui = useUiStore();
 const auth = useAuthStore();
 const router = useRouter();
 const { toggleTheme, isDark } = useThemeToggle();
+const { startTour } = useAppTour();
 
 const avatarUrl = ref<string | null>(null);
 const menuOpen = ref(false);
@@ -82,7 +84,9 @@ function logout(): void {
     <MessageInbox />
 
     <LocaleSwitcher />
-
+    <v-btn icon :title="$t('tour.help')" :aria-label="$t('tour.help')" @click="startTour">
+      <v-icon icon="mdi-help-circle-outline" />
+    </v-btn>
     <v-btn icon @click="toggleTheme">
       <v-icon :icon="isDark() ? 'mdi-weather-sunny' : 'mdi-weather-night'" />
     </v-btn>

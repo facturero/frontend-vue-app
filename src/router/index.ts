@@ -26,6 +26,7 @@ import InvoiceListView from '@/views/invoices/InvoiceListView.vue';
 import InvoiceDetailView from '@/views/invoices/InvoiceDetailView.vue';
 import InvoiceFormView from '@/views/invoices/InvoiceFormView.vue';
 import PluginsView from '@/views/plugins/PluginsView.vue';
+import AuditLogView from '@/views/audit/AuditLogView.vue';
 import AccountSettingsView from '@/views/settings/AccountSettingsView.vue';
 
 const router = createRouter({
@@ -120,27 +121,27 @@ const router = createRouter({
       path: '/products',
       name: 'products',
       component: ProductsListView,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, requiredPlugin: 'infra.catalog_products' },
     },
     {
       path: '/products/new',
       name: 'products-create',
       component: ProductFormView,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, requiredPlugin: 'infra.catalog_products' },
     },
     {
       path: '/products/:id',
       name: 'products-detail',
       component: ProductDetailView,
       props: true,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, requiredPlugin: 'infra.catalog_products' },
     },
     {
       path: '/products/:id/edit',
       name: 'products-edit',
       component: ProductFormView,
       props: true,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, requiredPlugin: 'infra.catalog_products' },
     },
 
     {
@@ -202,6 +203,15 @@ const router = createRouter({
       name: 'plugins',
       component: PluginsView,
       meta: { requiresAuth: true, requiredPermission: 'plugins:read' },
+    },
+
+    {
+      // Bitácora de auditoría. Es del núcleo (no depende de ningún plugin);
+      // el guard del router filtra por permiso y el gateway lo vuelve a exigir.
+      path: '/audit-logs',
+      name: 'audit-logs',
+      component: AuditLogView,
+      meta: { requiresAuth: true, requiredPermission: 'audit:read' },
     },
 
     {
