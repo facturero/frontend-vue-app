@@ -673,6 +673,14 @@
       "title": "Side menu",
       "desc": "Navigate between modules from here. Each module appears according to your permissions and your organization's active plugins."
     },
+    "roles": {
+      "title": "Roles and permissions",
+      "desc": "Define roles with specific permissions: Admin, Sales Rep, Accountant… Each account is assigned one or more roles, which determine what they can see and do."
+    },
+    "employees": {
+      "title": "Employees",
+      "desc": "Invite your team from here: assign an email, a role, and establishments. The person receives an email with a link to activate their account and start using the CRM."
+    },
     "customers": {
       "title": "Customers",
       "desc": "Manage your contacts and accounts: this is where your buyers are registered."

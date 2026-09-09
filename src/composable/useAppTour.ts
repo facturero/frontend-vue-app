@@ -148,6 +148,32 @@ export function useAppTour(): { startTour: () => void } {
       },
     ];
 
+    if (auth.can('user:read')) {
+      steps.push({
+        element: q('main h1'),
+        data: { route: 'roles' },
+        popover: {
+          title: t('tour.roles.title'),
+          description: t('tour.roles.desc'),
+          side: 'bottom',
+          align: 'start',
+        },
+      });
+    }
+
+    if (auth.can('user:read')) {
+      steps.push({
+        element: q('main h1'),
+        data: { route: 'employees' },
+        popover: {
+          title: t('tour.employees.title'),
+          description: t('tour.employees.desc'),
+          side: 'bottom',
+          align: 'start',
+        },
+      });
+    }
+
     if (auth.can('customer:read') && pluginStep('crm.contacts')) {
       steps.push({
         element: q('main h1'),

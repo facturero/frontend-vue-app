@@ -673,6 +673,14 @@
       "title": "Menu latéral",
       "desc": "Naviguez entre les modules depuis ici. Chaque module apparaît selon vos permissions et les plugins actifs de votre organisation."
     },
+    "roles": {
+      "title": "Rôles et permissions",
+      "desc": "Définissez des rôles avec des permissions spécifiques : Administrateur, Vendeur, Comptable… Chaque compte se voit attribuer un ou plusieurs rôles, ce qui détermine ce qu'il peut voir et faire."
+    },
+    "employees": {
+      "title": "Employés",
+      "desc": "Invitez votre équipe depuis ici : attribuez un e-mail, un rôle et des établissements. La personne reçoit un e-mail avec un lien pour activer son compte et commencer à utiliser le CRM."
+    },
     "customers": {
       "title": "Clients",
       "desc": "Gérez vos contacts et comptes : c'est ici que vos acheteurs sont enregistrés."

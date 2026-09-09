@@ -673,6 +673,14 @@
       "title": "Menú lateral",
       "desc": "Navega entre módulos desde aquí. Cada módulo se muestra según tus permisos y los plugins activos en tu organización."
     },
+    "roles": {
+      "title": "Roles y permisos",
+      "desc": "Define roles con permisos específicos: Administrador, Vendedor, Contador… Cada cuenta se asigna uno o más roles, y eso decide qué puede ver y hacer."
+    },
+    "employees": {
+      "title": "Empleados",
+      "desc": "Invita a tu equipo desde aquí: asigna un correo, un rol y establecimientos. La persona recibe un correo con un enlace para activar su cuenta y empezar a usar el CRM."
+    },
     "customers": {
       "title": "Clientes",
       "desc": "Gestiona tus contactos y cuentas: aquí se registra quién te compra."
