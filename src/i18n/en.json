@@ -86,17 +86,17 @@
       "tax_tax_rate_upserted": "Tax rate saved"
     },
     "filters": {
+      "title": "Filters",
+      "searchPlaceholder": "Search the audit log",
       "domain": "Module",
-      "search": "Search",
-      "searchHint": "Searches the event details and the author email",
       "from": "From",
       "to": "To",
       "userId": "User ID",
-      "userIdHint": "Filter by who performed the action",
       "targetId": "Item ID",
-      "targetIdHint": "Filter by the affected item",
+      "uuidPlaceholder": "Full UUID",
       "includePlatform": "Include platform changes",
-      "reset": "Clear filters"
+      "apply": "Apply",
+      "clearAll": "Clear all"
     },
     "headers": {
       "occurredAt": "Date",
@@ -104,6 +104,14 @@
       "actor": "Author",
       "target": "Item",
       "ip": "IP"
+    },
+    "range": {
+      "label": "Period",
+      "h24": "Last 24 hours",
+      "d7": "Last 7 days",
+      "d30": "Last 30 days",
+      "all": "All time",
+      "custom": "Custom"
     },
     "subtitle": "Who did what, when and from where. Read-only.",
     "system": "System",

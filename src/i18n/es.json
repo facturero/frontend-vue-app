@@ -86,17 +86,17 @@
       "tax_tax_rate_upserted": "Tasa de impuesto guardada"
     },
     "filters": {
+      "title": "Filtros",
+      "searchPlaceholder": "Buscar en la bitácora",
       "domain": "Módulo",
-      "search": "Buscar",
-      "searchHint": "Busca en el detalle del evento y en el correo del autor",
       "from": "Desde",
       "to": "Hasta",
       "userId": "ID de usuario",
-      "userIdHint": "Filtra por quién ejecutó la acción",
       "targetId": "ID del elemento",
-      "targetIdHint": "Filtra por el elemento afectado",
+      "uuidPlaceholder": "UUID completo",
       "includePlatform": "Incluir cambios de plataforma",
-      "reset": "Limpiar filtros"
+      "apply": "Aplicar",
+      "clearAll": "Limpiar todo"
     },
     "headers": {
       "occurredAt": "Fecha",
@@ -104,6 +104,14 @@
       "actor": "Autor",
       "target": "Elemento",
       "ip": "IP"
+    },
+    "range": {
+      "label": "Periodo",
+      "h24": "Últimas 24 horas",
+      "d7": "Últimos 7 días",
+      "d30": "Últimos 30 días",
+      "all": "Todo el historial",
+      "custom": "Personalizado"
     },
     "subtitle": "Quién hizo qué, cuándo y desde dónde. Solo lectura.",
     "system": "Sistema",

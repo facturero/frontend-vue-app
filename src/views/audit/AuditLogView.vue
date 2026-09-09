@@ -274,8 +274,6 @@ onMounted(load);
             v-model="search"
             :placeholder="$t('audit.filters.searchPlaceholder')"
             prepend-inner-icon="mdi-magnify"
-            variant="outlined"
-            density="compact"
             hide-details
             clearable
             @keyup.enter="applyFilters"
@@ -304,8 +302,6 @@ onMounted(load);
                   v-model="draft.domain"
                   :items="domains"
                   :label="$t('audit.filters.domain')"
-                  variant="outlined"
-                  density="compact"
                   hide-details
                   class="mb-3"
                 />
@@ -314,8 +310,6 @@ onMounted(load);
                   v-model="draft.range"
                   :items="rangeOptions"
                   :label="$t('audit.range.label')"
-                  variant="outlined"
-                  density="compact"
                   hide-details
                   class="mb-3"
                 />
@@ -326,8 +320,6 @@ onMounted(load);
                       v-model="draft.from"
                       type="date"
                       :label="$t('audit.filters.from')"
-                      variant="outlined"
-                      density="compact"
                       hide-details
                     />
                   </v-col>
@@ -336,8 +328,6 @@ onMounted(load);
                       v-model="draft.to"
                       type="date"
                       :label="$t('audit.filters.to')"
-                      variant="outlined"
-                      density="compact"
                       hide-details
                     />
                   </v-col>
@@ -347,8 +337,6 @@ onMounted(load);
                   v-model="draft.userId"
                   :label="$t('audit.filters.userId')"
                   :placeholder="$t('audit.filters.uuidPlaceholder')"
-                  variant="outlined"
-                  density="compact"
                   hide-details
                   clearable
                   class="mb-3"
@@ -358,8 +346,6 @@ onMounted(load);
                   v-model="draft.targetId"
                   :label="$t('audit.filters.targetId')"
                   :placeholder="$t('audit.filters.uuidPlaceholder')"
-                  variant="outlined"
-                  density="compact"
                   hide-details
                   clearable
                 />
@@ -406,7 +392,6 @@ onMounted(load);
             v-for="f in activeFilters"
             :key="f.key"
             size="small"
-            variant="tonal"
             color="primary"
             closable
             @click:close="removeFilter(f)"
@@ -457,7 +442,7 @@ onMounted(load);
             </div>
           </div>
           <!-- Sin actor = lo hizo el sistema, o el emisor aún no lo propaga. -->
-          <v-chip v-else size="x-small" variant="tonal">{{ $t('audit.system') }}</v-chip>
+          <v-chip v-else size="x-small">{{ $t('audit.system') }}</v-chip>
         </template>
 
         <template #item.targetId="{ item }">
@@ -509,10 +494,10 @@ onMounted(load);
 
             <div class="mt-4">
               <div class="text-subtitle-2 mb-1">{{ $t('audit.detail.payload') }}</div>
-              <v-alert type="info" variant="tonal" density="compact" class="mb-2">
+              <v-alert type="info" class="mb-2">
                 {{ $t('audit.detail.redactedNotice') }}
               </v-alert>
-              <v-alert v-if="wasTruncated" type="warning" variant="tonal" density="compact" class="mb-2">
+              <v-alert v-if="wasTruncated" type="warning" class="mb-2">
                 {{ $t('audit.detail.truncatedNotice') }}
               </v-alert>
               <pre v-if="payloadText" class="audit-payload">{{ payloadText }}</pre>
@@ -530,23 +515,3 @@ onMounted(load);
     </v-dialog>
   </v-container>
 </template>
-
-<style scoped>
-/* Los uuid y las IP se leen mucho mejor en monoespaciada. */
-.audit-mono {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-size: 11px;
-}
-
-.audit-payload {
-  background: rgba(var(--v-border-color), 0.06);
-  border-radius: 4px;
-  padding: 12px;
-  font-size: 12px;
-  line-height: 1.5;
-  max-height: 320px;
-  overflow: auto;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-</style>

@@ -86,17 +86,17 @@
       "tax_tax_rate_upserted": "Taux de taxe enregistré"
     },
     "filters": {
+      "title": "Filtres",
+      "searchPlaceholder": "Rechercher dans le journal",
       "domain": "Module",
-      "search": "Rechercher",
-      "searchHint": "Recherche dans le détail de l'événement et l'e-mail de l'auteur",
       "from": "Du",
       "to": "Au",
       "userId": "ID d'utilisateur",
-      "userIdHint": "Filtrer par l'auteur de l'action",
       "targetId": "ID de l'élément",
-      "targetIdHint": "Filtrer par l'élément concerné",
+      "uuidPlaceholder": "UUID complet",
       "includePlatform": "Inclure les changements de plateforme",
-      "reset": "Effacer les filtres"
+      "apply": "Appliquer",
+      "clearAll": "Tout effacer"
     },
     "headers": {
       "occurredAt": "Date",
@@ -104,6 +104,14 @@
       "actor": "Auteur",
       "target": "Élément",
       "ip": "IP"
+    },
+    "range": {
+      "label": "Période",
+      "h24": "Dernières 24 heures",
+      "d7": "7 derniers jours",
+      "d30": "30 derniers jours",
+      "all": "Tout l'historique",
+      "custom": "Personnalisé"
     },
     "subtitle": "Qui a fait quoi, quand et d'où. Lecture seule.",
     "system": "Système",

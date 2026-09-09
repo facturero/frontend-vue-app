@@ -24,6 +24,26 @@
         border-radius: var(--surface-radius) !important;
         box-shadow: var(--surface-shadow) !important;
       }
+
+      /* Utilidades de la bitácora de auditoría (vista audit/AuditLogView).
+         Son de un solo uso en esa vista pero no hay prop de Vuetify que las
+         cubra, así que viven aquí, junto al resto del sistema. */
+      .audit-mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 11px;
+      }
+
+      .audit-payload {
+        background: rgba(var(--v-border-color), 0.06);
+        border-radius: 4px;
+        padding: 12px;
+        font-size: 12px;
+        line-height: 1.5;
+        max-height: 320px;
+        overflow: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
     </style>
   </head>
   <body>
