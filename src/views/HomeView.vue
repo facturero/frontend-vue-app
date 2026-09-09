@@ -31,6 +31,14 @@ const activeEmployees = computed(() => employees.list.filter((e) => e.status ===
 const activeProducts = computed(() => products.list.filter((p) => p.status === 'active').length);
 const issuedInvoices = computed(() => invoices.list.filter((i) => i.status === 'issued').length);
 
+/**
+ * Cada tarjeta declara de qué depende y de dónde saca su número. El permiso no
+ * basta: el fundador nace con todos, así que una organización recién creada
+ * pedía clientes, productos y facturas a módulos que aún no tiene activos y se
+ * llevaba tres 403 del gateway. Se filtra también por plugin, igual que el menú
+ * lateral, y las peticiones salen de esta misma lista para que lo que se pide y
+ * lo que se enseña no puedan separarse.
+ */
 const cards = computed(() =>
   [
     {
@@ -40,7 +48,9 @@ const cards = computed(() =>
       bg: 'lightprimary',
       fg: 'primary',
       permission: 'customer:read',
+      plugin: 'crm.contacts',
       value: activeCustomers.value,
+      fetch: () => customers.fetch(),
     },
     {
       key: 'employees',
@@ -49,7 +59,10 @@ const cards = computed(() =>
       bg: 'lightinfo',
       fg: 'info',
       permission: 'user:read',
+      // Los empleados son del núcleo (auth-service): no hay plugin que activar.
+      plugin: null,
       value: activeEmployees.value,
+      fetch: () => employees.fetch(),
     },
     {
       key: 'products',
@@ -58,7 +71,9 @@ const cards = computed(() =>
       bg: 'lightsuccess',
       fg: 'success',
       permission: 'product:read',
+      plugin: 'infra.catalog_products',
       value: activeProducts.value,
+      fetch: () => products.fetch(),
     },
     {
       key: 'invoices',
@@ -67,9 +82,11 @@ const cards = computed(() =>
       bg: 'lightwarning',
       fg: 'warning',
       permission: 'invoice:read',
+      plugin: 'finance.electronic_invoicing',
       value: issuedInvoices.value,
+      fetch: () => invoices.fetch(),
     },
-  ].filter((c) => auth.can(c.permission)),
+  ].filter((c) => auth.can(c.permission) && plugins.isActive(c.plugin ?? undefined)),
 );
 
 onMounted(async () => {
@@ -83,12 +100,7 @@ onMounted(async () => {
       router.replace({ name: 'organization-settings' });
       return;
     }
-    const tasks: Promise<void>[] = [];
-    if (auth.can('customer:read')) tasks.push(customers.fetch());
-    if (auth.can('user:read')) tasks.push(employees.fetch());
-    if (auth.can('product:read')) tasks.push(products.fetch());
-    if (auth.can('invoice:read')) tasks.push(invoices.fetch());
-    await Promise.all(tasks).catch(() => {
+    await Promise.all(cards.value.map((c) => c.fetch())).catch(() => {
       /* fallback silencioso: las tarjetas muestran 0 si un servicio falla */
     });
   } catch (e) {
