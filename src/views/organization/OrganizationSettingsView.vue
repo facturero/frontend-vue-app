@@ -189,7 +189,10 @@ async function submit(): Promise<void> {
       </v-col>
     </v-row>
 
-    <v-row v-if="!props.embedded">
+    <!-- Durante el alta estas dos tarjetas son callejones sin salida: el guard
+         del router no deja entrar a ninguna de las dos hasta que la organización
+         esté rellenada, así que solo distraen del formulario de arriba. -->
+    <v-row v-if="!props.embedded && !isSetup">
       <v-col cols="12" md="8" lg="6">
         <v-card class="mt-2">
           <v-card-text class="d-flex align-center justify-space-between">
@@ -207,7 +210,7 @@ async function submit(): Promise<void> {
       </v-col>
     </v-row>
 
-    <v-row v-if="!props.embedded">
+    <v-row v-if="!props.embedded && !isSetup">
       <v-col cols="12" md="8" lg="6">
         <v-card class="mt-2">
           <v-card-text class="d-flex align-center justify-space-between">

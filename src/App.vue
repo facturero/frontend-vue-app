@@ -49,7 +49,7 @@ watch(
 <template>
   <v-app>
     <template v-if="showShell">
-      <AppNavigationDrawer />
+      <AppNavigationDrawer v-if="!auth.isOnboarding" />
       <AppTopBar />
       <v-main>
         <v-container :fluid="mobile">

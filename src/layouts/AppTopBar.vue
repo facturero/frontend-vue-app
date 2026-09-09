@@ -74,17 +74,25 @@ function logout(): void {
 
 <template>
   <v-app-bar app density="comfortable">
-    <v-btn icon @click="ui.toggleDrawer()" class="d-lg-none">
+    <v-btn v-if="!auth.isOnboarding" icon @click="ui.toggleDrawer()" class="d-lg-none">
       <v-icon icon="mdi-menu" />
     </v-btn>
 
     <v-spacer></v-spacer>
 
-    <NotificationBell />
-    <MessageInbox />
+    <template v-if="!auth.isOnboarding">
+      <NotificationBell />
+      <MessageInbox />
+    </template>
 
     <LocaleSwitcher />
-    <v-btn icon :title="$t('tour.help')" :aria-label="$t('tour.help')" @click="startTour">
+    <v-btn
+      v-if="!auth.isOnboarding"
+      icon
+      :title="$t('tour.help')"
+      :aria-label="$t('tour.help')"
+      @click="startTour"
+    >
       <v-icon icon="mdi-help-circle-outline" />
     </v-btn>
     <v-btn icon @click="toggleTheme">
@@ -115,12 +123,14 @@ function logout(): void {
         </v-list-item>
       </v-list>
 
-      <v-divider />
+      <template v-if="!auth.isOnboarding">
+        <v-divider />
 
-      <v-list density="compact" class="py-0">
-        <v-list-item prepend-icon="mdi-account-outline" :title="$t('common.myProfile')" value="profile"
-          @click="goToProfile" />
-      </v-list>
+        <v-list density="compact" class="py-0">
+          <v-list-item prepend-icon="mdi-account-outline" :title="$t('common.myProfile')" value="profile"
+            @click="goToProfile" />
+        </v-list>
+      </template>
 
       <v-divider />
 
