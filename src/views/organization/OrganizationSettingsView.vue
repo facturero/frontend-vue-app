@@ -3,6 +3,7 @@ import { nextTick, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { useOrganizationStore } from '@/stores/organization';
+import { usePluginsStore } from '@/stores/plugins';
 import { shouldAutoStartTour, useAppTour } from '@/composable/useAppTour';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import FieldHelp from '@/components/ui/FieldHelp.vue';
@@ -81,11 +82,18 @@ async function submit(): Promise<void> {
       },
     });
     await auth.fetchMe();
-    // Cerrado el alta, el sitio del usuario es el inicio: allí arranca el tour
-    // de la aplicación. En una edición desde Ajustes se queda donde estaba.
+    // Cerrado el perfil de la organización, el alta sigue hacia el perfil de
+    // negocio (qué se le sugiere) si aún no se ha decidido; si ya eligió (cambió
+    // de organización, invitado hereda una configurada), el sitio es el inicio,
+    // donde arranca el tour de la aplicación. En una edición desde Ajustes se
+    // queda donde estaba.
     if (isSetup.value) {
       isSetup.value = false;
-      router.push({ name: 'home' });
+      const plugins = usePluginsStore();
+      await plugins.ensureMyLoaded();
+      await router.push(
+        plugins.profilePending ? { name: 'business-profile' } : { name: 'home' },
+      );
       return;
     }
     saved.value = true;

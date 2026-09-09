@@ -71,6 +71,7 @@
       "plugin_custom_request_fulfilled": "Solicitud de módulo atendida",
       "plugin_custom_request_rejected": "Solicitud de módulo rechazada",
       "plugin_deactivated": "Módulo desactivado",
+      "plugin_business_profile_selected": "Perfil de negocio elegido",
       "product_category_created": "Categoría creada",
       "product_category_deleted": "Categoría eliminada",
       "product_category_updated": "Categoría modificada",
@@ -341,7 +342,18 @@
     "loadError": "No se pudo cargar /auth/me",
     "title": "Inicio",
     "today": "Hoy, {date}",
-    "welcome": "Bienvenido a {org}"
+    "welcome": "Bienvenido a {org}",
+    "batchResults": {
+      "title": "Activación terminada",
+      "summary": "{activated} módulos activados y {failed} no se pudieron activar.",
+      "reasons": {
+        "activated": "Activado",
+        "already_active": "Ya estaba activo",
+        "missing_dependencies": "Faltan dependencias por activar primero",
+        "not_available": "No está disponible para activar",
+        "not_found": "No existe"
+      }
+    }
   },
   "invoices": {
     "addLine": "Agregar línea",
@@ -539,6 +551,10 @@
     "needPlaceholder": "Ej.: Necesito integración con mi sistema de repartos…",
     "noMatches": "No hay plugins que coincidan con la búsqueda.",
     "perMonth": "/mes",
+    "profileBand": "Perfil de negocio: {name}",
+    "profilePending": "Aún no has elegido tu perfil de negocio: podemos recomendarte con qué módulos empezar.",
+    "changeProfile": "Cambiar perfil",
+    "chooseProfile": "Elegir perfil de negocio",
     "quoteIntro": "La activación incluye los siguientes plugins requeridos:",
     "requestCustom": "Solicitar plugin a medida",
     "requestLabel": "Solicitud {id}…",
@@ -742,6 +758,23 @@
     "finish": {
       "title": "¡Listo!",
       "desc": "Ya conoces lo esencial. Si algo se te escapa, pulsa el icono de ayuda arriba a la derecha para volver a ver la guía."
+    }
+  },
+  "onboarding": {
+    "businessProfile": {
+      "title": "¿A qué se dedica tu negocio?",
+      "intro": "Elige el perfil que mejor describa tu negocio. Solo sirve para sugerirte con qué módulos empezar: no limita nada y puedes cambiarlo cuando quieras.",
+      "selectHint": "Selecciona una tarjeta para continuar.",
+      "omit": "Omitir por ahora",
+      "recommendationsTitle": "Recomendados para {profile}",
+      "backToProfile": "Cambiar de perfil",
+      "alreadyActiveTitle": "Ya activos en tu organización",
+      "alreadyActive": "Ya activo",
+      "comingSoon": "Llegarán pronto",
+      "neededFirst": "Primero activa: {codes}",
+      "monthlyTotal": "Mensual de lo seleccionado: {amount}",
+      "skipRecommendations": "Omitir",
+      "activateSelected": "Activar {count} módulos"
     }
   }
 }

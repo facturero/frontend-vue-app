@@ -18,12 +18,16 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => !!getAccessToken());
 
   /**
-   * El alta sin terminar: falta el perfil (y con él la organización), o la
-   * organización existe pero está en blanco. Mientras dure, la aplicación se
-   * enseña desnuda — sin menú lateral ni adornos en la barra superior — para
-   * que el único camino visible sea el formulario que toca rellenar.
+   * El alta sin terminar: falta el perfil (y con él la organización), la
+   * organización existe pero está en blanco, o falta decidir el perfil de
+   * negocio. Mientras dure, la aplicación se enseña desnuda — sin menú lateral
+   * ni adornos en la barra superior — para que el único camino visible sea el
+   * formulario que toca rellenar.
    */
-  const isOnboarding = computed(() => needsOrg.value || needsOrgSetup.value);
+  const isOnboarding = computed(() => {
+    const plugins = usePluginsStore();
+    return needsOrg.value || needsOrgSetup.value || plugins.profilePending;
+  });
 
   async function login(email: string, password: string): Promise<void> {
     loading.value = true;

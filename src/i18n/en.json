@@ -71,6 +71,7 @@
       "plugin_custom_request_fulfilled": "Module request fulfilled",
       "plugin_custom_request_rejected": "Module request rejected",
       "plugin_deactivated": "Module deactivated",
+      "plugin_business_profile_selected": "Business profile selected",
       "product_category_created": "Category created",
       "product_category_deleted": "Category deleted",
       "product_category_updated": "Category updated",
@@ -341,7 +342,18 @@
     "loadError": "Could not load /auth/me",
     "title": "Home",
     "today": "Today, {date}",
-    "welcome": "Welcome to {org}"
+    "welcome": "Welcome to {org}",
+    "batchResults": {
+      "title": "Activation finished",
+      "summary": "{activated} modules activated and {failed} could not be activated.",
+      "reasons": {
+        "activated": "Activated",
+        "already_active": "Already active",
+        "missing_dependencies": "Missing dependencies to activate first",
+        "not_available": "Not available to activate",
+        "not_found": "Does not exist"
+      }
+    }
   },
   "invoices": {
     "addLine": "Add line",
@@ -539,6 +551,10 @@
     "needPlaceholder": "E.g. I need an integration with my delivery system…",
     "noMatches": "No plugins match your search.",
     "perMonth": "/month",
+    "profileBand": "Business profile: {name}",
+    "profilePending": "You haven't chosen your business profile yet: we can recommend which modules to start with.",
+    "changeProfile": "Change profile",
+    "chooseProfile": "Choose business profile",
     "quoteIntro": "Activation includes the following required plugins:",
     "requestCustom": "Request a custom plugin",
     "requestLabel": "Request {id}…",
@@ -742,6 +758,23 @@
     "finish": {
       "title": "All set!",
       "desc": "You know the essentials now. If anything slips your mind, press the help icon at the top right to see the guide again."
+    }
+  },
+  "onboarding": {
+    "businessProfile": {
+      "title": "What does your business do?",
+      "intro": "Choose the profile that best describes your business. It only suggests which modules to start with: it doesn't restrict anything and you can change it anytime.",
+      "selectHint": "Select a card to continue.",
+      "omit": "Skip for now",
+      "recommendationsTitle": "Recommended for {profile}",
+      "backToProfile": "Change profile",
+      "alreadyActiveTitle": "Already active in your organization",
+      "alreadyActive": "Already active",
+      "comingSoon": "Coming soon",
+      "neededFirst": "First activate: {codes}",
+      "monthlyTotal": "Monthly for the selection: {amount}",
+      "skipRecommendations": "Skip",
+      "activateSelected": "Activate {count} modules"
     }
   }
 }

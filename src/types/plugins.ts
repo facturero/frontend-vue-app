@@ -80,6 +80,61 @@ export interface RequestCustomPluginInput {
   basedOnPluginCodes: string[];
 }
 
+export interface BusinessProfile {
+  code: string;
+  name: string;
+  description: string;
+  icon: string;
+}
+
+export interface MyBusinessProfile {
+  profile: (BusinessProfile & { status: 'selected' | 'skipped' }) | null;
+  status: 'pending' | 'selected' | 'skipped';
+  decidedAt: string | null;
+}
+
+export interface RecommendationRequirement {
+  code: string;
+  alreadyActive: boolean;
+}
+
+export interface RecommendationPlugin {
+  code: string;
+  name: string;
+  category: string;
+  buildStatus: PluginBuildStatus;
+  priceCents: number;
+  currency: string;
+}
+
+export type RecommendationState = 'activatable' | 'already_active' | 'coming_soon' | 'blocked';
+
+export interface RecommendationItem {
+  plugin: RecommendationPlugin;
+  recommendation: 'essential' | 'suggested';
+  state: RecommendationState;
+  alreadyActive: boolean;
+  requires: RecommendationRequirement[];
+}
+
+export interface BusinessProfileRecommendations {
+  profile: { code: string; name: string };
+  items: RecommendationItem[];
+  totalMonthlyCents: number;
+}
+
+export type BatchActivationStatus =
+  | 'activated'
+  | 'already_active'
+  | 'not_available'
+  | 'missing_dependencies'
+  | 'not_found';
+
+export interface BatchActivationResult {
+  code: string;
+  result: BatchActivationStatus;
+}
+
 export interface ApiErrorDetail {
   field: string;
   message: string;

@@ -24,14 +24,19 @@ const showShell = computed(() => !!route.meta.requiresAuth);
  * los datos necesarios (usuario cargado, plugins de la organización cargados y
  * organizacion configurada). Se marca como visto al cerrarse: el botón de la
  * top bar permite relanzarlo cuando quiera.
+ *
+ * Las dos pantallas del perfil de negocio son parte del alta y se explican
+ * solas con su encabezado (ver perfiles-de-negocio.md): el tour sigue
+ * arrancando al llegar a inicio, donde el alta ya terminó.
  */
 const autoStarted = ref(false);
+const ONBOARDING_ROUTES = new Set(['business-profile', 'business-profile-plugins']);
 
 watch(
-  [showShell, () => auth.user, () => plugins.myLoaded, () => auth.needsOrgSetup],
+  [showShell, () => auth.user, () => plugins.myLoaded, () => auth.needsOrgSetup, () => route.name],
   () => {
     if (autoStarted.value) return;
-    if (showShell.value && auth.user && plugins.myLoaded && !auth.needsOrgSetup) {
+    if (showShell.value && auth.user && plugins.myLoaded && !auth.needsOrgSetup && !ONBOARDING_ROUTES.has(String(route.name))) {
       autoStarted.value = true;
       if (shouldAutoStartTour(auth.user.id, 'app')) startTour();
     }

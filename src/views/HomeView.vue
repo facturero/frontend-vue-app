@@ -7,6 +7,7 @@ import { useCustomerStore } from '@/stores/customers';
 import { useEmployeeStore } from '@/stores/employees';
 import { useProductStore } from '@/stores/products';
 import { useInvoiceStore } from '@/stores/invoices';
+import { usePluginsStore } from '@/stores/plugins';
 import PageHeader from '@/components/ui/PageHeader.vue';
 
 const { t, locale } = useI18n();
@@ -16,6 +17,7 @@ const customers = useCustomerStore();
 const employees = useEmployeeStore();
 const products = useProductStore();
 const invoices = useInvoiceStore();
+const plugins = usePluginsStore();
 
 const loading = ref(true);
 const loadError = ref<string | null>(null);
@@ -103,6 +105,30 @@ onMounted(async () => {
     <PageHeader :title="$t('home.title')" />
 
     <v-alert v-if="loadError" type="error" class="mb-4" :text="loadError" />
+
+    <v-alert
+      v-if="plugins.lastBatchResults"
+      type="success"
+      closable
+      class="mb-4"
+      @click:close="plugins.lastBatchResults = null"
+    >
+      <template #title>{{ $t('home.batchResults.title') }}</template>
+      <div class="text-body-2">
+        {{
+          $t('home.batchResults.summary', {
+            activated: plugins.lastBatchResults.filter((r) => r.result === 'activated').length,
+            failed: plugins.lastBatchResults.filter((r) => r.result !== 'activated').length,
+          })
+        }}
+      </div>
+      <ul v-if="plugins.lastBatchResults.some((r) => r.result !== 'activated')" class="ml-4 text-caption">
+        <li v-for="r in plugins.lastBatchResults.filter((r) => r.result !== 'activated')" :key="r.code">
+          {{ r.code }}
+          — {{ $t(`home.batchResults.reasons.${r.result}`) }}
+        </li>
+      </ul>
+    </v-alert>
 
     <v-row v-if="loading" dense>
       <v-col cols="12" class="text-center py-12">

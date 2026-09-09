@@ -2,7 +2,17 @@ import { computed, ref } from 'vue';
 import { defineStore } from 'pinia';
 import { pluginApi } from '@/api/plugins';
 import { extractError } from '@/utils/error';
-import type { ApiErrorBody, CatalogPlugin, OrganizationPlugin, PluginCustomRequest, Quote } from '@/types/plugins';
+import type {
+  ApiErrorBody,
+  BatchActivationResult,
+  BusinessProfile,
+  BusinessProfileRecommendations,
+  CatalogPlugin,
+  MyBusinessProfile,
+  OrganizationPlugin,
+  PluginCustomRequest,
+  Quote,
+} from '@/types/plugins';
 
 export const usePluginsStore = defineStore('plugins', () => {
   const catalog = ref<CatalogPlugin[]>([]);
@@ -18,9 +28,25 @@ export const usePluginsStore = defineStore('plugins', () => {
   const errorCode = ref<string | null>(null);
   const errorDetails = ref<string[]>([]);
 
+  /**
+   * Perfil de negocio de la organización: lo que decide qué se recomienda en
+   * el alta. Se carga una vez por sesión junto a `ensureMyLoaded()`, igual que
+   * los plugins activos, para no pedirlo en cada navegación.
+   */
+  const businessProfiles = ref<BusinessProfile[]>([]);
+  const myProfile = ref<MyBusinessProfile | null>(null);
+  const recommendations = ref<BusinessProfileRecommendations | null>(null);
+  /** Resultado de la última activación en lote, para enseñarlo al llegar a inicio. */
+  const lastBatchResults = ref<BatchActivationResult[] | null>(null);
+  const profileLoaded = ref(false);
+  const profileSaving = ref(false);
+
   const activeCodes = computed(
     () => new Set(myPlugins.value.filter((p) => p.status === 'active').map((p) => p.pluginCode ?? '')),
   );
+
+  /** La organización aún no ha decidido su perfil: el alta no ha terminado. */
+  const profilePending = computed(() => myProfile.value?.status === 'pending');
 
   /** Un módulo sin código de plugin es parte del núcleo: siempre disponible. */
   function isActive(pluginCode?: string): boolean {
@@ -69,10 +95,12 @@ export const usePluginsStore = defineStore('plugins', () => {
    * Carga los plugins de la organización una sola vez. La usa el guard del
    * router antes de decidir si una ruta es accesible: sin esto, el menú y las
    * rutas se evaluarían contra una lista vacía y todo parecería desactivado.
+   * El perfil de negocio viaja con ella: el guard y las pantallas del alta lo
+   * necesitan cargado desde el primer momento.
    */
   async function ensureMyLoaded(): Promise<void> {
     if (myLoaded.value) return;
-    await fetchMy();
+    await Promise.all([fetchMy(), ensureProfileLoaded()]);
   }
 
   /** Al cerrar sesión, lo de la organización anterior no debe sobrevivir. */
@@ -81,6 +109,11 @@ export const usePluginsStore = defineStore('plugins', () => {
     myPlugins.value = [];
     requests.value = [];
     currentQuote.value = null;
+    businessProfiles.value = [];
+    myProfile.value = null;
+    recommendations.value = null;
+    lastBatchResults.value = null;
+    profileLoaded.value = false;
     myLoaded.value = false;
     clearError();
   }
@@ -156,18 +189,95 @@ export const usePluginsStore = defineStore('plugins', () => {
     }
   }
 
+  async function ensureProfileLoaded(): Promise<void> {
+    if (profileLoaded.value) return;
+    try {
+      myProfile.value = await pluginApi.getMyBusinessProfile();
+      profileLoaded.value = true;
+    } catch (e) {
+      setError(e);
+    }
+  }
+
+  async function fetchBusinessProfiles(): Promise<void> {
+    loading.value = true;
+    clearError();
+    try {
+      businessProfiles.value = await pluginApi.businessProfiles();
+    } catch (e) {
+      setError(e);
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  /**
+   * Elige (o descarta, `code: null`) el perfil de negocio y refresca el estado
+   * local. Devuelve false si el backend lo rechazó (p. ej. sin plugins:manage).
+   */
+  async function chooseProfile(code: string | null, source: 'onboarding' | 'settings'): Promise<boolean> {
+    profileSaving.value = true;
+    clearError();
+    try {
+      myProfile.value = await pluginApi.chooseBusinessProfile(code, source);
+      return true;
+    } catch (e) {
+      setError(e);
+      return false;
+    } finally {
+      profileSaving.value = false;
+    }
+  }
+
+  async function fetchRecommendations(code: string): Promise<boolean> {
+    clearError();
+    loading.value = true;
+    try {
+      recommendations.value = await pluginApi.recommendations(code);
+      return true;
+    } catch (e) {
+      setError(e);
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  }
+
+  /** Activa un lote de códigos y deja el resultado en `lastBatchResults` para la alerta de inicio. */
+  async function activateBatch(codes: string[]): Promise<boolean> {
+    saving.value = true;
+    clearError();
+    try {
+      lastBatchResults.value = await pluginApi.activateBatch(codes);
+      await fetchMy();
+      return true;
+    } catch (e) {
+      setError(e);
+      return false;
+    } finally {
+      saving.value = false;
+    }
+  }
+
   return {
     catalog,
     myPlugins,
     requests,
     currentQuote,
+    businessProfiles,
+    myProfile,
+    recommendations,
+    lastBatchResults,
     loading,
     saving,
+    profileSaving,
     error,
     errorCode,
     errorDetails,
     activeCodes,
     myLoaded,
+    profileLoaded,
+    profilePending,
     isActive,
     ensureMyLoaded,
     reset,
@@ -179,5 +289,10 @@ export const usePluginsStore = defineStore('plugins', () => {
     activate,
     deactivate,
     requestCustom,
+    ensureProfileLoaded,
+    fetchBusinessProfiles,
+    chooseProfile,
+    fetchRecommendations,
+    activateBatch,
   };
 });

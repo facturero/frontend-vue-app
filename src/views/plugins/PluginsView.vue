@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { usePluginsStore } from '@/stores/plugins';
 import { usePluginsRealtime } from '@/composable/usePluginsRealtime';
 import PluginCatalogTab from '@/components/plugins/PluginCatalogTab.vue';
@@ -15,6 +15,9 @@ usePluginsRealtime();
 onMounted(() => {
   void store.fetchCatalog();
 });
+
+const currentProfile = computed(() => store.myProfile?.profile ?? null);
+const profilePending = computed(() => store.myProfile?.status === 'pending');
 </script>
 
 <template>
@@ -24,6 +27,41 @@ onMounted(() => {
 
       </template>
     </PageHeader>
+
+    <v-alert
+      v-if="currentProfile"
+      type="info"
+      class="mb-4"
+    >
+      <div class="d-flex flex-wrap align-center ga-2">
+        <v-icon :icon="currentProfile.icon" />
+        <span class="text-body-2">
+          {{ $t('plugins.profileBand', { name: currentProfile.name }) }}
+        </span>
+        <v-btn
+          variant="text"
+          size="small"
+          :to="{ name: 'business-profile', query: { source: 'settings' } }"
+          class="ml-auto"
+        >
+          {{ $t('plugins.changeProfile') }}
+        </v-btn>
+      </div>
+    </v-alert>
+
+    <v-alert v-else-if="profilePending" type="warning" class="mb-4">
+      <div class="d-flex flex-wrap align-center ga-2">
+        <span class="text-body-2">{{ $t('plugins.profilePending') }}</span>
+        <v-btn
+          variant="text"
+          size="small"
+          :to="{ name: 'business-profile' }"
+          class="ml-auto"
+        >
+          {{ $t('plugins.chooseProfile') }}
+        </v-btn>
+      </div>
+    </v-alert>
 
     <v-tabs v-model="tab" color="primary" class="mb-4">
       <v-tab value="catalog" prepend-icon="mdi-storefront-outline">{{ $t('plugins.tabCatalog') }}</v-tab>

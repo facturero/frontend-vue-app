@@ -28,6 +28,8 @@ import InvoiceFormView from '@/views/invoices/InvoiceFormView.vue';
 import PluginsView from '@/views/plugins/PluginsView.vue';
 import AuditLogView from '@/views/audit/AuditLogView.vue';
 import AccountSettingsView from '@/views/settings/AccountSettingsView.vue';
+import BusinessProfileView from '@/views/onboarding/BusinessProfileView.vue';
+import BusinessProfileRecommendationsView from '@/views/onboarding/BusinessProfileRecommendationsView.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -115,6 +117,23 @@ const router = createRouter({
       name: 'organization-certificates',
       component: CertificatesView,
       meta: { requiresAuth: true, requiredPermission: 'fiscal:manage', requiredPlugin: 'finance.electronic_certificate' },
+    },
+
+    {
+      // Alta, paso 3: elección del perfil de negocio. Omitible y reabierto desde
+      // módulos (source=settings). Exige plugins:manage porque sin él la pantalla
+      // no puede guardar; si el perfil del fundador no lo tiene, se salta entera.
+      path: '/onboarding/perfil',
+      name: 'business-profile',
+      component: BusinessProfileView,
+      meta: { requiresAuth: true, requiredPermission: 'plugins:manage' },
+    },
+    {
+      // Alta, paso 4: módulos recomendados por el perfil elegido.
+      path: '/onboarding/recomendados',
+      name: 'business-profile-plugins',
+      component: BusinessProfileRecommendationsView,
+      meta: { requiresAuth: true, requiredPermission: 'plugins:manage' },
     },
 
     {

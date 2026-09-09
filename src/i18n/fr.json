@@ -71,6 +71,7 @@
       "plugin_custom_request_fulfilled": "Demande de module traitée",
       "plugin_custom_request_rejected": "Demande de module refusée",
       "plugin_deactivated": "Module désactivé",
+      "plugin_business_profile_selected": "Profil métier choisi",
       "product_category_created": "Catégorie créée",
       "product_category_deleted": "Catégorie supprimée",
       "product_category_updated": "Catégorie modifiée",
@@ -341,7 +342,18 @@
     "loadError": "Impossible de charger /auth/me",
     "title": "Accueil",
     "today": "Aujourd'hui, {date}",
-    "welcome": "Bienvenue sur {org}"
+    "welcome": "Bienvenue sur {org}",
+    "batchResults": {
+      "title": "Activation terminée",
+      "summary": "{activated} modules activés et {failed} n'ont pas pu être activés.",
+      "reasons": {
+        "activated": "Activé",
+        "already_active": "Déjà actif",
+        "missing_dependencies": "Dépendances à activer d'abord",
+        "not_available": "Non disponible à l'activation",
+        "not_found": "N'existe pas"
+      }
+    }
   },
   "invoices": {
     "addLine": "Ajouter une ligne",
@@ -539,6 +551,10 @@
     "needPlaceholder": "Ex. : J'ai besoin d'une intégration avec mon système de livraison…",
     "noMatches": "Aucun plugin ne correspond à la recherche.",
     "perMonth": "/mois",
+    "profileBand": "Profil métier : {name}",
+    "profilePending": "Vous n'avez pas encore choisi votre profil métier : nous pouvons vous recommander les modules pour démarrer.",
+    "changeProfile": "Changer de profil",
+    "chooseProfile": "Choisir le profil métier",
     "quoteIntro": "L'activation inclut les plugins requis suivants :",
     "requestCustom": "Demander un plugin sur mesure",
     "requestLabel": "Demande {id}…",
@@ -742,6 +758,23 @@
     "finish": {
       "title": "C'est tout !",
       "desc": "Vous connaissez l'essentiel. Si besoin, appuyez sur l'icône d'aide en haut à droite pour revoir le guide."
+    }
+  },
+  "onboarding": {
+    "businessProfile": {
+      "title": "À quoi s'occupe votre entreprise ?",
+      "intro": "Choisissez le profil qui décrit le mieux votre entreprise. Il sert uniquement à suggérer les modules pour démarrer : il ne limite rien et vous pouvez le modifier à tout moment.",
+      "selectHint": "Sélectionnez une carte pour continuer.",
+      "omit": "Passer pour l'instant",
+      "recommendationsTitle": "Recommandations pour {profile}",
+      "backToProfile": "Changer de profil",
+      "alreadyActiveTitle": "Déjà actifs dans votre organisation",
+      "alreadyActive": "Déjà actif",
+      "comingSoon": "Bientôt disponibles",
+      "neededFirst": "Activez d'abord : {codes}",
+      "monthlyTotal": "Mensualité de la sélection : {amount}",
+      "skipRecommendations": "Passer",
+      "activateSelected": "Activer {count} modules"
     }
   }
 }
