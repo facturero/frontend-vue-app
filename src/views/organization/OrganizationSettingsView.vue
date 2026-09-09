@@ -90,7 +90,10 @@ async function submit(): Promise<void> {
     if (isSetup.value) {
       isSetup.value = false;
       const plugins = usePluginsStore();
-      await plugins.ensureMyLoaded();
+      // Se pide el perfil de negocio explícitamente: es el dato del que depende
+      // la bifurcación de aquí abajo, y esta ruta es de las que el guard del
+      // router se salta, así que puede no haberse pedido nunca.
+      await plugins.ensureProfileLoaded();
       await router.push(
         plugins.profilePending ? { name: 'business-profile' } : { name: 'home' },
       );

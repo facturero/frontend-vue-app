@@ -126,14 +126,14 @@ const router = createRouter({
       path: '/onboarding/perfil',
       name: 'business-profile',
       component: BusinessProfileView,
-      meta: { requiresAuth: true, requiredPermission: 'plugins:manage' },
+      meta: { requiresAuth: true, requiredPermission: 'plugins:manage', bareShell: true },
     },
     {
       // Alta, paso 4: módulos recomendados por el perfil elegido.
       path: '/onboarding/recomendados',
       name: 'business-profile-plugins',
       component: BusinessProfileRecommendationsView,
-      meta: { requiresAuth: true, requiredPermission: 'plugins:manage' },
+      meta: { requiresAuth: true, requiredPermission: 'plugins:manage', bareShell: true },
     },
 
     {

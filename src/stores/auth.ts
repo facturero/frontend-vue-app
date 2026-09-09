@@ -18,16 +18,17 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => !!getAccessToken());
 
   /**
-   * El alta sin terminar: falta el perfil (y con él la organización), la
-   * organización existe pero está en blanco, o falta decidir el perfil de
-   * negocio. Mientras dure, la aplicación se enseña desnuda — sin menú lateral
-   * ni adornos en la barra superior — para que el único camino visible sea el
-   * formulario que toca rellenar.
+   * El alta sin terminar: falta el perfil (y con él la organización), o la
+   * organización existe pero está en blanco. Mientras dure, la aplicación se
+   * enseña desnuda — sin menú lateral ni adornos en la barra superior — para
+   * que el único camino visible sea el formulario que toca rellenar.
+   *
+   * El perfil de negocio **no** cuenta: es un paso omitible, y quien ya tiene
+   * organización tiene derecho a su aplicación entera aunque no lo haya
+   * decidido. Las dos pantallas de ese paso se ven desnudas por su ruta
+   * (`meta.bareShell`), no por este estado — ver useBareShell().
    */
-  const isOnboarding = computed(() => {
-    const plugins = usePluginsStore();
-    return needsOrg.value || needsOrgSetup.value || plugins.profilePending;
-  });
+  const isOnboarding = computed(() => needsOrg.value || needsOrgSetup.value);
 
   async function login(email: string, password: string): Promise<void> {
     loading.value = true;

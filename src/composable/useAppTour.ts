@@ -386,7 +386,15 @@ export function useAppTour(): { startTour: (tour?: TourName) => void } {
       stageRadius: 12,
       stagePadding: 10,
       waitForElement: 900,
+      // Del tour solo se sale por la X del popover. `allowClose` se queda en
+      // true porque es lo que hace que driver.js pinte esa X; lo que se
+      // desarma es todo lo demás que cerraba sin querer: el clic en el fondo
+      // (un hook vacío lo deja inerte) y la tecla Escape, que va dentro del
+      // control por teclado. El precio de esto último es quedarse también sin
+      // las flechas para avanzar; los botones del popover siguen ahí.
       allowClose: true,
+      overlayClickBehavior: () => {},
+      allowKeyboardControl: false,
       popoverClass: 'app-tour',
       showProgress: true,
       progressText: t('tour.progress', { current: '{{current}}', total: '{{total}}' }),

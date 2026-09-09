@@ -9,12 +9,14 @@ import LocaleSwitcher from '@/components/LocaleSwitcher.vue';
 import NotificationBell from '@/components/NotificationBell.vue';
 import MessageInbox from '@/components/MessageInbox.vue';
 import { useAppTour } from '@/composable/useAppTour';
+import { useBareShell } from '@/composable/useBareShell';
 import type { Me } from '@/types/auth';
 
 const ui = useUiStore();
 const auth = useAuthStore();
 const router = useRouter();
 const { toggleTheme, isDark } = useThemeToggle();
+const bareShell = useBareShell();
 const { startTour } = useAppTour();
 
 const avatarUrl = ref<string | null>(null);
@@ -74,20 +76,20 @@ function logout(): void {
 
 <template>
   <v-app-bar app density="comfortable">
-    <v-btn v-if="!auth.isOnboarding" icon @click="ui.toggleDrawer()" class="d-lg-none">
+    <v-btn v-if="!bareShell" icon @click="ui.toggleDrawer()" class="d-lg-none">
       <v-icon icon="mdi-menu" />
     </v-btn>
 
     <v-spacer></v-spacer>
 
-    <template v-if="!auth.isOnboarding">
+    <template v-if="!bareShell">
       <NotificationBell />
       <MessageInbox />
     </template>
 
     <LocaleSwitcher />
     <v-btn
-      v-if="!auth.isOnboarding"
+      v-if="!bareShell"
       icon
       :title="$t('tour.help')"
       :aria-label="$t('tour.help')"
@@ -123,7 +125,7 @@ function logout(): void {
         </v-list-item>
       </v-list>
 
-      <template v-if="!auth.isOnboarding">
+      <template v-if="!bareShell">
         <v-divider />
 
         <v-list density="compact" class="py-0">

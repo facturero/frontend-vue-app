@@ -99,8 +99,14 @@ export const usePluginsStore = defineStore('plugins', () => {
    * necesitan cargado desde el primer momento.
    */
   async function ensureMyLoaded(): Promise<void> {
-    if (myLoaded.value) return;
-    await Promise.all([fetchMy(), ensureProfileLoaded()]);
+    // Cada mitad lleva su propio "ya está" (`myLoaded`, `profileLoaded`). Un
+    // único guardado arriba dejaba el perfil de negocio sin cargar para siempre
+    // en cuanto los plugins se hubieran cargado por su cuenta, y con `myProfile`
+    // en null nadie llevaba al usuario a elegirlo: se iba directo al inicio.
+    await Promise.all([
+      myLoaded.value ? Promise.resolve() : fetchMy(),
+      ensureProfileLoaded(),
+    ]);
   }
 
   /** Al cerrar sesión, lo de la organización anterior no debe sobrevivir. */

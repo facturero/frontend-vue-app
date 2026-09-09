@@ -6,6 +6,7 @@ import { useUiStore } from '@/stores/ui';
 import { useAuthStore } from '@/stores/auth';
 import { usePluginsStore } from '@/stores/plugins';
 import { shouldAutoStartTour, useAppTour } from '@/composable/useAppTour';
+import { useBareShell } from '@/composable/useBareShell';
 import AppNavigationDrawer from '@/layouts/AppNavigationDrawer.vue';
 import AppTopBar from '@/layouts/AppTopBar.vue';
 
@@ -16,6 +17,7 @@ const auth = useAuthStore();
 const plugins = usePluginsStore();
 const { startTour } = useAppTour();
 const { mobile } = useDisplay();
+const bareShell = useBareShell();
 
 const showShell = computed(() => !!route.meta.requiresAuth);
 
@@ -30,13 +32,12 @@ const showShell = computed(() => !!route.meta.requiresAuth);
  * arrancando al llegar a inicio, donde el alta ya terminó.
  */
 const autoStarted = ref(false);
-const ONBOARDING_ROUTES = new Set(['business-profile', 'business-profile-plugins']);
 
 watch(
   [showShell, () => auth.user, () => plugins.myLoaded, () => auth.needsOrgSetup, () => route.name],
   () => {
     if (autoStarted.value) return;
-    if (showShell.value && auth.user && plugins.myLoaded && !auth.needsOrgSetup && !ONBOARDING_ROUTES.has(String(route.name))) {
+    if (showShell.value && auth.user && plugins.myLoaded && !auth.needsOrgSetup && !bareShell.value) {
       autoStarted.value = true;
       if (shouldAutoStartTour(auth.user.id, 'app')) startTour();
     }
@@ -54,7 +55,7 @@ watch(
 <template>
   <v-app>
     <template v-if="showShell">
-      <AppNavigationDrawer v-if="!auth.isOnboarding" />
+      <AppNavigationDrawer v-if="!bareShell" />
       <AppTopBar />
       <v-main>
         <v-container :fluid="mobile">
