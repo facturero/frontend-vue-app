@@ -496,13 +496,19 @@
     "title": "Notifications"
   },
   "organization": {
-    "accountingHint": "It depends on your income/assets according to the tax authority — check this option if your company is required to. It affects the {field} field on electronic invoices.",
     "accountingObliged": "Required to keep accounting records",
     "certificateCard": "Digital certificate",
     "certificateCardHint": "Required for the tax authority to authorize your invoices.",
     "establishment": "Establishment",
     "establishmentsCard": "Establishments and emission points",
     "establishmentsCardHint": "Required to issue invoices.",
+    "help": {
+      "legalName": "The exact registered name of your company. It is the one printed on tax documents.",
+      "tradeName": "The name your customers know you by, if it differs from the legal name. Optional.",
+      "taxId": "Your organization's tax identifier. Electronic invoicing cannot be issued without it.",
+      "country": "It sets the tax rules the CRM applies: taxes, document types and identification types.",
+      "accounting": "It depends on your income and assets under the tax authority's rules. Check it if your company is required to: it affects the electronic invoices you issue."
+    },
     "legalName": "Legal name",
     "legalNamePlaceholder": "E.g. My Company Ltd.",
     "manage": "Manage",
@@ -619,6 +625,11 @@
     "completeProfile": "Complete profile",
     "completeTitle": "Complete your profile",
     "editIntro": "Update your personal details",
+    "help": {
+      "fullName": "It is recorded as the author of everything you do in the CRM: invoices issued, customer changes, team invitations.",
+      "idType": "The kind of document you identify with: national ID, tax ID or passport.",
+      "idNumber": "The number on that document. It is how the tax system identifies you."
+    },
     "idTypeCedula": "National ID",
     "idTypePassport": "Passport",
     "idTypeRuc": "Tax ID",
@@ -665,54 +676,26 @@
     "onboarding": {
       "hello": {
         "title": "Welcome aboard!",
-        "desc": "Before you start we need a few details so you get full control of your CRM. It is two short steps: yours first, then your organization's. It takes less than a minute."
+        "desc": "Before you start we need a few details so you get full control of your CRM. Two short steps, under a minute."
       },
       "profile": {
-        "photo": {
-          "title": "Your photo",
-          "desc": "Optional. Tap the camera to upload an image: it is the one your team sees next to your name."
-        },
-        "name": {
-          "title": "Your full name",
-          "desc": "It is recorded as the author of everything you do in the CRM: invoices issued, customer changes, team invitations."
-        },
-        "identification": {
-          "title": "Your identification",
-          "desc": "Pick the document type (national ID, tax ID or passport) and enter the number. This is how the tax system identifies you."
+        "form": {
+          "title": "Your details",
+          "desc": "Fill in your name and your identification. Each label has a ? that explains what it is for."
         },
         "submit": {
           "title": "Save and continue",
-          "desc": "Saving completes your account and takes you to step two: your organization's details."
+          "desc": "Saving takes you to your organization's details."
         }
       },
       "org": {
         "intro": {
           "title": "Now, your organization",
-          "desc": "Good. Now we need you to add your organization: the company your invoices are issued under and the one your team belongs to. Here is what each field is for."
-        },
-        "legalName": {
-          "title": "Legal name",
-          "desc": "The exact registered name of your company. It is the one printed on tax documents. Required."
-        },
-        "tradeName": {
-          "title": "Trade name",
-          "desc": "Optional. The name your customers know you by, if it differs from the legal name."
-        },
-        "taxId": {
-          "title": "Tax ID",
-          "desc": "Your organization's tax identifier. Electronic invoicing cannot be issued without it. Required."
-        },
-        "country": {
-          "title": "Country",
-          "desc": "It sets the tax rules the CRM applies: taxes, document types and identification types."
-        },
-        "accounting": {
-          "title": "Required to keep accounting records",
-          "desc": "Check it if your company is required to keep accounting records. It shows on the documents you issue."
+          "desc": "It is the company your invoices are issued under and the one your team belongs to. Each field has a ? with the detail."
         },
         "submit": {
           "title": "Save and enter",
-          "desc": "Saving takes you into the CRM, where we show you the rest: the menu, the modules and where everything lives."
+          "desc": "Saving takes you into the CRM, where we show you the rest."
         }
       }
     },

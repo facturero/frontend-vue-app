@@ -13,6 +13,7 @@ algo, es que falta una decisión aquí.
 | Colores | `theme.themes.light/dark.colors` en `src/plugins/vuetify.ts` | `color="primary"`, `class="bg-auth-panel text-medium-emphasis"` |
 | Aspecto por defecto de un componente | `defaults` en `src/plugins/vuetify.ts` | no se escribe nada |
 | Estructura de página | `src/components/ui/PageHeader.vue` | `<PageHeader :title="…">` |
+| Ayuda de un campo | `src/components/ui/FieldHelp.vue` | `<FieldHelp :text="$t('…')" />` |
 | Espaciado, flex, tamaños | utilidades de Vuetify | `class="d-flex ga-4 pa-6 mb-6"` |
 | Textos | `src/i18n/{es,en,fr}.json` | `$t('…')` |
 
@@ -225,6 +226,9 @@ El tour de la aplicación vive en `src/composable/useAppTour.ts` y su estilo en
 - **Pasos:** cada paso es una ruta y respeta permisos (`auth.can`) y plugins
   activos (`plugins.isActive`), igual que el menú lateral. Si añades un paso,
   réplica ese filtrado y reusa `PageHeader` como ancla (`<main h1>`).
+- **Cuánto contar:** el tour explica el para qué de una pantalla, no qué va
+  en cada campo. El detalle de un campo va en su `<FieldHelp>`, que se lee al
+  pasar el ratón y sigue ahí cuando el tour ya se cerró.
 - **Navegación:** entre pasos de rutas distintas el tour empuja la ruta con
   vue-router y reanuda el highlight al montar la vista (ver hooks
   `onNextClick`/`onPrevClick` y la reanudación en `router.afterEach`).

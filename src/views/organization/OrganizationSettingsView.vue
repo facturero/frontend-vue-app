@@ -5,6 +5,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useOrganizationStore } from '@/stores/organization';
 import { shouldAutoStartTour, useAppTour } from '@/composable/useAppTour';
 import PageHeader from '@/components/ui/PageHeader.vue';
+import FieldHelp from '@/components/ui/FieldHelp.vue';
 
 const auth = useAuthStore();
 const store = useOrganizationStore();
@@ -127,51 +128,62 @@ async function submit(): Promise<void> {
               {{ $t('organization.updated') }}
             </v-alert>
 
-            <v-form @submit.prevent="submit">
+            <v-form data-tour="org-form" @submit.prevent="submit">
               <v-text-field
-                data-tour="org-legal-name"
                 v-model="legalName"
                 :label="$t('organization.legalName')"
                 class="mb-4"
                 :placeholder="$t('organization.legalNamePlaceholder')"
-              />
+              >
+                <template #append>
+                  <FieldHelp :text="$t('organization.help.legalName')" />
+                </template>
+              </v-text-field>
 
               <v-text-field
-                data-tour="org-trade-name"
                 v-model="tradeName"
                 :label="$t('customers.tradeName')"
                 class="mb-4"
                 :placeholder="$t('organization.tradeNamePlaceholder')"
-              />
+              >
+                <template #append>
+                  <FieldHelp :text="$t('organization.help.tradeName')" />
+                </template>
+              </v-text-field>
 
               <v-text-field
-                data-tour="org-tax-id"
                 v-model="taxId"
                 :label="$t('invoices.taxIdLabel')"
                 class="mb-4"
                 :placeholder="$t('invoices.taxIdPlaceholder')"
-              />
+              >
+                <template #append>
+                  <FieldHelp :text="$t('organization.help.taxId')" />
+                </template>
+              </v-text-field>
 
               <v-select
-                data-tour="org-country"
                 v-model="countryCode"
                 :items="[{ title: 'Ecuador', value: 'EC' }]"
                 :label="$t('common.country')"
                 class="mb-4"
-              />
+              >
+                <template #append>
+                  <FieldHelp :text="$t('organization.help.country')" />
+                </template>
+              </v-select>
 
               <v-checkbox
-                data-tour="org-accounting"
                 v-model="obligadoContabilidad"
-                :label="$t('organization.accountingObliged')"
                 density="compact"
                 hide-details="auto"
                 class="mb-4"
-              />
-              <i18n-t keypath="organization.accountingHint" tag="p"
-                class="text-caption text-medium-emphasis mb-4" style="margin-top: -8px;">
-                <template #field><code>obligadoContabilidad</code></template>
-              </i18n-t>
+              >
+                <template #label>
+                  {{ $t('organization.accountingObliged') }}
+                  <FieldHelp :text="$t('organization.help.accounting')" />
+                </template>
+              </v-checkbox>
 
               <v-btn
                 data-tour="org-submit"

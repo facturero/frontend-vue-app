@@ -8,6 +8,7 @@ import ImageUploader from '@/components/ImageUploader.vue';
 import type { Me } from '@/types/auth';
 import type { FileResponse } from '@/types/files';
 import PageHeader from '@/components/ui/PageHeader.vue';
+import FieldHelp from '@/components/ui/FieldHelp.vue';
 
 const auth = useAuthStore();
 const router = useRouter();
@@ -132,7 +133,7 @@ function onAvatarSuccess(fileIds: string[]): void {
 
         <v-card-text class="pt-0 pb-8 px-6">
           <div class="d-flex justify-center">
-            <div data-tour="profile-avatar" class="position-relative" style="width: 148px; margin-top: -74px">
+            <div class="position-relative" style="width: 148px; margin-top: -74px">
               <div
                 class="rounded-circle overflow-hidden d-flex align-center justify-center"
                 style="width: 148px; height: 148px; border: 4px solid rgb(var(--v-theme-surface)); box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18); background: rgba(var(--v-theme-primary), 0.08)"
@@ -194,10 +195,11 @@ function onAvatarSuccess(fileIds: string[]): void {
               {{ $t('profile.updated') }}
             </v-alert>
 
-            <v-form class="d-flex flex-column ga-6" @submit.prevent="submit">
-              <div data-tour="profile-name">
+            <v-form data-tour="profile-form" class="d-flex flex-column ga-6" @submit.prevent="submit">
+              <div>
                 <v-label for="profile-full-name" class="text-body-2 font-weight-medium mb-2">
                   {{ $t('customers.fullName') }}
+                  <FieldHelp :text="$t('profile.help.fullName')" />
                 </v-label>
                 <v-text-field
                   id="profile-full-name"
@@ -206,10 +208,11 @@ function onAvatarSuccess(fileIds: string[]): void {
                 />
               </div>
 
-              <v-row data-tour="profile-identification">
+              <v-row>
                 <v-col cols="12" sm="5">
                   <v-label class="text-body-2 font-weight-medium mb-2">
                     {{ $t('customers.idType') }}
+                    <FieldHelp :text="$t('profile.help.idType')" />
                   </v-label>
                   <v-select
                     v-model="identificationType"
@@ -224,6 +227,7 @@ function onAvatarSuccess(fileIds: string[]): void {
                 <v-col cols="12" sm="7">
                   <v-label for="profile-id-number" class="text-body-2 font-weight-medium mb-2">
                     {{ identificationType === 'ruc' ? $t('profile.rucNumber') : $t('customers.idNumber') }}
+                    <FieldHelp :text="$t('profile.help.idNumber')" />
                   </v-label>
                   <v-text-field
                     id="profile-id-number"

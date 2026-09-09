@@ -154,6 +154,9 @@ export function useAppTour(): { startTour: (tour?: TourName) => void } {
    * Alta, paso 1: los datos personales. Sale sobre /profile en cuanto la cuenta
    * existe, así que lo primero que ve un usuario nuevo es el porqué de pedirle
    * datos antes de dejarle entrar.
+   *
+   * Cuenta el para qué de la pantalla, no qué va en cada campo: de eso se
+   * encarga el "?" que cada campo lleva al lado (components/ui/FieldHelp.vue).
    */
   function welcomeSteps(): DriveStep[] {
     return [
@@ -164,30 +167,12 @@ export function useAppTour(): { startTour: (tour?: TourName) => void } {
         },
       },
       {
-        element: q('[data-tour="profile-avatar"]'),
+        element: q('[data-tour="profile-form"]'),
         popover: {
-          title: t('tour.onboarding.profile.photo.title'),
-          description: t('tour.onboarding.profile.photo.desc'),
-          side: 'bottom',
+          title: t('tour.onboarding.profile.form.title'),
+          description: t('tour.onboarding.profile.form.desc'),
+          side: 'top',
           align: 'center',
-        },
-      },
-      {
-        element: q('[data-tour="profile-name"]'),
-        popover: {
-          title: t('tour.onboarding.profile.name.title'),
-          description: t('tour.onboarding.profile.name.desc'),
-          side: 'bottom',
-          align: 'start',
-        },
-      },
-      {
-        element: q('[data-tour="profile-identification"]'),
-        popover: {
-          title: t('tour.onboarding.profile.identification.title'),
-          description: t('tour.onboarding.profile.identification.desc'),
-          side: 'bottom',
-          align: 'start',
         },
       },
       {
@@ -203,7 +188,7 @@ export function useAppTour(): { startTour: (tour?: TourName) => void } {
   }
 
   /**
-   * Alta, paso 2: la ficha de la organización, campo a campo.
+   * Alta, paso 2: la ficha de la organización.
    *
    * `greet` antepone la bienvenida cuando el usuario nunca pasó por el tour de
    * perfil: quien se registra con identificación entra directo aquí (el guard
@@ -223,54 +208,12 @@ export function useAppTour(): { startTour: (tour?: TourName) => void } {
 
     steps.push(
       {
+        element: q('[data-tour="org-form"]'),
         popover: {
           title: t('tour.onboarding.org.intro.title'),
           description: t('tour.onboarding.org.intro.desc'),
-        },
-      },
-      {
-        element: q('[data-tour="org-legal-name"]'),
-        popover: {
-          title: t('tour.onboarding.org.legalName.title'),
-          description: t('tour.onboarding.org.legalName.desc'),
-          side: 'bottom',
-          align: 'start',
-        },
-      },
-      {
-        element: q('[data-tour="org-trade-name"]'),
-        popover: {
-          title: t('tour.onboarding.org.tradeName.title'),
-          description: t('tour.onboarding.org.tradeName.desc'),
-          side: 'bottom',
-          align: 'start',
-        },
-      },
-      {
-        element: q('[data-tour="org-tax-id"]'),
-        popover: {
-          title: t('tour.onboarding.org.taxId.title'),
-          description: t('tour.onboarding.org.taxId.desc'),
-          side: 'bottom',
-          align: 'start',
-        },
-      },
-      {
-        element: q('[data-tour="org-country"]'),
-        popover: {
-          title: t('tour.onboarding.org.country.title'),
-          description: t('tour.onboarding.org.country.desc'),
-          side: 'bottom',
-          align: 'start',
-        },
-      },
-      {
-        element: q('[data-tour="org-accounting"]'),
-        popover: {
-          title: t('tour.onboarding.org.accounting.title'),
-          description: t('tour.onboarding.org.accounting.desc'),
-          side: 'bottom',
-          align: 'start',
+          side: 'top',
+          align: 'center',
         },
       },
       {
