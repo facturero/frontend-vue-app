@@ -661,6 +661,61 @@
     "next": "Siguiente",
     "prev": "Anterior",
     "done": "Finalizar",
+    "gotIt": "Entendido",
+    "onboarding": {
+      "hello": {
+        "title": "¡Te damos la bienvenida!",
+        "desc": "Antes de empezar necesitamos llenar unos datos para que tengas el control completo de tu CRM. Son dos pasos cortos: primero los tuyos y después los de tu organización. No toma más de un minuto."
+      },
+      "profile": {
+        "photo": {
+          "title": "Tu foto",
+          "desc": "Opcional. Pulsa la cámara para subir una imagen: es la que verá tu equipo junto a tu nombre."
+        },
+        "name": {
+          "title": "Tu nombre completo",
+          "desc": "Queda como autor de cada acción que hagas en el CRM: facturas emitidas, cambios en un cliente, invitaciones a tu equipo."
+        },
+        "identification": {
+          "title": "Tu identificación",
+          "desc": "Elige el tipo de documento (cédula, RUC o pasaporte) y escribe el número. Con esto quedas identificado ante el sistema tributario."
+        },
+        "submit": {
+          "title": "Guarda y sigue",
+          "desc": "Al guardar completamos tu cuenta y pasamos al segundo paso: los datos de tu organización."
+        }
+      },
+      "org": {
+        "intro": {
+          "title": "Ahora, tu organización",
+          "desc": "Bien. Ahora necesitamos que añadas tu organización: es la empresa bajo la que emites tus facturas y a la que pertenece tu equipo. Te explico qué va en cada campo."
+        },
+        "legalName": {
+          "title": "Razón social",
+          "desc": "El nombre legal exacto con el que tu empresa está registrada. Es el que aparece en los documentos tributarios. Obligatorio."
+        },
+        "tradeName": {
+          "title": "Nombre comercial",
+          "desc": "Opcional. El nombre con el que te conocen tus clientes, si es distinto de la razón social."
+        },
+        "taxId": {
+          "title": "RUC",
+          "desc": "El identificador tributario de tu organización. Sin él no se puede emitir facturación electrónica. Obligatorio."
+        },
+        "country": {
+          "title": "País",
+          "desc": "Decide las reglas tributarias que aplica el CRM: impuestos, tipos de comprobante y tipos de identificación."
+        },
+        "accounting": {
+          "title": "Obligado a llevar contabilidad",
+          "desc": "Márcalo si tu empresa está obligada a llevar contabilidad. Se refleja en los comprobantes que emitas."
+        },
+        "submit": {
+          "title": "Guarda y entra",
+          "desc": "Al guardar entras al CRM y te enseñamos el resto: el menú, los módulos y dónde está cada cosa."
+        }
+      }
+    },
     "welcome": {
       "title": "Bienvenido de nuevo",
       "desc": "Te mostramos los rincones principales de tu CRM para que empieces con buen pie. Puedes salir cuando quieras y relanzar la guía desde la campana de ayuda."

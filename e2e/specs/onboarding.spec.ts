@@ -96,6 +96,9 @@ test.describe('Onboarding — cuenta nueva con organización nueva', () => {
       ({ a, r }) => {
         localStorage.setItem('accessToken', a);
         localStorage.setItem('refreshToken', r);
+        // Cuenta recién creada: sin esto sale el tour del alta y su overlay
+        // intercepta los clics del test (useAppTour.ts, crm:tour:disabled).
+        localStorage.setItem('crm:tour:disabled', '1');
       },
       { a: accessToken, r: refreshToken },
     );
@@ -110,7 +113,9 @@ test.describe('Onboarding — cuenta nueva con organización nueva', () => {
     await fieldByLabel(page, 'Nombre legal (razón social)').locator('input').fill(`Onboarding E2E ${UNIQUE}`);
     await fieldByLabel(page, 'RUC / identificación tributaria').locator('input').fill(`179${String(UNIQUE).slice(-7)}001`);
     await page.getByRole('button', { name: 'Guardar cambios' }).click();
-    await expect(page.getByText('Organización actualizada')).toBeVisible({ timeout: 10_000 });
+    // Guardar aquí cierra el alta, y la vista lleva al inicio en vez de quedarse
+    // con el aviso de "actualizada" (OrganizationSettingsView.submit).
+    await expect(page).toHaveURL('/', { timeout: 10_000 });
 
     await activatePlugins(accessToken, ['org.establishments', 'crm.contacts']);
     await waitForAuthServiceToKnowOrgName(accessToken);
@@ -146,6 +151,9 @@ test.describe('Onboarding — cuenta nueva con organización nueva', () => {
       ({ a, r }) => {
         localStorage.setItem('accessToken', a);
         localStorage.setItem('refreshToken', r);
+        // Cuenta recién creada: sin esto sale el tour del alta y su overlay
+        // intercepta los clics del test (useAppTour.ts, crm:tour:disabled).
+        localStorage.setItem('crm:tour:disabled', '1');
       },
       { a: accessToken, r: refreshToken },
     );
@@ -157,7 +165,9 @@ test.describe('Onboarding — cuenta nueva con organización nueva', () => {
     await fieldByLabel(page, 'Nombre legal (razón social)').locator('input').fill(`Onboarding E2E B ${UNIQUE}`);
     await fieldByLabel(page, 'RUC / identificación tributaria').locator('input').fill(`179${String(UNIQUE).slice(-7)}001`);
     await page.getByRole('button', { name: 'Guardar cambios' }).click();
-    await expect(page.getByText('Organización actualizada')).toBeVisible({ timeout: 10_000 });
+    // Guardar aquí cierra el alta, y la vista lleva al inicio en vez de quedarse
+    // con el aviso de "actualizada" (OrganizationSettingsView.submit).
+    await expect(page).toHaveURL('/', { timeout: 10_000 });
 
     await activatePlugins(accessToken, ['org.establishments', 'crm.contacts']);
     await waitForAuthServiceToKnowOrgName(accessToken);

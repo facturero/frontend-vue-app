@@ -5,7 +5,7 @@ import { useDisplay } from 'vuetify';
 import { useUiStore } from '@/stores/ui';
 import { useAuthStore } from '@/stores/auth';
 import { usePluginsStore } from '@/stores/plugins';
-import { isTourSeen, useAppTour } from '@/composable/useAppTour';
+import { shouldAutoStartTour, useAppTour } from '@/composable/useAppTour';
 import AppNavigationDrawer from '@/layouts/AppNavigationDrawer.vue';
 import AppTopBar from '@/layouts/AppTopBar.vue';
 
@@ -33,7 +33,7 @@ watch(
     if (autoStarted.value) return;
     if (showShell.value && auth.user && plugins.myLoaded && !auth.needsOrgSetup) {
       autoStarted.value = true;
-      if (!isTourSeen(auth.user.id)) startTour();
+      if (shouldAutoStartTour(auth.user.id, 'app')) startTour();
     }
   },
   { immediate: true },

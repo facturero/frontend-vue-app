@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, nextTick, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import { shouldAutoStartTour, useAppTour } from '@/composable/useAppTour';
 import { fileApi } from '@/api/files';
 import ImageUploader from '@/components/ImageUploader.vue';
 import type { Me } from '@/types/auth';
@@ -10,6 +11,7 @@ import PageHeader from '@/components/ui/PageHeader.vue';
 
 const auth = useAuthStore();
 const router = useRouter();
+const { startTour } = useAppTour();
 
 // `embedded`: la vista vive dentro de Ajustes (arquetipo F) como pestaña, sin
 // su container ni su PageHeader, que ya pone la vista contenedora.
@@ -45,7 +47,22 @@ onMounted(async () => {
   } finally {
     checking.value = false;
   }
+  await nextTick();
+  maybeStartWelcomeTour();
 });
+
+/**
+ * Tour de bienvenida: es lo primero que ve una cuenta recién creada. Se lanza
+ * desde aquí y no desde App.vue porque necesita el formulario ya pintado
+ * (`checking` en false) para que driver.js encuentre los campos que señala.
+ * Embebida en Ajustes la vista no es un alta sino una edición: ahí no sale.
+ */
+function maybeStartWelcomeTour(): void {
+  const id = (auth.user as Me | null)?.id;
+  if (props.embedded || !isSetup.value || !id) return;
+  if (!shouldAutoStartTour(id, 'welcome')) return;
+  startTour('welcome');
+}
 
 async function loadAvatar(userId: string): Promise<void> {
   try {
@@ -115,7 +132,7 @@ function onAvatarSuccess(fileIds: string[]): void {
 
         <v-card-text class="pt-0 pb-8 px-6">
           <div class="d-flex justify-center">
-            <div class="position-relative" style="width: 148px; margin-top: -74px">
+            <div data-tour="profile-avatar" class="position-relative" style="width: 148px; margin-top: -74px">
               <div
                 class="rounded-circle overflow-hidden d-flex align-center justify-center"
                 style="width: 148px; height: 148px; border: 4px solid rgb(var(--v-theme-surface)); box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18); background: rgba(var(--v-theme-primary), 0.08)"
@@ -178,7 +195,7 @@ function onAvatarSuccess(fileIds: string[]): void {
             </v-alert>
 
             <v-form class="d-flex flex-column ga-6" @submit.prevent="submit">
-              <div>
+              <div data-tour="profile-name">
                 <v-label for="profile-full-name" class="text-body-2 font-weight-medium mb-2">
                   {{ $t('customers.fullName') }}
                 </v-label>
@@ -189,7 +206,7 @@ function onAvatarSuccess(fileIds: string[]): void {
                 />
               </div>
 
-              <v-row>
+              <v-row data-tour="profile-identification">
                 <v-col cols="12" sm="5">
                   <v-label class="text-body-2 font-weight-medium mb-2">
                     {{ $t('customers.idType') }}
@@ -217,6 +234,7 @@ function onAvatarSuccess(fileIds: string[]): void {
               </v-row>
 
               <v-btn
+                data-tour="profile-submit"
                 block
                 size="large"
                 color="primary"

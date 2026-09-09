@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { nextTick, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { useOrganizationStore } from '@/stores/organization';
+import { shouldAutoStartTour, useAppTour } from '@/composable/useAppTour';
 import PageHeader from '@/components/ui/PageHeader.vue';
 
 const auth = useAuthStore();
 const store = useOrganizationStore();
+const router = useRouter();
+const { startTour } = useAppTour();
 
 // `embedded`: la vista vive dentro de Ajustes (arquetipo F) como pestaña, sin
 // container ni PageHeader propios. Se omiten también las tarjetas de acceso
@@ -19,7 +23,16 @@ const countryCode = ref('EC');
 const obligadoContabilidad = ref(false);
 const saved = ref(false);
 
+/**
+ * Segundo paso del alta: se llega aquí porque el guard del router no deja
+ * entrar sin organización. Se guarda al montar porque `needsOrgSetup` deja de
+ * ser cierto en cuanto se guarda, y al terminar hay que saber si esto era un
+ * alta (llevar al inicio) o una edición normal desde Ajustes (quedarse).
+ */
+const isSetup = ref(false);
+
 onMounted(async () => {
+  isSetup.value = !props.embedded && auth.needsOrgSetup;
   try {
     await store.fetch();
     if (store.org) {
@@ -32,7 +45,21 @@ onMounted(async () => {
   } catch {
     // handled by store
   }
+  await nextTick();
+  maybeStartOrgTour();
 });
+
+/**
+ * Tour de la organización: explica campo a campo qué se está pidiendo. Sale
+ * una sola vez y solo en el alta, con el formulario ya pintado para que
+ * driver.js encuentre los campos que señala.
+ */
+function maybeStartOrgTour(): void {
+  const id = auth.user?.id;
+  if (!isSetup.value || !id) return;
+  if (!shouldAutoStartTour(id, 'organization')) return;
+  startTour('organization');
+}
 
 async function submit(): Promise<void> {
   saved.value = false;
@@ -53,6 +80,13 @@ async function submit(): Promise<void> {
       },
     });
     await auth.fetchMe();
+    // Cerrado el alta, el sitio del usuario es el inicio: allí arranca el tour
+    // de la aplicación. En una edición desde Ajustes se queda donde estaba.
+    if (isSetup.value) {
+      isSetup.value = false;
+      router.push({ name: 'home' });
+      return;
+    }
     saved.value = true;
   } catch {
     // handled by store
@@ -95,6 +129,7 @@ async function submit(): Promise<void> {
 
             <v-form @submit.prevent="submit">
               <v-text-field
+                data-tour="org-legal-name"
                 v-model="legalName"
                 :label="$t('organization.legalName')"
                 class="mb-4"
@@ -102,6 +137,7 @@ async function submit(): Promise<void> {
               />
 
               <v-text-field
+                data-tour="org-trade-name"
                 v-model="tradeName"
                 :label="$t('customers.tradeName')"
                 class="mb-4"
@@ -109,6 +145,7 @@ async function submit(): Promise<void> {
               />
 
               <v-text-field
+                data-tour="org-tax-id"
                 v-model="taxId"
                 :label="$t('invoices.taxIdLabel')"
                 class="mb-4"
@@ -116,6 +153,7 @@ async function submit(): Promise<void> {
               />
 
               <v-select
+                data-tour="org-country"
                 v-model="countryCode"
                 :items="[{ title: 'Ecuador', value: 'EC' }]"
                 :label="$t('common.country')"
@@ -123,6 +161,7 @@ async function submit(): Promise<void> {
               />
 
               <v-checkbox
+                data-tour="org-accounting"
                 v-model="obligadoContabilidad"
                 :label="$t('organization.accountingObliged')"
                 density="compact"
@@ -135,6 +174,7 @@ async function submit(): Promise<void> {
               </i18n-t>
 
               <v-btn
+                data-tour="org-submit"
                 block
                 color="primary"
                 type="submit"

@@ -661,6 +661,61 @@
     "next": "Suivant",
     "prev": "Précédent",
     "done": "Terminer",
+    "gotIt": "Compris",
+    "onboarding": {
+      "hello": {
+        "title": "Bienvenue !",
+        "desc": "Avant de commencer, nous avons besoin de quelques informations pour que vous ayez le contrôle complet de votre CRM. Deux étapes courtes : les vôtres, puis celles de votre organisation. Moins d'une minute."
+      },
+      "profile": {
+        "photo": {
+          "title": "Votre photo",
+          "desc": "Facultatif. Appuyez sur l'appareil photo pour téléverser une image : c'est celle que votre équipe verra à côté de votre nom."
+        },
+        "name": {
+          "title": "Votre nom complet",
+          "desc": "Il est enregistré comme auteur de chaque action dans le CRM : factures émises, modifications de clients, invitations de l'équipe."
+        },
+        "identification": {
+          "title": "Votre identification",
+          "desc": "Choisissez le type de document (carte d'identité, numéro fiscal ou passeport) et saisissez le numéro. C'est ainsi que le système fiscal vous identifie."
+        },
+        "submit": {
+          "title": "Enregistrer et continuer",
+          "desc": "L'enregistrement complète votre compte et vous amène à la deuxième étape : les données de votre organisation."
+        }
+      },
+      "org": {
+        "intro": {
+          "title": "Maintenant, votre organisation",
+          "desc": "Bien. Il faut maintenant ajouter votre organisation : l'entreprise sous laquelle vos factures sont émises et à laquelle appartient votre équipe. Voici à quoi sert chaque champ."
+        },
+        "legalName": {
+          "title": "Raison sociale",
+          "desc": "Le nom légal exact sous lequel votre entreprise est enregistrée. C'est celui qui figure sur les documents fiscaux. Obligatoire."
+        },
+        "tradeName": {
+          "title": "Nom commercial",
+          "desc": "Facultatif. Le nom sous lequel vos clients vous connaissent, s'il diffère de la raison sociale."
+        },
+        "taxId": {
+          "title": "Numéro fiscal",
+          "desc": "L'identifiant fiscal de votre organisation. Sans lui, la facturation électronique est impossible. Obligatoire."
+        },
+        "country": {
+          "title": "Pays",
+          "desc": "Il détermine les règles fiscales appliquées par le CRM : taxes, types de documents et types d'identification."
+        },
+        "accounting": {
+          "title": "Tenue de comptabilité obligatoire",
+          "desc": "Cochez si votre entreprise est tenue de tenir une comptabilité. Cela apparaît sur les documents que vous émettez."
+        },
+        "submit": {
+          "title": "Enregistrer et entrer",
+          "desc": "L'enregistrement vous fait entrer dans le CRM, où nous vous montrons le reste : le menu, les modules et où se trouve chaque chose."
+        }
+      }
+    },
     "welcome": {
       "title": "Bienvenue",
       "desc": "Nous allons vous montrer les zones clés de votre CRM pour bien démarrer. Vous pouvez quitter à tout moment et relancer le guide depuis l'icône d'aide."
