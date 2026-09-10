@@ -17,6 +17,9 @@ import OrganizationSettingsView from '@/views/organization/OrganizationSettingsV
 import EstablishmentsView from '@/views/organization/EstablishmentsView.vue';
 import CertificatesView from '@/views/organization/CertificatesView.vue';
 import ProductsListView from '@/views/products/ProductsListView.vue';
+import StockListView from '@/views/inventory/StockListView.vue';
+import StockMovementsView from '@/views/inventory/StockMovementsView.vue';
+import WarehousesView from '@/views/inventory/WarehousesView.vue';
 import ProductFormView from '@/views/products/ProductFormView.vue';
 import ProductDetailView from '@/views/products/ProductDetailView.vue';
 import CustomersListView from '@/views/customers/CustomersListView.vue';
@@ -136,6 +139,27 @@ const router = createRouter({
       meta: { requiresAuth: true, requiredPermission: 'plugins:manage', bareShell: true },
     },
 
+    {
+      path: '/stock',
+      name: 'inventory-stock',
+      component: StockListView,
+      meta: { requiresAuth: true, requiredPlugin: 'inventory.kardex' },
+    },
+    {
+      path: '/stock/products/:productId',
+      name: 'inventory-kardex',
+      component: StockMovementsView,
+      props: true,
+      meta: { requiresAuth: true, requiredPlugin: 'inventory.kardex' },
+    },
+    {
+      // Bodegas cuelga de su propio plugin: se puede llevar kardex con una sola
+      // bodega y el concepto oculto. Coincide con el corte del gateway.
+      path: '/warehouses',
+      name: 'inventory-warehouses',
+      component: WarehousesView,
+      meta: { requiresAuth: true, requiredPlugin: 'inventory.warehouses' },
+    },
     {
       path: '/products',
       name: 'products',

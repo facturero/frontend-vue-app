@@ -1,4 +1,20 @@
 {
+  "assistant": {
+    "title": "Asistente",
+    "newChat": "Conversación nueva",
+    "placeholder": "Pídeme algo. Enter para enviar.",
+    "thinking": "Consultando tus datos…",
+    "emptyHint": "Pregúntame por tus datos o pídeme que haga algo. Antes de crear o cambiar nada, te pediré que lo confirmes.",
+    "confirmTitle": "Necesito tu confirmación",
+    "approve": "Confirmar",
+    "reject": "Rechazar",
+    "disclaimer": "El asistente solo puede hacer lo que tú puedes hacer, y nunca escribe sin que lo confirmes.",
+    "examples": {
+      "sales": "¿Cuánto facturé este mes?",
+      "role": "Crea un rol de cajero que solo pueda facturar",
+      "customer": "¿Tengo algún cliente sin correo?"
+    }
+  },
   "audit": {
     "allDomains": "Todos los módulos",
     "detail": {
@@ -169,6 +185,7 @@
     "actions": "Acciones",
     "active": "Activo",
     "add": "Agregar",
+    "address": "Dirección",
     "all": "Todos",
     "back": "Volver",
     "cancel": "Cancelar",
@@ -355,6 +372,107 @@
       }
     }
   },
+  "inventory": {
+    "accountingNature": "Naturaleza contable",
+    "adjust": "Ajustar",
+    "adjustDialog": {
+      "title": "Ajustar existencias",
+      "entry": "Entrada",
+      "exit": "Salida",
+      "quantityHint": "Cantidad en positivo. La dirección la decides arriba.",
+      "reasonCode": "Motivo",
+      "reasonCodeHint": "De este motivo sale la cuenta contable. No es una nota.",
+      "naturePreview": "Contablemente será:",
+      "unitCost": "Costo unitario",
+      "unitCostHint": "Solo si la entrada trae un costo real de fuera. En blanco entra al promedio vigente.",
+      "note": "Nota",
+      "noteHint": "Texto libre para el humano. No decide nada contable.",
+      "invalidQuantity": "La cantidad debe ser un número mayor que cero, con hasta 4 decimales.",
+      "reasonRequired": "Elige un motivo."
+    },
+    "allProducts": "Todos los productos",
+    "allStockStates": "Con y sin existencia",
+    "allTypes": "Todos los tipos",
+    "allWarehouses": "Todas las bodegas",
+    "available": "Disponible",
+    "averageCost": "Costo promedio",
+    "code": "Código",
+    "deactivate": "Desactivar",
+    "deactivateBody": "La bodega {name} dejará de aparecer. El kardex histórico se conserva intacto. Si le queda existencia, el servidor lo rechazará.",
+    "deactivateTitle": "Desactivar bodega",
+    "defaultWarehouse": "Principal",
+    "empty": "Todavía no hay existencias registradas.",
+    "intro": "Existencias por producto y bodega, con su costo promedio.",
+    "kardex": "Kardex",
+    "movement": {
+      "purchase_in": "Compra",
+      "sale_out": "Venta",
+      "transfer_in": "Traslado entrante",
+      "transfer_out": "Traslado saliente",
+      "adjustment_in": "Ajuste positivo",
+      "adjustment_out": "Ajuste negativo",
+      "opening_balance": "Saldo inicial"
+    },
+    "nature": {
+      "inventory_in": "Entrada a inventario",
+      "inventory_gain": "Sobrante",
+      "cogs": "Costo de ventas",
+      "expense": "Gasto",
+      "shrinkage": "Merma",
+      "internal_transfer": "Traslado interno"
+    },
+    "newWarehouse": "Nueva bodega",
+    "noEstablishment": "Sin establecimiento",
+    "noMovements": "Este producto no tiene movimientos.",
+    "noWarehouses": "No hay bodegas.",
+    "onHand": "En bodega",
+    "productFilter": "Producto",
+    "productFilterHint": "El listado se pagina en el servidor: para buscar, elige un producto.",
+    "quantity": "Cantidad",
+    "reason": {
+      "physical_count": "Conteo físico",
+      "damage": "Avería",
+      "expiration": "Vencimiento",
+      "theft": "Robo",
+      "internal_use": "Consumo interno",
+      "correction": "Corrección"
+    },
+    "reference": "Referencia",
+    "referenceType": {
+      "adjustment": "Ajuste",
+      "invoice": "Factura",
+      "opening_balance": "Saldo inicial",
+      "purchase_order": "Orden de compra",
+      "transfer": "Traslado"
+    },
+    "searchLabel": "Buscar por nombre o SKU",
+    "showingOf": "Mostrando {shown} de {total}",
+    "stale": {
+      "title": "Estas cifras no son confiables",
+      "body": "El inventario estuvo desactivado entre el {from} y el {to}. Durante ese tiempo se siguió vendiendo y no se registraron {count} movimientos.",
+      "action": "Haz un conteo físico y cárgalo como ajuste con motivo Conteo físico. El aviso desaparece solo."
+    },
+    "stockState": "Existencia",
+    "title": "Inventario",
+    "totalCost": "Costo total",
+    "unknownProduct": "Producto desconocido",
+    "warehouse": "Bodega",
+    "warehouseDialog": {
+      "createTitle": "Nueva bodega",
+      "editTitle": "Editar bodega",
+      "codeHint": "No se puede cambiar después: queda escrito en cada fila del kardex.",
+      "codeRequired": "El código es obligatorio.",
+      "nameRequired": "El nombre es obligatorio.",
+      "establishmentHint": "Las ventas de este establecimiento descontarán de esta bodega.",
+      "isDefault": "Bodega principal",
+      "isDefaultHint": "Recibe las ventas cuyo establecimiento no tiene bodega propia."
+    },
+    "warehouses": "Bodegas",
+    "warehousesIntro": "Cada establecimiento recibe su bodega automáticamente. Aquí se añaden las demás.",
+    "warehousesWithStock": "Bodegas con existencia",
+    "withStock": "Con existencia",
+    "withoutStock": "Sin existencia"
+  },
   "invoices": {
     "addLine": "Agregar línea",
     "addLineError": "Error al agregar la línea",
@@ -460,28 +578,8 @@
     "plugins": "Plugins",
     "products": "Productos",
     "roles": "Roles",
-    "settings": "Ajustes"
-  },
-  "notifications": {
-    "accountDisabled": "Tu cuenta fue desactivada",
-    "accountEnabled": "Tu cuenta fue reactivada",
-    "customPluginReady": "Tu plugin a medida está listo",
-    "empty": "Sin notificaciones",
-    "hoursAgo": "hace {n} h",
-    "invoiceIssued": "Factura emitida",
-    "invoiceVoided": "Factura anulada",
-    "invited": "Has sido invitado a la organización",
-    "justNow": "hace un momento",
-    "markAllRead": "Marcar todas como leídas",
-    "minutesAgo": "hace {n} min",
-    "passwordResetRequested": "Se solicitó restablecer tu contraseña",
-    "pluginActivated": "Plugin activado",
-    "pluginDeactivated": "Plugin desactivado",
-    "pluginsUpdate": "Actualización de plugins",
-    "requestFulfilled": "Solicitud atendida",
-    "requestRejected": "Solicitud rechazada",
-    "requestSent": "Solicitud enviada",
-    "title": "Notificaciones"
+    "settings": "Ajustes",
+    "stock": "Inventario"
   },
   "notificationPrefs": {
     "app": "App",
@@ -506,6 +604,44 @@
     "smtp": "Correo",
     "tabTitle": "Notificaciones",
     "title": "Notificaciones"
+  },
+  "notifications": {
+    "accountDisabled": "Tu cuenta fue desactivada",
+    "accountEnabled": "Tu cuenta fue reactivada",
+    "customPluginReady": "Tu plugin a medida está listo",
+    "empty": "Sin notificaciones",
+    "hoursAgo": "hace {n} h",
+    "invoiceIssued": "Factura emitida",
+    "invoiceVoided": "Factura anulada",
+    "invited": "Has sido invitado a la organización",
+    "justNow": "hace un momento",
+    "markAllRead": "Marcar todas como leídas",
+    "minutesAgo": "hace {n} min",
+    "passwordResetRequested": "Se solicitó restablecer tu contraseña",
+    "pluginActivated": "Plugin activado",
+    "pluginDeactivated": "Plugin desactivado",
+    "pluginsUpdate": "Actualización de plugins",
+    "requestFulfilled": "Solicitud atendida",
+    "requestRejected": "Solicitud rechazada",
+    "requestSent": "Solicitud enviada",
+    "title": "Notificaciones"
+  },
+  "onboarding": {
+    "businessProfile": {
+      "title": "¿A qué se dedica tu negocio?",
+      "intro": "Elige el perfil que mejor describa tu negocio. Solo sirve para sugerirte con qué módulos empezar: no limita nada y puedes cambiarlo cuando quieras.",
+      "selectHint": "Selecciona una tarjeta para continuar.",
+      "omit": "Omitir por ahora",
+      "recommendationsTitle": "Recomendados para {profile}",
+      "backToProfile": "Cambiar de perfil",
+      "alreadyActiveTitle": "Ya activos en tu organización",
+      "alreadyActive": "Ya activo",
+      "comingSoon": "Llegarán pronto",
+      "neededFirst": "Primero activa: {codes}",
+      "monthlyTotal": "Mensual de lo seleccionado: {amount}",
+      "skipRecommendations": "Omitir",
+      "activateSelected": "Activar {count} módulos"
+    }
   },
   "organization": {
     "accountingObliged": "Obligado a llevar contabilidad",
@@ -670,18 +806,6 @@
     "systemRoleHint": "Este rol es del sistema y no puede ser modificado.",
     "title": "Roles"
   },
-  "uploader": {
-    "addMore": "Añadir más",
-    "change": "Cambiar",
-    "dropHint": "Arrastra o haz clic para seleccionar",
-    "duplicate": "Esa imagen ya está seleccionada",
-    "duplicates": "{count} imágenes ya estaban seleccionadas",
-    "onlyImages": "Solo se permiten imágenes",
-    "tooLarge": "La imagen no debe superar {mb} MB",
-    "uploadError": "Error al subir",
-    "uploaded": "{count} imágenes subidas",
-    "uploadedOne": "Imagen subida"
-  },
   "tour": {
     "help": "Ver guía de la aplicación",
     "progress": "{current} / {total}",
@@ -760,21 +884,16 @@
       "desc": "Ya conoces lo esencial. Si algo se te escapa, pulsa el icono de ayuda arriba a la derecha para volver a ver la guía."
     }
   },
-  "onboarding": {
-    "businessProfile": {
-      "title": "¿A qué se dedica tu negocio?",
-      "intro": "Elige el perfil que mejor describa tu negocio. Solo sirve para sugerirte con qué módulos empezar: no limita nada y puedes cambiarlo cuando quieras.",
-      "selectHint": "Selecciona una tarjeta para continuar.",
-      "omit": "Omitir por ahora",
-      "recommendationsTitle": "Recomendados para {profile}",
-      "backToProfile": "Cambiar de perfil",
-      "alreadyActiveTitle": "Ya activos en tu organización",
-      "alreadyActive": "Ya activo",
-      "comingSoon": "Llegarán pronto",
-      "neededFirst": "Primero activa: {codes}",
-      "monthlyTotal": "Mensual de lo seleccionado: {amount}",
-      "skipRecommendations": "Omitir",
-      "activateSelected": "Activar {count} módulos"
-    }
+  "uploader": {
+    "addMore": "Añadir más",
+    "change": "Cambiar",
+    "dropHint": "Arrastra o haz clic para seleccionar",
+    "duplicate": "Esa imagen ya está seleccionada",
+    "duplicates": "{count} imágenes ya estaban seleccionadas",
+    "onlyImages": "Solo se permiten imágenes",
+    "tooLarge": "La imagen no debe superar {mb} MB",
+    "uploadError": "Error al subir",
+    "uploaded": "{count} imágenes subidas",
+    "uploadedOne": "Imagen subida"
   }
 }

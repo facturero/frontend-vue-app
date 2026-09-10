@@ -7,6 +7,7 @@ import { useAuthStore } from '@/stores/auth';
 import { usePluginsStore } from '@/stores/plugins';
 import { shouldAutoStartTour, useAppTour } from '@/composable/useAppTour';
 import { useBareShell } from '@/composable/useBareShell';
+import AssistantPanel from '@/components/AssistantPanel.vue';
 import AppNavigationDrawer from '@/layouts/AppNavigationDrawer.vue';
 import AppTopBar from '@/layouts/AppTopBar.vue';
 
@@ -57,6 +58,7 @@ watch(
     <template v-if="showShell">
       <AppNavigationDrawer v-if="!bareShell" />
       <AppTopBar />
+      <AssistantPanel v-if="!bareShell" />
       <v-main>
         <v-container :fluid="mobile">
           <router-view />

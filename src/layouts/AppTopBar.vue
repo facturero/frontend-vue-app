@@ -10,6 +10,7 @@ import NotificationBell from '@/components/NotificationBell.vue';
 import MessageInbox from '@/components/MessageInbox.vue';
 import { useAppTour } from '@/composable/useAppTour';
 import { useBareShell } from '@/composable/useBareShell';
+import { useAssistantStore } from '@/stores/assistant';
 import type { Me } from '@/types/auth';
 
 const ui = useUiStore();
@@ -17,6 +18,7 @@ const auth = useAuthStore();
 const router = useRouter();
 const { toggleTheme, isDark } = useThemeToggle();
 const bareShell = useBareShell();
+const assistant = useAssistantStore();
 const { startTour } = useAppTour();
 
 const avatarUrl = ref<string | null>(null);
@@ -83,6 +85,14 @@ function logout(): void {
     <v-spacer></v-spacer>
 
     <template v-if="!bareShell">
+      <v-btn
+        icon
+        :title="$t('assistant.title')"
+        :aria-label="$t('assistant.title')"
+        @click="assistant.toggle()"
+      >
+        <v-icon icon="mdi-robot-outline" />
+      </v-btn>
       <NotificationBell />
       <MessageInbox />
     </template>

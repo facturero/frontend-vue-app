@@ -1,4 +1,20 @@
 {
+  "assistant": {
+    "title": "Assistant",
+    "newChat": "Nouvelle conversation",
+    "placeholder": "Demandez-moi quelque chose. Entrée pour envoyer.",
+    "thinking": "Consultation de vos données…",
+    "emptyHint": "Posez-moi une question sur vos données ou demandez-moi d'agir. Avant de créer ou de modifier quoi que ce soit, je vous demanderai de confirmer.",
+    "confirmTitle": "J’ai besoin de votre confirmation",
+    "approve": "Confirmer",
+    "reject": "Refuser",
+    "disclaimer": "L'assistant ne peut faire que ce que vous pouvez faire, et n'écrit jamais rien sans votre confirmation.",
+    "examples": {
+      "sales": "Combien ai-je facturé ce mois-ci ?",
+      "role": "Crée un rôle de caissier qui ne peut que facturer",
+      "customer": "Ai-je des clients sans adresse e-mail ?"
+    }
+  },
   "audit": {
     "allDomains": "Tous les modules",
     "detail": {
@@ -169,6 +185,7 @@
     "actions": "Actions",
     "active": "Actif",
     "add": "Ajouter",
+    "address": "Adresse",
     "all": "Tous",
     "back": "Retour",
     "cancel": "Annuler",
@@ -355,6 +372,107 @@
       }
     }
   },
+  "inventory": {
+    "accountingNature": "Nature comptable",
+    "adjust": "Ajuster",
+    "adjustDialog": {
+      "title": "Ajuster le stock",
+      "entry": "Entrée",
+      "exit": "Sortie",
+      "quantityHint": "Quantité positive. Le sens se choisit au-dessus.",
+      "reasonCode": "Motif",
+      "reasonCodeHint": "Ce motif détermine le compte comptable. Ce n'est pas une note.",
+      "naturePreview": "Nature comptable :",
+      "unitCost": "Coût unitaire",
+      "unitCostHint": "Uniquement si l'entrée porte un coût réel externe. Vide, elle prend le coût moyen.",
+      "note": "Note",
+      "noteHint": "Texte libre pour l'humain. Ne décide rien en comptabilité.",
+      "invalidQuantity": "La quantité doit être un nombre supérieur à zéro, jusqu'à 4 décimales.",
+      "reasonRequired": "Choisissez un motif."
+    },
+    "allProducts": "Tous les produits",
+    "allStockStates": "Avec et sans stock",
+    "allTypes": "Tous les types",
+    "allWarehouses": "Tous les entrepôts",
+    "available": "Disponible",
+    "averageCost": "Coût moyen",
+    "code": "Code",
+    "deactivate": "Désactiver",
+    "deactivateBody": "L'entrepôt {name} n'apparaîtra plus. L'historique de la fiche de stock reste intact. S'il reste du stock, le serveur refusera.",
+    "deactivateTitle": "Désactiver l'entrepôt",
+    "defaultWarehouse": "Principal",
+    "empty": "Aucun stock enregistré pour l'instant.",
+    "intro": "Stock par produit et entrepôt, avec son coût moyen.",
+    "kardex": "Fiche de stock",
+    "movement": {
+      "purchase_in": "Achat",
+      "sale_out": "Vente",
+      "transfer_in": "Transfert entrant",
+      "transfer_out": "Transfert sortant",
+      "adjustment_in": "Ajustement positif",
+      "adjustment_out": "Ajustement négatif",
+      "opening_balance": "Solde initial"
+    },
+    "nature": {
+      "inventory_in": "Entrée en stock",
+      "inventory_gain": "Excédent",
+      "cogs": "Coût des ventes",
+      "expense": "Charge",
+      "shrinkage": "Perte",
+      "internal_transfer": "Transfert interne"
+    },
+    "newWarehouse": "Nouvel entrepôt",
+    "noEstablishment": "Sans établissement",
+    "noMovements": "Ce produit n'a aucun mouvement.",
+    "noWarehouses": "Aucun entrepôt.",
+    "onHand": "En entrepôt",
+    "productFilter": "Produit",
+    "productFilterHint": "La liste est paginée sur le serveur : pour chercher, choisissez un produit.",
+    "quantity": "Quantité",
+    "reason": {
+      "physical_count": "Comptage physique",
+      "damage": "Casse",
+      "expiration": "Péremption",
+      "theft": "Vol",
+      "internal_use": "Consommation interne",
+      "correction": "Correction"
+    },
+    "reference": "Référence",
+    "referenceType": {
+      "adjustment": "Ajustement",
+      "invoice": "Facture",
+      "opening_balance": "Solde initial",
+      "purchase_order": "Bon de commande",
+      "transfer": "Transfert"
+    },
+    "searchLabel": "Rechercher par nom ou SKU",
+    "showingOf": "Affichage de {shown} sur {total}",
+    "stale": {
+      "title": "Ces chiffres ne sont pas fiables",
+      "body": "L'inventaire a été désactivé entre le {from} et le {to}. Les ventes ont continué et {count} mouvements n'ont pas été enregistrés.",
+      "action": "Faites un comptage physique et chargez-le comme ajustement avec le motif Comptage physique. L'avertissement disparaît tout seul."
+    },
+    "stockState": "Stock",
+    "title": "Inventaire",
+    "totalCost": "Coût total",
+    "unknownProduct": "Produit inconnu",
+    "warehouse": "Entrepôt",
+    "warehouseDialog": {
+      "createTitle": "Nouvel entrepôt",
+      "editTitle": "Modifier l'entrepôt",
+      "codeHint": "Non modifiable ensuite : il figure sur chaque ligne de la fiche de stock.",
+      "codeRequired": "Le code est obligatoire.",
+      "nameRequired": "Le nom est obligatoire.",
+      "establishmentHint": "Les ventes de cet établissement sortiront de cet entrepôt.",
+      "isDefault": "Entrepôt principal",
+      "isDefaultHint": "Reçoit les ventes dont l'établissement n'a pas son propre entrepôt."
+    },
+    "warehouses": "Entrepôts",
+    "warehousesIntro": "Chaque établissement reçoit son entrepôt automatiquement. Ajoutez les autres ici.",
+    "warehousesWithStock": "Entrepôts avec stock",
+    "withStock": "En stock",
+    "withoutStock": "Sans stock"
+  },
   "invoices": {
     "addLine": "Ajouter une ligne",
     "addLineError": "Erreur lors de l'ajout de la ligne",
@@ -460,28 +578,8 @@
     "plugins": "Plugins",
     "products": "Produits",
     "roles": "Rôles",
-    "settings": "Paramètres"
-  },
-  "notifications": {
-    "accountDisabled": "Votre compte a été désactivé",
-    "accountEnabled": "Votre compte a été réactivé",
-    "customPluginReady": "Votre plugin sur mesure est prêt",
-    "empty": "Aucune notification",
-    "hoursAgo": "il y a {n} h",
-    "invoiceIssued": "Facture émise",
-    "invoiceVoided": "Facture annulée",
-    "invited": "Vous avez été invité à l'organisation",
-    "justNow": "à l'instant",
-    "markAllRead": "Tout marquer comme lu",
-    "minutesAgo": "il y a {n} min",
-    "passwordResetRequested": "Une réinitialisation de mot de passe a été demandée",
-    "pluginActivated": "Plugin activé",
-    "pluginDeactivated": "Plugin désactivé",
-    "pluginsUpdate": "Mise à jour des plugins",
-    "requestFulfilled": "Demande traitée",
-    "requestRejected": "Demande refusée",
-    "requestSent": "Demande envoyée",
-    "title": "Notifications"
+    "settings": "Paramètres",
+    "stock": "Inventaire"
   },
   "notificationPrefs": {
     "app": "App",
@@ -506,6 +604,44 @@
     "smtp": "Courriel",
     "tabTitle": "Notifications",
     "title": "Notifications"
+  },
+  "notifications": {
+    "accountDisabled": "Votre compte a été désactivé",
+    "accountEnabled": "Votre compte a été réactivé",
+    "customPluginReady": "Votre plugin sur mesure est prêt",
+    "empty": "Aucune notification",
+    "hoursAgo": "il y a {n} h",
+    "invoiceIssued": "Facture émise",
+    "invoiceVoided": "Facture annulée",
+    "invited": "Vous avez été invité à l'organisation",
+    "justNow": "à l'instant",
+    "markAllRead": "Tout marquer comme lu",
+    "minutesAgo": "il y a {n} min",
+    "passwordResetRequested": "Une réinitialisation de mot de passe a été demandée",
+    "pluginActivated": "Plugin activé",
+    "pluginDeactivated": "Plugin désactivé",
+    "pluginsUpdate": "Mise à jour des plugins",
+    "requestFulfilled": "Demande traitée",
+    "requestRejected": "Demande refusée",
+    "requestSent": "Demande envoyée",
+    "title": "Notifications"
+  },
+  "onboarding": {
+    "businessProfile": {
+      "title": "À quoi s'occupe votre entreprise ?",
+      "intro": "Choisissez le profil qui décrit le mieux votre entreprise. Il sert uniquement à suggérer les modules pour démarrer : il ne limite rien et vous pouvez le modifier à tout moment.",
+      "selectHint": "Sélectionnez une carte pour continuer.",
+      "omit": "Passer pour l'instant",
+      "recommendationsTitle": "Recommandations pour {profile}",
+      "backToProfile": "Changer de profil",
+      "alreadyActiveTitle": "Déjà actifs dans votre organisation",
+      "alreadyActive": "Déjà actif",
+      "comingSoon": "Bientôt disponibles",
+      "neededFirst": "Activez d'abord : {codes}",
+      "monthlyTotal": "Mensualité de la sélection : {amount}",
+      "skipRecommendations": "Passer",
+      "activateSelected": "Activer {count} modules"
+    }
   },
   "organization": {
     "accountingObliged": "Tenu de tenir une comptabilité",
@@ -670,18 +806,6 @@
     "systemRoleHint": "Ce rôle est un rôle système et ne peut pas être modifié.",
     "title": "Rôles"
   },
-  "uploader": {
-    "addMore": "Ajouter plus",
-    "change": "Changer",
-    "dropHint": "Glissez ou cliquez pour sélectionner",
-    "duplicate": "Cette image est déjà sélectionnée",
-    "duplicates": "{count} images étaient déjà sélectionnées",
-    "onlyImages": "Seules les images sont autorisées",
-    "tooLarge": "L'image ne doit pas dépasser {mb} Mo",
-    "uploadError": "Erreur de téléversement",
-    "uploaded": "{count} images téléversées",
-    "uploadedOne": "Image téléversée"
-  },
   "tour": {
     "help": "Voir le guide de l'application",
     "progress": "{current} / {total}",
@@ -760,21 +884,16 @@
       "desc": "Vous connaissez l'essentiel. Si besoin, appuyez sur l'icône d'aide en haut à droite pour revoir le guide."
     }
   },
-  "onboarding": {
-    "businessProfile": {
-      "title": "À quoi s'occupe votre entreprise ?",
-      "intro": "Choisissez le profil qui décrit le mieux votre entreprise. Il sert uniquement à suggérer les modules pour démarrer : il ne limite rien et vous pouvez le modifier à tout moment.",
-      "selectHint": "Sélectionnez une carte pour continuer.",
-      "omit": "Passer pour l'instant",
-      "recommendationsTitle": "Recommandations pour {profile}",
-      "backToProfile": "Changer de profil",
-      "alreadyActiveTitle": "Déjà actifs dans votre organisation",
-      "alreadyActive": "Déjà actif",
-      "comingSoon": "Bientôt disponibles",
-      "neededFirst": "Activez d'abord : {codes}",
-      "monthlyTotal": "Mensualité de la sélection : {amount}",
-      "skipRecommendations": "Passer",
-      "activateSelected": "Activer {count} modules"
-    }
+  "uploader": {
+    "addMore": "Ajouter plus",
+    "change": "Changer",
+    "dropHint": "Glissez ou cliquez pour sélectionner",
+    "duplicate": "Cette image est déjà sélectionnée",
+    "duplicates": "{count} images étaient déjà sélectionnées",
+    "onlyImages": "Seules les images sont autorisées",
+    "tooLarge": "L'image ne doit pas dépasser {mb} Mo",
+    "uploadError": "Erreur de téléversement",
+    "uploaded": "{count} images téléversées",
+    "uploadedOne": "Image téléversée"
   }
 }

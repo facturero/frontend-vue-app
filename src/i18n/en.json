@@ -1,4 +1,20 @@
 {
+  "assistant": {
+    "title": "Assistant",
+    "newChat": "New conversation",
+    "placeholder": "Ask me something. Enter to send.",
+    "thinking": "Looking through your data…",
+    "emptyHint": "Ask about your data or tell me to do something. Before creating or changing anything, I will ask you to confirm.",
+    "confirmTitle": "I need your confirmation",
+    "approve": "Confirm",
+    "reject": "Reject",
+    "disclaimer": "The assistant can only do what you can do, and never writes anything without your confirmation.",
+    "examples": {
+      "sales": "How much did I invoice this month?",
+      "role": "Create a cashier role that can only issue invoices",
+      "customer": "Do I have any customer without an email?"
+    }
+  },
   "audit": {
     "allDomains": "All modules",
     "detail": {
@@ -169,6 +185,7 @@
     "actions": "Actions",
     "active": "Active",
     "add": "Add",
+    "address": "Address",
     "all": "All",
     "back": "Back",
     "cancel": "Cancel",
@@ -355,6 +372,107 @@
       }
     }
   },
+  "inventory": {
+    "accountingNature": "Accounting nature",
+    "adjust": "Adjust",
+    "adjustDialog": {
+      "title": "Adjust stock",
+      "entry": "In",
+      "exit": "Out",
+      "quantityHint": "Positive amount. You pick the direction above.",
+      "reasonCode": "Reason",
+      "reasonCodeHint": "This reason picks the accounting account. It is not a note.",
+      "naturePreview": "Accounting nature:",
+      "unitCost": "Unit cost",
+      "unitCostHint": "Only when the entry carries a real outside cost. Leave blank to use the current average.",
+      "note": "Note",
+      "noteHint": "Free text for humans. It decides nothing in accounting.",
+      "invalidQuantity": "Quantity must be a number greater than zero, up to 4 decimals.",
+      "reasonRequired": "Pick a reason."
+    },
+    "allProducts": "All products",
+    "allStockStates": "In and out of stock",
+    "allTypes": "All types",
+    "allWarehouses": "All warehouses",
+    "available": "Available",
+    "averageCost": "Average cost",
+    "code": "Code",
+    "deactivate": "Deactivate",
+    "deactivateBody": "Warehouse {name} will stop showing up. The stock ledger history stays untouched. If any stock is left, the server will refuse.",
+    "deactivateTitle": "Deactivate warehouse",
+    "defaultWarehouse": "Default",
+    "empty": "No stock recorded yet.",
+    "intro": "Stock on hand per product and warehouse, with average cost.",
+    "kardex": "Stock ledger",
+    "movement": {
+      "purchase_in": "Purchase",
+      "sale_out": "Sale",
+      "transfer_in": "Transfer in",
+      "transfer_out": "Transfer out",
+      "adjustment_in": "Positive adjustment",
+      "adjustment_out": "Negative adjustment",
+      "opening_balance": "Opening balance"
+    },
+    "nature": {
+      "inventory_in": "Inventory in",
+      "inventory_gain": "Overage",
+      "cogs": "Cost of goods sold",
+      "expense": "Expense",
+      "shrinkage": "Shrinkage",
+      "internal_transfer": "Internal transfer"
+    },
+    "newWarehouse": "New warehouse",
+    "noEstablishment": "No establishment",
+    "noMovements": "This product has no movements.",
+    "noWarehouses": "No warehouses.",
+    "onHand": "On hand",
+    "productFilter": "Product",
+    "productFilterHint": "The list is paginated on the server: to search, pick a product.",
+    "quantity": "Quantity",
+    "reason": {
+      "physical_count": "Physical count",
+      "damage": "Damage",
+      "expiration": "Expiration",
+      "theft": "Theft",
+      "internal_use": "Internal use",
+      "correction": "Correction"
+    },
+    "reference": "Reference",
+    "referenceType": {
+      "adjustment": "Adjustment",
+      "invoice": "Invoice",
+      "opening_balance": "Opening balance",
+      "purchase_order": "Purchase order",
+      "transfer": "Transfer"
+    },
+    "searchLabel": "Search by name or SKU",
+    "showingOf": "Showing {shown} of {total}",
+    "stale": {
+      "title": "These figures are not reliable",
+      "body": "Inventory was switched off between {from} and {to}. Sales kept happening and {count} movements went unrecorded.",
+      "action": "Run a physical count and load it as an adjustment with reason Physical count. The warning clears itself."
+    },
+    "stockState": "Stock",
+    "title": "Inventory",
+    "totalCost": "Total cost",
+    "unknownProduct": "Unknown product",
+    "warehouse": "Warehouse",
+    "warehouseDialog": {
+      "createTitle": "New warehouse",
+      "editTitle": "Edit warehouse",
+      "codeHint": "Cannot be changed later: it is written on every stock ledger row.",
+      "codeRequired": "Code is required.",
+      "nameRequired": "Name is required.",
+      "establishmentHint": "Sales from this establishment will draw down this warehouse.",
+      "isDefault": "Default warehouse",
+      "isDefaultHint": "Takes sales whose establishment has no warehouse of its own."
+    },
+    "warehouses": "Warehouses",
+    "warehousesIntro": "Every establishment gets its warehouse automatically. Add the rest here.",
+    "warehousesWithStock": "Warehouses with stock",
+    "withStock": "In stock",
+    "withoutStock": "Out of stock"
+  },
   "invoices": {
     "addLine": "Add line",
     "addLineError": "Error adding the line",
@@ -460,28 +578,8 @@
     "plugins": "Plugins",
     "products": "Products",
     "roles": "Roles",
-    "settings": "Settings"
-  },
-  "notifications": {
-    "accountDisabled": "Your account was disabled",
-    "accountEnabled": "Your account was re-enabled",
-    "customPluginReady": "Your custom plugin is ready",
-    "empty": "No notifications",
-    "hoursAgo": "{n} h ago",
-    "invoiceIssued": "Invoice issued",
-    "invoiceVoided": "Invoice voided",
-    "invited": "You were invited to the organization",
-    "justNow": "just now",
-    "markAllRead": "Mark all as read",
-    "minutesAgo": "{n} min ago",
-    "passwordResetRequested": "A password reset was requested",
-    "pluginActivated": "Plugin activated",
-    "pluginDeactivated": "Plugin deactivated",
-    "pluginsUpdate": "Plugins update",
-    "requestFulfilled": "Request fulfilled",
-    "requestRejected": "Request rejected",
-    "requestSent": "Request sent",
-    "title": "Notifications"
+    "settings": "Settings",
+    "stock": "Inventory"
   },
   "notificationPrefs": {
     "app": "App",
@@ -506,6 +604,44 @@
     "smtp": "Email",
     "tabTitle": "Notifications",
     "title": "Notifications"
+  },
+  "notifications": {
+    "accountDisabled": "Your account was disabled",
+    "accountEnabled": "Your account was re-enabled",
+    "customPluginReady": "Your custom plugin is ready",
+    "empty": "No notifications",
+    "hoursAgo": "{n} h ago",
+    "invoiceIssued": "Invoice issued",
+    "invoiceVoided": "Invoice voided",
+    "invited": "You were invited to the organization",
+    "justNow": "just now",
+    "markAllRead": "Mark all as read",
+    "minutesAgo": "{n} min ago",
+    "passwordResetRequested": "A password reset was requested",
+    "pluginActivated": "Plugin activated",
+    "pluginDeactivated": "Plugin deactivated",
+    "pluginsUpdate": "Plugins update",
+    "requestFulfilled": "Request fulfilled",
+    "requestRejected": "Request rejected",
+    "requestSent": "Request sent",
+    "title": "Notifications"
+  },
+  "onboarding": {
+    "businessProfile": {
+      "title": "What does your business do?",
+      "intro": "Choose the profile that best describes your business. It only suggests which modules to start with: it doesn't restrict anything and you can change it anytime.",
+      "selectHint": "Select a card to continue.",
+      "omit": "Skip for now",
+      "recommendationsTitle": "Recommended for {profile}",
+      "backToProfile": "Change profile",
+      "alreadyActiveTitle": "Already active in your organization",
+      "alreadyActive": "Already active",
+      "comingSoon": "Coming soon",
+      "neededFirst": "First activate: {codes}",
+      "monthlyTotal": "Monthly for the selection: {amount}",
+      "skipRecommendations": "Skip",
+      "activateSelected": "Activate {count} modules"
+    }
   },
   "organization": {
     "accountingObliged": "Required to keep accounting records",
@@ -670,18 +806,6 @@
     "systemRoleHint": "This is a system role and cannot be modified.",
     "title": "Roles"
   },
-  "uploader": {
-    "addMore": "Add more",
-    "change": "Change",
-    "dropHint": "Drag or click to select",
-    "duplicate": "That image is already selected",
-    "duplicates": "{count} images were already selected",
-    "onlyImages": "Only images are allowed",
-    "tooLarge": "The image must not exceed {mb} MB",
-    "uploadError": "Upload error",
-    "uploaded": "{count} images uploaded",
-    "uploadedOne": "Image uploaded"
-  },
   "tour": {
     "help": "View app guide",
     "progress": "{current} / {total}",
@@ -760,21 +884,16 @@
       "desc": "You know the essentials now. If anything slips your mind, press the help icon at the top right to see the guide again."
     }
   },
-  "onboarding": {
-    "businessProfile": {
-      "title": "What does your business do?",
-      "intro": "Choose the profile that best describes your business. It only suggests which modules to start with: it doesn't restrict anything and you can change it anytime.",
-      "selectHint": "Select a card to continue.",
-      "omit": "Skip for now",
-      "recommendationsTitle": "Recommended for {profile}",
-      "backToProfile": "Change profile",
-      "alreadyActiveTitle": "Already active in your organization",
-      "alreadyActive": "Already active",
-      "comingSoon": "Coming soon",
-      "neededFirst": "First activate: {codes}",
-      "monthlyTotal": "Monthly for the selection: {amount}",
-      "skipRecommendations": "Skip",
-      "activateSelected": "Activate {count} modules"
-    }
+  "uploader": {
+    "addMore": "Add more",
+    "change": "Change",
+    "dropHint": "Drag or click to select",
+    "duplicate": "That image is already selected",
+    "duplicates": "{count} images were already selected",
+    "onlyImages": "Only images are allowed",
+    "tooLarge": "The image must not exceed {mb} MB",
+    "uploadError": "Upload error",
+    "uploaded": "{count} images uploaded",
+    "uploadedOne": "Image uploaded"
   }
 }
