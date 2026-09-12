@@ -2,8 +2,18 @@ import { io, type Socket } from 'socket.io-client';
 import { getAccessToken } from '@/utils/http';
 import { useRealtimeStore } from '@/stores/realtime';
 import { useAuthStore } from '@/stores/auth';
+import type { AssistantTurn } from '@/types/assistant';
 
 let socket: Socket | null = null;
+
+/**
+ * Turnos del asistente por el socket. El HTTP normal moría en 502 cuando un
+ * turno pasaba de ~30s: Cloudflare Tunnel bufferiza las respuestas HTTP y corta
+ * (el asistente a veces tarda un minuto o más con el LLM local). El WebSocket
+ * no pasa por ese buffer, así que el turno completo viaja por aquí. El gateway
+ * llama al assistant-service internamente y contesta por el socket.
+ */
+const ASSISTANT_TURN_TIMEOUT_MS = 11 * 60_000;
 
 export function isConnected(): boolean {
   return socket?.connected ?? false;
@@ -11,6 +21,38 @@ export function isConnected(): boolean {
 
 export function getSocket(): Socket | null {
   return socket;
+}
+
+/** Manda un turno del asistente por el socket y espera la respuesta del gateway. */
+export function assistantSend(text: string, conversationId: string | null): Promise<AssistantTurn> {
+  return emitAssistant('assistant:send', { text, conversationId });
+}
+
+/** Confirma o rechaza una escritura propuesta por el asistente. */
+export function assistantDecide(actionId: string, approve: boolean): Promise<AssistantTurn> {
+  return emitAssistant('assistant:decide', { actionId, approve });
+}
+
+function emitAssistant<T>(event: string, payload: Record<string, unknown>): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    if (!socket?.connected) {
+      reject(new Error('Sin conexión con el asistente'));
+      return;
+    }
+    // El ack del gateway llega cuando el turno termina (puede tardar más de un
+    // minuto). socket.io por defecto no corta los acks; nosotras fijamos el cap.
+    socket.timeout(ASSISTANT_TURN_TIMEOUT_MS).emit(event, payload, (err, res?: { ok?: boolean; data?: T; message?: string }) => {
+      if (err) {
+        reject(new Error('El asistente tardó demasiado'));
+        return;
+      }
+      if (res && res.ok && res.data !== undefined) {
+        resolve(res.data);
+        return;
+      }
+      reject(new Error(res?.message ?? 'El asistente no respondió'));
+    });
+  });
 }
 
 /**
@@ -24,7 +66,10 @@ export function connectRealtime(): void {
 
   socket = io(import.meta.env.VITE_API_URL, {
     path: '/ws',
-    auth: { token },
+    // El locale va en el auth (no en un header): el navegador no deja fijar
+    // headers en un transport websocket, pero socket.io entrega `auth` al
+    // gateway, que lo guarda en socket.data.locale para el asistente.
+    auth: { token, locale: localStorage.getItem('app-locale') || 'es' },
     transports: ['websocket', 'polling'],
   });
 

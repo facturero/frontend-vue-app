@@ -1,11 +1,13 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { assistantApi } from '@/api/assistant';
+import { assistantSend, assistantDecide, isConnected } from '@/utils/realtime';
 import { extractError } from '@/utils/error';
 import type {
   ConversationMessage,
   ConversationSummary,
   PendingAction,
+  AssistantTurn,
 } from '@/types/assistant';
 
 export const useAssistantStore = defineStore('assistant', () => {
@@ -23,6 +25,13 @@ export const useAssistantStore = defineStore('assistant', () => {
     messages.value = [];
     pendingActions.value = [];
     error.value = null;
+  }
+
+  /** Prefiere el socket: un turno puede durar más del cap de 30s del túnel.
+   *  Si el socket no está (p.ej. recarga en curso), cae al HTTP. */
+  function sendTurn(text: string, conversationId: string | null): Promise<AssistantTurn> {
+    if (isConnected()) return assistantSend(text, conversationId);
+    return assistantApi.send(text, conversationId);
   }
 
   function toggle(): void {
@@ -64,7 +73,7 @@ export const useAssistantStore = defineStore('assistant', () => {
     messages.value.push({ role: 'user', text: clean, createdAt: new Date().toISOString() });
 
     try {
-      const turn = await assistantApi.send(clean, conversationId.value);
+      const turn = await sendTurn(clean, conversationId.value);
       conversationId.value = turn.conversationId;
       if (turn.reply) {
         messages.value.push({
@@ -82,13 +91,18 @@ export const useAssistantStore = defineStore('assistant', () => {
     }
   }
 
+  function decideTurn(actionId: string, approve: boolean): Promise<AssistantTurn> {
+    if (isConnected()) return assistantDecide(actionId, approve);
+    return assistantApi.decide(actionId, approve);
+  }
+
   /** Confirma o rechaza una escritura propuesta. */
   async function decide(actionId: string, approve: boolean): Promise<void> {
     if (deciding.value) return;
     deciding.value = actionId;
     error.value = null;
     try {
-      const turn = await assistantApi.decide(actionId, approve);
+      const turn = await decideTurn(actionId, approve);
       if (turn.reply) {
         messages.value.push({
           role: 'assistant',
