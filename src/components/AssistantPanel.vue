@@ -15,6 +15,7 @@ import { useAssistantStore } from '@/stores/assistant';
 const store = useAssistantStore();
 const draft = ref('');
 const scroller = ref<HTMLElement | null>(null);
+const showHistory = ref(false);
 
 async function scrollToBottom(): Promise<void> {
   await nextTick();
@@ -27,6 +28,7 @@ watch(() => store.pendingActions.length, scrollToBottom);
 async function submit(): Promise<void> {
   const text = draft.value;
   draft.value = '';
+  showHistory.value = false;
   await store.send(text);
 }
 
@@ -36,6 +38,19 @@ function formatTime(iso: string): string {
   } catch {
     return '';
   }
+}
+
+function formatDate(iso: string): string {
+  try {
+    return new Date(iso).toLocaleDateString([], { day: '2-digit', month: 'short', year: 'numeric' });
+  } catch {
+    return '';
+  }
+}
+
+async function openFromHistory(id: string): Promise<void> {
+  await store.openConversation(id);
+  showHistory.value = false;
 }
 
 /**
@@ -109,10 +124,38 @@ function inlineMarkdown(text: string): string {
           :title="$t('assistant.newChat')"
           @click="store.reset()"
         />
+        <v-btn
+          icon="mdi-history"
+          variant="text"
+          size="small"
+          :color="showHistory ? 'primary' : undefined"
+          :title="$t('assistant.history')"
+          @click="showHistory = !showHistory"
+        />
         <v-btn icon="mdi-close" variant="text" size="small" @click="store.open = false" />
       </div>
 
-      <div ref="scroller" class="flex-grow-1 overflow-y-auto pa-4">
+      <div v-if="showHistory" ref="scroller" class="flex-grow-1 overflow-y-auto pa-4">
+        <v-list v-if="store.conversations.length" density="comfortable" nav>
+          <v-list-item
+            v-for="conversation in store.conversations"
+            :key="conversation.id"
+            @click="openFromHistory(conversation.id)"
+          >
+            <v-list-item-title class="text-body-2">
+              {{ conversation.title ?? $t('assistant.untitled') }}
+            </v-list-item-title>
+            <v-list-item-subtitle class="text-caption text-medium-emphasis">
+              {{ formatDate(conversation.updatedAt) }}
+            </v-list-item-subtitle>
+          </v-list-item>
+        </v-list>
+        <p v-else class="text-body-2 text-medium-emphasis">
+          {{ $t('assistant.historyEmpty') }}
+        </p>
+      </div>
+
+      <div v-else ref="scroller" class="flex-grow-1 overflow-y-auto pa-4">
         <div v-if="!store.messages.length" class="text-center text-medium-emphasis py-8">
           <v-avatar color="lightprimary" size="56" class="mb-3">
             <v-icon icon="mdi-robot-happy-outline" color="primary" size="30" />

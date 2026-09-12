@@ -58,6 +58,9 @@ onMounted(async () => {
   } catch {
     // ignora
   }
+  // Reabre la última conversación del asistente sin esperar a que el panel se
+  // abra: al recargar, el chat que estabas viendo vuelve a aparecer.
+  void assistant.restoreActive();
 });
 
 watch(() => me.value?.avatarFileId, () => {

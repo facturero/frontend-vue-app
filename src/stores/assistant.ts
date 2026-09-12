@@ -20,11 +20,26 @@ export const useAssistantStore = defineStore('assistant', () => {
   const deciding = ref<string | null>(null);
   const error = ref<string | null>(null);
 
+  // El historial vive en el servidor (assistant_db). Esto solo recuerda CUÁL
+  // conversación estaba abierta: al recargar la página el chat que estabas
+  // viendo vuelve a aparecer. La conversación en sí nunca se pierde, da igual
+  // el navegador o el dispositivo.
+  const ACTIVE_KEY = 'assistant.activeConversationId';
+
+  function persistActive(): void {
+    if (conversationId.value) {
+      localStorage.setItem(ACTIVE_KEY, conversationId.value);
+    } else {
+      localStorage.removeItem(ACTIVE_KEY);
+    }
+  }
+
   function reset(): void {
     conversationId.value = null;
     messages.value = [];
     pendingActions.value = [];
     error.value = null;
+    persistActive();
   }
 
   /** Prefiere el socket: un turno puede durar más del cap de 30s del túnel.
@@ -54,6 +69,7 @@ export const useAssistantStore = defineStore('assistant', () => {
       conversationId.value = detail.id;
       messages.value = detail.messages;
       pendingActions.value = detail.pendingActions;
+      persistActive();
     } catch (e) {
       error.value = extractError(e);
     }
@@ -75,6 +91,7 @@ export const useAssistantStore = defineStore('assistant', () => {
     try {
       const turn = await sendTurn(clean, conversationId.value);
       conversationId.value = turn.conversationId;
+      persistActive();
       if (turn.reply) {
         messages.value.push({
           role: 'assistant',
@@ -119,9 +136,14 @@ export const useAssistantStore = defineStore('assistant', () => {
     }
   }
 
+  function restoreActive(): void {
+    const saved = localStorage.getItem(ACTIVE_KEY);
+    if (saved) void openConversation(saved);
+  }
+
   return {
     open, conversationId, messages, pendingActions, conversations,
     sending, deciding, error,
-    toggle, reset, send, decide, loadConversations, openConversation,
+    toggle, reset, send, decide, loadConversations, openConversation, restoreActive,
   };
 });

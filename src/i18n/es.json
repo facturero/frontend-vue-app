@@ -2,6 +2,9 @@
   "assistant": {
     "title": "Asistente",
     "newChat": "Conversación nueva",
+    "history": "Historial",
+    "historyEmpty": "Todavía no tienes conversaciones. El historial se guarda en el servidor y nunca se pierde.",
+    "untitled": "Conversación sin título",
     "placeholder": "Pídeme algo. Enter para enviar.",
     "thinking": "Consultando tus datos…",
     "emptyHint": "Pregúntame por tus datos o pídeme que haga algo. Antes de crear o cambiar nada, te pediré que lo confirmes.",
