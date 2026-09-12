@@ -178,7 +178,6 @@ onMounted(async () => {
     <v-alert
       v-if="store.staleWarning"
       type="warning"
-      variant="tonal"
       class="mb-4"
       :title="$t('inventory.stale.title')"
       data-testid="inventory-stale-warning"

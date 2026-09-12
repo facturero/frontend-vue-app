@@ -29,6 +29,61 @@ async function submit(): Promise<void> {
   draft.value = '';
   await store.send(text);
 }
+
+function formatTime(iso: string): string {
+  try {
+    return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  } catch {
+    return '';
+  }
+}
+
+/**
+ * Markdown-lite sin dependencias nuevas: el asistente devuelve **negrita**,
+ * listas con "- "/"* " y párrafos — antes se mostraba todo literal (con los
+ * asteriscos incluidos). Solo cubre ese subconjunto, a propósito: escapa HTML
+ * primero para no abrir una vía de inyección con texto que viene del modelo.
+ */
+function renderMarkdownLite(text: string): string {
+  const escaped = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  const lines = escaped.split('\n');
+  const html: string[] = [];
+  let inList = false;
+
+  for (const line of lines) {
+    const bullet = line.match(/^\s*[-*]\s+(.*)/);
+    if (bullet) {
+      if (!inList) {
+        html.push('<ul>');
+        inList = true;
+      }
+      html.push(`<li>${inlineMarkdown(bullet[1])}</li>`);
+      continue;
+    }
+    if (inList) {
+      html.push('</ul>');
+      inList = false;
+    }
+    if (line.trim() === '') {
+      html.push('<br>');
+    } else {
+      html.push(`<p>${inlineMarkdown(line)}</p>`);
+    }
+  }
+  if (inList) html.push('</ul>');
+
+  return html.join('');
+}
+
+function inlineMarkdown(text: string): string {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/`(.+?)`/g, '<code>$1</code>');
+}
 </script>
 
 <template>
@@ -38,10 +93,13 @@ async function submit(): Promise<void> {
     temporary
     width="420"
     :scrim="false"
+    class="assistant-drawer"
   >
     <div class="d-flex flex-column fill-height">
-      <div class="d-flex align-center ga-2 pa-4 pb-2">
-        <v-icon icon="mdi-robot-outline" color="primary" />
+      <div class="d-flex align-center ga-3 pa-4 assistant-header">
+        <v-avatar color="lightprimary" size="36">
+          <v-icon icon="mdi-robot-outline" color="primary" size="20" />
+        </v-avatar>
         <span class="text-subtitle-1 font-weight-bold">{{ $t('assistant.title') }}</span>
         <v-spacer />
         <v-btn
@@ -54,46 +112,65 @@ async function submit(): Promise<void> {
         <v-btn icon="mdi-close" variant="text" size="small" @click="store.open = false" />
       </div>
 
-      <v-divider />
-
       <div ref="scroller" class="flex-grow-1 overflow-y-auto pa-4">
         <div v-if="!store.messages.length" class="text-center text-medium-emphasis py-8">
-          <v-icon icon="mdi-robot-happy-outline" size="40" class="mb-3 d-block mx-auto" />
+          <v-avatar color="lightprimary" size="56" class="mb-3">
+            <v-icon icon="mdi-robot-happy-outline" color="primary" size="30" />
+          </v-avatar>
           <p class="text-body-2 mb-4">{{ $t('assistant.emptyHint') }}</p>
-          <v-chip
-            v-for="example in ['assistant.examples.sales', 'assistant.examples.role', 'assistant.examples.customer']"
-            :key="example"
-            size="small"
-            class="ma-1"
-            @click="draft = $t(example)"
-          >
-            {{ $t(example) }}
-          </v-chip>
+          <div class="d-flex flex-column ga-2 align-start mx-auto" style="max-width: 280px">
+            <v-chip
+              v-for="example in ['assistant.examples.sales', 'assistant.examples.role', 'assistant.examples.customer']"
+              :key="example"
+              size="small"
+              variant="outlined"
+              class="example-chip"
+              @click="draft = $t(example)"
+            >
+              {{ $t(example) }}
+            </v-chip>
+          </div>
         </div>
 
         <div
           v-for="(message, index) in store.messages"
           :key="index"
-          class="mb-3 d-flex"
-          :class="message.role === 'user' ? 'justify-end' : 'justify-start'"
+          class="d-flex ga-2 mb-4"
+          :class="message.role === 'user' ? 'flex-row-reverse' : ''"
         >
-          <v-sheet
-            :color="message.role === 'user' ? 'lightprimary' : 'surface'"
-            rounded="lg"
-            class="pa-3"
-            max-width="320"
-            :border="message.role === 'assistant'"
+          <v-avatar
+            :color="message.role === 'user' ? 'primary' : 'lightprimary'"
+            size="28"
+            class="flex-shrink-0 mt-1"
           >
-            <span class="text-body-2" style="white-space: pre-wrap">{{ message.text }}</span>
-          </v-sheet>
+            <v-icon
+              :icon="message.role === 'user' ? 'mdi-account' : 'mdi-robot-outline'"
+              :color="message.role === 'user' ? 'white' : 'primary'"
+              size="16"
+            />
+          </v-avatar>
+          <div class="d-flex flex-column" :class="message.role === 'user' ? 'align-end' : 'align-start'" style="min-width: 0">
+            <v-sheet
+              :color="message.role === 'user' ? 'primary' : undefined"
+              :class="message.role === 'assistant' ? 'assistant-bubble' : ''"
+              rounded="lg"
+              class="pa-3 message-bubble"
+              elevation="0"
+            >
+              <span v-if="message.role === 'user'" class="text-body-2 message-text" style="white-space: pre-wrap; color: white">{{ message.text }}</span>
+              <!-- eslint-disable-next-line vue/no-v-html -->
+              <div v-else class="text-body-2 message-text markdown-lite" v-html="renderMarkdownLite(message.text)" />
+            </v-sheet>
+            <span class="text-caption text-medium-emphasis mt-1 message-time">{{ formatTime(message.createdAt) }}</span>
+          </div>
         </div>
 
         <!-- Confirmación de escrituras. Nada se ejecuta hasta pulsar. -->
         <v-card
           v-for="action in store.pendingActions"
           :key="action.id"
-          class="mb-3"
-          border
+          class="mb-4 confirm-card"
+          elevation="0"
         >
           <v-card-text class="pb-2">
             <div class="d-flex align-center ga-2 mb-2">
@@ -126,9 +203,15 @@ async function submit(): Promise<void> {
           </v-card-actions>
         </v-card>
 
-        <div v-if="store.sending" class="d-flex align-center ga-2 text-medium-emphasis">
-          <v-progress-circular indeterminate size="16" width="2" />
-          <span class="text-caption">{{ $t('assistant.thinking') }}</span>
+        <div v-if="store.sending" class="d-flex ga-2 mb-4">
+          <v-avatar color="lightprimary" size="28" class="flex-shrink-0 mt-1">
+            <v-icon icon="mdi-robot-outline" color="primary" size="16" />
+          </v-avatar>
+          <v-sheet rounded="lg" class="pa-3 assistant-bubble message-bubble d-flex align-center">
+            <span class="typing-dots">
+              <span /><span /><span />
+            </span>
+          </v-sheet>
         </div>
 
         <v-alert
@@ -145,26 +228,30 @@ async function submit(): Promise<void> {
       <v-divider />
 
       <div class="pa-3">
-        <v-textarea
-          v-model="draft"
-          :placeholder="$t('assistant.placeholder')"
-          rows="2"
-          auto-grow
-          max-rows="6"
-          hide-details
-          :disabled="store.sending"
-          @keydown.enter.exact.prevent="submit"
-        >
-          <template #append-inner>
-            <v-btn
-              icon="mdi-send"
-              variant="text"
-              size="small"
-              :disabled="!draft.trim() || store.sending"
-              @click="submit"
-            />
-          </template>
-        </v-textarea>
+        <div class="d-flex align-end ga-2">
+          <v-textarea
+            v-model="draft"
+            :placeholder="$t('assistant.placeholder')"
+            rows="1"
+            auto-grow
+            max-rows="6"
+            hide-details
+            density="comfortable"
+            rounded="lg"
+            class="assistant-input"
+            :disabled="store.sending"
+            @keydown.enter.exact.prevent="submit"
+          />
+          <v-btn
+            icon="mdi-send"
+            color="primary"
+            variant="flat"
+            size="default"
+            class="flex-shrink-0"
+            :disabled="!draft.trim() || store.sending"
+            @click="submit"
+          />
+        </div>
         <p class="text-caption text-medium-emphasis mt-2 mb-0">
           {{ $t('assistant.disclaimer') }}
         </p>
@@ -172,3 +259,100 @@ async function submit(): Promise<void> {
     </div>
   </v-navigation-drawer>
 </template>
+
+<style scoped>
+.assistant-header {
+  border-bottom: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
+}
+
+.message-bubble {
+  max-width: 300px;
+  word-break: break-word;
+}
+
+.assistant-bubble {
+  background-color: rgb(var(--v-theme-surface));
+  border: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.message-time {
+  padding-inline: 4px;
+}
+
+.example-chip {
+  cursor: pointer;
+}
+
+.markdown-lite :deep(p) {
+  margin: 0 0 8px;
+}
+
+.markdown-lite :deep(p:last-child) {
+  margin-bottom: 0;
+}
+
+.markdown-lite :deep(ul) {
+  margin: 0 0 8px;
+  padding-inline-start: 20px;
+}
+
+.markdown-lite :deep(ul:last-child) {
+  margin-bottom: 0;
+}
+
+.markdown-lite :deep(li) {
+  margin-bottom: 2px;
+}
+
+.markdown-lite :deep(code) {
+  background-color: rgba(var(--v-theme-on-surface), 0.06);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 0.9em;
+}
+
+.confirm-card {
+  border: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
+  border-inline-start: 3px solid rgb(var(--v-theme-warning));
+}
+
+.assistant-input :deep(textarea) {
+  line-height: 1.4;
+}
+
+.typing-dots {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 16px;
+}
+
+.typing-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: rgb(var(--v-theme-primary));
+  opacity: 0.5;
+  animation: typing-bounce 1.2s infinite ease-in-out;
+}
+
+.typing-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing-bounce {
+  0%, 80%, 100% {
+    transform: scale(0.7);
+    opacity: 0.4;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+</style>

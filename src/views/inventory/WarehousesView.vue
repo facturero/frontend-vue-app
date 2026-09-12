@@ -229,7 +229,7 @@ onMounted(async () => {
           {{ editing ? $t('inventory.warehouseDialog.editTitle') : $t('inventory.warehouseDialog.createTitle') }}
         </v-card-title>
         <v-card-text>
-          <v-alert v-if="formError" type="error" variant="tonal" density="compact" class="mb-4">
+          <v-alert v-if="formError" type="error" class="mb-4">
             {{ formError }}
           </v-alert>
 

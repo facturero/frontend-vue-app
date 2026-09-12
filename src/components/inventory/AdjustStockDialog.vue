@@ -146,9 +146,7 @@ async function submit(): Promise<void> {
         <v-alert
           v-if="formError || store.error"
           type="error"
-          variant="tonal"
           class="mb-4"
-          density="compact"
         >
           {{ formError || store.error }}
         </v-alert>
@@ -186,8 +184,6 @@ async function submit(): Promise<void> {
         <v-alert
           v-if="previewNature"
           type="info"
-          variant="tonal"
-          density="compact"
           class="mb-4"
           data-testid="adjust-nature-preview"
         >
