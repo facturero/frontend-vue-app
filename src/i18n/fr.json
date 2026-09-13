@@ -359,6 +359,35 @@
     "unpaired": "Non appairé",
     "viewCode": "Voir le code"
   },
+  "fiscal": {
+    "title": "Statut auprès du SRI",
+    "status": {
+      "pending": "Envoi en cours",
+      "sent": "En attente d’autorisation",
+      "authorized": "Autorisée",
+      "rejected": "Rejetée",
+      "error": "Erreur"
+    },
+    "statusHint": {
+      "pending": "Elle est en cours de signature et d’envoi au SRI.",
+      "sent": "Le SRI l’a reçue et ne l’a pas encore autorisée. Cela prend généralement quelques secondes.",
+      "authorized": "Le SRI a autorisé ce document. Il est valable fiscalement.",
+      "rejected": "Le SRI l’a rejetée. Corrigez les données et émettez une nouvelle facture.",
+      "error": "L’envoi au SRI n’a pas pu aboutir."
+    },
+    "accessKey": "Clé d’accès",
+    "authorizationNumber": "Numéro d’autorisation",
+    "authorizationDate": "Date d’autorisation",
+    "sriMessages": "Messages du SRI",
+    "retry": "Relancer l’envoi",
+    "downloadAuthorized": "XML autorisé",
+    "downloadSigned": "XML signé",
+    "waiting": "Préparation du document électronique…",
+    "none": "Cette facture n’a pas encore de document électronique.",
+    "autoRetry": "Nouvelle tentative automatique le {when}.",
+    "needsAction": "Aucune nouvelle tentative automatique : corrigez le problème puis cliquez sur « Relancer l’envoi ».",
+    "voidedWarning": "Cette facture est annulée dans le système. Si le SRI l’autorise, il faudra émettre une note de crédit ou l’annuler dans SRI en línea."
+  },
   "home": {
     "activeCustomers": "Clients actifs",
     "activeEmployees": "Employés actifs",
@@ -605,7 +634,9 @@
       "identity_invited": "Invitation à l'organisation",
       "identity_invited_desc": "Prévenez-moi quand je suis invité à une organisation.",
       "identity_password_reset": "Réinitialisation du mot de passe",
-      "identity_password_reset_desc": "Prévenez-moi quand une réinitialisation de mot de passe est demandée."
+      "identity_password_reset_desc": "Prévenez-moi quand une réinitialisation de mot de passe est demandée.",
+      "fiscal_attention_required": "Facture en difficulté auprès du SRI",
+      "fiscal_attention_required_desc": "Me prévenir lorsque le SRI rejette une facture ou qu’elle ne peut pas être envoyée sans aide."
     },
     "reset": "Réinitialiser",
     "saved": "Préférences enregistrées.",
@@ -632,7 +663,8 @@
     "requestFulfilled": "Demande traitée",
     "requestRejected": "Demande refusée",
     "requestSent": "Demande envoyée",
-    "title": "Notifications"
+    "title": "Notifications",
+    "fiscalAttention": "Une facture requiert votre attention"
   },
   "onboarding": {
     "businessProfile": {
@@ -671,7 +703,33 @@
     "settingsIntro": "Les données fiscales de votre organisation. Elles servent à émettre des factures et figurent dans le profil de l'entreprise. Le numéro fiscal et le pays sont obligatoires pour émettre des documents électroniques.",
     "settingsTitle": "Paramètres de l'organisation",
     "tradeNamePlaceholder": "Ex. MonEntreprise",
-    "updated": "Organisation mise à jour"
+    "updated": "Organisation mise à jour",
+    "sriProfile": {
+      "title": "Données fiscales pour le SRI",
+      "intro": "Uniquement si elles s’appliquent à votre entreprise. Elles figurent sur chaque facture électronique ; laissez-les vides sinon.",
+      "rimpe": "Régime RIMPE",
+      "rimpeNone": "Hors RIMPE",
+      "rimpeEntrepreneur": "RIMPE entrepreneur",
+      "rimpePopular": "RIMPE commerce populaire",
+      "specialTaxpayer": "Contribuable spécial",
+      "specialTaxpayerHint": "Numéro de résolution, si le SRI vous a désigné contribuable spécial.",
+      "withholdingAgent": "Agent de retenue",
+      "withholdingAgentHint": "Numéro de résolution, si le SRI vous a désigné agent de retenue.",
+      "mainAddress": "Adresse du siège",
+      "mainAddressHint": "Si elle est vide, l’adresse de l’établissement émetteur est utilisée.",
+      "defaultPaymentMethod": "Mode de paiement par défaut",
+      "defaultPaymentMethodHint": "Déclaré au SRI lorsque la facture n’en indique pas d’autre.",
+      "paymentMethods": {
+        "15": "Compensation de dettes",
+        "16": "Carte de débit",
+        "17": "Monnaie électronique",
+        "18": "Carte prépayée",
+        "19": "Carte de crédit",
+        "20": "Autres, avec utilisation du système financier",
+        "21": "Endossement de titres",
+        "01": "Sans utilisation du système financier"
+      }
+    }
   },
   "plugins": {
     "activate": "Activer",

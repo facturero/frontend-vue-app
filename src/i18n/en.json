@@ -359,6 +359,35 @@
     "unpaired": "Not paired",
     "viewCode": "View code"
   },
+  "fiscal": {
+    "title": "SRI status",
+    "status": {
+      "pending": "Sending",
+      "sent": "Awaiting authorization",
+      "authorized": "Authorized",
+      "rejected": "Rejected",
+      "error": "Error"
+    },
+    "statusHint": {
+      "pending": "It is being signed and sent to the SRI.",
+      "sent": "The SRI received it and has not authorized it yet. This usually takes a few seconds.",
+      "authorized": "The SRI authorized this document. It is valid for tax purposes.",
+      "rejected": "The SRI rejected it. Fix the data and issue a new invoice.",
+      "error": "It could not be delivered to the SRI."
+    },
+    "accessKey": "Access key",
+    "authorizationNumber": "Authorization number",
+    "authorizationDate": "Authorization date",
+    "sriMessages": "SRI messages",
+    "retry": "Retry delivery",
+    "downloadAuthorized": "Authorized XML",
+    "downloadSigned": "Signed XML",
+    "waiting": "Preparing the electronic document…",
+    "none": "This invoice does not have an electronic document yet.",
+    "autoRetry": "It will be retried automatically on {when}.",
+    "needsAction": "It will not be retried on its own: fix the problem and press \"Retry delivery\".",
+    "voidedWarning": "This invoice is voided in the system. If the SRI authorizes it, you will need to issue a credit note or void it in SRI en línea."
+  },
   "home": {
     "activeCustomers": "Active customers",
     "activeEmployees": "Active employees",
@@ -605,7 +634,9 @@
       "identity_invited": "Organization invitation",
       "identity_invited_desc": "Notify me when I'm invited to an organization.",
       "identity_password_reset": "Password reset",
-      "identity_password_reset_desc": "Notify me when a password reset is requested."
+      "identity_password_reset_desc": "Notify me when a password reset is requested.",
+      "fiscal_attention_required": "Invoice with SRI problems",
+      "fiscal_attention_required_desc": "Notify me when the SRI rejects an invoice or it cannot be sent without help."
     },
     "reset": "Reset",
     "saved": "Preferences saved.",
@@ -632,7 +663,8 @@
     "requestFulfilled": "Request fulfilled",
     "requestRejected": "Request rejected",
     "requestSent": "Request sent",
-    "title": "Notifications"
+    "title": "Notifications",
+    "fiscalAttention": "An invoice needs your attention"
   },
   "onboarding": {
     "businessProfile": {
@@ -671,7 +703,33 @@
     "settingsIntro": "Your organization's tax details. They are used to issue invoices and in the company profile. The tax ID and country are required to issue electronic documents.",
     "settingsTitle": "Organization settings",
     "tradeNamePlaceholder": "E.g. MyCompany",
-    "updated": "Organization updated"
+    "updated": "Organization updated",
+    "sriProfile": {
+      "title": "Tax details for the SRI",
+      "intro": "Only if they apply to your company. They appear on every electronic invoice; leave them empty otherwise.",
+      "rimpe": "RIMPE regime",
+      "rimpeNone": "Not under RIMPE",
+      "rimpeEntrepreneur": "RIMPE entrepreneur",
+      "rimpePopular": "RIMPE popular business",
+      "specialTaxpayer": "Special taxpayer",
+      "specialTaxpayerHint": "Resolution number, if the SRI designated you as a special taxpayer.",
+      "withholdingAgent": "Withholding agent",
+      "withholdingAgentHint": "Resolution number, if the SRI designated you as a withholding agent.",
+      "mainAddress": "Head office address",
+      "mainAddressHint": "If empty, the issuing establishment address is used.",
+      "defaultPaymentMethod": "Default payment method",
+      "defaultPaymentMethodHint": "Declared to the SRI when the invoice does not specify another one.",
+      "paymentMethods": {
+        "15": "Debt offsetting",
+        "16": "Debit card",
+        "17": "Electronic money",
+        "18": "Prepaid card",
+        "19": "Credit card",
+        "20": "Other, using the financial system",
+        "21": "Endorsement of securities",
+        "01": "Without using the financial system"
+      }
+    }
   },
   "plugins": {
     "activate": "Activate",

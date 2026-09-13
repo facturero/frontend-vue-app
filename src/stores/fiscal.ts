@@ -56,8 +56,9 @@ export const useFiscalStore = defineStore('fiscal', () => {
   }
 
   async function retryFiscalInvoice(billingInvoiceId: string): Promise<void> {
-    await fiscalApi.retryFiscalInvoice(billingInvoiceId);
-    await fetchFiscalInvoice(billingInvoiceId);
+    const result = await fiscalApi.retryFiscalInvoice(billingInvoiceId);
+    if (result.invoice) currentFiscalInvoice.value = result.invoice;
+    else await fetchFiscalInvoice(billingInvoiceId);
   }
 
   return {

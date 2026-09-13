@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { useInvoiceStore } from '@/stores/invoices';
 import { useAuthStore } from '@/stores/auth';
 import { fileApi } from '@/api/files';
+import FiscalStatusCard from '@/components/invoices/FiscalStatusCard.vue';
 
 const props = defineProps<{ id: string }>();
 const { t, locale } = useI18n();
@@ -21,6 +22,10 @@ const invoiceId = computed(() => props.id || (route.params.id as string));
 const canVoid = computed(() => auth.can('invoice:void'));
 const canIssue = computed(() => auth.can('invoice:issue'));
 const canUpdate = computed(() => auth.can('invoice:update'));
+// El estado ante el SRI solo existe para facturas emitidas de Ecuador.
+const showFiscal = computed(
+  () => auth.can('fiscal:read') && store.current?.status !== 'draft' && store.current?.countryCode === 'EC',
+);
 
 // Documents
 const documents = ref<Array<{ id: string; originalName: string; mimeType: string; createdAt: string }>>([]);
@@ -199,6 +204,8 @@ onMounted(async () => {
           <div class="text-h6"><strong>{{ $t('invoices.total') }}:</strong> {{ store.current.total }}</div>
         </v-card-text>
       </v-card>
+
+      <FiscalStatusCard v-if="showFiscal" :billing-invoice-id="invoiceId" />
 
       <v-card v-if="store.current.status === 'voided'">
         <v-card-title>{{ $t('invoices.voidTitle') }}</v-card-title>

@@ -26,6 +26,30 @@ const obligadoContabilidad = ref(false);
 const saved = ref(false);
 
 /**
+ * Datos del emisor que el SRI pide en el XML según su situación tributaria.
+ * Viven en `settings` junto a `obligadoContabilidad` y fiscal-ecuador los lee
+ * de ahí. Los valores de RIMPE son las leyendas exactas del esquema del SRI.
+ */
+const contribuyenteRimpe = ref<string | null>(null);
+const contribuyenteEspecial = ref('');
+const agenteRetencion = ref('');
+const dirMatriz = ref('');
+const defaultPaymentMethodCode = ref('01');
+
+const RIMPE_OPTIONS = [
+  { value: null, key: 'rimpeNone' },
+  { value: 'CONTRIBUYENTE RÉGIMEN RIMPE', key: 'rimpeEntrepreneur' },
+  { value: 'CONTRIBUYENTE NEGOCIO POPULAR - RÉGIMEN RIMPE', key: 'rimpePopular' },
+];
+/** Tabla 24 del SRI: formas de pago. */
+const PAYMENT_METHOD_CODES = ['01', '15', '16', '17', '18', '19', '20', '21'];
+
+function readSettingString(settings: Record<string, unknown> | null, key: string): string {
+  const value = settings?.[key];
+  return typeof value === 'string' ? value : '';
+}
+
+/**
  * Segundo paso del alta: se llega aquí porque el guard del router no deja
  * entrar sin organización. Se guarda al montar porque `needsOrgSetup` deja de
  * ser cierto en cuanto se guarda, y al terminar hay que saber si esto era un
@@ -42,7 +66,13 @@ onMounted(async () => {
       tradeName.value = store.org.tradeName ?? '';
       taxId.value = store.org.taxId ?? '';
       countryCode.value = store.org.countryCode ?? 'EC';
-      obligadoContabilidad.value = Boolean((store.org.settings as Record<string, unknown> | null)?.obligadoContabilidad);
+      const settings = store.org.settings as Record<string, unknown> | null;
+      obligadoContabilidad.value = Boolean(settings?.obligadoContabilidad);
+      contribuyenteRimpe.value = readSettingString(settings, 'contribuyenteRimpe') || null;
+      contribuyenteEspecial.value = readSettingString(settings, 'contribuyenteEspecial');
+      agenteRetencion.value = readSettingString(settings, 'agenteRetencion');
+      dirMatriz.value = readSettingString(settings, 'dirMatriz');
+      defaultPaymentMethodCode.value = readSettingString(settings, 'defaultPaymentMethodCode') || '01';
     }
   } catch {
     // handled by store
@@ -75,12 +105,24 @@ async function submit(): Promise<void> {
     // El perfil legal/tributario va por upsert (PUT); obligadoContabilidad vive en
     // settings, que se actualiza por separado (PATCH) porque updateSettings()
     // reemplaza el objeto settings entero, así que hay que mergear lo que ya había.
-    await store.update({
-      settings: {
-        ...((store.org?.settings as Record<string, unknown> | null) ?? {}),
-        obligadoContabilidad: obligadoContabilidad.value,
-      },
-    });
+    // Los vacíos se quitan en vez de guardarse como '': para fiscal-ecuador un
+    // campo ausente es "no aplica", y así el XML no lleva nodos vacíos.
+    const fiscalExtras: Record<string, string | null> = {
+      contribuyenteRimpe: contribuyenteRimpe.value,
+      contribuyenteEspecial: contribuyenteEspecial.value.trim() || null,
+      agenteRetencion: agenteRetencion.value.trim() || null,
+      dirMatriz: dirMatriz.value.trim() || null,
+      defaultPaymentMethodCode: defaultPaymentMethodCode.value,
+    };
+    const nextSettings: Record<string, unknown> = {
+      ...((store.org?.settings as Record<string, unknown> | null) ?? {}),
+      obligadoContabilidad: obligadoContabilidad.value,
+    };
+    for (const [key, value] of Object.entries(fiscalExtras)) {
+      if (value) nextSettings[key] = value;
+      else delete nextSettings[key];
+    }
+    await store.update({ settings: nextSettings });
     await auth.fetchMe();
     // Cerrado el perfil de la organización, el alta sigue hacia el perfil de
     // negocio (qué se le sugiere) si aún no se ha decidido; si ya eligió (cambió
@@ -195,6 +237,53 @@ async function submit(): Promise<void> {
                   <FieldHelp :text="$t('organization.help.accounting')" />
                 </template>
               </v-checkbox>
+
+              <v-expansion-panels v-if="countryCode === 'EC'" variant="accordion" class="mb-4">
+                <v-expansion-panel :title="$t('organization.sriProfile.title')">
+                  <v-expansion-panel-text>
+                    <p class="text-body-2 text-medium-emphasis mb-4">{{ $t('organization.sriProfile.intro') }}</p>
+
+                    <v-select
+                      v-model="contribuyenteRimpe"
+                      :items="RIMPE_OPTIONS.map((o) => ({ value: o.value, title: $t(`organization.sriProfile.${o.key}`) }))"
+                      :label="$t('organization.sriProfile.rimpe')"
+                      class="mb-4"
+                    />
+
+                    <v-text-field
+                      v-model="contribuyenteEspecial"
+                      :label="$t('organization.sriProfile.specialTaxpayer')"
+                      :hint="$t('organization.sriProfile.specialTaxpayerHint')"
+                      persistent-hint
+                      class="mb-4"
+                    />
+
+                    <v-text-field
+                      v-model="agenteRetencion"
+                      :label="$t('organization.sriProfile.withholdingAgent')"
+                      :hint="$t('organization.sriProfile.withholdingAgentHint')"
+                      persistent-hint
+                      class="mb-4"
+                    />
+
+                    <v-text-field
+                      v-model="dirMatriz"
+                      :label="$t('organization.sriProfile.mainAddress')"
+                      :hint="$t('organization.sriProfile.mainAddressHint')"
+                      persistent-hint
+                      class="mb-4"
+                    />
+
+                    <v-select
+                      v-model="defaultPaymentMethodCode"
+                      :items="PAYMENT_METHOD_CODES.map((code) => ({ value: code, title: `${code} · ${$t(`organization.sriProfile.paymentMethods.${code}`)}` }))"
+                      :label="$t('organization.sriProfile.defaultPaymentMethod')"
+                      :hint="$t('organization.sriProfile.defaultPaymentMethodHint')"
+                      persistent-hint
+                    />
+                  </v-expansion-panel-text>
+                </v-expansion-panel>
+              </v-expansion-panels>
 
               <v-btn
                 data-tour="org-submit"

@@ -16,6 +16,7 @@ export const fiscalApi = {
   revokeCertificate: (id: string) =>
     http.delete<{ message: string }>(`/certificates/${id}`).then((r) => r.data),
 
+  /** `null` si la factura todavía no tiene comprobante fiscal (o no es de Ecuador). */
   getFiscalInvoice: (billingInvoiceId: string) =>
     http
       .get<FiscalInvoiceDTO>(`/fiscal-invoices/${billingInvoiceId}`)
@@ -23,5 +24,15 @@ export const fiscalApi = {
       .catch(() => null),
 
   retryFiscalInvoice: (billingInvoiceId: string) =>
-    http.post<{ message: string }>(`/fiscal-invoices/${billingInvoiceId}/retry`).then((r) => r.data),
+    http
+      .post<{ message: string; invoice: FiscalInvoiceDTO | null }>(`/fiscal-invoices/${billingInvoiceId}/retry`)
+      .then((r) => r.data),
+
+  /** El XML autorizado por el SRI si existe; si no, el firmado. */
+  downloadXml: async (fiscalInvoiceId: string): Promise<{ blob: Blob; filename: string }> => {
+    const r = await http.get(`/fiscal-invoices/${fiscalInvoiceId}/xml/download`, { responseType: 'blob' });
+    const disposition = String(r.headers['content-disposition'] ?? '');
+    const filename = disposition.match(/filename="([^"]+)"/)?.[1] ?? 'factura.xml';
+    return { blob: r.data as Blob, filename };
+  },
 };

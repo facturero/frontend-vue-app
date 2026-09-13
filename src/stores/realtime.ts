@@ -36,6 +36,7 @@ const EVENT_TITLE_KEYS: Record<string, string> = {
   'identity.user.password_reset_requested': 'notifications.passwordResetRequested',
   'billing.invoice.issued': 'notifications.invoiceIssued',
   'billing.invoice.voided': 'notifications.invoiceVoided',
+  'fiscal.ec.invoice.attention_required': 'notifications.fiscalAttention',
 };
 
 /**
@@ -47,7 +48,7 @@ export function routeForEvent(
   event: string,
   data: Record<string, unknown>,
 ): string | null {
-  if (event.startsWith('billing.invoice.')) {
+  if (event.startsWith('billing.invoice.') || event === 'fiscal.ec.invoice.attention_required') {
     const id = typeof data.invoiceId === 'string' ? data.invoiceId : null;
     return id ? `/invoices/${id}` : '/invoices';
   }
@@ -60,6 +61,10 @@ export function routeForEvent(
 
 /** Texto de apoyo bajo el título, con lo que traiga el payload de cada evento. */
 function detailFor(event: string, data: Record<string, unknown>): string {
+  if (event === 'fiscal.ec.invoice.attention_required') {
+    // Qué factura y por qué: el mensaje del SRI o del validador.
+    return [data.number, data.message].filter((v) => typeof v === 'string' && v).join(' — ');
+  }
   if (event.startsWith('billing.invoice.')) {
     return typeof data.number === 'string' ? data.number : '';
   }

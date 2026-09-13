@@ -359,6 +359,35 @@
     "unpaired": "Sin emparejar",
     "viewCode": "Ver código"
   },
+  "fiscal": {
+    "title": "Estado ante el SRI",
+    "status": {
+      "pending": "Enviando",
+      "sent": "En autorización",
+      "authorized": "Autorizada",
+      "rejected": "Rechazada",
+      "error": "Con error"
+    },
+    "statusHint": {
+      "pending": "Se está firmando y enviando al SRI.",
+      "sent": "El SRI la recibió y está pendiente de autorizar. Suele tardar unos segundos.",
+      "authorized": "El SRI autorizó el comprobante. Es válido tributariamente.",
+      "rejected": "El SRI la rechazó. Corrige los datos y emite una factura nueva.",
+      "error": "No se pudo completar el envío al SRI."
+    },
+    "accessKey": "Clave de acceso",
+    "authorizationNumber": "Número de autorización",
+    "authorizationDate": "Fecha de autorización",
+    "sriMessages": "Mensajes del SRI",
+    "retry": "Reintentar envío",
+    "downloadAuthorized": "XML autorizado",
+    "downloadSigned": "XML firmado",
+    "waiting": "Preparando el comprobante electrónico…",
+    "none": "Esta factura todavía no tiene comprobante electrónico.",
+    "autoRetry": "Se reintentará automáticamente el {when}.",
+    "needsAction": "No se reintentará solo: revisa el problema y pulsa «Reintentar envío».",
+    "voidedWarning": "La factura está anulada en el sistema. Si el SRI la autoriza, habrá que emitir una nota de crédito o anularla en SRI en línea."
+  },
   "home": {
     "activeCustomers": "Clientes activos",
     "activeEmployees": "Empleados activos",
@@ -605,7 +634,9 @@
       "identity_invited": "Invitación a la organización",
       "identity_invited_desc": "Avísame cuando me inviten a una organización.",
       "identity_password_reset": "Restablecimiento de contraseña",
-      "identity_password_reset_desc": "Avísame cuando se solicite restablecer mi contraseña."
+      "identity_password_reset_desc": "Avísame cuando se solicite restablecer mi contraseña.",
+      "fiscal_attention_required": "Factura con problemas ante el SRI",
+      "fiscal_attention_required_desc": "Avísame cuando el SRI rechace una factura o no se pueda enviar sin ayuda."
     },
     "reset": "Restablecer",
     "saved": "Preferencias guardadas.",
@@ -632,7 +663,8 @@
     "requestFulfilled": "Solicitud atendida",
     "requestRejected": "Solicitud rechazada",
     "requestSent": "Solicitud enviada",
-    "title": "Notificaciones"
+    "title": "Notificaciones",
+    "fiscalAttention": "Una factura necesita tu atención"
   },
   "onboarding": {
     "businessProfile": {
@@ -671,7 +703,33 @@
     "settingsIntro": "Datos fiscales de tu organización. Se usan para emitir facturas y en el perfil de la empresa. El RUC y el país son obligatorios para poder emitir documentos electrónicos.",
     "settingsTitle": "Configuración de la organización",
     "tradeNamePlaceholder": "Ej. MiEmpresa",
-    "updated": "Organización actualizada"
+    "updated": "Organización actualizada",
+    "sriProfile": {
+      "title": "Datos tributarios para el SRI",
+      "intro": "Solo si aplican a tu empresa. Aparecen en cada factura electrónica; déjalos vacíos si no te corresponden.",
+      "rimpe": "Régimen RIMPE",
+      "rimpeNone": "No pertenece al RIMPE",
+      "rimpeEntrepreneur": "RIMPE emprendedor",
+      "rimpePopular": "RIMPE negocio popular",
+      "specialTaxpayer": "Contribuyente especial",
+      "specialTaxpayerHint": "Número de resolución, si el SRI te calificó como contribuyente especial.",
+      "withholdingAgent": "Agente de retención",
+      "withholdingAgentHint": "Número de resolución, si el SRI te designó agente de retención.",
+      "mainAddress": "Dirección de la matriz",
+      "mainAddressHint": "Si la dejas vacía se usa la dirección del establecimiento que emite.",
+      "defaultPaymentMethod": "Forma de pago por defecto",
+      "defaultPaymentMethodHint": "La que se declara al SRI cuando la factura no indica otra.",
+      "paymentMethods": {
+        "15": "Compensación de deudas",
+        "16": "Tarjeta de débito",
+        "17": "Dinero electrónico",
+        "18": "Tarjeta prepago",
+        "19": "Tarjeta de crédito",
+        "20": "Otros con utilización del sistema financiero",
+        "21": "Endoso de títulos",
+        "01": "Sin utilización del sistema financiero"
+      }
+    }
   },
   "plugins": {
     "activate": "Activar",

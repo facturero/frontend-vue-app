@@ -87,6 +87,7 @@ function iconFor(event: string): string {
   if (event === 'plugin.created') return 'mdi-puzzle-plus';
   if (event === 'billing.invoice.issued') return 'mdi-file-document-check-outline';
   if (event === 'billing.invoice.voided') return 'mdi-file-document-remove-outline';
+  if (event === 'fiscal.ec.invoice.attention_required') return 'mdi-file-document-alert-outline';
   if (event === 'identity.user.enabled') return 'mdi-account-check-outline';
   if (event === 'identity.user.disabled') return 'mdi-account-cancel-outline';
   if (event === 'identity.user.invited') return 'mdi-account-plus-outline';
