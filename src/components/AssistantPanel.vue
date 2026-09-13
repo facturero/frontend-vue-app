@@ -10,10 +10,12 @@
  * ejecuta.
  */
 import { nextTick, ref, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { useAssistantStore } from '@/stores/assistant';
 import type { ConversationSummary } from '@/types/assistant';
 
 const store = useAssistantStore();
+const router = useRouter();
 const draft = ref('');
 const scroller = ref<HTMLElement | null>(null);
 const showHistory = ref(false);
@@ -118,8 +120,39 @@ function renderMarkdownLite(text: string): string {
 
 function inlineMarkdown(text: string): string {
   return text
+    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_match, label: string, href: string) => renderLink(label, href))
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/`(.+?)`/g, '<code>$1</code>');
+}
+
+/**
+ * Enlaces del asistente a pantallas de la app, como `[facturación](/invoices/new)`.
+ *
+ * Solo se convierten en enlace las rutas **internas que existen en el router**:
+ * el texto viene del modelo, y el modelo lee datos de clientes y productos. Si
+ * un dato trae un enlace a otra web, aquí se queda en texto plano y nunca llega
+ * a ser clicable. Con cualquier ruta que no encaje pasa lo mismo.
+ */
+const SAFE_PATH = /^\/(?!\/)[A-Za-z0-9/_\-?=&.]*$/;
+
+function renderLink(label: string, escapedHref: string): string {
+  // El texto ya viene escapado: `&` llega como `&amp;` (p. ej. en `?tab=x&y=z`).
+  const href = escapedHref.replace(/&amp;/g, '&');
+  if (!SAFE_PATH.test(href)) return label;
+  // La ruta comodín del router redirige a inicio y no tiene nombre: una ruta
+  // que solo encaja con ella es una pantalla que no existe.
+  if (!router.resolve(href).name) return label;
+  return `<a href="${href.replace(/&/g, '&amp;')}" class="text-primary font-weight-medium text-decoration-underline" data-internal-link>${label}</a>`;
+}
+
+/** Los enlaces se pintan con v-html, así que la navegación se engancha aquí. */
+function onMessageClick(event: MouseEvent): void {
+  const link = (event.target as HTMLElement | null)?.closest<HTMLAnchorElement>('a[data-internal-link]');
+  if (!link) return;
+  // Ctrl/Cmd+clic o clic central: que el navegador lo abra en otra pestaña.
+  if (event.ctrlKey || event.metaKey || event.shiftKey || event.button !== 0) return;
+  event.preventDefault();
+  void router.push(link.getAttribute('href') ?? '/');
 }
 </script>
 
@@ -243,7 +276,12 @@ function inlineMarkdown(text: string): string {
             >
               <span v-if="message.role === 'user'" class="text-body-2 message-text" style="white-space: pre-wrap; color: white">{{ message.text }}</span>
               <!-- eslint-disable-next-line vue/no-v-html -->
-              <div v-else class="text-body-2 message-text markdown-lite" v-html="renderMarkdownLite(message.text)" />
+              <div
+                v-else
+                class="text-body-2 message-text markdown-lite"
+                @click="onMessageClick"
+                v-html="renderMarkdownLite(message.text)"
+              />
             </v-sheet>
             <span class="text-caption text-medium-emphasis mt-1 message-time">{{ formatTime(message.createdAt) }}</span>
           </div>
