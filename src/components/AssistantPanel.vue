@@ -11,6 +11,7 @@
  */
 import { nextTick, ref, watch } from 'vue';
 import { useAssistantStore } from '@/stores/assistant';
+import type { ConversationSummary } from '@/types/assistant';
 
 const store = useAssistantStore();
 const draft = ref('');
@@ -51,6 +52,27 @@ function formatDate(iso: string): string {
 async function openFromHistory(id: string): Promise<void> {
   await store.openConversation(id);
   showHistory.value = false;
+}
+
+function startNewChat(): void {
+  store.reset();
+  showHistory.value = false;
+}
+
+// Borrar pide confirmación: desde la lista no se ve el contenido del hilo, y un
+// clic de más no debería llevarse una conversación.
+const pendingDelete = ref<ConversationSummary | null>(null);
+const deleting = ref(false);
+
+async function confirmDelete(): Promise<void> {
+  if (!pendingDelete.value) return;
+  deleting.value = true;
+  try {
+    await store.deleteConversation(pendingDelete.value.id);
+  } finally {
+    deleting.value = false;
+    pendingDelete.value = null;
+  }
 }
 
 /**
@@ -122,7 +144,7 @@ function inlineMarkdown(text: string): string {
           variant="text"
           size="small"
           :title="$t('assistant.newChat')"
-          @click="store.reset()"
+          @click="startNewChat"
         />
         <v-btn
           icon="mdi-history"
@@ -148,11 +170,30 @@ function inlineMarkdown(text: string): string {
             <v-list-item-subtitle class="text-caption text-medium-emphasis">
               {{ formatDate(conversation.updatedAt) }}
             </v-list-item-subtitle>
+            <template #append>
+              <v-btn
+                icon="mdi-delete-outline"
+                variant="text"
+                size="small"
+                :title="$t('assistant.deleteConversation')"
+                @click.stop="pendingDelete = conversation"
+              />
+            </template>
           </v-list-item>
         </v-list>
         <p v-else class="text-body-2 text-medium-emphasis">
           {{ $t('assistant.historyEmpty') }}
         </p>
+
+        <v-alert
+          v-if="store.error"
+          type="error"
+          closable
+          class="mt-3"
+          @click:close="store.error = null"
+        >
+          {{ store.error }}
+        </v-alert>
       </div>
 
       <div v-else ref="scroller" class="flex-grow-1 overflow-y-auto pa-4">
@@ -268,9 +309,11 @@ function inlineMarkdown(text: string): string {
         </v-alert>
       </div>
 
-      <v-divider />
+      <!-- En el historial no se escribe: primero se abre una conversación o se
+           empieza una nueva. -->
+      <v-divider v-if="!showHistory" />
 
-      <div class="pa-3">
+      <div v-if="!showHistory" class="pa-3">
         <div class="d-flex align-end ga-2">
           <v-textarea
             v-model="draft"
@@ -300,6 +343,31 @@ function inlineMarkdown(text: string): string {
         </p>
       </div>
     </div>
+
+    <v-dialog
+      :model-value="!!pendingDelete"
+      max-width="380"
+      @update:model-value="(v) => { if (!v && !deleting) pendingDelete = null; }"
+    >
+      <v-card>
+        <v-card-title class="text-subtitle-1 font-weight-bold">
+          {{ $t('assistant.deleteTitle') }}
+        </v-card-title>
+        <v-card-text class="text-body-2">
+          <p class="mb-2 font-weight-medium">{{ pendingDelete?.title ?? $t('assistant.untitled') }}</p>
+          <p class="mb-0 text-medium-emphasis">{{ $t('assistant.deleteHint') }}</p>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn variant="text" :disabled="deleting" @click="pendingDelete = null">
+            {{ $t('assistant.cancel') }}
+          </v-btn>
+          <v-btn color="error" variant="flat" :loading="deleting" @click="confirmDelete">
+            {{ $t('assistant.delete') }}
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-navigation-drawer>
 </template>
 

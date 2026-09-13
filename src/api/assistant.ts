@@ -23,6 +23,10 @@ export const assistantApi = {
   conversation: (id: string) =>
     http.get<ConversationDetail>(`/assistant/conversations/${id}`).then((r) => r.data),
 
+  /** Borrado virtual: el servidor la oculta, no destruye el historial. */
+  deleteConversation: (id: string) =>
+    http.delete(`/assistant/conversations/${id}`).then(() => undefined),
+
   send: (text: string, conversationId: string | null) =>
     http
       .post<AssistantTurn>(

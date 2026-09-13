@@ -76,6 +76,21 @@ export const useAssistantStore = defineStore('assistant', () => {
   }
 
   /**
+   * Borra una conversación del historial. Si es la que está abierta, el chat
+   * vuelve a quedar en blanco: seguir escribiendo en un hilo borrado daría 404.
+   */
+  async function deleteConversation(id: string): Promise<void> {
+    error.value = null;
+    try {
+      await assistantApi.deleteConversation(id);
+      conversations.value = conversations.value.filter((c) => c.id !== id);
+      if (conversationId.value === id) reset();
+    } catch (e) {
+      error.value = extractError(e);
+    }
+  }
+
+  /**
    * Manda un mensaje. El mensaje del usuario se pinta antes de que conteste el
    * servidor: el turno tarda, y ver tu propia frase en pantalla es la diferencia
    * entre "está pensando" y "se ha colgado".
@@ -136,14 +151,25 @@ export const useAssistantStore = defineStore('assistant', () => {
     }
   }
 
-  function restoreActive(): void {
+  async function restoreActive(): Promise<void> {
     const saved = localStorage.getItem(ACTIVE_KEY);
-    if (saved) void openConversation(saved);
+    if (!saved) return;
+    try {
+      const detail = await assistantApi.conversation(saved);
+      conversationId.value = detail.id;
+      messages.value = detail.messages;
+      pendingActions.value = detail.pendingActions;
+    } catch (e) {
+      // La que estaba abierta pudo borrarse desde otro dispositivo: con un 404
+      // se empieza en blanco en vez de enseñar un error al cargar la página.
+      if ((e as { response?: { status?: number } }).response?.status === 404) reset();
+      else error.value = extractError(e);
+    }
   }
 
   return {
     open, conversationId, messages, pendingActions, conversations,
     sending, deciding, error,
-    toggle, reset, send, decide, loadConversations, openConversation, restoreActive,
+    toggle, reset, send, decide, loadConversations, openConversation, deleteConversation, restoreActive,
   };
 });
