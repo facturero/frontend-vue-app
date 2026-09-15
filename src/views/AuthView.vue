@@ -75,7 +75,7 @@ function toggleMode(): void {
     <v-col cols="12" lg="5" class="d-flex align-center justify-center pa-3">
       <v-sheet :max-width="420" width="100%" color="transparent">
         <div class="d-flex justify-end mb-2">
-          <LocaleSwitcher />
+          <LocaleSwitcher class="w-50 flex-grow-0" />
         </div>
 
         <h1 class="text-h5 font-weight-bold">{{ t('auth.welcomeTitle') }}</h1>

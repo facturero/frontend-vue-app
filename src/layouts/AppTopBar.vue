@@ -4,9 +4,9 @@ import { useDisplay } from 'vuetify';
 import { useUiStore } from '@/stores/ui';
 import { useAuthStore } from '@/stores/auth';
 import { useThemeToggle } from '@/composable/useThemeToggle';
-import { LANGUAGES, useLocale } from '@/composable/useLocale';
 import { useRouter } from 'vue-router';
 import { resolveFileUrl } from '@/composable/useFileUrl';
+import LocaleSwitcher from '@/components/LocaleSwitcher.vue';
 import NotificationBell from '@/components/NotificationBell.vue';
 import MessageInbox from '@/components/MessageInbox.vue';
 import GlobalSearch from '@/components/GlobalSearch.vue';
@@ -20,7 +20,6 @@ const auth = useAuthStore();
 const router = useRouter();
 const { mobile } = useDisplay();
 const { toggleTheme, isDark } = useThemeToggle();
-const { locale, setLocale } = useLocale();
 const bareShell = useBareShell();
 const assistant = useAssistantStore();
 const { startTour } = useAppTour();
@@ -153,15 +152,8 @@ function logout(): void {
           </template>
         </v-list-item>
 
-        <v-list-item prepend-icon="mdi-translate" :title="$t('common.language')">
-          <template #append>
-            <v-btn-toggle :model-value="locale" mandatory divided density="compact" color="primary" class="ml-2"
-              @update:model-value="setLocale">
-              <v-btn v-for="lang in LANGUAGES" :key="lang.code" :value="lang.code" :title="lang.label" size="small">
-                {{ lang.code.toUpperCase() }}
-              </v-btn>
-            </v-btn-toggle>
-          </template>
+        <v-list-item prepend-icon="mdi-translate">
+          <LocaleSwitcher :label="$t('common.language')" class="my-1" />
         </v-list-item>
 
         <v-list-item v-if="!bareShell" prepend-icon="mdi-help-circle-outline" :title="$t('tour.help')" value="tour"

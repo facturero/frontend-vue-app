@@ -1,40 +1,66 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { LANGUAGES as languages, useLocale } from '@/composable/useLocale';
+import { useLocale, type LanguageOption } from '@/composable/useLocale';
+import { normalize } from '@/menus/search';
 
-const { locale, setLocale } = useLocale();
+defineProps<{ label?: string }>();
 
-const current = computed(() => languages.find((lang) => lang.code === locale.value) ?? languages[0]);
+const { locale, languages, setLocale } = useLocale();
+
+const current = computed(() => languages.value.find((lang) => lang.code === locale.value));
+
+/**
+ * Pensado para decenas de idiomas: se busca por el nombre nativo ("Deutsch"),
+ * por el nombre en el idioma de la interfaz ("Alemán") o por el código ("de"),
+ * sin importar mayúsculas ni tildes.
+ */
+function filterLanguage(_value: string, query: string, item?: { raw: LanguageOption }): boolean {
+  if (!item) return false;
+  const q = normalize(query);
+  const { code, nativeName, localizedName } = item.raw;
+  return [code, nativeName, localizedName].some((text) => normalize(text).includes(q));
+}
+
+function onSelect(code: string | null): void {
+  if (code) setLocale(code);
+}
 </script>
 
 <template>
-  <v-menu>
-    <template #activator="{ props }">
-      <v-btn v-bind="props" variant="text" class="text-none px-2" size="small">
-        <span class="text-body-2">{{ current.icon }}</span>
-        <span class="text-body-2 font-weight-medium ml-1">{{ current.code.toUpperCase() }}</span>
-        <v-icon icon="mdi-chevron-down" size="16" class="ml-1 text-medium-emphasis" />
-      </v-btn>
+  <v-autocomplete
+    :model-value="locale"
+    :items="languages"
+    item-value="code"
+    item-title="nativeName"
+    :label="label"
+    :custom-filter="filterLanguage"
+    :aria-label="$t('common.language')"
+    :menu-props="{ maxHeight: 320 }"
+    auto-select-first
+    hide-details
+    @update:model-value="onSelect"
+  >
+    <template #prepend-inner>
+      <span v-if="current" :class="`fi fi-${current.flag}`" class="rounded-sm elevation-1" />
     </template>
 
-    <v-list density="compact" min-width="170" class="py-1">
+    <template #item="{ props: itemProps, item }">
       <v-list-item
-        v-for="lang in languages"
-        :key="lang.code"
-        rounded="lg"
-        class="mx-1"
-        :active="locale === lang.code"
-        color="primary"
-        @click="setLocale(lang.code)"
+        v-bind="itemProps"
+        :title="item.raw.nativeName"
+        :subtitle="item.raw.localizedName !== item.raw.nativeName ? item.raw.localizedName : undefined"
       >
         <template #prepend>
-          <span class="mr-2">{{ lang.icon }}</span>
+          <span :class="`fi fi-${item.raw.flag}`" class="rounded-sm elevation-1 mr-3" />
         </template>
-        <v-list-item-title class="text-body-2">{{ lang.label }}</v-list-item-title>
-        <template v-if="locale === lang.code" #append>
-          <v-icon icon="mdi-check" size="16" color="primary" />
+        <template v-if="item.raw.code === locale" #append>
+          <v-icon icon="mdi-check" size="18" color="primary" />
         </template>
       </v-list-item>
-    </v-list>
-  </v-menu>
+    </template>
+
+    <template #no-data>
+      <v-list-item :title="$t('common.noData')" disabled />
+    </template>
+  </v-autocomplete>
 </template>

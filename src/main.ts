@@ -2,6 +2,7 @@ import { createApp } from 'vue';
 import { registerPlugins } from '@/plugins';
 import App from './App.vue';
 import 'driver.js/dist/driver.css';
+import 'flag-icons/css/flag-icons.min.css';
 import '@/styles/tour.css';
 
 const app = createApp(App);
