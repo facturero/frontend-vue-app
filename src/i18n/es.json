@@ -203,6 +203,7 @@
     "create": "Crear",
     "createError": "No se pudo crear",
     "createdAt": "Creado",
+    "darkMode": "Modo oscuro",
     "date": "Fecha",
     "deactivate": "Desactivar",
     "delete": "Eliminar",
@@ -214,6 +215,7 @@
     "generalInfo": "Información general",
     "images": "Imágenes",
     "inactive": "Inactivo",
+    "language": "Idioma",
     "loading": "Cargando…",
     "logout": "Cerrar sesión",
     "metadata": "Metadatos",
@@ -612,12 +614,12 @@
     "audit": "Auditoría",
     "brand": "CRM",
     "brandSubtitle": "Panel de adm.",
-    "collapse": "Colapsar",
     "comingSoon": "pronto",
     "customers": "Clientes",
     "employees": "Empleados",
     "home": "Inicio",
     "invoices": "Facturas",
+    "menu": "Menú",
     "plugins": "Plugins",
     "products": "Productos",
     "roles": "Roles",
@@ -951,7 +953,7 @@
     },
     "welcome": {
       "title": "Bienvenido de nuevo",
-      "desc": "Te mostramos los rincones principales de tu CRM para que empieces con buen pie. Puedes salir cuando quieras y relanzar la guía desde la campana de ayuda."
+      "desc": "Te mostramos los rincones principales de tu CRM para que empieces con buen pie. Puedes salir cuando quieras y relanzar la guía desde el menú de tu avatar."
     },
     "home": {
       "title": "Inicio",

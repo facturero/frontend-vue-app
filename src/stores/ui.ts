@@ -3,7 +3,8 @@ import { ref } from 'vue';
 
 /**
  * Estado de la UI del panel (layout). Compartido entre el app bar y el
- * navigation drawer para que la hamburguesa y el sidebar estén sincronizados.
+ * navigation drawer para que la hamburguesa y el sidebar estén sincronizados:
+ * la hamburguesa abre/cierra el drawer en móvil y alterna el rail en escritorio.
  *
  * - drawer: abierto/cerrado (relevante sobre todo en móvil, modo temporary).
  * - rail:   colapsado a solo-iconos (relevante en desktop, modo permanent).

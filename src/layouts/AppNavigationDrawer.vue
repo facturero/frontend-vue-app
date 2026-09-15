@@ -52,12 +52,6 @@ const items = computed(() =>
         </template>
       </v-list>
     </div>
-
-    <template #append>
-      <v-divider />
-      <v-list-item prepend-icon="mdi-chevron-left" :title="$t('nav.collapse')" @click="ui.toggleRail()"
-        class="flex-shrink-0" />
-    </template>
   </v-navigation-drawer>
 </template>
 

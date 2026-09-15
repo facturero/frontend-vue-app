@@ -4,6 +4,13 @@ import { useLocale as useVuetifyLocale } from 'vuetify';
 
 const STORAGE_KEY = 'app-locale';
 
+/** Idiomas con traducción en `src/i18n`. Lo comparten el selector de la portada y el menú del avatar. */
+export const LANGUAGES = [
+  { code: 'es', label: 'Español', icon: '🇪🇸' },
+  { code: 'en', label: 'English', icon: '🇺🇸' },
+  { code: 'fr', label: 'Français', icon: '🇫🇷' },
+];
+
 export function useLocale() {
   const { locale } = useI18n();
   const vuetifyLocale = useVuetifyLocale();

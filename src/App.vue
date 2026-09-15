@@ -5,6 +5,7 @@ import { useDisplay } from 'vuetify';
 import { useUiStore } from '@/stores/ui';
 import { useAuthStore } from '@/stores/auth';
 import { usePluginsStore } from '@/stores/plugins';
+import { useAssistantStore } from '@/stores/assistant';
 import { shouldAutoStartTour, useAppTour } from '@/composable/useAppTour';
 import { useBareShell } from '@/composable/useBareShell';
 import AssistantPanel from '@/components/AssistantPanel.vue';
@@ -16,6 +17,7 @@ const router = useRouter();
 const ui = useUiStore();
 const auth = useAuthStore();
 const plugins = usePluginsStore();
+const assistant = useAssistantStore();
 const { startTour } = useAppTour();
 const { mobile } = useDisplay();
 const bareShell = useBareShell();
@@ -25,8 +27,8 @@ const showShell = computed(() => !!route.meta.requiresAuth);
 /**
  * El tour automático sale una sola vez por usuario, cuando la sesión ya tiene
  * los datos necesarios (usuario cargado, plugins de la organización cargados y
- * organizacion configurada). Se marca como visto al cerrarse: el botón de la
- * top bar permite relanzarlo cuando quiera.
+ * organizacion configurada). Se marca como visto al cerrarse: el menú del
+ * avatar permite relanzarlo cuando quiera.
  *
  * Las dos pantallas del perfil de negocio son parte del alta y se explican
  * solas con su encabezado (ver perfiles-de-negocio.md): el tour sigue
@@ -59,6 +61,20 @@ watch(
       <AppNavigationDrawer v-if="!bareShell" />
       <AppTopBar />
       <AssistantPanel v-if="!bareShell" />
+      <!-- Acceso fijo al asistente abajo a la derecha; se oculta mientras el panel está abierto para no taparle el campo de mensaje. -->
+      <v-fab
+        v-if="!bareShell"
+        :active="!assistant.open"
+        app
+        appear
+        location="bottom end"
+        size="large"
+        color="primary"
+        icon="mdi-robot-outline"
+        :title="$t('assistant.title')"
+        :aria-label="$t('assistant.title')"
+        @click="assistant.toggle()"
+      />
       <v-main>
         <v-container :fluid="mobile">
           <router-view />

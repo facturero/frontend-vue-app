@@ -1,14 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useLocale } from '@/composable/useLocale';
+import { LANGUAGES as languages, useLocale } from '@/composable/useLocale';
 
 const { locale, setLocale } = useLocale();
-
-const languages = [
-  { code: 'es', label: 'Español', icon: '🇪🇸' },
-  { code: 'en', label: 'English', icon: '🇺🇸' },
-  { code: 'fr', label: 'Français', icon: '🇫🇷' },
-];
 
 const current = computed(() => languages.find((lang) => lang.code === locale.value) ?? languages[0]);
 </script>

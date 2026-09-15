@@ -203,6 +203,7 @@
     "create": "Create",
     "createError": "Could not create",
     "createdAt": "Created",
+    "darkMode": "Dark mode",
     "date": "Date",
     "deactivate": "Deactivate",
     "delete": "Delete",
@@ -214,6 +215,7 @@
     "generalInfo": "General information",
     "images": "Images",
     "inactive": "Inactive",
+    "language": "Language",
     "loading": "Loading…",
     "logout": "Sign out",
     "metadata": "Metadata",
@@ -612,12 +614,12 @@
     "audit": "Audit log",
     "brand": "CRM",
     "brandSubtitle": "Admin panel",
-    "collapse": "Collapse",
     "comingSoon": "coming soon",
     "customers": "Customers",
     "employees": "Employees",
     "home": "Home",
     "invoices": "Invoices",
+    "menu": "Menu",
     "plugins": "Plugins",
     "products": "Products",
     "roles": "Roles",
@@ -951,7 +953,7 @@
     },
     "welcome": {
       "title": "Welcome back",
-      "desc": "We'll walk you through the key areas of your CRM so you get off to a great start. You can exit anytime and relaunch the guide from the help icon."
+      "desc": "We'll walk you through the key areas of your CRM so you get off to a great start. You can exit anytime and relaunch the guide from your avatar menu."
     },
     "home": {
       "title": "Home",

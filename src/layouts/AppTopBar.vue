@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
+import { useDisplay } from 'vuetify';
 import { useUiStore } from '@/stores/ui';
 import { useAuthStore } from '@/stores/auth';
 import { useThemeToggle } from '@/composable/useThemeToggle';
+import { LANGUAGES, useLocale } from '@/composable/useLocale';
 import { useRouter } from 'vue-router';
 import { resolveFileUrl } from '@/composable/useFileUrl';
-import LocaleSwitcher from '@/components/LocaleSwitcher.vue';
 import NotificationBell from '@/components/NotificationBell.vue';
 import MessageInbox from '@/components/MessageInbox.vue';
 import GlobalSearch from '@/components/GlobalSearch.vue';
@@ -17,10 +18,18 @@ import type { Me } from '@/types/auth';
 const ui = useUiStore();
 const auth = useAuthStore();
 const router = useRouter();
+const { mobile } = useDisplay();
 const { toggleTheme, isDark } = useThemeToggle();
+const { locale, setLocale } = useLocale();
 const bareShell = useBareShell();
 const assistant = useAssistantStore();
 const { startTour } = useAppTour();
+
+/** En móvil el drawer es temporal (se abre y cierra); en escritorio es fijo y alterna entre rail y ancho completo. */
+function toggleNavigation(): void {
+  if (mobile.value) ui.toggleDrawer();
+  else ui.toggleRail();
+}
 
 const avatarUrl = ref<string | null>(null);
 const menuOpen = ref(false);
@@ -71,6 +80,11 @@ function goToProfile(): void {
   router.push({ name: 'profile' });
 }
 
+function openTour(): void {
+  menuOpen.value = false;
+  startTour();
+}
+
 function logout(): void {
   menuOpen.value = false;
   auth.logout();
@@ -80,41 +94,21 @@ function logout(): void {
 
 <template>
   <v-app-bar app density="comfortable">
-    <v-btn v-if="!bareShell" icon @click="ui.toggleDrawer()" class="d-lg-none">
-      <v-icon icon="mdi-menu" />
-    </v-btn>
-    <GlobalSearch v-if="!bareShell" />
+    <template v-if="!bareShell">
+      <v-btn icon :title="$t('nav.menu')" :aria-label="$t('nav.menu')" @click="toggleNavigation">
+        <v-icon icon="mdi-menu" />
+      </v-btn>
+      <GlobalSearch />
+    </template>
 
     <v-spacer></v-spacer>
 
     <template v-if="!bareShell">
-      <v-btn
-        icon
-        :title="$t('assistant.title')"
-        :aria-label="$t('assistant.title')"
-        @click="assistant.toggle()"
-      >
-        <v-icon icon="mdi-robot-outline" />
-      </v-btn>
       <NotificationBell />
       <MessageInbox />
     </template>
 
-    <LocaleSwitcher />
-    <v-btn
-      v-if="!bareShell"
-      icon
-      :title="$t('tour.help')"
-      :aria-label="$t('tour.help')"
-      @click="startTour"
-    >
-      <v-icon icon="mdi-help-circle-outline" />
-    </v-btn>
-    <v-btn icon @click="toggleTheme">
-      <v-icon :icon="isDark() ? 'mdi-weather-sunny' : 'mdi-weather-night'" />
-    </v-btn>
-
-    <v-menu v-model="menuOpen" :close-on-content-click="false" location="bottom end" min-width="220" :offset="8">
+    <v-menu v-model="menuOpen" :close-on-content-click="false" location="bottom end" min-width="300" :offset="8">
       <template #activator="{ props: menuProps }">
         <v-btn v-bind="menuProps" icon class="ml-2">
           <v-avatar :color="avatarUrl ? undefined : 'primary'" size="32">
@@ -146,6 +140,33 @@ function logout(): void {
             @click="goToProfile" />
         </v-list>
       </template>
+
+      <v-divider />
+
+      <v-list density="compact" class="py-0">
+        <!-- El switch es solo indicador: el clic lo recoge la fila entera, así no alterna dos veces. -->
+        <v-list-item :prepend-icon="isDark() ? 'mdi-weather-night' : 'mdi-weather-sunny'" :title="$t('common.darkMode')"
+          value="theme" @click="toggleTheme">
+          <template #append>
+            <v-switch :model-value="isDark()" color="primary" density="compact" hide-details readonly inset
+              class="ml-2" />
+          </template>
+        </v-list-item>
+
+        <v-list-item prepend-icon="mdi-translate" :title="$t('common.language')">
+          <template #append>
+            <v-btn-toggle :model-value="locale" mandatory divided density="compact" color="primary" class="ml-2"
+              @update:model-value="setLocale">
+              <v-btn v-for="lang in LANGUAGES" :key="lang.code" :value="lang.code" :title="lang.label" size="small">
+                {{ lang.code.toUpperCase() }}
+              </v-btn>
+            </v-btn-toggle>
+          </template>
+        </v-list-item>
+
+        <v-list-item v-if="!bareShell" prepend-icon="mdi-help-circle-outline" :title="$t('tour.help')" value="tour"
+          @click="openTour" />
+      </v-list>
 
       <v-divider />
 

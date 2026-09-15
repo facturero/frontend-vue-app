@@ -203,6 +203,7 @@
     "create": "Créer",
     "createError": "Impossible de créer",
     "createdAt": "Créé le",
+    "darkMode": "Mode sombre",
     "date": "Date",
     "deactivate": "Désactiver",
     "delete": "Supprimer",
@@ -214,6 +215,7 @@
     "generalInfo": "Informations générales",
     "images": "Images",
     "inactive": "Inactif",
+    "language": "Langue",
     "loading": "Chargement…",
     "logout": "Déconnexion",
     "metadata": "Métadonnées",
@@ -612,12 +614,12 @@
     "audit": "Journal d'audit",
     "brand": "CRM",
     "brandSubtitle": "Panneau d'admin.",
-    "collapse": "Réduire",
     "comingSoon": "bientôt",
     "customers": "Clients",
     "employees": "Employés",
     "home": "Accueil",
     "invoices": "Factures",
+    "menu": "Menu",
     "plugins": "Plugins",
     "products": "Produits",
     "roles": "Rôles",
@@ -951,7 +953,7 @@
     },
     "welcome": {
       "title": "Bienvenue",
-      "desc": "Nous allons vous montrer les zones clés de votre CRM pour bien démarrer. Vous pouvez quitter à tout moment et relancer le guide depuis l'icône d'aide."
+      "desc": "Nous allons vous montrer les zones clés de votre CRM pour bien démarrer. Vous pouvez quitter à tout moment et relancer le guide depuis le menu de votre avatar."
     },
     "home": {
       "title": "Accueil",
