@@ -32,6 +32,8 @@ export interface FiscalInvoiceDTO {
   sri_messages: SriMessage[];
   has_signed_xml: boolean;
   has_authorized_xml: boolean;
+  /** El RIDE (PDF tributario) se puede generar: autorizado + datos disponibles. */
+  ride_available: boolean;
   created_at: string;
   updated_at: string;
 }

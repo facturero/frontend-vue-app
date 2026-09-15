@@ -24,7 +24,7 @@ const savingEstablishments = ref(false);
 const disabling = ref(false);
 const changeDialog = ref(false);
 
-const employee = computed(() => emp.list.find((e) => e.id === props.id));
+const employee = computed(() => emp.list.find((e) => e.id === props.id) ?? null);
 const isActive = computed(() => employee.value?.status === 'active');
 const canAssign = computed(() => auth.can('user:assign_role'));
 const canAssignEstablishments = computed(() => auth.can('user:update'));

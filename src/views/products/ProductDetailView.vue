@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { fileUrl } from '@/composable/useFileUrl';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -22,7 +23,6 @@ const disabling = ref(false);
 
 const product = computed(() => store.current);
 
-const apiUrl = import.meta.env.VITE_API_URL as string;
 
 const productEstablishments = computed(() =>
   (product.value?.establishmentIds ?? []).map((id) => {
@@ -36,7 +36,8 @@ const productEstablishments = computed(() =>
 );
 
 function imageUrl(fileId: string): string {
-  return `${apiUrl}/files/${fileId}/download`;
+  // Enlace firmado pedido con el token: la descarga ya no es pública (ver useFileUrl).
+  return fileUrl(fileId) ?? '';
 }
 
 function taxRateLabel(taxRateId: string): string {
@@ -298,7 +299,7 @@ onMounted(async () => {
                     </v-img>
 
                     <v-overlay
-                      :model-value="isHovering"
+                      :model-value="isHovering === true"
                       contained
                       scrim="black"
                       class="align-center justify-center"

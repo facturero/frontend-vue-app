@@ -61,6 +61,11 @@ function saveTokens(accessToken: string, refreshToken: string): void {
         localStorage: [
           { name: 'accessToken', value: accessToken },
           { name: 'refreshToken', value: refreshToken },
+          // Sin esto, en una base recién creada el tour de bienvenida del admin
+          // tapa la pantalla con su overlay e intercepta todos los clics
+          // (useAppTour.ts). Ningún spec prueba el tour con esta sesión; los de
+          // cuentas nuevas ya lo desactivan por su cuenta.
+          { name: 'crm:tour:disabled', value: '1' },
         ],
       },
     ],

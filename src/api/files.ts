@@ -13,8 +13,21 @@ export const fileApi = {
       .get<FileListResponse>('/files', { params: { resourceType, resourceId, category } })
       .then((r) => r.data),
 
+  /**
+   * Enlace firmado y temporal al archivo. Exige sesión y que el archivo sea de
+   * la organización; el enlace resultante no necesita cabeceras (sirve en <img>).
+   * Ver composable/useFileUrl.ts.
+   */
+  getUrl: (fileId: string) =>
+    http
+      .get<{ url: string; originalName: string; mimeType: string }>(`/files/${fileId}/url`)
+      .then((r) => r.data),
+
+  /** Los bytes del archivo, pasando por el enlace firmado. */
   getDownloadBlob: async (fileId: string): Promise<Blob> => {
-    const r = await http.get(`/files/${fileId}/download`, { responseType: 'blob' });
-    return r.data as Blob;
+    const { url } = await fileApi.getUrl(fileId);
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`No se pudo descargar el archivo (${response.status})`);
+    return response.blob();
   },
 };

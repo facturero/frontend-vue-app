@@ -1,3 +1,4 @@
+import { clearFileUrls } from '@/composable/useFileUrl';
 import { defineStore } from 'pinia';
 import { usePluginsStore } from '@/stores/plugins';
 import { computed, ref } from 'vue';
@@ -113,6 +114,8 @@ export const useAuthStore = defineStore('auth', () => {
     // Los plugins son de la organización que acaba de cerrar sesión: si
     // sobreviven, el menú del siguiente login se arma con datos ajenos.
     usePluginsStore().reset();
+    // Igual con los enlaces a archivos: se pidieron con esa sesión.
+    clearFileUrls();
   }
 
   return {

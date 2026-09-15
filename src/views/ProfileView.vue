@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { resolveFileUrl } from '@/composable/useFileUrl';
 import { computed, nextTick, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
@@ -71,8 +72,7 @@ async function loadAvatar(userId: string): Promise<void> {
     avatarFiles.value = result.files;
     if (result.files.length > 0) {
       const latest = result.files[0];
-      const blob = await fileApi.getDownloadBlob(latest.id);
-      currentAvatarUrl.value = URL.createObjectURL(blob);
+      currentAvatarUrl.value = await resolveFileUrl(latest.id);
     }
   } catch {
     // no hay avatar aún
@@ -113,7 +113,6 @@ async function submit(): Promise<void> {
 
 function onAvatarSuccess(fileIds: string[]): void {
   if (fileIds.length > 0 && userId.value) {
-    if (currentAvatarUrl.value) URL.revokeObjectURL(currentAvatarUrl.value);
     loadAvatar(userId.value);
   }
 }

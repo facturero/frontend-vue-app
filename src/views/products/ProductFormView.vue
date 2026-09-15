@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { fileUrl } from '@/composable/useFileUrl';
 import { onMounted, ref, computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -38,7 +39,6 @@ const saveError = ref<string | null>(null);
 const imageUploaderRef = ref<InstanceType<typeof ImageUploader> | null>(null);
 const uploading = ref(false);
 
-const apiUrl = import.meta.env.VITE_API_URL as string;
 const tempId = crypto.randomUUID();
 
 const imageResourceId = computed(() => productId.value ?? tempId);
@@ -53,7 +53,7 @@ const establishmentsOptions = computed(() =>
 const existingImages = computed(() =>
   store.current?.images.map((img) => ({
     id: img.id,
-    url: `${apiUrl}/files/${img.fileId}/download`,
+    url: fileUrl(img.fileId) ?? '',
   })) ?? [],
 );
 

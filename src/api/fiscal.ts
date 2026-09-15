@@ -35,4 +35,12 @@ export const fiscalApi = {
     const filename = disposition.match(/filename="([^"]+)"/)?.[1] ?? 'factura.xml';
     return { blob: r.data as Blob, filename };
   },
+
+  /** El RIDE (PDF tributario) de un comprobante autorizado. */
+  downloadRide: async (fiscalInvoiceId: string): Promise<{ blob: Blob; filename: string }> => {
+    const r = await http.get(`/fiscal-invoices/${fiscalInvoiceId}/ride`, { responseType: 'blob' });
+    const disposition = String(r.headers['content-disposition'] ?? '');
+    const filename = disposition.match(/filename="([^"]+)"/)?.[1] ?? 'ride.pdf';
+    return { blob: r.data as Blob, filename };
+  },
 };

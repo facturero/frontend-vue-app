@@ -16,7 +16,7 @@ const API_URL = process.env.E2E_API_URL ?? 'http://localhost:8080';
 const DEV_INTERNAL_SECRET = 'dev-internal-secret-change-me';
 const FISCAL_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '../../../backend/fiscal-ecuador');
 
-async function newOrganization(label: string): Promise<{ api: APIRequestContext; token: string; organizationId: string }> {
+async function newOrganization(label: string): Promise<{ api: APIRequestContext; token: string; refreshToken: string; organizationId: string }> {
   const unique = `${Date.now()}${Math.floor(Math.random() * 1000)}`;
   const anon = await playwrightRequest.newContext();
   const resp = await anon.post(`${API_URL}/auth/register`, {
@@ -30,10 +30,10 @@ async function newOrganization(label: string): Promise<{ api: APIRequestContext;
   await api.put(`${API_URL}/organizations/me`, {
     data: { legalName: `Docs ${label} ${unique}`, taxId: `179${unique.slice(-7)}001`, countryCode: 'EC' },
   });
-  for (const code of ['finance.electronic_certificate']) {
+  for (const code of ['finance.electronic_certificate', 'crm.contacts']) {
     await api.post(`${API_URL}/organizations/me/plugins/${code}/activate`);
   }
-  return { api, token: body.accessToken, organizationId: body.organizationId };
+  return { api, token: body.accessToken, refreshToken: body.refreshToken, organizationId: body.organizationId };
 }
 
 test.describe('Certificados en document-service — aislamiento entre organizaciones', () => {
@@ -93,15 +93,15 @@ test.describe('Certificados en document-service — aislamiento entre organizaci
   });
 
   /**
-   * FACTURACION-BRECHAS.md, N13. La descarga pública (`GET /files/:id/download`)
-   * sigue abierta para imágenes, que la interfaz pinta con <img src> sin token,
-   * pero ya no entrega archivos fiscales: responde como si no existieran.
+   * FACTURACION-BRECHAS.md, N13. La descarga ya no es pública: exige sesión y que
+   * el archivo sea de la organización. Los archivos fiscales, además, no salen
+   * nunca por aquí.
    */
   test('sin sesión no se obtiene un enlace al certificado', async () => {
     const anon = await playwrightRequest.newContext();
     const resp = await anon.get(`${API_URL}/files/${p12FileId}/download`, { maxRedirects: 0 });
     await anon.dispose();
-    expect(resp.status()).toBe(404);
+    expect(resp.status()).toBe(401);
   });
 
   test('ni con sesión de otra organización', async () => {
@@ -109,3 +109,103 @@ test.describe('Certificados en document-service — aislamiento entre organizaci
     expect(resp.status()).toBe(404);
   });
 });
+
+/** Una imagen de cliente PNG de 1×1, como la subiría la interfaz. */
+const PIXEL_PNG = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+  'base64',
+);
+
+test.describe('Imágenes y documentos — solo los ve su organización (N13)', () => {
+  test.describe.configure({ mode: 'serial', timeout: 120_000 });
+  test.use({ storageState: { cookies: [], origins: [] } });
+
+  let owner: Awaited<ReturnType<typeof newOrganization>>;
+  let intruder: Awaited<ReturnType<typeof newOrganization>>;
+  let customerId = '';
+  let imageFileId = '';
+
+  test.beforeAll(async () => {
+    owner = await newOrganization('imagen-duena');
+    intruder = await newOrganization('imagen-intrusa');
+
+    const rucType = await retryUntil(async () =>
+      ((await (await owner.api.get(`${API_URL}/identification-types`)).json()) as any[]).find((t) => t.code === 'RUC') ?? null);
+    const customer = await retryUntil(async () => {
+      const r = await owner.api.post(`${API_URL}/customers`, {
+        data: { businessName: 'Cliente con logo', type: 'company', identificationTypeId: rucType.id, identification: '0992512549001' },
+      });
+      return r.ok() ? r.json() : null;
+    });
+    customerId = customer.id;
+
+    // El mismo flujo que ImageUploader: pedir enlace de subida, subir a MinIO y confirmar.
+    const presigned = await (await owner.api.post(`${API_URL}/files/presigned`, {
+      data: { resourceType: 'customer', resourceId: customerId, category: 'logo', originalName: 'logo.png', mimeType: 'image/png', size: PIXEL_PNG.length },
+    })).json();
+    const put = await fetch(presigned.presignedUrl, { method: 'PUT', body: PIXEL_PNG, headers: { 'Content-Type': 'image/png' } });
+    expect(put.ok, `subida a MinIO: ${put.status}`).toBe(true);
+    const confirmed = await owner.api.patch(`${API_URL}/files/${presigned.fileId}/confirm`, { data: { checksum: 'e2e' } });
+    expect(confirmed.ok()).toBe(true);
+    imageFileId = presigned.fileId;
+
+    const updated = await owner.api.patch(`${API_URL}/customers/${customerId}`, { data: { imageFileId } });
+    expect(updated.ok(), await updated.text()).toBe(true);
+  });
+
+  test.afterAll(async () => {
+    await owner?.api.dispose();
+    await intruder?.api.dispose();
+  });
+
+  test('sin sesión no se descarga', async () => {
+    const anon = await playwrightRequest.newContext();
+    expect((await anon.get(`${API_URL}/files/${imageFileId}/download`, { maxRedirects: 0 })).status()).toBe(401);
+    expect((await anon.get(`${API_URL}/files/${imageFileId}/url`)).status()).toBe(401);
+    await anon.dispose();
+  });
+
+  test('otra organización no la ve, ni por id ni listando', async () => {
+    expect((await intruder.api.get(`${API_URL}/files/${imageFileId}/url`)).status()).toBe(404);
+    expect((await intruder.api.get(`${API_URL}/files/${imageFileId}/download`, { maxRedirects: 0 })).status()).toBe(404);
+    expect((await intruder.api.get(`${API_URL}/files/${imageFileId}`)).status()).toBe(404);
+    const list = await (await intruder.api.get(`${API_URL}/files`, { params: { resourceType: 'customer', resourceId: customerId } })).json();
+    expect(list.total).toBe(0);
+    expect((await intruder.api.delete(`${API_URL}/files/${imageFileId}`)).status()).toBe(404);
+  });
+
+  test('su organización obtiene un enlace que entrega la imagen', async () => {
+    const resp = await owner.api.get(`${API_URL}/files/${imageFileId}/url`);
+    expect(resp.status()).toBe(200);
+    const { url } = await resp.json();
+    const image = await fetch(url);
+    expect(image.ok).toBe(true);
+    expect(Buffer.from(await image.arrayBuffer()).equals(PIXEL_PNG)).toBe(true);
+  });
+
+  test('en la pantalla del cliente la imagen se ve, pedida con la sesión', async ({ page }) => {
+    await page.goto('/login');
+    await page.evaluate(({ a, r }) => {
+      localStorage.setItem('accessToken', a);
+      localStorage.setItem('refreshToken', r);
+      localStorage.setItem('crm:tour:disabled', '1');
+    }, { a: owner.token, r: owner.refreshToken });
+    await page.goto(`/customers/${customerId}`);
+
+    const avatar = page.locator('.v-avatar img').first();
+    await expect(avatar).toBeVisible({ timeout: 15_000 });
+    await expect.poll(async () => avatar.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0)).toBe(true);
+    // Ya no apunta a la ruta del API sin token, sino al enlace firmado del almacenamiento.
+    expect(await avatar.getAttribute('src')).not.toContain('/files/');
+  });
+});
+
+async function retryUntil<T>(attempt: () => Promise<T | null>, timeoutMs = 45_000): Promise<T> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const value = await attempt();
+    if (value !== null) return value;
+    await new Promise((r) => setTimeout(r, 1500));
+  }
+  throw new Error('no se cumplió a tiempo');
+}

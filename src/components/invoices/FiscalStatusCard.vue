@@ -34,7 +34,11 @@ let timer: ReturnType<typeof setTimeout> | null = null;
 const fiscal = computed(() =>
   store.currentFiscalInvoice?.billing_invoice_id === props.billingInvoiceId ? store.currentFiscalInvoice : null,
 );
-const canRetry = computed(() => auth.can('fiscal:manage') && fiscal.value?.status === 'error' && !fiscal.value.billing_voided_at);
+// Mismo criterio que la API: `invoice:authorize` (reenviar al SRI) o `fiscal:manage`.
+const canRetry = computed(
+  () => (auth.can('invoice:authorize') || auth.can('fiscal:manage'))
+    && fiscal.value?.status === 'error' && !fiscal.value.billing_voided_at,
+);
 
 const STATUS_COLOR: Record<FiscalInvoiceStatus, string> = {
   pending: 'info',
@@ -107,6 +111,25 @@ async function downloadXml(): Promise<void> {
   }
 }
 
+async function downloadRide(): Promise<void> {
+  if (!fiscal.value) return;
+  downloading.value = true;
+  actionError.value = null;
+  try {
+    const { blob, filename } = await fiscalApi.downloadRide(fiscal.value.id);
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    actionError.value = extractError(e);
+  } finally {
+    downloading.value = false;
+  }
+}
+
 watch(() => props.billingInvoiceId, () => {
   polls = 0;
   void load();
@@ -140,6 +163,17 @@ onBeforeUnmount(stopPolling);
         {{ fiscal.has_authorized_xml ? t('fiscal.downloadAuthorized') : t('fiscal.downloadSigned') }}
       </v-btn>
       <v-btn
+        v-if="fiscal && fiscal.ride_available"
+        size="small"
+        variant="text"
+        color="primary"
+        prepend-icon="mdi-file-pdf-box"
+        :loading="downloading"
+        @click="downloadRide"
+      >
+        {{ t('fiscal.downloadRide') }}
+      </v-btn>
+      <v-btn
         v-if="canRetry"
         size="small"
         color="primary"
@@ -166,8 +200,6 @@ onBeforeUnmount(stopPolling);
         <v-alert
           v-if="fiscal.billing_voided_at && fiscal.status !== 'error' && fiscal.status !== 'rejected'"
           type="warning"
-          variant="tonal"
-          density="compact"
           class="mb-3"
         >
           {{ t('fiscal.voidedWarning') }}
@@ -176,8 +208,6 @@ onBeforeUnmount(stopPolling);
         <v-alert
           v-if="fiscal.last_error && fiscal.status !== 'authorized'"
           :type="fiscal.status === 'rejected' ? 'error' : 'warning'"
-          variant="tonal"
-          density="compact"
           class="mb-3"
         >
           <div class="text-body-2">{{ fiscal.last_error }}</div>
@@ -213,7 +243,7 @@ onBeforeUnmount(stopPolling);
         </v-list>
       </template>
 
-      <v-alert v-if="actionError" type="error" variant="tonal" density="compact" class="mt-3" closable @click:close="actionError = null">
+      <v-alert v-if="actionError" type="error" class="mt-3" closable @click:close="actionError = null">
         {{ actionError }}
       </v-alert>
     </v-card-text>

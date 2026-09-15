@@ -9,6 +9,7 @@ import type {
   AddLineInput,
   IssueInvoiceInput,
   VoidInvoiceInput,
+  CreditNoteInput,
 } from '@/types/invoices';
 
 export const useInvoiceStore = defineStore('invoices', () => {
@@ -110,8 +111,23 @@ export const useInvoiceStore = defineStore('invoices', () => {
     }
   }
 
+  async function creditNote(invoiceId: string, input: CreditNoteInput): Promise<InvoiceDetail> {
+    saving.value = true;
+    error.value = null;
+    try {
+      const creditNote = await invoiceApi.creditNote(invoiceId, input);
+      current.value = creditNote;
+      return creditNote;
+    } catch (e) {
+      error.value = extractError(e);
+      throw e;
+    } finally {
+      saving.value = false;
+    }
+  }
+
   return {
     list, current, loading, saving, error,
-    fetch, fetchById, create, addLine, removeLine, issue, voidInvoice,
+    fetch, fetchById, create, addLine, removeLine, issue, voidInvoice, creditNote,
   };
 });

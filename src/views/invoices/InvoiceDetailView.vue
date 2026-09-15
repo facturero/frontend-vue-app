@@ -4,7 +4,9 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useInvoiceStore } from '@/stores/invoices';
 import { useAuthStore } from '@/stores/auth';
+import { useOrganizationStore } from '@/stores/organization';
 import { fileApi } from '@/api/files';
+import { openFile } from '@/composable/useFileUrl';
 import FiscalStatusCard from '@/components/invoices/FiscalStatusCard.vue';
 
 const props = defineProps<{ id: string }>();
@@ -13,15 +15,30 @@ const route = useRoute();
 const router = useRouter();
 const store = useInvoiceStore();
 const auth = useAuthStore();
+const orgStore = useOrganizationStore();
 
 const voidDialog = ref(false);
 const voidReason = ref('');
+
+const creditNoteDialog = ref(false);
+const creditNoteReason = ref('');
+const creditNoteEstablishmentId = ref('');
+const creditNoteEmissionPointId = ref('');
+const creditNoteError = ref('');
+const creditNoteSaving = ref(false);
 
 const invoiceId = computed(() => props.id || (route.params.id as string));
 
 const canVoid = computed(() => auth.can('invoice:void'));
 const canIssue = computed(() => auth.can('invoice:issue'));
 const canUpdate = computed(() => auth.can('invoice:update'));
+// La nota de crédito revierte el importe de una factura emitida (o de una ya
+// anulada que el SRI pudo autorizar): el backend la acepta para ambos estados.
+const canCreditNote = computed(
+  () => canIssue
+    && store.current?.countryCode === 'EC'
+    && (store.current?.status === 'issued' || store.current?.status === 'voided'),
+);
 // El estado ante el SRI solo existe para facturas emitidas de Ecuador.
 const showFiscal = computed(
   () => auth.can('fiscal:read') && store.current?.status !== 'draft' && store.current?.countryCode === 'EC',
@@ -52,8 +69,8 @@ const formatDate = (date: string | null) => {
 };
 
 function downloadFile(fileId: string) {
-  const baseURL = import.meta.env.VITE_API_URL;
-  window.open(`${baseURL}/files/${fileId}/download`, '_blank');
+  // La descarga exige sesión: se pide el enlace firmado con el token (ver useFileUrl).
+  void openFile(fileId);
 }
 
 async function fetchDocuments() {
@@ -89,6 +106,46 @@ async function handleVoid() {
   voidReason.value = '';
 }
 
+async function openCreditNoteDialog() {
+  creditNoteError.value = '';
+  creditNoteReason.value = '';
+  creditNoteEstablishmentId.value = '';
+  creditNoteEmissionPointId.value = '';
+  orgStore.emissionPoints.splice(0);
+  creditNoteDialog.value = true;
+  await orgStore.fetchEstablishments();
+  // El establecimiento y el punto de la factura son la opción más probable:
+  // se preseleccionan si siguen activos.
+  const est = store.current?.establishmentId;
+  if (est) {
+    creditNoteEstablishmentId.value = est;
+    await orgStore.fetchEmissionPoints(est);
+    const point = store.current?.emissionPointId;
+    if (point && orgStore.emissionPoints.some(ep => ep.id === point)) {
+      creditNoteEmissionPointId.value = point;
+    }
+  }
+}
+
+async function handleCreditNote() {
+  if (!invoiceId.value || !creditNoteReason.value || !creditNoteEstablishmentId.value || !creditNoteEmissionPointId.value) return;
+  creditNoteError.value = '';
+  creditNoteSaving.value = true;
+  try {
+    const creditNote = await store.creditNote(invoiceId.value, {
+      reason: creditNoteReason.value,
+      establishmentId: creditNoteEstablishmentId.value,
+      emissionPointId: creditNoteEmissionPointId.value,
+    });
+    creditNoteDialog.value = false;
+    router.push(`/invoices/${creditNote.id}`);
+  } catch (e: any) {
+    creditNoteError.value = e.message || t('invoices.creditNoteError');
+  } finally {
+    creditNoteSaving.value = false;
+  }
+}
+
 onMounted(async () => {
   if (invoiceId.value) {
     await store.fetchById(invoiceId.value);
@@ -117,6 +174,16 @@ onMounted(async () => {
           @click="router.push(`/invoices/${invoiceId}/edit`)"
         >
           {{ $t('common.edit') }}
+        </v-btn>
+        <v-btn
+          v-if="canCreditNote"
+          color="primary"
+          variant="tonal"
+          prepend-icon="mdi-credit-card-refund"
+          class="mr-2"
+          @click="openCreditNoteDialog"
+        >
+          {{ $t('invoices.creditNote') }}
         </v-btn>
         <v-btn
           v-if="store.current?.status === 'issued' && canVoid"
@@ -260,6 +327,51 @@ onMounted(async () => {
           <v-btn variant="text" @click="voidDialog = false">{{ $t('common.cancel') }}</v-btn>
           <v-btn color="error" :disabled="!voidReason" :loading="store.saving" @click="handleVoid">
             {{ $t('invoices.voidInvoice') }}
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="creditNoteDialog" max-width="520">
+      <v-card>
+        <v-card-title>{{ $t('invoices.creditNote') }}</v-card-title>
+        <v-card-text>
+          <v-alert v-if="creditNoteError" type="error" class="mb-4">
+            {{ creditNoteError }}
+          </v-alert>
+          <p class="text-caption text-medium-emphasis mb-4">
+            {{ $t('invoices.creditNoteHint') }}
+          </p>
+          <v-textarea
+            v-model="creditNoteReason"
+            :label="$t('invoices.creditNoteReason')"
+            counter="300"
+            class="mb-4"
+          />
+          <v-sheet color="grey100" rounded="lg" class="d-flex ga-3 pa-4">
+            <v-select
+              v-model="creditNoteEstablishmentId"
+              :items="orgStore.establishments.filter(e => e.status === 'active').map(e => ({ title: `${e.code} — ${e.name}`, value: e.id }))"
+              :label="$t('organization.establishment')"
+            />
+            <v-select
+              v-model="creditNoteEmissionPointId"
+              :items="orgStore.emissionPoints.filter(ep => ep.status === 'active').map(ep => ({ title: `${ep.code} — ${ep.name || $t('invoices.emissionPoint')}`, value: ep.id }))"
+              :label="$t('invoices.emissionPoint')"
+              :disabled="!creditNoteEstablishmentId"
+            />
+          </v-sheet>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn variant="text" @click="creditNoteDialog = false">{{ $t('common.cancel') }}</v-btn>
+          <v-btn
+            color="primary"
+            :loading="creditNoteSaving"
+            :disabled="!creditNoteReason || !creditNoteEstablishmentId || !creditNoteEmissionPointId"
+            @click="handleCreditNote"
+          >
+            {{ $t('invoices.creditNoteSubmit') }}
           </v-btn>
         </v-card-actions>
       </v-card>

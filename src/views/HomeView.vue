@@ -170,7 +170,7 @@ onMounted(async () => {
       <v-card-text>
         <div class="text-h6 font-weight-bold mb-1">
           <i18n-t keypath="home.welcome" tag="span">
-            <template #org>{{ auth.user?.orgName || auth.user?.email }}</template>
+            <template #org>{{ auth.user && 'orgName' in auth.user ? (auth.user.orgName || auth.user.email) : auth.user?.email }}</template>
           </i18n-t>
         </div>
         <i18n-t keypath="home.today" tag="span" class="text-body-2 text-medium-emphasis">

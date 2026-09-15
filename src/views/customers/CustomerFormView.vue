@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import { fileUrl } from '@/composable/useFileUrl';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useCustomerStore } from '@/stores/customers';
 import ImageUploader from '@/components/ImageUploader.vue';
-import type { CreateCustomerInput, UpdateCustomerInput, CustomerType } from '@/types/customers';
+import type { CreateCustomerInput, UpdateCustomerInput, CustomerType, CustomerDetail } from '@/types/customers';
 import PageHeader from '@/components/ui/PageHeader.vue';
 
 const { t } = useI18n();
@@ -15,7 +16,6 @@ const store = useCustomerStore();
 const customerId = computed(() => (route.params.id as string) || null);
 const isEdit = computed(() => !!customerId.value);
 
-const apiUrl = import.meta.env.VITE_API_URL as string;
 const tempId = crypto.randomUUID();
 
 // Campos
@@ -34,7 +34,7 @@ const imageUploaderRef = ref<InstanceType<typeof ImageUploader> | null>(null);
 
 const existingImages = computed(() =>
   store.current?.imageFileId
-    ? [{ id: store.current.imageFileId, url: `${apiUrl}/files/${store.current.imageFileId}/download` }]
+    ? [{ id: store.current.imageFileId, url: fileUrl(store.current.imageFileId) ?? '' }]
     : [],
 );
 
@@ -135,11 +135,10 @@ async function submit(): Promise<void> {
 }
 
 onMounted(async () => {
-  store.current = null;
   await store.fetchCatalog();
   if (isEdit.value && customerId.value) {
     await store.fetchById(customerId.value);
-    const c = store.current;
+    const c: CustomerDetail | null = store.current;
     if (c) {
       businessName.value = c.businessName;
       tradeName.value = c.tradeName ?? '';

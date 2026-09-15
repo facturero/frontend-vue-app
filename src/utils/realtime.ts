@@ -41,7 +41,7 @@ function emitAssistant<T>(event: string, payload: Record<string, unknown>): Prom
     }
     // El ack del gateway llega cuando el turno termina (puede tardar más de un
     // minuto). socket.io por defecto no corta los acks; nosotras fijamos el cap.
-    socket.timeout(ASSISTANT_TURN_TIMEOUT_MS).emit(event, payload, (err, res?: { ok?: boolean; data?: T; message?: string }) => {
+    socket.timeout(ASSISTANT_TURN_TIMEOUT_MS).emit(event, payload, (err: Error | null, res?: { ok?: boolean; data?: T; message?: string }) => {
       if (err) {
         reject(new Error('El asistente tardó demasiado'));
         return;

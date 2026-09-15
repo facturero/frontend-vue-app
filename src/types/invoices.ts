@@ -119,3 +119,9 @@ export interface IssueInvoiceInput {
 export interface VoidInvoiceInput {
   reason: string;
 }
+
+export interface CreditNoteInput {
+  establishmentId: string;
+  emissionPointId: string;
+  reason: string;
+}

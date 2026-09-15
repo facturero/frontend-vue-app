@@ -4,7 +4,7 @@ import { useUiStore } from '@/stores/ui';
 import { useAuthStore } from '@/stores/auth';
 import { useThemeToggle } from '@/composable/useThemeToggle';
 import { useRouter } from 'vue-router';
-import { fileApi } from '@/api/files';
+import { resolveFileUrl } from '@/composable/useFileUrl';
 import LocaleSwitcher from '@/components/LocaleSwitcher.vue';
 import NotificationBell from '@/components/NotificationBell.vue';
 import MessageInbox from '@/components/MessageInbox.vue';
@@ -43,9 +43,7 @@ async function loadAvatar(): Promise<void> {
     return;
   }
   try {
-    const blob = await fileApi.getDownloadBlob(fileId);
-    if (avatarUrl.value) URL.revokeObjectURL(avatarUrl.value);
-    avatarUrl.value = URL.createObjectURL(blob);
+    avatarUrl.value = await resolveFileUrl(fileId);
   } catch {
     avatarUrl.value = null;
   }

@@ -7,8 +7,8 @@ import { useCustomerStore } from '@/stores/customers';
 import { customerApi } from '@/api/customers';
 import type { ContactInput, AddressInput, AddressType } from '@/types/customers';
 import PageHeader from '@/components/ui/PageHeader.vue';
+import { fileUrl } from '@/composable/useFileUrl';
 
-const apiUrl = import.meta.env.VITE_API_URL as string;
 
 const { t } = useI18n();
 const route = useRoute();
@@ -341,7 +341,7 @@ onMounted(async () => {
             <v-card-title class="text-h6">{{ $t('customers.avatar') }}</v-card-title>
             <v-card-text class="d-flex justify-center">
               <v-avatar size="150" rounded="lg">
-                <v-img :src="`${apiUrl}/files/${customer.imageFileId}/download`" alt="avatar" cover />
+                <v-img :src="fileUrl(customer.imageFileId)" alt="avatar" cover />
               </v-avatar>
             </v-card-text>
           </v-card>
