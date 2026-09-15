@@ -152,9 +152,19 @@ function logout(): void {
           </template>
         </v-list-item>
 
-        <v-list-item prepend-icon="mdi-translate">
-          <LocaleSwitcher :label="$t('common.language')" class="my-1" />
-        </v-list-item>
+        <!-- La fila entera es el botón: abre el selector de idioma al costado del menú. -->
+        <LocaleSwitcher location="start">
+          <template #activator="{ props: localeProps, current }">
+            <v-list-item v-bind="localeProps" prepend-icon="mdi-translate" :title="$t('common.language')"
+              value="language">
+              <template #append>
+                <span v-if="current" :class="`fi fi-${current.flag}`" class="rounded-sm elevation-1 ml-2" />
+                <span class="text-body-2 text-medium-emphasis ml-2">{{ current?.nativeName }}</span>
+                <v-icon icon="mdi-chevron-right" size="18" class="ml-1 text-medium-emphasis" />
+              </template>
+            </v-list-item>
+          </template>
+        </LocaleSwitcher>
 
         <v-list-item v-if="!bareShell" prepend-icon="mdi-help-circle-outline" :title="$t('tour.help')" value="tour"
           @click="openTour" />
