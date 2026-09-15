@@ -1,16 +1,22 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePluginsStore } from '@/stores/plugins';
 import { useAuthStore } from '@/stores/auth';
 import type { CatalogPlugin } from '@/types/plugins';
+
+const props = defineProps<{ initialSearch?: string }>();
 
 const { t, locale } = useI18n();
 const store = usePluginsStore();
 const auth = useAuthStore();
 
 const canActivate = computed(() => auth.can('plugins:manage'));
-const search = ref('');
+const search = ref(props.initialSearch ?? '');
+// Estando ya en /plugins, otra búsqueda desde la barra superior cambia la consulta sin remontar la vista.
+watch(() => props.initialSearch, (q) => {
+  if (q) search.value = q;
+});
 const categoryFilter = ref<string | null>(null);
 const statusFilter = ref<string | null>(null);
 const sortBy = ref('name-asc');

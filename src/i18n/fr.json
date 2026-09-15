@@ -878,6 +878,44 @@
     "systemRoleHint": "Ce rôle est un rôle système et ne peut pas être modifié.",
     "title": "Rôles"
   },
+  "search": {
+    "open": "Rechercher",
+    "placeholder": "Rechercher des écrans, actions ou plugins…",
+    "sections": {
+      "pages": "Écrans",
+      "actions": "Actions rapides",
+      "plugins": "Plugins",
+      "assistant": "Assistant"
+    },
+    "askAssistant": "Demander à l’assistant : « {query} »",
+    "noResults": "Aucun résultat pour « {query} »",
+    "hintNavigate": "naviguer",
+    "hintOpen": "ouvrir",
+    "hintClose": "fermer",
+    "keywords": {
+      "home": "accueil tableau de bord résumé",
+      "employees": "utilisateurs personnel équipe collaborateurs invitations",
+      "roles": "permissions accès profils sécurité rbac",
+      "customers": "contacts clients identifiant fiscal adresses acheteurs",
+      "invoices": "justificatifs ventes sri avoir note de crédit ride xml pdf annuler réessayer autorisation",
+      "products": "catalogue articles services prix tva sku code",
+      "stock": "inventaire kardex stock mouvements coût fifo moyen",
+      "settings": "configuration paramètres préférences",
+      "plugins": "modules extensions marketplace activer acheter profil d’entreprise",
+      "audit": "journal historique logs registres qui a modifié",
+      "warehouses": "entrepôt magasin dépôt emplacements",
+      "profile": "compte mot de passe avatar photo nom",
+      "organization": "entreprise identifiant fiscal raison sociale rimpe contribuable spécial comptabilité logo",
+      "establishments": "succursale magasin point d’émission caisse pos appairer séquence",
+      "certificates": "signature électronique p12 jeton sri",
+      "notifications": "courriel email alertes cloche",
+      "newInvoice": "facturer vendre émettre justificatif vente",
+      "newCustomer": "créer client ajouter contact enregistrer",
+      "newProduct": "créer produit ajouter article service",
+      "inviteEmployee": "inviter utilisateur ajouter employé courriel",
+      "newRole": "créer rôle permissions accès"
+    }
+  },
   "tour": {
     "help": "Voir le guide de l'application",
     "progress": "{current} / {total}",

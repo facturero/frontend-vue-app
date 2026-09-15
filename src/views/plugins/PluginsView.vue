@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import { usePluginsStore } from '@/stores/plugins';
 import { usePluginsRealtime } from '@/composable/usePluginsRealtime';
 import PluginCatalogTab from '@/components/plugins/PluginCatalogTab.vue';
@@ -8,7 +9,14 @@ import CustomRequestsTab from '@/components/plugins/CustomRequestsTab.vue';
 import PageHeader from '@/components/ui/PageHeader.vue';
 
 const store = usePluginsStore();
+const route = useRoute();
 const tab = ref('catalog');
+
+// ?q=… llega desde el buscador de la barra superior: aterriza en el catálogo ya filtrado.
+const catalogSearch = computed(() => (route.query.q as string | undefined) ?? '');
+watch(catalogSearch, (q) => {
+  if (q) tab.value = 'catalog';
+}, { immediate: true });
 
 usePluginsRealtime();
 
@@ -71,7 +79,7 @@ const profilePending = computed(() => store.myProfile?.status === 'pending');
 
     <v-tabs-window v-model="tab">
       <v-tabs-window-item value="catalog">
-        <PluginCatalogTab />
+        <PluginCatalogTab :initial-search="catalogSearch" />
       </v-tabs-window-item>
 
       <v-tabs-window-item value="my">

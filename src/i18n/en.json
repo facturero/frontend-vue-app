@@ -878,6 +878,44 @@
     "systemRoleHint": "This is a system role and cannot be modified.",
     "title": "Roles"
   },
+  "search": {
+    "open": "Search",
+    "placeholder": "Search screens, actions or plugins…",
+    "sections": {
+      "pages": "Screens",
+      "actions": "Quick actions",
+      "plugins": "Plugins",
+      "assistant": "Assistant"
+    },
+    "askAssistant": "Ask the assistant: “{query}”",
+    "noResults": "No results for “{query}”",
+    "hintNavigate": "move",
+    "hintOpen": "open",
+    "hintClose": "close",
+    "keywords": {
+      "home": "home dashboard overview summary",
+      "employees": "users staff team members invitations",
+      "roles": "permissions access profiles security rbac",
+      "customers": "contacts clients id tax id addresses buyers",
+      "invoices": "receipts sales sri credit note ride xml pdf void retry authorization billing",
+      "products": "catalog items services prices vat tax sku code",
+      "stock": "inventory kardex stock movements cost fifo average",
+      "settings": "configuration settings preferences",
+      "plugins": "modules extensions marketplace activate buy business profile",
+      "audit": "audit log history logs records who changed",
+      "warehouses": "warehouse storage depot locations",
+      "profile": "account password avatar photo name",
+      "organization": "company tax id legal name rimpe special taxpayer accounting logo",
+      "establishments": "branch store emission point cash register pos pair sequence",
+      "certificates": "electronic signature p12 token sri",
+      "notifications": "email mail alerts bell",
+      "newInvoice": "invoice sell issue receipt sale billing",
+      "newCustomer": "create customer add contact register",
+      "newProduct": "create product add item service",
+      "inviteEmployee": "invite user add employee email",
+      "newRole": "create role permissions access"
+    }
+  },
   "tour": {
     "help": "View app guide",
     "progress": "{current} / {total}",

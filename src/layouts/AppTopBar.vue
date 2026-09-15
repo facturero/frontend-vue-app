@@ -8,6 +8,7 @@ import { resolveFileUrl } from '@/composable/useFileUrl';
 import LocaleSwitcher from '@/components/LocaleSwitcher.vue';
 import NotificationBell from '@/components/NotificationBell.vue';
 import MessageInbox from '@/components/MessageInbox.vue';
+import GlobalSearch from '@/components/GlobalSearch.vue';
 import { useAppTour } from '@/composable/useAppTour';
 import { useBareShell } from '@/composable/useBareShell';
 import { useAssistantStore } from '@/stores/assistant';
@@ -82,6 +83,7 @@ function logout(): void {
     <v-btn v-if="!bareShell" icon @click="ui.toggleDrawer()" class="d-lg-none">
       <v-icon icon="mdi-menu" />
     </v-btn>
+    <GlobalSearch v-if="!bareShell" />
 
     <v-spacer></v-spacer>
 

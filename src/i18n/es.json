@@ -878,6 +878,44 @@
     "systemRoleHint": "Este rol es del sistema y no puede ser modificado.",
     "title": "Roles"
   },
+  "search": {
+    "open": "Buscar",
+    "placeholder": "Buscar pantallas, acciones o plugins…",
+    "sections": {
+      "pages": "Pantallas",
+      "actions": "Acciones rápidas",
+      "plugins": "Plugins",
+      "assistant": "Asistente"
+    },
+    "askAssistant": "Preguntar al asistente: «{query}»",
+    "noResults": "Sin resultados para «{query}»",
+    "hintNavigate": "moverse",
+    "hintOpen": "abrir",
+    "hintClose": "cerrar",
+    "keywords": {
+      "home": "inicio dashboard panel resumen",
+      "employees": "usuarios personal equipo colaboradores invitaciones",
+      "roles": "permisos accesos perfiles seguridad rbac",
+      "customers": "contactos cédula ruc direcciones compradores",
+      "invoices": "comprobantes ventas sri nota de crédito ride xml pdf anular reintentar autorización",
+      "products": "catálogo artículos servicios precios iva sku código",
+      "stock": "kardex existencias stock movimientos costo fifo promedio",
+      "settings": "configuración ajustes preferencias",
+      "plugins": "módulos extensiones marketplace activar comprar perfil de negocio",
+      "audit": "bitácora historial logs registros quién cambió",
+      "warehouses": "bodega almacén depósito ubicaciones",
+      "profile": "cuenta contraseña avatar foto nombre",
+      "organization": "empresa ruc razón social rimpe contribuyente especial obligado contabilidad logo",
+      "establishments": "sucursal local punto de emisión caja pos emparejar secuencial",
+      "certificates": "firma electrónica p12 token sri",
+      "notifications": "correo email avisos campana alertas",
+      "newInvoice": "facturar vender emitir comprobante venta",
+      "newCustomer": "crear cliente agregar contacto registrar",
+      "newProduct": "crear producto agregar artículo servicio",
+      "inviteEmployee": "invitar usuario agregar empleado correo",
+      "newRole": "crear rol permisos accesos"
+    }
+  },
   "tour": {
     "help": "Ver guía de la aplicación",
     "progress": "{current} / {total}",
