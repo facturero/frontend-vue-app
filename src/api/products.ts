@@ -2,6 +2,8 @@ import { http } from '@/utils/http';
 import type {
   ProductSummary,
   ProductDetail,
+  ProductPage,
+  ProductListParams,
   CreateProductInput,
   UpdateProductInput,
   Category,
@@ -17,8 +19,8 @@ import type {
 } from '@/types/products';
 
 export const productApi = {
-  list: (params?: { search?: string; status?: string; type?: string; categoryId?: string; establishmentId?: string }) =>
-    http.get<ProductSummary[]>('/products', { params }).then((r) => r.data),
+  list: (params?: ProductListParams) =>
+    http.get<ProductPage>('/products', { params }).then((r) => r.data),
 
   create: (body: CreateProductInput) =>
     http.post<ProductDetail>('/products', body).then((r) => r.data),

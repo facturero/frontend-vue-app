@@ -2,6 +2,23 @@ export type ProductType = 'good' | 'service';
 export type ProductStatus = 'active' | 'inactive';
 export type TaxKind = 'vat' | 'withholding_iva' | 'withholding_rent' | 'special';
 
+export interface ProductPage {
+  items: ProductSummary[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface ProductListParams {
+  search?: string;
+  status?: string;
+  type?: string;
+  categoryId?: string;
+  establishmentId?: string;
+  page?: number;
+  pageSize?: number;
+}
+
 export interface ProductSummary {
   id: string;
   organizationId: string;

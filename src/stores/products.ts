@@ -5,6 +5,7 @@ import { extractError } from '@/utils/error';
 import type {
   ProductSummary,
   ProductDetail,
+  ProductListParams,
   CreateProductInput,
   UpdateProductInput,
   Category,
@@ -14,6 +15,9 @@ import type {
 
 export const useProductStore = defineStore('products', () => {
   const list = ref<ProductSummary[]>([]);
+  const total = ref(0);
+  const page = ref(1);
+  const pageSize = ref(10);
   const current = ref<ProductDetail | null>(null);
   const categories = ref<Category[]>([]);
   const units = ref<Unit[]>([]);
@@ -22,11 +26,15 @@ export const useProductStore = defineStore('products', () => {
   const saving = ref(false);
   const error = ref<string | null>(null);
 
-  async function fetch(params?: { search?: string; status?: string; type?: string; categoryId?: string; establishmentId?: string }): Promise<void> {
+  async function fetch(params: ProductListParams = {}): Promise<void> {
     loading.value = true;
     error.value = null;
     try {
-      list.value = await productApi.list(params);
+      const result = await productApi.list(params);
+      list.value = result.items;
+      total.value = result.total;
+      page.value = result.page;
+      pageSize.value = result.pageSize;
     } catch (e) {
       error.value = extractError(e);
       throw e;
@@ -112,7 +120,7 @@ export const useProductStore = defineStore('products', () => {
   }
 
   return {
-    list, current, categories, units, taxRates,
+    list, total, page, pageSize, current, categories, units, taxRates,
     loading, saving, error,
     fetch, fetchById, create, update, updateTaxes, disable, fetchCatalog,
   };

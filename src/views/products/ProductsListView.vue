@@ -38,23 +38,6 @@ const headers = computed(() => [
   { title: t('common.actions'), key: 'actions', sortable: false, align: 'end' as const },
 ]);
 
-const filtered = computed(() => {
-  let result = store.list;
-  if (search.value) {
-    const q = search.value.toLowerCase();
-    result = result.filter(
-      (p) => p.name.toLowerCase().includes(q) || (p.sku ?? '').toLowerCase().includes(q),
-    );
-  }
-  if (statusFilter.value) {
-    result = result.filter((p) => p.status === statusFilter.value);
-  }
-  if (typeFilter.value) {
-    result = result.filter((p) => p.type === typeFilter.value);
-  }
-  return result;
-});
-
 function formatPrice(cents: number, currency: string, includesTax: boolean): string {
   // El formato de moneda sigue al idioma activo: separadores y posición del
   // símbolo cambian entre es-EC, en-US y fr-FR.
@@ -66,7 +49,7 @@ function formatPrice(cents: number, currency: string, includesTax: boolean): str
   return includesTax ? `${amount} ${t('products.priceIncludesTaxShort')}` : amount;
 }
 
-async function doSearch(): Promise<void> {
+async function fetchPage(resetPage: boolean, page: number, pageSize: number): Promise<void> {
   filtersApplied.value = true;
   try {
     await store.fetch({
@@ -74,10 +57,23 @@ async function doSearch(): Promise<void> {
       status: statusFilter.value || undefined,
       type: typeFilter.value || undefined,
       establishmentId: establishmentFilter.value || undefined,
+      page: resetPage ? 1 : page,
+      pageSize,
     });
   } finally {
     filtersApplied.value = false;
   }
+}
+
+async function doSearch(): Promise<void> {
+  // Al cambiar filtros se vuelve a la primera página: la búsqueda se resuelve
+  // en el servidor, no paginando en memoria el catálogo completo.
+  await fetchPage(true, store.page, store.pageSize);
+}
+
+function onTableOptions({ page, itemsPerPage }: { page: number; itemsPerPage: number }): void {
+  if (itemsPerPage === store.pageSize && page === store.page) return;
+  void fetchPage(false, page, itemsPerPage);
 }
 
 function viewDetail(id: string): void {
@@ -147,13 +143,15 @@ onMounted(async () => {
     </v-card>
 
     <v-card>
-      <v-data-table :headers="headers" :items="filtered" :loading="store.loading" item-value="id" :items-per-page="10"
+      <v-data-table :headers="headers" :items="store.list" :loading="store.loading" item-value="id"
+        :items-per-page="store.pageSize" :server-items-length="store.total"
         :items-per-page-options="[
           { title: '5', value: 5 },
           { title: '10', value: 10 },
           { title: '25', value: 25 },
           { title: '50', value: 50 },
-        ]">
+          { title: '100', value: 100 },
+        ]" @update:options="onTableOptions">
         <template #item.sku="{ item }">
           <span class="text-caption font-weight-medium">{{ item.sku || '—' }}</span>
         </template>
