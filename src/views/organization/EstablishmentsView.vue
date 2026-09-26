@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { useOrganizationStore } from '@/stores/organization';
 import type { EstablishmentDTO, EmissionPointDTO } from '@/types/organization';
 import PageHeader from '@/components/ui/PageHeader.vue';
+import { getSocket } from '@/utils/realtime';
 
 const { t } = useI18n();
 const auth = useAuthStore();
@@ -89,14 +90,33 @@ async function handleUnlink(ep: EmissionPointDTO): Promise<void> {
   await store.unlinkEmissionPoint(selected.value.id, ep.id);
 }
 
+// El POS se vincula/desvincula desde otro equipo: el gateway avisa por el socket (`emission_points.changed`,
+// a la organizacion) y aqui se vuelve a pedir la lista por REST. Asi "Desvincular" aparece solo y el dialogo
+// del codigo se cierra al emparejar, sin recargar ni consultar cada pocos segundos.
+async function refreshPoints(): Promise<void> {
+  if (!selected.value) return;
+  await store.fetchEmissionPoints(selected.value.id);
+}
+
+watch(
+  () => store.emissionPoints,
+  (points) => {
+    const ep = pairingPoint.value;
+    if (!ep || !showPairingDialog.value) return;
+    if (points.find((p) => p.id === ep.id)?.paired) closePairingDialog();
+  },
+);
+
 onMounted(async () => {
   await store.fetchEstablishments();
   if (store.establishments.length > 0) {
     await selectEstablishment(store.establishments[0]);
   }
+  getSocket()?.on('emission_points.changed', refreshPoints);
 });
 
 onUnmounted(() => {
+  getSocket()?.off('emission_points.changed', refreshPoints);
   store.stopPairingCodePolling();
 });
 </script>
