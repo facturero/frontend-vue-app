@@ -169,7 +169,7 @@ onUnmounted(() => {
       <v-card-title class="d-flex align-center justify-space-between">
         <span class="text-body-1 font-weight-medium">{{ $t('posThemes.listTitle') }}</span>
         <v-btn
-          v-if="canManage && !props.embedded"
+          v-if="canManage && props.embedded"
           size="small"
           variant="tonal"
           color="primary"
