@@ -357,6 +357,9 @@
     "typePosLong": "PDV (caisse physique)",
     "typeWeb": "Web",
     "unlink": "Dissocier et régénérer",
+    "theme": "Thème",
+    "themeDefault": "Par défaut",
+    "themeDefaultHint": "Celui de toute l’organisation",
     "unlinkConfirm": "Dissocier « {name} » ? Le PDV appairé ne pourra plus se synchroniser tant qu'il ne sera pas reconfiguré avec un nouveau code.",
     "unpaired": "Non appairé",
     "viewCode": "Voir le code"
@@ -800,6 +803,180 @@
     "tabMine": "Mes plugins",
     "title": "Plugins",
     "whatDoYouNeed": "De quoi avez-vous besoin ?"
+  },
+  "posThemes": {
+    "tabTitle": "Apparence du POS",
+    "title": "Apparence du POS",
+    "intro": "Le thème que voit le client à la caisse. Chaque terminal POS utilise celui que vous lui affectez, ou celui de l’organisation si rien ne lui est affecté.",
+    "new": "Nouveau thème",
+    "listTitle": "Thèmes",
+    "version": "v{version}",
+    "isDefault": "Par défaut",
+    "assignedCount": "{count} en usage | {count} en usage",
+    "makeDefault": "Définir par défaut",
+    "assign": "Affecter",
+    "deleteConfirm": "« {name} » va être supprimé. {count} terminal l’utilise. | « {name} » va être supprimé. {count} terminaux l’utilisent.",
+    "inUseHint": "Désaffectez le thème de {count} terminal avant de le supprimer. | Désaffectez le thème de {count} terminaux avant de le supprimer.",
+    "empty": "Aucun thème pour l’instant. Créez le premier pour que les caisses cessent d’utiliser celui intégré.",
+    "pointFallback": "Terminal {code}",
+    "currentTheme": "Actuellement : {name}",
+    "useOrganizationDefault": "Thème de l’organisation",
+    "organizationDefault": "le thème de l’organisation",
+    "noPosPoints": "Aucun terminal POS à affecter.",
+    "assignTitle": "Affecter « {name} » aux terminaux",
+    "assignHint": "Choisissez le thème de chaque terminal POS. Celui que vous laissez vide utilise le thème de l’organisation.",
+    "editor": {
+      "newTitle": "Nouveau thème POS",
+      "editTitle": "Modifier le thème POS",
+      "subtitle": "L’aperçu se met à jour pendant la saisie. Le POS récupère les changements lors de sa synchronisation suivante."
+    },
+    "notFound": "Ce thème n’existe plus. Un autre utilisateur l’a peut-être supprimé.",
+    "contrastPair": "{a} sur {b} : {ratio}:1 (minimum {min}:1)",
+    "presetsTitle": "Point de départ",
+    "presetsHint": "Un nouveau thème part de l’un de ceux-ci. Vous pourrez ensuite changer chaque couleur.",
+    "presets": {
+      "classic": "Classique",
+      "dark": "Sombre",
+      "highContrast": "Contraste élevé",
+      "warm": "Chaleureux"
+    },
+    "nameError": "Le nom est obligatoire et accepte 80 caractères au maximum.",
+    "colorsTitle": "Couleurs",
+    "mode": "Mode",
+    "modeLight": "Clair",
+    "modeDark": "Sombre",
+    "scheduleHint": "La caisse passe d’elle-même en mode sombre pendant ces heures.",
+    "darkFrom": "Sombre à partir de",
+    "darkTo": "Sombre jusqu’à",
+    "tokens": {
+      "primary": "Primaire",
+      "background": "Arrière-plan",
+      "surface": "Surface",
+      "surfaceAlt": "Surface alternative",
+      "text": "Texte",
+      "textMuted": "Texte secondaire",
+      "border": "Bordure",
+      "success": "Succès",
+      "warning": "Avertissement",
+      "danger": "Erreur"
+    },
+    "contrastTitle": "Contraste",
+    "contrastBlocking": "Du texte ne sera pas lisible à la caisse. Corrigez ces couleurs avant d’enregistrer.",
+    "contrastAdvisory": "C’est lisible, mais juste : sous 4,5:1 la WCAG le considère insuffisant.",
+    "contrastOk": "Toutes les combinaisons de texte se lisent bien.",
+    "typographyTitle": "Typographie",
+    "fontFamily": "Police",
+    "baseSize": "Taille de base",
+    "headingWeight": "Graisse des titres",
+    "shapeTitle": "Forme",
+    "radius": "Angles",
+    "density": "Densité",
+    "borderWidth": "Épaisseur de bordure",
+    "shadows": "Ombres",
+    "layoutTitle": "Disposition",
+    "cartPosition": "Panier",
+    "cartWidth": "Largeur du panier",
+    "columns": "Colonnes du catalogue",
+    "productCard": "Fiche produit",
+    "categories": "Catégories",
+    "statusBar": "Barre d’état",
+    "showImages": "Afficher les images des produits",
+    "brandingTitle": "Image de marque",
+    "welcomeMessage": "Message d’accueil",
+    "welcomeTooLong": "Le message accepte 80 caractères au maximum.",
+    "logoPosition": "Position du logo",
+    "logoSize": "Taille du logo",
+    "showLogoOnLogin": "Afficher le logo sur l’écran de connexion",
+    "logo": "Image de l’entreprise",
+    "logoHint": "Affichée sur un côté de l’en-tête de la caisse. Sans image, POS KIOSKO s’affiche. PNG, JPG, WebP ou SVG jusqu’à 1 Mo.",
+    "logoDark": "Image pour le mode sombre (facultatif)",
+    "logoDarkHint": "Si votre logo a des lettres sombres, ajoutez une version claire. Sinon, la même image est utilisée.",
+    "imageUpload": "Téléverser",
+    "imagePick": "Choisir une image",
+    "imageBadType": "Seules les images PNG, JPG, WebP ou SVG sont acceptées.",
+    "imageRemove": "Supprimer",
+    "imageUploadError": "Impossible de téléverser l’image.",
+    "loginBackground": "Arrière-plan de l’écran de connexion",
+    "loginBgColor": "Couleur du thème",
+    "loginBgImage": "Image",
+    "loginBgColorHint": "Utilise la couleur d’arrière-plan du thème.",
+    "previewTitle": "Aperçu",
+    "preview": {
+      "online": "En ligne",
+      "clock": "{time}",
+      "wordmark": "VOTRE ENTREPRISE",
+      "cart": "Panier",
+      "line": "{name} — {price}",
+      "total": "Total {total}",
+      "pay": "Encaisser",
+      "items": "{count} articles",
+      "cashier": "Caissier : {name}"
+    },
+    "values": {
+      "mode": {
+        "light": "Clair",
+        "dark": "Sombre",
+        "schedule": "Automatique selon l’horaire"
+      },
+      "fontFamily": {
+        "system": "Système",
+        "inter": "Inter",
+        "roboto": "Roboto",
+        "poppins": "Poppins",
+        "nunito": "Nunito",
+        "montserrat": "Montserrat",
+        "source-sans": "Source Sans",
+        "jetbrains-mono": "JetBrains Mono"
+      },
+      "radius": {
+        "none": "Droites",
+        "sm": "Légères",
+        "md": "Moyennes",
+        "lg": "Arrondies",
+        "xl": "Très arrondies"
+      },
+      "density": {
+        "compact": "Compacte",
+        "comfortable": "Confortable",
+        "spacious": "Spacieuse"
+      },
+      "cartPosition": {
+        "left": "Gauche",
+        "right": "Droite"
+      },
+      "cartWidth": {
+        "narrow": "Étroit",
+        "normal": "Normal",
+        "wide": "Large"
+      },
+      "productCard": {
+        "image-top": "Image en haut",
+        "image-left": "Image à gauche",
+        "text-only": "Texte seul",
+        "compact": "Compacte"
+      },
+      "categoriesPlacement": {
+        "top": "En haut",
+        "left": "À gauche",
+        "hidden": "Masquées"
+      },
+      "statusBarPosition": {
+        "top": "En haut",
+        "bottom": "En bas"
+      },
+      "logoPosition": {
+        "left": "Gauche",
+        "right": "Droite"
+      },
+      "logoSize": {
+        "sm": "Petit",
+        "md": "Moyen",
+        "lg": "Grand"
+      },
+      "catalogColumns": {
+        "auto": "Automatique"
+      }
+    }
   },
   "products": {
     "addImages": "Ajouter des images",

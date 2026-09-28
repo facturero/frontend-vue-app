@@ -357,6 +357,9 @@
     "typePosLong": "POS (caja física)",
     "typeWeb": "Web",
     "unlink": "Desvincular y regenerar",
+    "theme": "Tema",
+    "themeDefault": "Predeterminado",
+    "themeDefaultHint": "El de toda la organización",
     "unlinkConfirm": "¿Desvincular \"{name}\"? El POS emparejado ya no podrá sincronizar hasta que se vuelva a configurar con un código nuevo.",
     "unpaired": "Sin emparejar",
     "viewCode": "Ver código"
@@ -800,6 +803,180 @@
     "tabMine": "Mis plugins",
     "title": "Plugins",
     "whatDoYouNeed": "¿Qué necesitas?"
+  },
+  "posThemes": {
+    "tabTitle": "Apariencia del POS",
+    "title": "Apariencia del POS",
+    "intro": "El tema que ve el cliente en la caja. Cada punto POS usa el que le asignes o, si no tiene ninguno, el de la organización.",
+    "new": "Nuevo tema",
+    "listTitle": "Temas",
+    "version": "v{version}",
+    "isDefault": "Predeterminado",
+    "assignedCount": "{count} en uso | {count} en uso",
+    "makeDefault": "Usar por defecto",
+    "assign": "Asignar",
+    "deleteConfirm": "Se va a eliminar «{name}». Lo usan {count} punto de emisión. | Se va a eliminar «{name}». Lo usan {count} puntos de emisión.",
+    "inUseHint": "Desasigna el tema de {count} punto antes de borrarlo. | Desasigna el tema de {count} puntos antes de borrarlo.",
+    "empty": "Todavía no hay temas. Crea el primero para que las dejen de usar el integrado.",
+    "pointFallback": "Punto {code}",
+    "currentTheme": "Ahora: {name}",
+    "useOrganizationDefault": "Tema de la organización",
+    "organizationDefault": "el tema de la organización",
+    "noPosPoints": "No hay puntos de tipo POS a los que asignar.",
+    "assignTitle": "Asignar «{name}» a los puntos",
+    "assignHint": "Elige el tema de cada punto POS. El que dejes sin elección usa el tema de la organización.",
+    "editor": {
+      "newTitle": "Nuevo tema del POS",
+      "editTitle": "Editar tema del POS",
+      "subtitle": "La vista previa se actualiza mientras escribes. El POS recoge los cambios en su siguiente sincronización."
+    },
+    "notFound": "El tema ya no existe. Puede que otro usuario lo haya borrado.",
+    "contrastPair": "{a} sobre {b}: {ratio}:1 (mínimo {min}:1)",
+    "presetsTitle": "Punto de partida",
+    "presetsHint": "Un tema nuevo nace de uno de estos. Después puedes cambiar cada color.",
+    "presets": {
+      "classic": "Clásico",
+      "dark": "Oscuro",
+      "highContrast": "Alto contraste",
+      "warm": "Cálido"
+    },
+    "nameError": "El nombre es obligatorio y admite 80 caracteres como máximo.",
+    "colorsTitle": "Colores",
+    "mode": "Modo",
+    "modeLight": "Claro",
+    "modeDark": "Oscuro",
+    "scheduleHint": "La caja cambia sola a oscuro en el horario indicado.",
+    "darkFrom": "Oscuro desde",
+    "darkTo": "Oscuro hasta",
+    "tokens": {
+      "primary": "Primario",
+      "background": "Fondo",
+      "surface": "Superficie",
+      "surfaceAlt": "Superficie alternativa",
+      "text": "Texto",
+      "textMuted": "Texto secundario",
+      "border": "Borde",
+      "success": "Éxito",
+      "warning": "Aviso",
+      "danger": "Error"
+    },
+    "contrastTitle": "Contraste",
+    "contrastBlocking": "Hay texto que no se va a poder leer en la caja. Corrige esos colores antes de guardar.",
+    "contrastAdvisory": "Se lee, pero justa: por debajo de 4.5:1 la WCAG lo considera insuficiente.",
+    "contrastOk": "Todas las combinaciones de texto se leen bien.",
+    "typographyTitle": "Tipografía",
+    "fontFamily": "Fuente",
+    "baseSize": "Tamaño base",
+    "headingWeight": "Grosor de títulos",
+    "shapeTitle": "Forma",
+    "radius": "Esquinas",
+    "density": "Densidad",
+    "borderWidth": "Grosor del borde",
+    "shadows": "Sombras",
+    "layoutTitle": "Distribución",
+    "cartPosition": "Carrito",
+    "cartWidth": "Ancho del carrito",
+    "columns": "Columnas del catálogo",
+    "productCard": "Tarjeta de producto",
+    "categories": "Categorías",
+    "statusBar": "Barra de estado",
+    "showImages": "Mostrar imágenes de producto",
+    "brandingTitle": "Marca",
+    "welcomeMessage": "Mensaje de bienvenida",
+    "welcomeTooLong": "El mensaje admite 80 caracteres como máximo.",
+    "logoPosition": "Posición del logotipo",
+    "logoSize": "Tamaño del logotipo",
+    "showLogoOnLogin": "Mostrar el logotipo en la pantalla de acceso",
+    "logo": "Imagen de la empresa",
+    "logoHint": "Va a un lado del encabezado de la caja. Sin imagen se muestra POS KIOSKO. PNG, JPG, WebP o SVG de hasta 1 MB.",
+    "logoDark": "Imagen para modo oscuro (opcional)",
+    "logoDarkHint": "Si tu logotipo lleva letras oscuras, sube una versión clara. Si no, se usa la misma imagen.",
+    "imageUpload": "Subir",
+    "imagePick": "Elegir imagen",
+    "imageBadType": "Solo se admiten imágenes PNG, JPG, WebP o SVG.",
+    "imageRemove": "Quitar",
+    "imageUploadError": "No se pudo subir la imagen.",
+    "loginBackground": "Fondo de la pantalla de acceso",
+    "loginBgColor": "Color del tema",
+    "loginBgImage": "Imagen",
+    "loginBgColorHint": "Usa el color de fondo del tema.",
+    "previewTitle": "Vista previa",
+    "preview": {
+      "online": "En línea",
+      "clock": "{time}",
+      "wordmark": "TU NEGOCIO",
+      "cart": "Carrito",
+      "line": "{name} — {price}",
+      "total": "Total {total}",
+      "pay": "Cobrar",
+      "items": "{count} artículos",
+      "cashier": "Cajero: {name}"
+    },
+    "values": {
+      "mode": {
+        "light": "Claro",
+        "dark": "Oscuro",
+        "schedule": "Automático por horario"
+      },
+      "fontFamily": {
+        "system": "Sistema",
+        "inter": "Inter",
+        "roboto": "Roboto",
+        "poppins": "Poppins",
+        "nunito": "Nunito",
+        "montserrat": "Montserrat",
+        "source-sans": "Source Sans",
+        "jetbrains-mono": "JetBrains Mono"
+      },
+      "radius": {
+        "none": "Rectas",
+        "sm": "Ligeras",
+        "md": "Medias",
+        "lg": "Redondeadas",
+        "xl": "Muy redondeadas"
+      },
+      "density": {
+        "compact": "Compacta",
+        "comfortable": "Cómoda",
+        "spacious": "Amplia"
+      },
+      "cartPosition": {
+        "left": "Izquierda",
+        "right": "Derecha"
+      },
+      "cartWidth": {
+        "narrow": "Estrecho",
+        "normal": "Normal",
+        "wide": "Ancho"
+      },
+      "productCard": {
+        "image-top": "Imagen arriba",
+        "image-left": "Imagen a la izquierda",
+        "text-only": "Solo texto",
+        "compact": "Compacta"
+      },
+      "categoriesPlacement": {
+        "top": "Arriba",
+        "left": "Izquierda",
+        "hidden": "Ocultas"
+      },
+      "statusBarPosition": {
+        "top": "Arriba",
+        "bottom": "Abajo"
+      },
+      "logoPosition": {
+        "left": "Izquierda",
+        "right": "Derecha"
+      },
+      "logoSize": {
+        "sm": "Pequeño",
+        "md": "Mediano",
+        "lg": "Grande"
+      },
+      "catalogColumns": {
+        "auto": "Automático"
+      }
+    }
   },
   "products": {
     "addImages": "Agregar imágenes",

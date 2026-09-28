@@ -1,6 +1,7 @@
 import { io, type Socket } from 'socket.io-client';
 import { getAccessToken } from '@/utils/http';
 import { useRealtimeStore } from '@/stores/realtime';
+import { usePosThemeStore } from '@/stores/posTheme';
 import { useAuthStore } from '@/stores/auth';
 import type { AssistantTurn } from '@/types/assistant';
 
@@ -99,6 +100,18 @@ export function connectRealtime(): void {
       void useAuthStore().fetchMe();
     } catch {
       // pinia aún no activa; el próximo fetchMe de la app deja el store al día
+    }
+  });
+
+  socket.on('organization.pos_theme.changed', (data: Record<string, unknown>) => {
+    // El aviso de tema solo lleva el id (el config se pide por REST, igual que
+    // la caja: por el socket no viaja el tema entero). La organizationId del
+    // payload es la del evento; el store ya solo ve lo de su organización.
+    try {
+      const themeId = typeof data.themeId === 'string' ? data.themeId : null;
+      void usePosThemeStore().onThemeChanged(themeId);
+    } catch {
+      // pinia aún no activa (no debería ocurrir tras el login)
     }
   });
 

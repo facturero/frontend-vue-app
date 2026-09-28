@@ -16,6 +16,8 @@ import RoleEditView from '@/views/roles/RoleEditView.vue';
 import OrganizationSettingsView from '@/views/organization/OrganizationSettingsView.vue';
 import EstablishmentsView from '@/views/organization/EstablishmentsView.vue';
 import CertificatesView from '@/views/organization/CertificatesView.vue';
+import PosThemesView from '@/views/organization/PosThemesView.vue';
+import PosThemeEditorView from '@/views/organization/PosThemeEditorView.vue';
 import ProductsListView from '@/views/products/ProductsListView.vue';
 import StockListView from '@/views/inventory/StockListView.vue';
 import StockMovementsView from '@/views/inventory/StockMovementsView.vue';
@@ -120,6 +122,29 @@ const router = createRouter({
       name: 'organization-certificates',
       component: CertificatesView,
       meta: { requiresAuth: true, requiredPermission: 'fiscal:manage', requiredPlugin: 'finance.electronic_certificate' },
+    },
+
+    {
+      // Temas del POS. La lista es deep-link de la pestaña de Ajustes
+      // (/settings?tab=pos-themes) y además ruta propia para poder llegar
+      // directo. El editor necesita ruta aparte porque lleva un id: dentro de la
+      // vista de pestañas no habría forma de distinguir un tema de otro.
+      path: '/organization/pos-themes',
+      name: 'organization-pos-themes',
+      component: PosThemesView,
+      meta: { requiresAuth: true, requiredPermission: 'organization:admin' },
+    },
+    {
+      path: '/organization/pos-themes/new',
+      name: 'organization-pos-theme-new',
+      component: PosThemeEditorView,
+      meta: { requiresAuth: true, requiredPermission: 'organization:admin' },
+    },
+    {
+      path: '/organization/pos-themes/:themeId',
+      name: 'organization-pos-theme-edit',
+      component: PosThemeEditorView,
+      meta: { requiresAuth: true, requiredPermission: 'organization:admin' },
     },
 
     {

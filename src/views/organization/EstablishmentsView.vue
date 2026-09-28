@@ -3,6 +3,7 @@ import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { useOrganizationStore } from '@/stores/organization';
+import { usePosThemeStore } from '@/stores/posTheme';
 import type { EstablishmentDTO, EmissionPointDTO } from '@/types/organization';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import { getSocket } from '@/utils/realtime';
@@ -10,12 +11,15 @@ import { getSocket } from '@/utils/realtime';
 const { t } = useI18n();
 const auth = useAuthStore();
 const store = useOrganizationStore();
+const themeStore = usePosThemeStore();
 
 // `embedded`: la vista vive dentro de Ajustes (arquetipo F) como pestaña, sin
 // container ni PageHeader propios.
 const props = defineProps<{ embedded?: boolean }>();
 
 const canCreate = computed(() => auth.can('establishment:create'));
+// Cambiar el tema de una caja es escribir en la biblioteca de temas de la organización.
+const canAssignTheme = computed(() => auth.can('organization:admin'));
 
 const selected = ref<EstablishmentDTO | null>(null);
 
@@ -98,6 +102,13 @@ async function refreshPoints(): Promise<void> {
   await store.fetchEmissionPoints(selected.value.id);
 }
 
+// `posThemeId` null = la caja usa el tema predeterminado de la organización.
+async function assignTheme(ep: EmissionPointDTO, themeId: string | null): Promise<void> {
+  if (!selected.value || ep.posThemeId === themeId) return;
+  const updated = await themeStore.assignToPoint(selected.value.id, ep.id, themeId);
+  if (updated) await refreshPoints();
+}
+
 watch(
   () => store.emissionPoints,
   (points) => {
@@ -108,6 +119,7 @@ watch(
 );
 
 onMounted(async () => {
+  if (canAssignTheme.value) void themeStore.fetchThemes();
   await store.fetchEstablishments();
   if (store.establishments.length > 0) {
     await selectEstablishment(store.establishments[0]);
@@ -199,10 +211,35 @@ onUnmounted(() => {
                   <v-chip size="x-small" variant="flat" :color="ep.paired ? 'lightsuccess' : 'lightwarning'">
                     {{ ep.paired ? $t('establishments.paired') : $t('establishments.unpaired') }}
                   </v-chip>
+                  <v-chip size="x-small" variant="flat" color="lightprimary" prepend-icon="mdi-palette-outline">
+                    {{ ep.posThemeName ?? $t('establishments.themeDefault') }}
+                  </v-chip>
                 </template>
               </v-list-item-subtitle>
 
               <template v-if="ep.type === 'pos'" #append>
+                <v-menu v-if="canAssignTheme">
+                  <template #activator="{ props: menuProps }">
+                    <v-btn v-bind="menuProps" size="small" variant="text" prepend-icon="mdi-palette-outline">
+                      {{ $t('establishments.theme') }}
+                    </v-btn>
+                  </template>
+                  <v-list density="compact">
+                    <v-list-item
+                      :active="ep.posThemeId == null"
+                      :title="$t('establishments.themeDefault')"
+                      :subtitle="$t('establishments.themeDefaultHint')"
+                      @click="assignTheme(ep, null)"
+                    />
+                    <v-list-item
+                      v-for="th in themeStore.themes"
+                      :key="th.id"
+                      :active="ep.posThemeId === th.id"
+                      :title="th.name"
+                      @click="assignTheme(ep, th.id)"
+                    />
+                  </v-list>
+                </v-menu>
                 <v-btn
                   v-if="!ep.paired"
                   size="small"

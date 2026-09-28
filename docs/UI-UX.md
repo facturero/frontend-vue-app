@@ -232,3 +232,35 @@ El tour de la aplicación vive en `src/composable/useAppTour.ts` y su estilo en
 - **Navegación:** entre pasos de rutas distintas el tour empuja la ruta con
   vue-router y reanuda el highlight al montar la vista (ver hooks
   `onNextClick`/`onPrevClick` y la reanudación en `router.afterEach`).
+
+---
+
+## 9. Tema del POS (editor y vista previa)
+
+`Ajustes → Apariencia del POS` (`PosThemesView`, `PosThemeEditorView`) deja al
+cliente personalizar sus cajas. Las vistas siguen las reglas de siempre
+(`PageHeader`, utilidades de Vuetify, tokens); lo único distinto es la **vista
+previa**, y por eso vive aislada.
+
+- **Un solo sitio con colores "sueltos":** `components/pos-theme/PosThemePreview.vue`
+  (y `PosBrandMark.vue`, que dibuja el logotipo POS KIOSKO). Los colores que pintan
+  NO son decisiones de diseño del CRM sino **datos que escribió el cliente**: llegan
+  por `:style` desde el estado. Aun así, **no se escribe un hexadecimal a mano**: si
+  hace falta un color por defecto, sale de `defaultPosThemeConfig()`
+  (`src/types/posTheme.ts`).
+- **Por qué no usa `v-card`:** los defaults globales de `vuetify.ts` (radio, sombra)
+  son de la app y falsearían la única vista que tiene que ser fiel al 100 % a lo que
+  verá la caja. El mock se construye con `div` y estilos en línea.
+- **Selector de color:** un `<input type="color">` nativo (Vuetify no trae uno) con su
+  campo hexadecimal al lado; el contrato solo acepta `#rrggbb` en minúsculas.
+- **Imágenes de marca:** `PosThemeLogoField` reutiliza `ImageUploader`. Los archivos
+  cuelgan de la **organización** (`resourceType: pos-theme-brand`, categorías `logo`,
+  `logo-dark`, `login-background`), no del tema, porque un tema nuevo aún no tiene id.
+- **Contraste:** bajo 3:1 el editor bloquea el guardado (igual que el servidor); entre
+  3 y 4,5 solo avisa. La lógica está en `checkContrast` y tiene pruebas.
+- **El contrato se copia, no se importa:** `src/types/posTheme.ts` replica
+  `organization-service/src/domain/pos-theme.ts`. Si cambia un token, cámbialo en los
+  dos sitios; `posTheme.test.ts` avisa si se desincronizan.
+- **Defaults = aspecto actual del POS:** el tema "Clásico" reproduce los colores y la
+  distribución que la caja tiene hoy (paleta gray/blue de Tailwind). Si se toca, hay
+  que tocar también el tema integrado del POS.

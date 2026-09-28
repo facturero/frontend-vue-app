@@ -48,6 +48,14 @@ export interface EmissionPointDTO {
   status: 'active' | 'inactive';
   type: 'web' | 'pos';
   paired: boolean;
+  /**
+   * Tema del POS que tiene este punto por encima del default de la
+   * organización. `null` = sin override, así que va al default. Ya viene
+   * resuelto por el servidor: el cliente no vuelve a compositionar la cadena
+   * override → default → integrado, que es donde se equivoca la gente.
+   */
+  posThemeId?: string | null;
+  posThemeName?: string | null;
 }
 
 export interface CreateEmissionPointInput {

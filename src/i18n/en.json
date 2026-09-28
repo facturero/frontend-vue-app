@@ -357,6 +357,9 @@
     "typePosLong": "POS (physical register)",
     "typeWeb": "Web",
     "unlink": "Unlink and regenerate",
+    "theme": "Theme",
+    "themeDefault": "Default",
+    "themeDefaultHint": "The organization-wide one",
     "unlinkConfirm": "Unlink \"{name}\"? The paired POS will no longer sync until it is set up again with a new code.",
     "unpaired": "Not paired",
     "viewCode": "View code"
@@ -800,6 +803,180 @@
     "tabMine": "My plugins",
     "title": "Plugins",
     "whatDoYouNeed": "What do you need?"
+  },
+  "posThemes": {
+    "tabTitle": "POS appearance",
+    "title": "POS appearance",
+    "intro": "The theme the customer sees at the till. Each POS terminal uses the one you assign it, or the organisation default if it has none.",
+    "new": "New theme",
+    "listTitle": "Themes",
+    "version": "v{version}",
+    "isDefault": "Default",
+    "assignedCount": "{count} in use | {count} in use",
+    "makeDefault": "Use as default",
+    "assign": "Assign",
+    "deleteConfirm": "«{name}» will be deleted. {count} terminal currently uses it. | «{name}» will be deleted. {count} terminals currently use it.",
+    "inUseHint": "Unassign the theme from {count} terminal first. | Unassign the theme from {count} terminals first.",
+    "empty": "No themes yet. Create the first one so the terminals stop using the built-in one.",
+    "pointFallback": "Terminal {code}",
+    "currentTheme": "Now: {name}",
+    "useOrganizationDefault": "Organisation default",
+    "organizationDefault": "the organisation default",
+    "noPosPoints": "There are no POS terminals to assign to.",
+    "assignTitle": "Assign «{name}» to terminals",
+    "assignHint": "Pick the theme for each POS terminal. One left unset uses the organisation default.",
+    "editor": {
+      "newTitle": "New POS theme",
+      "editTitle": "Edit POS theme",
+      "subtitle": "The preview updates as you type. The POS picks the changes up on its next sync."
+    },
+    "notFound": "This theme no longer exists. Another user may have deleted it.",
+    "contrastPair": "{a} on {b}: {ratio}:1 (minimum {min}:1)",
+    "presetsTitle": "Starting point",
+    "presetsHint": "A new theme starts from one of these. You can change every colour afterwards.",
+    "presets": {
+      "classic": "Classic",
+      "dark": "Dark",
+      "highContrast": "High contrast",
+      "warm": "Warm"
+    },
+    "nameError": "The name is required and allows up to 80 characters.",
+    "colorsTitle": "Colours",
+    "mode": "Mode",
+    "modeLight": "Light",
+    "modeDark": "Dark",
+    "scheduleHint": "The till switches to dark on its own during these hours.",
+    "darkFrom": "Dark from",
+    "darkTo": "Dark until",
+    "tokens": {
+      "primary": "Primary",
+      "background": "Background",
+      "surface": "Surface",
+      "surfaceAlt": "Alternative surface",
+      "text": "Text",
+      "textMuted": "Secondary text",
+      "border": "Border",
+      "success": "Success",
+      "warning": "Warning",
+      "danger": "Error"
+    },
+    "contrastTitle": "Contrast",
+    "contrastBlocking": "Some text cannot be read at the till. Fix those colours before saving.",
+    "contrastAdvisory": "It is readable but tight: WCAG considers anything under 4.5:1 insufficient.",
+    "contrastOk": "Every text combination reads well.",
+    "typographyTitle": "Typography",
+    "fontFamily": "Font",
+    "baseSize": "Base size",
+    "headingWeight": "Heading weight",
+    "shapeTitle": "Shape",
+    "radius": "Corners",
+    "density": "Density",
+    "borderWidth": "Border width",
+    "shadows": "Shadows",
+    "layoutTitle": "Layout",
+    "cartPosition": "Cart",
+    "cartWidth": "Cart width",
+    "columns": "Catalogue columns",
+    "productCard": "Product card",
+    "categories": "Categories",
+    "statusBar": "Status bar",
+    "showImages": "Show product images",
+    "brandingTitle": "Branding",
+    "welcomeMessage": "Welcome message",
+    "welcomeTooLong": "The message allows up to 80 characters.",
+    "logoPosition": "Logo position",
+    "logoSize": "Logo size",
+    "showLogoOnLogin": "Show the logo on the sign-in screen",
+    "logo": "Company image",
+    "logoHint": "Shown at one side of the register header. Without an image, POS KIOSKO is shown. PNG, JPG, WebP or SVG up to 1 MB.",
+    "logoDark": "Dark-mode image (optional)",
+    "logoDarkHint": "If your logo has dark lettering, upload a light version. Otherwise the same image is used.",
+    "imageUpload": "Upload",
+    "imagePick": "Choose image",
+    "imageBadType": "Only PNG, JPG, WebP or SVG images are allowed.",
+    "imageRemove": "Remove",
+    "imageUploadError": "The image could not be uploaded.",
+    "loginBackground": "Sign-in screen background",
+    "loginBgColor": "Theme color",
+    "loginBgImage": "Image",
+    "loginBgColorHint": "Uses the theme's background color.",
+    "previewTitle": "Preview",
+    "preview": {
+      "online": "Online",
+      "clock": "{time}",
+      "wordmark": "YOUR BUSINESS",
+      "cart": "Cart",
+      "line": "{name} — {price}",
+      "total": "Total {total}",
+      "pay": "Charge",
+      "items": "{count} items",
+      "cashier": "Cashier: {name}"
+    },
+    "values": {
+      "mode": {
+        "light": "Light",
+        "dark": "Dark",
+        "schedule": "Automatic on a schedule"
+      },
+      "fontFamily": {
+        "system": "System",
+        "inter": "Inter",
+        "roboto": "Roboto",
+        "poppins": "Poppins",
+        "nunito": "Nunito",
+        "montserrat": "Montserrat",
+        "source-sans": "Source Sans",
+        "jetbrains-mono": "JetBrains Mono"
+      },
+      "radius": {
+        "none": "Square",
+        "sm": "Slight",
+        "md": "Medium",
+        "lg": "Rounded",
+        "xl": "Very rounded"
+      },
+      "density": {
+        "compact": "Compact",
+        "comfortable": "Comfortable",
+        "spacious": "Spacious"
+      },
+      "cartPosition": {
+        "left": "Left",
+        "right": "Right"
+      },
+      "cartWidth": {
+        "narrow": "Narrow",
+        "normal": "Normal",
+        "wide": "Wide"
+      },
+      "productCard": {
+        "image-top": "Image on top",
+        "image-left": "Image on the left",
+        "text-only": "Text only",
+        "compact": "Compact"
+      },
+      "categoriesPlacement": {
+        "top": "Top",
+        "left": "Left",
+        "hidden": "Hidden"
+      },
+      "statusBarPosition": {
+        "top": "Top",
+        "bottom": "Bottom"
+      },
+      "logoPosition": {
+        "left": "Left",
+        "right": "Right"
+      },
+      "logoSize": {
+        "sm": "Small",
+        "md": "Medium",
+        "lg": "Large"
+      },
+      "catalogColumns": {
+        "auto": "Automatic"
+      }
+    }
   },
   "products": {
     "addImages": "Add images",
