@@ -10,5 +10,7 @@ export const roleApi = {
   updatePermissions: (roleId: string, body: UpdateRolePermissionsInput) =>
     http.patch<void>(`/roles/${roleId}/permissions`, body).then((r) => r.data),
 
+  remove: (roleId: string) => http.delete<void>(`/roles/${roleId}`).then((r) => r.data),
+
   listPermissions: () => http.get<PermissionItem[]>('/permissions').then((r) => r.data),
 };

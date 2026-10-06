@@ -1,16 +1,36 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { useRoleStore } from '@/stores/roles';
 import RoleBadge from '@/components/RoleBadge.vue';
 import PageHeader from '@/components/ui/PageHeader.vue';
+import { extractError } from '@/utils/error';
+import type { RoleSummary } from '@/types/roles';
 
 const auth = useAuthStore();
 const store = useRoleStore();
 const router = useRouter();
 
 const canManage = auth.can('user:assign_role');
+
+// Solo se pueden eliminar los roles propios (no los de sistema). Si alguien todavía tiene el rol, el servidor lo
+// rechaza (409) y el mensaje se muestra tal cual.
+const roleToDelete = ref<RoleSummary | null>(null);
+const deleting = ref(false);
+
+async function confirmDelete(): Promise<void> {
+  if (!roleToDelete.value) return;
+  deleting.value = true;
+  try {
+    await store.remove(roleToDelete.value.id);
+  } catch (e) {
+    store.error = extractError(e);
+  } finally {
+    deleting.value = false;
+    roleToDelete.value = null;
+  }
+}
 
 onMounted(() => {
   store.fetch();
@@ -60,6 +80,16 @@ onMounted(() => {
               <v-card-subtitle v-if="r.description" class="mt-1">
                 {{ r.description }}
               </v-card-subtitle>
+              <template v-if="canManage && !r.isSystem" #append>
+                <v-btn
+                  icon="mdi-delete-outline"
+                  variant="text"
+                  size="small"
+                  color="error"
+                  :aria-label="$t('roles.deleteRole')"
+                  @click.stop="roleToDelete = r"
+                />
+              </template>
             </v-card-item>
 
             <v-card-text>
@@ -97,5 +127,16 @@ onMounted(() => {
     <div v-else class="d-flex justify-center py-8">
       <v-progress-circular indeterminate color="primary" />
     </div>
+
+    <v-dialog :model-value="roleToDelete !== null" max-width="420" @update:model-value="roleToDelete = null">
+      <v-card :title="$t('roles.deleteConfirmTitle')">
+        <v-card-text>{{ $t('roles.deleteConfirmText', { name: roleToDelete?.name ?? '' }) }}</v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn :disabled="deleting" @click="roleToDelete = null">{{ $t('common.cancel') }}</v-btn>
+          <v-btn color="error" variant="flat" :loading="deleting" @click="confirmDelete">{{ $t('common.delete') }}</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>

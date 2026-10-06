@@ -44,5 +44,11 @@ export const useRoleStore = defineStore('roles', () => {
     await roleApi.updatePermissions(roleId, { permissions: permissionCodes });
   }
 
-  return { list, permissions, loading, error, fetch, fetchPermissions, create, updatePermissions };
+  async function remove(roleId: string): Promise<void> {
+    error.value = null;
+    await roleApi.remove(roleId);
+    list.value = list.value.filter((r) => r.id !== roleId);
+  }
+
+  return { list, permissions, loading, error, fetch, fetchPermissions, create, updatePermissions, remove };
 });
