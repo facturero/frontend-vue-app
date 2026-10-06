@@ -9,6 +9,7 @@ import RoleBadge from '@/components/RoleBadge.vue';
 import RoleSelect from '@/components/RoleSelect.vue';
 import RestorePasswordDialog from '@/components/RestorePasswordDialog.vue';
 import PageHeader from '@/components/ui/PageHeader.vue';
+import { extractError } from '@/utils/error';
 
 const props = defineProps<{ id: string }>();
 const emp = useEmployeeStore();
@@ -74,15 +75,22 @@ async function disableEmployee(): Promise<void> {
   }
 }
 
+// El selector parte de los roles que el usuario ya tiene: lo que se marca de más se añade y lo que se desmarca se quita.
+// Primero se añade y luego se quita, para que nunca se quede sin ningún rol por el camino.
 async function assignRole(): Promise<void> {
   if (selectedRoleIds.value.length === 0) return;
   assigning.value = true;
   emp.error = null;
   try {
-    await emp.assignRole(props.id, selectedRoleIds.value);
+    const current = rolesStore.list.filter((r) => employee.value?.roles.includes(r.name)).map((r) => r.id);
+    const toAdd = selectedRoleIds.value.filter((id) => !current.includes(id));
+    const toRemove = current.filter((id) => !selectedRoleIds.value.includes(id));
+    if (toAdd.length > 0) await emp.assignRole(props.id, toAdd);
+    for (const roleId of toRemove) await emp.removeRole(props.id, roleId);
     await emp.fetch();
-  } catch {
-    /* manejado por el store */
+  } catch (e) {
+    emp.error = extractError(e);
+    await emp.fetch().catch(() => undefined);
   } finally {
     assigning.value = false;
   }

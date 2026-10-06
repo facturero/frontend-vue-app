@@ -12,6 +12,9 @@ export const employeeApi = {
   assignRole: (userId: string, roleIds: string[]) =>
     http.post<void>(`/users/${userId}/roles`, { roleIds }).then((r) => r.data),
 
+  removeRole: (userId: string, roleId: string) =>
+    http.delete<void>(`/users/${userId}/roles/${roleId}`).then((r) => r.data),
+
   disable: (userId: string) =>
     http.post<void>(`/users/${userId}/disable`).then((r) => r.data),
 

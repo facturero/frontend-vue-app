@@ -32,6 +32,11 @@ export const useEmployeeStore = defineStore('employees', () => {
     await employeeApi.assignRole(userId, roleIds);
   }
 
+  async function removeRole(userId: string, roleId: string): Promise<void> {
+    error.value = null;
+    await employeeApi.removeRole(userId, roleId);
+  }
+
   async function disable(userId: string): Promise<void> {
     error.value = null;
     await employeeApi.disable(userId);
@@ -47,5 +52,5 @@ export const useEmployeeStore = defineStore('employees', () => {
     await employeeApi.requestPasswordReset(userId);
   }
 
-  return { list, loading, error, fetch, invite, assignRole, disable, updateEstablishments, requestPasswordReset };
+  return { list, loading, error, fetch, invite, assignRole, removeRole, disable, updateEstablishments, requestPasswordReset };
 });
