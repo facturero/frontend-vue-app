@@ -20,6 +20,13 @@ watch(catalogSearch, (q) => {
 
 usePluginsRealtime();
 
+// Reactivar un módulo desactivado reutiliza la cotización del catálogo (precio, prueba gratis y código de descuento).
+const catalogTab = ref<InstanceType<typeof PluginCatalogTab> | null>(null);
+async function reactivate(code: string): Promise<void> {
+  tab.value = 'catalog';
+  await catalogTab.value?.openQuote(code);
+}
+
 onMounted(() => {
   void store.fetchCatalog();
 });
@@ -79,11 +86,11 @@ const profilePending = computed(() => store.myProfile?.status === 'pending');
 
     <v-tabs-window v-model="tab">
       <v-tabs-window-item value="catalog">
-        <PluginCatalogTab :initial-search="catalogSearch" />
+        <PluginCatalogTab ref="catalogTab" :initial-search="catalogSearch" />
       </v-tabs-window-item>
 
       <v-tabs-window-item value="my">
-        <MyPluginsTab />
+        <MyPluginsTab @reactivate="reactivate" />
       </v-tabs-window-item>
 
       <v-tabs-window-item value="custom">

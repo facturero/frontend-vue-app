@@ -93,12 +93,15 @@ function formatPrice(cents: number, currency: string): string {
   return new Intl.NumberFormat(locale.value, { style: 'currency', currency }).format(cents / 100);
 }
 
-async function openQuote(plugin: CatalogPlugin): Promise<void> {
-  activatingCode.value = plugin.code;
+async function openQuote(code: string): Promise<void> {
+  activatingCode.value = code;
   discountInput.value = '';
-  const ok = await store.fetchQuote(plugin.code);
+  const ok = await store.fetchQuote(code);
   if (ok) quoteDialog.value = true;
 }
+
+// «Mis plugins» reactiva un módulo desactivado pasando por la misma cotización que una activación nueva.
+defineExpose({ openQuote });
 
 async function applyDiscount(): Promise<void> {
   if (!activatingCode.value || !discountInput.value.trim()) return;
@@ -246,14 +249,14 @@ async function confirmActivate(): Promise<void> {
             <v-spacer />
             <span class="text-subtitle-2 mr-2">{{ p.priceCents === 0 ? $t('plugins.included') : formatPrice(p.priceCents, p.currency) + $t('plugins.perMonth') + $t('plugins.plusVat') }}</span>
             <v-btn
-              v-if="canActivate && p.display_status === 'disponible'"
+              v-if="canActivate && (p.display_status === 'disponible' || p.display_status === 'desactivado')"
               color="primary"
               variant="tonal"
               size="small"
               :loading="store.loading && activatingCode === p.code"
-              @click="openQuote(p)"
+              @click="openQuote(p.code)"
             >
-              {{ $t('plugins.activate') }}
+              {{ $t(p.display_status === 'desactivado' ? 'plugins.reactivate' : 'plugins.activate') }}
             </v-btn>
           </v-card-actions>
         </v-card>

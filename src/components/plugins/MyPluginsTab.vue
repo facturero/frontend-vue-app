@@ -6,6 +6,8 @@ import { useAuthStore } from '@/stores/auth';
 import type { OrganizationPlugin } from '@/types/plugins';
 import { resolveBlockingPlugins, type BlockingPlugin } from '@/utils/plugin-blockers';
 
+const emit = defineEmits<{ reactivate: [code: string] }>();
+
 const { locale } = useI18n();
 const store = usePluginsStore();
 const auth = useAuthStore();
@@ -118,8 +120,14 @@ async function confirmDeactivate(): Promise<void> {
               {{ p.activationSource === 'direct' ? $t('plugins.sourceDirect') : $t('plugins.sourceDependency') }}
             </v-chip>
           </v-card-text>
+          <v-card-actions v-if="canActivate && p.status !== 'active' && p.pluginCode" class="pt-0">
+            <v-spacer />
+            <v-btn color="primary" variant="tonal" size="small" @click="emit('reactivate', p.pluginCode)">
+              {{ $t('plugins.reactivate') }}
+            </v-btn>
+          </v-card-actions>
           <v-card-actions
-            v-if="canActivate && p.activationSource === 'direct' && p.status === 'active'"
+            v-else-if="canActivate && p.activationSource === 'direct' && p.status === 'active'"
             class="pt-0"
           >
             <v-spacer />
