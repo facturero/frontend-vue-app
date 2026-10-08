@@ -810,6 +810,8 @@
     "deactivateNoticePaid": "You are billed at the end of each month. You can keep using it as usual until {date}, when the period you already paid for ends; then it will disappear from My plugins and you won't be charged next month. If you change your mind before then, you can cancel the deactivation.",
     "deactivateNoticeTrial": "While your free trial lasts you can keep using it as usual, until {date}; then it will disappear from My plugins and you won't be charged. If you change your mind before then, you can cancel the deactivation.",
     "deactivateNoticeFree": "This module is free: it will be deactivated now and doesn't affect your billing. You can turn it back on any time.",
+    "requiredByTitle": "These modules need it:",
+    "requiredByHint": "To deactivate it, deactivate those modules first (click one to do it).",
     "scheduledChip": "Deactivates on {date}",
     "scheduledHint": "It keeps working until that date. You won't be charged next month.",
     "cancelDeactivation": "Cancel deactivation",

@@ -810,6 +810,8 @@
     "deactivateNoticePaid": "El cobro es al finalizar cada mes. Seguirás usándolo con normalidad hasta el {date}, cuando termina el periodo que ya pagaste; después desaparecerá de Mis plugins y no se te cobrará el mes siguiente. Si cambias de opinión antes, podrás cancelar la desactivación.",
     "deactivateNoticeTrial": "Mientras dure tu prueba gratis lo seguirás usando con normalidad, hasta el {date}; después desaparecerá de Mis plugins y no se te cobrará. Si cambias de opinión antes, podrás cancelar la desactivación.",
     "deactivateNoticeFree": "Es un módulo gratuito: se desactivará ahora y no afecta tu cobro. Podrás volver a activarlo cuando quieras.",
+    "requiredByTitle": "Lo necesitan estos módulos:",
+    "requiredByHint": "Para desactivarlo, desactiva primero esos módulos (pulsa uno para hacerlo).",
     "scheduledChip": "Se desactiva el {date}",
     "scheduledHint": "Sigue funcionando hasta esa fecha. No se te cobrará el mes siguiente.",
     "cancelDeactivation": "Cancelar desactivación",
