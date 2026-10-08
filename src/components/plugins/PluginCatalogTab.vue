@@ -28,9 +28,12 @@ const activatingCode = ref<string | null>(null);
 const discountInput = ref('');
 const applyingDiscount = ref(false);
 
-const categories = computed(() =>
-  Array.from(new Set(store.catalog.map((p) => p.category))).sort(),
-);
+
+// Lo incluido en la plataforma (núcleo y módulos base) no es algo que se elija ni se compre: no se mezcla con los plugins del
+// catálogo. Solo se ve si se pide expresamente con el filtro «Incluido».
+const offered = computed(() => store.catalog.filter((p) => p.display_status !== 'incluido'));
+
+const categories = computed(() => Array.from(new Set(offered.value.map((p) => p.category))).sort());
 
 const statusOptions = computed(() => {
   const counts: Record<string, number> = {};
@@ -40,7 +43,7 @@ const statusOptions = computed(() => {
     { label: string; color: string },
   ][];
   return [
-    { value: 'all', label: t('plugins.allCount', { count: store.catalog.length }), color: 'grey' },
+    { value: 'all', label: t('plugins.allCount', { count: offered.value.length }), color: 'grey' },
     ...entries
       .filter(([value]) => (counts[value] ?? 0) > 0)
       .map(([value, meta]) => ({
@@ -54,6 +57,7 @@ const statusOptions = computed(() => {
 const filtered = computed(() => {
   const q = search.value.trim().toLowerCase();
   const list = store.catalog.filter((p) => {
+    if (p.display_status === 'incluido' && statusFilter.value !== 'incluido') return false;
     if (categoryFilter.value && p.category !== categoryFilter.value) return false;
     if (statusFilter.value && statusFilter.value !== 'all' && p.display_status !== statusFilter.value) return false;
     if (!q) return true;
