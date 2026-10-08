@@ -42,7 +42,7 @@ const profilePending = computed(() => store.myProfile?.status === 'pending');
 
 <template>
   <v-container>
-    <PageHeader :title="$t('plugins.title')">
+    <PageHeader :title="$t('plugins.title')" sticky>
       <template #actions>
         <v-badge :content="cart.count" :model-value="cart.count > 0" color="primary">
           <v-btn prepend-icon="mdi-cart-outline" @click="cart.openCart()">{{ $t('plugins.cart.title') }}</v-btn>

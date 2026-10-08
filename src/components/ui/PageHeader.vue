@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed, ref } from 'vue';
+import { useStickyHeader } from '@/composable/useStickyHeader';
 /**
  * Encabezado canónico de una vista. Toda vista de nivel superior empieza con
  * este componente: fija el nivel del encabezado, la tipografía, el espaciado y
@@ -14,14 +16,28 @@
  * patrón de la referencia visual (ver docs/PLAN-MODERNIZE.md) y además separa
  * la cabecera del contenido sin necesidad de una línea divisoria.
  */
-defineProps<{
+const props = defineProps<{
   title: string;
   subtitle?: string;
+  /**
+   * El encabezado se queda fijo bajo la barra superior al hacer scroll y, al bajar, crece de forma gradual hasta el 100 % del
+   * ancho útil. Para vistas cuyas acciones no deben desaparecer (p. ej. el carrito de módulos). Ver useStickyHeader.
+   */
+  sticky?: boolean;
 }>();
+
+const sheet = ref<{ $el: HTMLElement } | null>(null);
+const sheetEl = computed(() => sheet.value?.$el ?? null);
+const stickyStyle = useStickyHeader(sheetEl, () => props.sticky === true);
 </script>
 
 <template>
-  <v-sheet color="lightprimary" class="d-flex flex-wrap align-center ga-3 mb-6 pa-6">
+  <v-sheet
+    ref="sheet"
+    color="lightprimary"
+    class="d-flex flex-wrap align-center ga-3 mb-6 pa-6"
+    :style="stickyStyle"
+  >
     <div>
       <!--
         Color forzado, no utilidad de opacidad: sobre `lightprimary` el texto

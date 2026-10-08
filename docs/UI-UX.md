@@ -125,6 +125,10 @@ Reglas fijas:
   tabla ancha que realmente lo necesita.
 - El título lo pone **siempre** `PageHeader`, nunca un `<h1>`/`<h2>` suelto.
   Así el nivel de encabezado y el margen inferior son idénticos en todas partes.
+- `<PageHeader sticky>` deja el encabezado fijo bajo la barra superior para que sus acciones no desaparezcan al hacer scroll (hoy:
+  el carrito de módulos en `/plugins`). Arriba del todo es el panel de siempre; al bajar crece de forma gradual, atada al scroll,
+  hasta el 100 % del ancho útil, pierde las esquinas y proyecta sombra. No cambia de alto (si lo hiciera, el contenido se movería
+  mientras se hace scroll). La lógica está en `composable/useStickyHeader.ts`; úsalo solo en vistas con acciones que deban seguir a mano.
 - Los errores van en un `v-alert` justo debajo del encabezado, no dentro de la
   tarjeta.
 - La acción principal va en `#actions`, alineada a la derecha, **sólida**
