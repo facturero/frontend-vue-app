@@ -115,7 +115,7 @@ onMounted(async () => {
             <v-text-field v-model="search" :label="$t('products.searchLabel')"
               hide-details prepend-inner-icon="mdi-magnify" clearable @keyup.enter="doSearch" />
           </v-col>
-          <v-col cols="6" sm="3">
+          <v-col cols="12" sm="3">
             <v-select v-model="statusFilter" :items="[
               { title: $t('products.allStatuses'), value: null },
               { title: $t('common.active'), value: 'active' },
@@ -123,7 +123,7 @@ onMounted(async () => {
             ]" :label="$t('common.status')" hide-details clearable
               @update:model-value="doSearch" />
           </v-col>
-          <v-col cols="6" sm="3">
+          <v-col cols="12" sm="3">
             <v-select v-model="typeFilter" :items="[
               { title: $t('products.allTypes'), value: null },
               { title: $t('products.good'), value: 'good' },
@@ -131,7 +131,7 @@ onMounted(async () => {
             ]" :label="$t('common.type')" hide-details clearable
               @update:model-value="doSearch" />
           </v-col>
-          <v-col cols="6" sm="3">
+          <v-col cols="12" sm="3">
             <v-select v-model="establishmentFilter" :items="establishmentOptions" :label="$t('organization.establishment')" hide-details clearable
               @update:model-value="doSearch" data-testid="products-establishment-filter" />
           </v-col>

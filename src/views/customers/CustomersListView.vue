@@ -116,7 +116,7 @@ onMounted(async () => {
           <v-col cols="12" sm="4">
             <v-text-field v-model="search" :label="$t('customers.searchLabel')" hide-details prepend-inner-icon="mdi-magnify" clearable @keyup.enter="doSearch" />
           </v-col>
-          <v-col cols="6" sm="2">
+          <v-col cols="12" sm="2">
             <v-select v-model="statusFilter" :items="[
               { title: $t('customers.allStatuses'), value: null },
               { title: $t('common.active'), value: 'active' },
@@ -124,7 +124,7 @@ onMounted(async () => {
             ]" :label="$t('common.status')" hide-details clearable
               @update:model-value="doSearch" />
           </v-col>
-          <v-col cols="6" sm="2">
+          <v-col cols="12" sm="2">
             <v-select v-model="typeFilter" :items="[
               { title: $t('customers.allTypes'), value: null },
               { title: $t('customers.person'), value: 'person' },
@@ -132,14 +132,14 @@ onMounted(async () => {
             ]" :label="$t('common.type')" hide-details clearable
               @update:model-value="doSearch" />
           </v-col>
-          <v-col cols="8" sm="3">
+          <v-col cols="9" sm="3">
             <v-select v-model="tagFilter" :items="[
               { title: $t('customers.allTags'), value: null },
               ...store.tags.map((tag) => ({ title: tag.name, value: tag.id })),
             ]" :label="$t('customers.tag')" hide-details clearable
               @update:model-value="doSearch" />
           </v-col>
-          <v-col cols="4" sm="1">
+          <v-col cols="3" sm="1">
             <v-btn variant="text" icon="mdi-refresh" :loading="store.loading" @click="doSearch" />
           </v-col>
         </v-row>

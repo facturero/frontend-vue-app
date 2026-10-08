@@ -179,7 +179,7 @@ onMounted(async () => {
     <v-card class="mb-4">
       <v-card-text>
         <v-row dense align="end">
-          <v-col v-if="!store.isSingleWarehouse" cols="6" sm="4">
+          <v-col v-if="!store.isSingleWarehouse" cols="12" sm="4">
             <v-select
               v-model="warehouseFilter"
               :items="warehouseOptions"
@@ -189,7 +189,7 @@ onMounted(async () => {
               @update:model-value="applyFilters"
             />
           </v-col>
-          <v-col cols="6" sm="4">
+          <v-col cols="12" sm="4">
             <v-select
               v-model="typeFilter"
               :items="typeOptions"

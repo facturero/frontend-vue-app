@@ -4,6 +4,7 @@ import App from './App.vue';
 import 'driver.js/dist/driver.css';
 import 'flag-icons/css/flag-icons.min.css';
 import '@/styles/tour.css';
+import '@/styles/mobile.css';
 
 const app = createApp(App);
 

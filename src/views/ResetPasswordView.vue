@@ -52,11 +52,11 @@ async function submit(): Promise<void> {
 </script>
 
 <template>
-  <div class="auth-wrapper d-flex align-center justify-center h-screen bg-background">
+  <div class="auth-wrapper d-flex align-center justify-center h-screen bg-background pa-4">
     <v-card max-width="480" class="mx-auto" style="width: 100%;">
       <v-card-item class="pa-6">
         <v-card-title>{{ t('auth.resetPassword') }}</v-card-title>
-        <v-card-subtitle>{{ t('auth.setNewPassword') }}</v-card-subtitle>
+        <v-card-subtitle class="text-wrap">{{ t('auth.setNewPassword') }}</v-card-subtitle>
       </v-card-item>
 
       <v-card-text class="pa-6 pt-0">

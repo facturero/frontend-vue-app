@@ -164,13 +164,12 @@ onMounted(async () => {
           {{ $t('common.back') }}
         </v-btn>
       </v-col>
-      <v-col class="text-right">
+      <v-col class="d-flex flex-wrap justify-end ga-2">
         <v-btn
           v-if="store.current?.status === 'draft' && canUpdate"
           color="primary"
           variant="tonal"
           prepend-icon="mdi-pencil"
-          class="mr-2"
           @click="router.push(`/invoices/${invoiceId}/edit`)"
         >
           {{ $t('common.edit') }}
@@ -180,7 +179,6 @@ onMounted(async () => {
           color="primary"
           variant="tonal"
           prepend-icon="mdi-credit-card-refund"
-          class="mr-2"
           @click="openCreditNoteDialog"
         >
           {{ $t('invoices.creditNote') }}
@@ -200,9 +198,9 @@ onMounted(async () => {
 
     <template v-if="store.current">
       <v-card class="mb-4">
-        <v-card-title class="d-flex align-center">
+        <v-card-title class="d-flex align-center flex-wrap ga-2 text-wrap">
           {{ $t('invoices.singular') }} {{ store.current.number || $t('invoices.draftSuffix') }}
-          <v-chip :color="statusColor(store.current.status)" class="ml-3" size="small">
+          <v-chip :color="statusColor(store.current.status)" size="small">
             {{ statusLabel(store.current.status) }}
           </v-chip>
         </v-card-title>

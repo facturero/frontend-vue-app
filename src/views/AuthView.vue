@@ -54,8 +54,10 @@ function toggleMode(): void {
   <v-row no-gutters class="h-lg-screen">
     <!-- Panel de marca -->
     <v-col cols="12" lg="7" class="d-flex">
+      <!-- min-height: en el teléfono la imagen no se muestra y el logo (absoluto) mide más que el panel vacío; sin esto se salía de él. -->
       <v-sheet
         color="auth-panel"
+        :min-height="86"
         class="flex-1-1 ma-3 pa-6 position-relative d-flex align-center justify-center"
       >
         <div class="position-absolute top-0 left-0 d-flex align-center ga-3 pa-6">
