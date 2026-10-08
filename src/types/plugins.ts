@@ -66,6 +66,19 @@ export interface Quote {
   /** Solo si se cotizó con un código que NO vale: el precio de lista viene igual. */
   discount_error?: { code: string; message: string };
   total_after_discount?: number;
+  /** IVA en porcentaje (15 = 15 %), lo que cuesta de IVA al mes y el total mensual con IVA. */
+  vat_percent?: number;
+  vat_cents?: number;
+  total_with_vat?: number;
+  /** Prueba gratis de la organización; ausente si todavía no empezó. */
+  trial?: { active: boolean; ends_at: string; days_left: number };
+  /** Lo que se paga HOY con IVA: 0 mientras dure la prueba. */
+  due_today?: number;
+}
+
+export interface Subscription {
+  trial: { started_at: string; ends_at: string; active: boolean; days_left: number } | null;
+  vat_percent: number;
 }
 
 export interface ActivationResult {

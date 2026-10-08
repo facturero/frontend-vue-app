@@ -140,6 +140,7 @@
       "pricing_discount_reactivated": "Réduction réactivée",
       "pricing_discount_redeemed": "Réduction utilisée",
       "pricing_discount_updated": "Réduction modifiée",
+      "pricing_trial_started": "Essai gratuit démarré",
       "product_category_created": "Catégorie créée",
       "product_category_deleted": "Catégorie supprimée",
       "product_category_updated": "Catégorie modifiée",
@@ -861,7 +862,13 @@
       "DISCOUNT_INACTIVE": "Ce code n'est plus disponible.",
       "DISCOUNT_NOT_APPLICABLE": "Ce code ne s'applique pas à ce module."
     },
-    "included": "Inclus"
+    "included": "Inclus",
+    "plusVat": " + TVA",
+    "monthlySubtotal": "Sous-total mensuel :",
+    "vatLine": "TVA ({percent} %) :",
+    "trialBanner": "Essai gratuit : il vous reste {days} jours (jusqu'au {date}). Pendant cette période, activez les modules que vous voulez sans payer.",
+    "trialEnded": "Votre essai gratuit s'est terminé le {date}. Les modules actifs sont facturés à leur prix mensuel.",
+    "trialQuote": "Vous payez 0,00 $ aujourd'hui : vous êtes en essai gratuit jusqu'au {date} ({days} jours). Ensuite, le total ci-dessus est facturé chaque mois."
   },
   "posThemes": {
     "tabTitle": "Apparence du POS",

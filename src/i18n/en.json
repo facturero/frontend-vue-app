@@ -140,6 +140,7 @@
       "pricing_discount_reactivated": "Discount reactivated",
       "pricing_discount_redeemed": "Discount redeemed",
       "pricing_discount_updated": "Discount updated",
+      "pricing_trial_started": "Free trial started",
       "product_category_created": "Category created",
       "product_category_deleted": "Category deleted",
       "product_category_updated": "Category updated",
@@ -861,7 +862,13 @@
       "DISCOUNT_INACTIVE": "This code is no longer available.",
       "DISCOUNT_NOT_APPLICABLE": "This code does not apply to this module."
     },
-    "included": "Included"
+    "included": "Included",
+    "plusVat": " + VAT",
+    "monthlySubtotal": "Monthly subtotal:",
+    "vatLine": "VAT ({percent}%):",
+    "trialBanner": "Free trial: {days} days left (until {date}). While it lasts, activate any modules you like at no cost.",
+    "trialEnded": "Your free trial ended on {date}. Active modules are billed at their monthly price.",
+    "trialQuote": "You pay $0.00 today: you are on your free trial until {date} ({days} days). After that, the total above is charged every month."
   },
   "posThemes": {
     "tabTitle": "POS appearance",

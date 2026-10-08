@@ -119,6 +119,10 @@ function discountErrorText(error: { code: string; message: string }): string {
   return te(key) ? t(key) : error.message;
 }
 
+function formatDate(iso: string): string {
+  return new Intl.DateTimeFormat(locale.value, { dateStyle: 'long' }).format(new Date(iso));
+}
+
 async function confirmActivate(): Promise<void> {
   if (!activatingCode.value) return;
   quoting.value = true;
@@ -131,6 +135,24 @@ async function confirmActivate(): Promise<void> {
 
 <template>
   <div>
+    <v-alert
+      v-if="store.subscription?.trial?.active"
+      type="info"
+      icon="mdi-gift-outline"
+      class="mb-4"
+    >
+      {{ $t('plugins.trialBanner', {
+        days: store.subscription.trial.days_left,
+        date: formatDate(store.subscription.trial.ends_at),
+      }) }}
+    </v-alert>
+    <v-alert
+      v-else-if="store.subscription?.trial"
+      type="warning"
+      class="mb-4"
+    >
+      {{ $t('plugins.trialEnded', { date: formatDate(store.subscription.trial.ends_at) }) }}
+    </v-alert>
     <v-alert
       v-if="store.error"
       type="error"
@@ -222,7 +244,7 @@ async function confirmActivate(): Promise<void> {
               {{ statusMeta[p.display_status].label }}
             </v-chip>
             <v-spacer />
-            <span class="text-subtitle-2 mr-2">{{ p.priceCents === 0 ? $t('plugins.included') : formatPrice(p.priceCents, p.currency) + $t('plugins.perMonth') }}</span>
+            <span class="text-subtitle-2 mr-2">{{ p.priceCents === 0 ? $t('plugins.included') : formatPrice(p.priceCents, p.currency) + $t('plugins.perMonth') + $t('plugins.plusVat') }}</span>
             <v-btn
               v-if="canActivate && p.display_status === 'disponible'"
               color="primary"
@@ -313,10 +335,31 @@ async function confirmActivate(): Promise<void> {
             >
               {{ formatPrice(store.currentQuote.total_monthly, store.currentQuote.plugin.currency) }}
             </span>
-            <span class="text-h6">{{ $t('plugins.monthlyTotal') }}
+            <span :class="store.currentQuote.total_with_vat === undefined ? 'text-h6' : 'text-body-1'">{{ $t('plugins.monthlySubtotal') }}
               {{ formatPrice(store.currentQuote.total_after_discount ?? store.currentQuote.total_monthly, store.currentQuote.plugin.currency) }}
             </span>
           </div>
+          <template v-if="store.currentQuote.total_with_vat !== undefined">
+            <div class="d-flex justify-end text-body-2 text-medium-emphasis">
+              {{ $t('plugins.vatLine', { percent: store.currentQuote.vat_percent }) }}
+              {{ formatPrice(store.currentQuote.vat_cents ?? 0, store.currentQuote.plugin.currency) }}
+            </div>
+            <div class="d-flex justify-end text-h6">
+              {{ $t('plugins.monthlyTotal') }}
+              {{ formatPrice(store.currentQuote.total_with_vat, store.currentQuote.plugin.currency) }}
+            </div>
+            <v-alert
+              v-if="store.currentQuote.trial?.active"
+              type="success"
+              icon="mdi-gift-outline"
+              class="mt-3"
+            >
+              {{ $t('plugins.trialQuote', {
+                days: store.currentQuote.trial.days_left,
+                date: formatDate(store.currentQuote.trial.ends_at),
+              }) }}
+            </v-alert>
+          </template>
         </v-card-text>
         <v-card-actions>
           <v-spacer />

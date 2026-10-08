@@ -11,6 +11,7 @@ import type {
   PluginCustomRequest,
   Quote,
   RequestCustomPluginInput,
+  Subscription,
 } from '@/types/plugins';
 
 const org = '/organizations/me';
@@ -18,6 +19,10 @@ const org = '/organizations/me';
 export const pluginApi = {
   catalog: () =>
     http.get<CatalogPlugin[]>(`${org}/plugins/catalog`).then((r) => r.data),
+
+  /** Prueba gratis e IVA. Para el administrador, la primera llamada arranca la prueba de la organización. */
+  subscription: () =>
+    http.get<Subscription>(`${org}/subscription`).then((r) => r.data),
 
   listMine: () =>
     http.get<OrganizationPlugin[]>(`${org}/plugins`).then((r) => r.data),

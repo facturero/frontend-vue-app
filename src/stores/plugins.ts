@@ -12,6 +12,7 @@ import type {
   OrganizationPlugin,
   PluginCustomRequest,
   Quote,
+  Subscription,
 } from '@/types/plugins';
 
 export const usePluginsStore = defineStore('plugins', () => {
@@ -19,6 +20,8 @@ export const usePluginsStore = defineStore('plugins', () => {
   const myPlugins = ref<OrganizationPlugin[]>([]);
   const requests = ref<PluginCustomRequest[]>([]);
   const currentQuote = ref<Quote | null>(null);
+  /** Prueba gratis e IVA de la organización. */
+  const subscription = ref<Subscription | null>(null);
   /** Los plugins de la organización ya se cargaron al menos una vez en esta sesión. */
   const myLoaded = ref(false);
 
@@ -98,6 +101,18 @@ export const usePluginsStore = defineStore('plugins', () => {
    * El perfil de negocio viaja con ella: el guard y las pantallas del alta lo
    * necesitan cargado desde el primer momento.
    */
+  /**
+   * La primera vez que el administrador abre el CRM esto arranca la prueba gratis de la organización (el servidor lo
+   * decide por su permiso). Un fallo aquí no debe bloquear nada: sin el dato, la pantalla solo no muestra el aviso.
+   */
+  async function fetchSubscription(): Promise<void> {
+    try {
+      subscription.value = await pluginApi.subscription();
+    } catch {
+      /* el aviso de prueba es informativo */
+    }
+  }
+
   async function ensureMyLoaded(): Promise<void> {
     // Cada mitad lleva su propio "ya está" (`myLoaded`, `profileLoaded`). Un
     // único guardado arriba dejaba el perfil de negocio sin cargar para siempre
@@ -106,6 +121,7 @@ export const usePluginsStore = defineStore('plugins', () => {
     await Promise.all([
       myLoaded.value ? Promise.resolve() : fetchMy(),
       ensureProfileLoaded(),
+      subscription.value ? Promise.resolve() : fetchSubscription(),
     ]);
   }
 
@@ -115,6 +131,7 @@ export const usePluginsStore = defineStore('plugins', () => {
     myPlugins.value = [];
     requests.value = [];
     currentQuote.value = null;
+    subscription.value = null;
     businessProfiles.value = [];
     myProfile.value = null;
     recommendations.value = null;
@@ -270,6 +287,7 @@ export const usePluginsStore = defineStore('plugins', () => {
     myPlugins,
     requests,
     currentQuote,
+    subscription,
     businessProfiles,
     myProfile,
     recommendations,
@@ -286,6 +304,7 @@ export const usePluginsStore = defineStore('plugins', () => {
     profilePending,
     isActive,
     ensureMyLoaded,
+    fetchSubscription,
     reset,
     clearError,
     fetchCatalog,
