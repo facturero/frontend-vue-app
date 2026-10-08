@@ -144,35 +144,39 @@ function formatDate(iso: string): string {
     <v-card class="mb-4">
       <v-card-text class="pb-2">
         <v-row dense align="end">
-          <v-text-field
-            v-model="search"
-            :label="$t('plugins.search')"
-            prepend-inner-icon="mdi-magnify"
-            hide-details
-            clearable
-            class="mr-2"
-          />
-          <v-select
-            v-model="categoryFilter"
-            :items="categories"
-            :label="$t('products.category')"
-            hide-details
-            clearable
-            class="mr-2"
-          />
-          <v-select
-            v-model="sortBy"
-            :items="[
-              { title: $t('plugins.sortNameAsc'), value: 'name-asc' },
-              { title: $t('plugins.sortNameDesc'), value: 'name-desc' },
-              { title: $t('plugins.sortPriceAsc'), value: 'price-asc' },
-              { title: $t('plugins.sortPriceDesc'), value: 'price-desc' },
-            ]"
-            :label="$t('plugins.sortBy')"
-            hide-details
-          />
+          <v-col cols="12" md="5">
+            <v-text-field
+              v-model="search"
+              :label="$t('plugins.search')"
+              prepend-inner-icon="mdi-magnify"
+              hide-details
+              clearable
+            />
+          </v-col>
+          <v-col cols="12" sm="6" md="4">
+            <v-select
+              v-model="categoryFilter"
+              :items="categories"
+              :label="$t('products.category')"
+              hide-details
+              clearable
+            />
+          </v-col>
+          <v-col cols="12" sm="6" md="3">
+            <v-select
+              v-model="sortBy"
+              :items="[
+                { title: $t('plugins.sortNameAsc'), value: 'name-asc' },
+                { title: $t('plugins.sortNameDesc'), value: 'name-desc' },
+                { title: $t('plugins.sortPriceAsc'), value: 'price-asc' },
+                { title: $t('plugins.sortPriceDesc'), value: 'price-desc' },
+              ]"
+              :label="$t('plugins.sortBy')"
+              hide-details
+            />
+          </v-col>
         </v-row>
-        <v-chip-group v-model="statusFilter" class="mt-1" mandatory>
+        <v-chip-group v-model="statusFilter" class="mt-1" mandatory column>
           <v-chip
             v-for="opt in statusOptions"
             :key="opt.value"
@@ -188,36 +192,27 @@ function formatDate(iso: string): string {
     </v-card>
 
     <v-row>
-      <v-col v-for="p in filtered" :key="p.id" cols="12" sm="6" md="4" lg="3">
+      <v-col v-for="p in filtered" :key="p.id" cols="12" sm="6" lg="4" xl="3">
         <v-card class="d-flex flex-column fill-height">
-          <v-card-title class="d-flex align-center justify-space-between">
+          <v-card-title class="d-flex align-start justify-space-between ga-2 text-wrap">
             <span class="text-subtitle-1 font-weight-medium">{{ p.name }}</span>
             <v-chip v-if="p.is_exclusive" size="x-small" color="deep-purple">
               {{ $t('plugins.exclusive') }}
             </v-chip>
           </v-card-title>
-          <v-card-subtitle class="text-caption">{{ p.code }} · {{ p.category }}</v-card-subtitle>
+          <v-card-subtitle class="text-caption text-wrap">{{ p.code }} · {{ p.category }}</v-card-subtitle>
           <v-card-text class="text-body-2 flex-grow-1">
             {{ p.description }}
             <div v-if="p.depends_on.length" class="mt-2 text-caption text-medium-emphasis">
-              {{ $t('plugins.requires') }}
-              <v-chip
-                v-for="d in p.depends_on"
-                :key="d.code"
-                size="x-small"
-                class="mr-1 mb-1"
-                variant="outlined"
-              >
-                {{ d.name }}
-              </v-chip>
+              {{ $t('plugins.requires') }} {{ p.depends_on.map((d) => d.name).join(', ') }}
             </div>
           </v-card-text>
+          <div class="px-4 pb-2 text-subtitle-2">{{ p.display_status === 'incluido' || p.priceCents === 0 ? $t('plugins.included') : formatPrice(p.priceCents, p.currency) + $t('plugins.perMonth') + $t('plugins.plusVat') }}</div>
           <v-card-actions class="pt-0">
             <v-chip size="small" :color="statusMeta[p.display_status].color" :variant="statusMeta[p.display_status].variant">
               {{ statusMeta[p.display_status].label }}
             </v-chip>
             <v-spacer />
-            <span class="text-subtitle-2 mr-2">{{ p.display_status === 'incluido' || p.priceCents === 0 ? $t('plugins.included') : formatPrice(p.priceCents, p.currency) + $t('plugins.perMonth') + $t('plugins.plusVat') }}</span>
             <v-btn
               v-if="canActivate && (p.display_status === 'disponible' || p.display_status === 'desactivado')"
               :color="cart.has(p.code) ? 'success' : 'primary'"
