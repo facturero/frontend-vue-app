@@ -28,6 +28,14 @@ function openBlocker(blocker: BlockingPlugin): void {
   deactivateDialog.value = blocker.plugin;
 }
 
+// Un módulo desactivado sigue en la lista (es el historial de la organización), pero ya no se cobra: por defecto solo
+// se ven los activos y los demás quedan a un clic, para que no parezca que se siguen usando.
+const showDisabled = ref(false);
+const disabledCount = computed(() => store.myPlugins.filter((p) => p.status !== 'active').length);
+const visiblePlugins = computed(() =>
+  store.myPlugins.filter((p) => p.status === 'active' || showDisabled.value),
+);
+
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString(locale.value, { dateStyle: 'medium' });
 }
@@ -72,8 +80,14 @@ async function confirmDeactivate(): Promise<void> {
       </template>
     </v-alert>
 
+    <div v-if="disabledCount" class="d-flex justify-end mb-2">
+      <v-btn size="small" color="primary" @click="showDisabled = !showDisabled">
+        {{ $t(showDisabled ? 'plugins.hideDisabled' : 'plugins.showDisabled', { count: disabledCount }) }}
+      </v-btn>
+    </div>
+
     <v-row>
-      <v-col v-for="p in store.myPlugins" :key="p.pluginId" cols="12" sm="6" lg="4">
+      <v-col v-for="p in visiblePlugins" :key="p.pluginId" cols="12" sm="6" lg="4">
         <v-card class="d-flex flex-column fill-height">
           <v-card-title class="d-flex align-center justify-space-between">
             <span class="text-subtitle-1 font-weight-medium">{{ p.pluginName }}</span>
@@ -87,10 +101,15 @@ async function confirmDeactivate(): Promise<void> {
           </v-card-title>
           <v-card-subtitle class="text-caption">{{ p.pluginCode }}</v-card-subtitle>
           <v-card-text class="text-caption text-medium-emphasis flex-grow-1">
-            <div>
+            <div v-if="p.status === 'active' || !p.deactivatedAt">
               {{ $t('plugins.headerActivatedAt') }}: {{ formatDate(p.activatedAt) }}
             </div>
+            <template v-else>
+              <div>{{ $t('plugins.headerDeactivatedAt') }}: {{ formatDate(p.deactivatedAt) }}</div>
+              <div class="mt-2">{{ $t('plugins.disabledHint') }}</div>
+            </template>
             <v-chip
+              v-if="p.status === 'active'"
               size="x-small"
               class="mt-2"
               :color="p.activationSource === 'direct' ? 'lightprimary' : 'lightinfo'"
@@ -117,7 +136,7 @@ async function confirmDeactivate(): Promise<void> {
       </v-col>
     </v-row>
 
-    <div v-if="!store.loading && !store.myPlugins.length" class="text-center text-medium-emphasis pa-6">
+    <div v-if="!store.loading && !visiblePlugins.length" class="text-center text-medium-emphasis pa-6">
       {{ $t('plugins.mineEmpty') }}
     </div>
 
@@ -128,6 +147,7 @@ async function confirmDeactivate(): Promise<void> {
           <i18n-t keypath="plugins.deactivateConfirm" tag="span">
             <template #name><strong>{{ deactivateDialog.pluginName }}</strong></template>
           </i18n-t>
+          <v-alert type="info" class="mt-4">{{ $t('plugins.deactivateNotice') }}</v-alert>
         </v-card-text>
         <v-card-actions>
           <v-spacer />
