@@ -247,7 +247,7 @@ async function confirmActivate(): Promise<void> {
               {{ statusMeta[p.display_status].label }}
             </v-chip>
             <v-spacer />
-            <span class="text-subtitle-2 mr-2">{{ p.priceCents === 0 ? $t('plugins.included') : formatPrice(p.priceCents, p.currency) + $t('plugins.perMonth') + $t('plugins.plusVat') }}</span>
+            <span class="text-subtitle-2 mr-2">{{ p.display_status === 'incluido' || p.priceCents === 0 ? $t('plugins.included') : formatPrice(p.priceCents, p.currency) + $t('plugins.perMonth') + $t('plugins.plusVat') }}</span>
             <v-btn
               v-if="canActivate && (p.display_status === 'disponible' || p.display_status === 'desactivado')"
               color="primary"
