@@ -16,15 +16,19 @@ import { useStickyHeader } from '@/composable/useStickyHeader';
  * patrón de la referencia visual (ver docs/PLAN-MODERNIZE.md) y además separa
  * la cabecera del contenido sin necesidad de una línea divisoria.
  */
-const props = defineProps<{
-  title: string;
-  subtitle?: string;
-  /**
-   * El encabezado se queda fijo bajo la barra superior al hacer scroll y, al bajar, crece de forma gradual hasta el 100 % del
-   * ancho útil. Para vistas cuyas acciones no deben desaparecer (p. ej. el carrito de módulos). Ver useStickyHeader.
-   */
-  sticky?: boolean;
-}>();
+const props = withDefaults(
+  defineProps<{
+    title: string;
+    subtitle?: string;
+    /**
+     * El encabezado se queda fijo bajo la barra superior al hacer scroll y, al bajar, crece de forma gradual hasta el 100 % del
+     * ancho útil y se compacta. Es el comportamiento de TODAS las pantallas; `:sticky="false"` lo apaga en una excepción. No se
+     * fija dentro de tarjetas ni diálogos (secciones embebidas). Ver useStickyHeader.
+     */
+    sticky?: boolean;
+  }>(),
+  { sticky: true },
+);
 
 const sheet = ref<{ $el: HTMLElement } | null>(null);
 const sheetEl = computed(() => sheet.value?.$el ?? null);

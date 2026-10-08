@@ -597,7 +597,7 @@ onMounted(async () => {
       <v-col cols="12" md="5">
         <!-- Sticky en línea: Vuetify no tiene utilidad para `position: sticky` y
              una hoja de estilo en la vista no es opción. -->
-        <div style="position: sticky; top: 16px;">
+        <div style="position: sticky; top: calc(var(--v-layout-top, 0px) + 68px);">
           <v-card>
             <v-card-title class="d-flex align-center justify-space-between">
               <span class="text-body-1 font-weight-medium">{{ $t('posThemes.previewTitle') }}</span>

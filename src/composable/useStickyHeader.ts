@@ -5,6 +5,8 @@ type HeaderStyle = Record<string, string | number>;
 
 /** Cuántos píxeles de scroll hacen falta para pasar del encabezado normal al fijo a todo el ancho. */
 const SCROLL_RANGE = 120;
+/** Un encabezado más alto que esto (en pantallas angostas las acciones bajan a otra fila) no se fija: comería demasiada pantalla. */
+const MAX_REST_HEIGHT = 112;
 /** Relleno vertical con el que queda el encabezado ya fijo (arriba del todo conserva el suyo). */
 const STUCK_PADDING = 8;
 
@@ -18,6 +20,8 @@ const px = (value: string): number => Number.parseFloat(value) || 0;
  * se lo suma al margen inferior; si no, el contenido de debajo se desplazaría mientras se hace scroll y el scroll
  * "pelearía" con ese desplazamiento.
  *
+ * Se activa solo donde tiene sentido: no dentro de tarjetas ni diálogos, ni si el encabezado es muy alto en reposo (móvil).
+ *
  * Devuelve el `style` que hay que poner en el elemento. Lo que se anima son márgenes negativos: el contenedor del encabezado
  * no cambia de tamaño, así que el resto de la página no se mueve.
  *
@@ -30,6 +34,8 @@ export function useStickyHeader(el: Ref<HTMLElement | null>, enabled: () => bool
   let radius = 0;
   let padding = 0;
   let marginBottom = 0;
+  let appliedShrink = 0;
+  let fits = true;
   let bleedLeft = 0;
   let bleedRight = 0;
 
@@ -46,6 +52,10 @@ export function useStickyHeader(el: Ref<HTMLElement | null>, enabled: () => bool
       padding = px(own.paddingTop);
       marginBottom = px(own.marginBottom);
     }
+
+    // Dentro de una tarjeta o un diálogo (p. ej. las secciones de Ajustes, que ya viven bajo su propio encabezado) no hay página
+    // que seguir: no se fija. Y un encabezado muy alto en reposo tampoco.
+    fits = !header.closest('.v-card, .v-dialog') && header.offsetHeight + 2 * appliedShrink <= MAX_REST_HEIGHT;
 
     const main = header.closest('.v-main');
     if (!main) {
@@ -64,12 +74,14 @@ export function useStickyHeader(el: Ref<HTMLElement | null>, enabled: () => bool
   }
 
   function apply(): void {
-    if (!el.value || !enabled()) {
+    if (!el.value || !enabled() || !fits) {
+      appliedShrink = 0;
       style.value = {};
       return;
     }
     const progress = Math.min(1, Math.max(0, window.scrollY / SCROLL_RANGE));
     const shrink = Math.max(0, padding - STUCK_PADDING) * progress;
+    appliedShrink = shrink;
     // `!important`: las clases utilitarias de la hoja (`pa-6`, `mb-6`, `rounded-lg`) también lo son y, sin esto, ganarían.
     style.value = {
       position: 'sticky',

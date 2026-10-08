@@ -125,10 +125,14 @@ Reglas fijas:
   tabla ancha que realmente lo necesita.
 - El título lo pone **siempre** `PageHeader`, nunca un `<h1>`/`<h2>` suelto.
   Así el nivel de encabezado y el margen inferior son idénticos en todas partes.
-- `<PageHeader sticky>` deja el encabezado fijo bajo la barra superior para que sus acciones no desaparezcan al hacer scroll (hoy:
-  el carrito de módulos en `/plugins`). Arriba del todo es el panel de siempre; al bajar crece de forma gradual, atada al scroll,
-  hasta el 100 % del ancho útil, pierde las esquinas y se compacta (menos relleno), sin sombra. Su hueco en la página no
-  cambia: lo que pierde de alto se lo suma al margen inferior (si no, el contenido se movería mientras se hace scroll). La lógica está en `composable/useStickyHeader.ts`; úsalo solo en vistas con acciones que deban seguir a mano.
+- **El encabezado es fijo en todas las pantallas** (`PageHeader`, por defecto): se queda bajo la barra superior al hacer scroll para que
+  sus acciones (el carrito de módulos, «Crear rol», etc.) no desaparezcan. Arriba del todo es el panel de siempre; al bajar crece de
+  forma gradual, atada al scroll, hasta el 100 % del ancho útil, pierde las esquinas y se compacta (menos relleno), sin sombra. Su
+  hueco en la página no cambia: lo que pierde de alto se lo suma al margen inferior (si no, el contenido se movería mientras se hace
+  scroll). No se fija dentro de tarjetas ni diálogos (las secciones embebidas de Ajustes), ni si en reposo mide más de 112 px (móvil,
+  con las acciones en otra fila). `:sticky="false"` lo apaga. Lo que sea `position: sticky` en una vista debe calcular su `top` con
+  `var(--v-layout-top)` más el alto del encabezado (ver el panel de vista previa de `PosThemeEditorView`). Lógica en
+  `composable/useStickyHeader.ts`.
 - Los errores van en un `v-alert` justo debajo del encabezado, no dentro de la
   tarjeta.
 - La acción principal va en `#actions`, alineada a la derecha, **sólida**
