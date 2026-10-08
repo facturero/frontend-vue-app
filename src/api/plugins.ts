@@ -4,6 +4,7 @@ import type {
   BatchActivationResult,
   BusinessProfile,
   BusinessProfileRecommendations,
+  CartQuote,
   CatalogPlugin,
   DeactivationResult,
   MyBusinessProfile,
@@ -35,6 +36,18 @@ export const pluginApi = {
   activate: (code: string, discountCode?: string) =>
     http
       .post<ActivationResult[]>(`${org}/plugins/${code}/activate`, discountCode ? { discountCode } : undefined)
+      .then((r) => r.data),
+
+  /** El carrito: cotiza varios módulos juntos (lo compartido se cuenta una vez; un código de descuento aplica a todo). */
+  cartQuote: (codes: string[], discountCode?: string) =>
+    http
+      .post<CartQuote>(`${org}/plugins/cart/quote`, { codes, ...(discountCode ? { discountCode } : {}) })
+      .then((r) => r.data),
+
+  /** Activa todo el carrito de una vez: todo o nada. */
+  cartActivate: (codes: string[], discountCode?: string) =>
+    http
+      .post<ActivationResult[]>(`${org}/plugins/cart/activate`, { codes, ...(discountCode ? { discountCode } : {}) })
       .then((r) => r.data),
 
   deactivate: (code: string) =>

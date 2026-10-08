@@ -81,6 +81,34 @@ export interface Quote {
   due_today?: number;
 }
 
+/** Una línea del carrito cotizado. */
+export interface CartQuoteItem {
+  plugin: Plugin;
+  price: number;
+  /** `selected`: lo que se eligió; `required`: lo que arrastra y se activará también; `already_active`: ya lo tiene. */
+  kind: 'selected' | 'required' | 'already_active';
+  /** Para `required`: código del módulo elegido que lo necesita. */
+  required_by?: string;
+}
+
+/** La cotización de todo el carrito: lo que comparten los módulos se cuenta una sola vez. */
+export interface CartQuote {
+  items: CartQuoteItem[];
+  /** Códigos que ya no se pueden activar (no existen, son del núcleo, aún no están disponibles). */
+  invalid: { code: string; reason: 'not_found' | 'core' | 'not_available' }[];
+  /** Dependencias que no se activan solas: hay que resolverlas antes. */
+  missing: string[];
+  total_monthly: number;
+  discount?: QuoteDiscount;
+  discount_error?: { code: string; message: string };
+  total_after_discount?: number;
+  vat_percent?: number;
+  vat_cents?: number;
+  total_with_vat?: number;
+  trial?: { active: boolean; ends_at: string; days_left: number };
+  due_today?: number;
+}
+
 export interface Subscription {
   trial: { started_at: string; ends_at: string; active: boolean; days_left: number } | null;
   vat_percent: number;

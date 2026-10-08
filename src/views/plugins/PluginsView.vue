@@ -2,13 +2,16 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { usePluginsStore } from '@/stores/plugins';
+import { usePluginCartStore } from '@/stores/pluginCart';
 import { usePluginsRealtime } from '@/composable/usePluginsRealtime';
 import PluginCatalogTab from '@/components/plugins/PluginCatalogTab.vue';
+import PluginCartDialog from '@/components/plugins/PluginCartDialog.vue';
 import MyPluginsTab from '@/components/plugins/MyPluginsTab.vue';
 import CustomRequestsTab from '@/components/plugins/CustomRequestsTab.vue';
 import PageHeader from '@/components/ui/PageHeader.vue';
 
 const store = usePluginsStore();
+const cart = usePluginCartStore();
 const route = useRoute();
 const tab = ref('catalog');
 
@@ -20,11 +23,11 @@ watch(catalogSearch, (q) => {
 
 usePluginsRealtime();
 
-// Reactivar un módulo desactivado reutiliza la cotización del catálogo (precio, prueba gratis y código de descuento).
-const catalogTab = ref<InstanceType<typeof PluginCatalogTab> | null>(null);
+// Reactivar un módulo desactivado lo agrega al carrito y lo abre: pasa por la misma cotización (precio, prueba gratis,
+// código de descuento) que una activación nueva.
 async function reactivate(code: string): Promise<void> {
-  tab.value = 'catalog';
-  await catalogTab.value?.openQuote(code);
+  cart.add(code);
+  await cart.openCart();
 }
 
 onMounted(() => {
@@ -39,9 +42,21 @@ const profilePending = computed(() => store.myProfile?.status === 'pending');
   <v-container>
     <PageHeader :title="$t('plugins.title')">
       <template #actions>
-
+        <v-badge :content="cart.count" :model-value="cart.count > 0" color="primary">
+          <v-btn prepend-icon="mdi-cart-outline" @click="cart.openCart()">{{ $t('plugins.cart.title') }}</v-btn>
+        </v-badge>
       </template>
     </PageHeader>
+
+    <v-alert
+      v-if="cart.lastActivated !== null"
+      type="success"
+      closable
+      class="mb-4"
+      @click:close="cart.lastActivated = null"
+    >
+      {{ $t('plugins.cart.activated', { count: cart.lastActivated }) }}
+    </v-alert>
 
     <v-alert
       v-if="currentProfile"
@@ -86,7 +101,7 @@ const profilePending = computed(() => store.myProfile?.status === 'pending');
 
     <v-tabs-window v-model="tab">
       <v-tabs-window-item value="catalog">
-        <PluginCatalogTab ref="catalogTab" :initial-search="catalogSearch" />
+        <PluginCatalogTab :initial-search="catalogSearch" />
       </v-tabs-window-item>
 
       <v-tabs-window-item value="my">
@@ -97,5 +112,6 @@ const profilePending = computed(() => store.myProfile?.status === 'pending');
         <CustomRequestsTab />
       </v-tabs-window-item>
     </v-tabs-window>
+    <PluginCartDialog />
   </v-container>
 </template>

@@ -11,7 +11,6 @@ import type {
   MyBusinessProfile,
   OrganizationPlugin,
   PluginCustomRequest,
-  Quote,
   Subscription,
 } from '@/types/plugins';
 
@@ -19,7 +18,6 @@ export const usePluginsStore = defineStore('plugins', () => {
   const catalog = ref<CatalogPlugin[]>([]);
   const myPlugins = ref<OrganizationPlugin[]>([]);
   const requests = ref<PluginCustomRequest[]>([]);
-  const currentQuote = ref<Quote | null>(null);
   /** Prueba gratis e IVA de la organización. */
   const subscription = ref<Subscription | null>(null);
   /** Los plugins de la organización ya se cargaron al menos una vez en esta sesión. */
@@ -130,7 +128,6 @@ export const usePluginsStore = defineStore('plugins', () => {
     catalog.value = [];
     myPlugins.value = [];
     requests.value = [];
-    currentQuote.value = null;
     subscription.value = null;
     businessProfiles.value = [];
     myProfile.value = null;
@@ -149,36 +146,6 @@ export const usePluginsStore = defineStore('plugins', () => {
       setError(e);
     } finally {
       loading.value = false;
-    }
-  }
-
-  async function fetchQuote(code: string, discountCode?: string): Promise<boolean> {
-    clearError();
-    loading.value = true;
-    try {
-      currentQuote.value = await pluginApi.quote(code, discountCode);
-      return true;
-    } catch (e) {
-      setError(e);
-      return false;
-    } finally {
-      loading.value = false;
-    }
-  }
-
-  async function activate(code: string, discountCode?: string): Promise<boolean> {
-    saving.value = true;
-    clearError();
-    try {
-      await pluginApi.activate(code, discountCode);
-      currentQuote.value = null;
-      await Promise.all([fetchMy(), fetchCatalog()]);
-      return true;
-    } catch (e) {
-      setError(e);
-      return false;
-    } finally {
-      saving.value = false;
     }
   }
 
@@ -302,7 +269,6 @@ export const usePluginsStore = defineStore('plugins', () => {
     catalog,
     myPlugins,
     requests,
-    currentQuote,
     subscription,
     businessProfiles,
     myProfile,
@@ -326,8 +292,6 @@ export const usePluginsStore = defineStore('plugins', () => {
     fetchCatalog,
     fetchMy,
     fetchRequests,
-    fetchQuote,
-    activate,
     deactivate,
     cancelDeactivation,
     requestCustom,

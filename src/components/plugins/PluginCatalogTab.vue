@@ -2,13 +2,15 @@
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePluginsStore } from '@/stores/plugins';
+import { usePluginCartStore } from '@/stores/pluginCart';
 import { useAuthStore } from '@/stores/auth';
 import type { CatalogPlugin } from '@/types/plugins';
 
 const props = defineProps<{ initialSearch?: string }>();
 
-const { t, te, locale } = useI18n();
+const { t, locale } = useI18n();
 const store = usePluginsStore();
+const cart = usePluginCartStore();
 const auth = useAuthStore();
 
 const canActivate = computed(() => auth.can('plugins:manage'));
@@ -20,14 +22,6 @@ watch(() => props.initialSearch, (q) => {
 const categoryFilter = ref<string | null>(null);
 const statusFilter = ref<string | null>(null);
 const sortBy = ref('name-asc');
-
-const quoteDialog = ref(false);
-const quoting = ref(false);
-const activatingCode = ref<string | null>(null);
-// Código de descuento escrito en el diálogo. Solo viaja al activar si la cotización lo aceptó (quote.discount).
-const discountInput = ref('');
-const applyingDiscount = ref(false);
-
 
 // Lo incluido en la plataforma (núcleo y módulos base) no es algo que se elija ni se compre: no se mezcla con los plugins del
 // catálogo. Solo se ve si se pide expresamente con el filtro «Incluido».
@@ -97,46 +91,8 @@ function formatPrice(cents: number, currency: string): string {
   return new Intl.NumberFormat(locale.value, { style: 'currency', currency }).format(cents / 100);
 }
 
-async function openQuote(code: string): Promise<void> {
-  activatingCode.value = code;
-  discountInput.value = '';
-  const ok = await store.fetchQuote(code);
-  if (ok) quoteDialog.value = true;
-}
-
-// «Mis plugins» reactiva un módulo desactivado pasando por la misma cotización que una activación nueva.
-defineExpose({ openQuote });
-
-async function applyDiscount(): Promise<void> {
-  if (!activatingCode.value || !discountInput.value.trim()) return;
-  applyingDiscount.value = true;
-  await store.fetchQuote(activatingCode.value, discountInput.value.trim());
-  applyingDiscount.value = false;
-}
-
-async function removeDiscount(): Promise<void> {
-  if (!activatingCode.value) return;
-  discountInput.value = '';
-  await store.fetchQuote(activatingCode.value);
-}
-
-/** Mensaje del código rechazado: traducido si lo conocemos; si no, el que manda el servidor. */
-function discountErrorText(error: { code: string; message: string }): string {
-  const key = `plugins.discountErrors.${error.code}`;
-  return te(key) ? t(key) : error.message;
-}
-
 function formatDate(iso: string): string {
   return new Intl.DateTimeFormat(locale.value, { dateStyle: 'long' }).format(new Date(iso));
-}
-
-async function confirmActivate(): Promise<void> {
-  if (!activatingCode.value) return;
-  quoting.value = true;
-  const code = store.currentQuote?.discount ? store.currentQuote.discount.code : undefined;
-  const ok = await store.activate(activatingCode.value, code);
-  quoting.value = false;
-  if (ok) quoteDialog.value = false;
 }
 </script>
 
@@ -254,13 +210,15 @@ async function confirmActivate(): Promise<void> {
             <span class="text-subtitle-2 mr-2">{{ p.display_status === 'incluido' || p.priceCents === 0 ? $t('plugins.included') : formatPrice(p.priceCents, p.currency) + $t('plugins.perMonth') + $t('plugins.plusVat') }}</span>
             <v-btn
               v-if="canActivate && (p.display_status === 'disponible' || p.display_status === 'desactivado')"
-              color="primary"
+              :color="cart.has(p.code) ? 'success' : 'primary'"
               variant="tonal"
               size="small"
-              :loading="store.loading && activatingCode === p.code"
-              @click="openQuote(p.code)"
+              :prepend-icon="cart.has(p.code) ? 'mdi-check' : 'mdi-cart-plus'"
+              @click="cart.toggle(p.code)"
             >
-              {{ $t(p.display_status === 'desactivado' ? 'plugins.reactivate' : 'plugins.activate') }}
+              {{ cart.has(p.code)
+                ? $t('plugins.cart.inCart')
+                : $t(p.display_status === 'desactivado' ? 'plugins.reactivate' : 'plugins.cart.add') }}
             </v-btn>
           </v-card-actions>
         </v-card>
@@ -271,116 +229,5 @@ async function confirmActivate(): Promise<void> {
       {{ $t('plugins.noMatches') }}
     </div>
 
-    <v-dialog v-model="quoteDialog" max-width="560">
-      <v-card v-if="store.currentQuote">
-        <v-card-title>{{ $t('plugins.activateTitle', { name: store.currentQuote.plugin.name }) }}</v-card-title>
-        <v-card-text>
-          <div class="text-body-2 mb-3">
-            {{ $t('plugins.quoteIntro') }}
-          </div>
-          <v-list density="compact" class="bg-grey-lighten-4 rounded-lg mb-3">
-            <v-list-item>
-              <template #prepend>
-                <v-icon icon="mdi-puzzle" />
-              </template>
-              <v-list-item-title>{{ store.currentQuote.plugin.name }}</v-list-item-title>
-              <template #append>
-                <span class="text-body-2">{{ store.currentQuote.price === 0 ? $t('plugins.included') : formatPrice(store.currentQuote.price, store.currentQuote.plugin.currency) }}</span>
-              </template>
-            </v-list-item>
-            <v-list-item v-for="r in store.currentQuote.requires" :key="r.plugin.id">
-              <template #prepend>
-                <v-icon icon="mdi-arrow-right-bottom" />
-              </template>
-              <v-list-item-title>{{ r.plugin.name }}</v-list-item-title>
-              <template #append>
-                <v-chip
-                  v-if="r.already_active"
-                  size="x-small"
-                  color="primary"
-                  class="mr-2"
-                >
-                  {{ $t('plugins.alreadyActive') }}
-                </v-chip>
-                <span class="text-body-2">{{ r.price === 0 ? $t('plugins.included') : formatPrice(r.price, r.plugin.currency) }}</span>
-              </template>
-            </v-list-item>
-          </v-list>
-          <div class="d-flex align-start ga-2 mb-2">
-            <v-text-field
-              v-model="discountInput"
-              :label="$t('plugins.discountCode')"
-              :disabled="Boolean(store.currentQuote.discount)"
-              prepend-inner-icon="mdi-ticket-percent-outline"
-              :error-messages="store.currentQuote.discount_error ? [discountErrorText(store.currentQuote.discount_error)] : []"
-              @keyup.enter="applyDiscount"
-            />
-            <v-btn
-              v-if="!store.currentQuote.discount"
-              variant="tonal"
-              :loading="applyingDiscount"
-              :disabled="!discountInput.trim()"
-              @click="applyDiscount"
-            >
-              {{ $t('plugins.discountApply') }}
-            </v-btn>
-            <v-btn v-else variant="text" @click="removeDiscount">{{ $t('plugins.discountRemove') }}</v-btn>
-          </div>
-          <v-alert v-if="store.currentQuote.discount" type="success" class="mb-2">
-            {{ $t('plugins.discountApplied', {
-              name: store.currentQuote.discount.name,
-              amount: formatPrice(store.currentQuote.discount.discount_cents, store.currentQuote.plugin.currency),
-            }) }}
-            <span v-if="store.currentQuote.discount.duration_months">
-              {{ $t('plugins.discountDuration', { months: store.currentQuote.discount.duration_months }) }}
-            </span>
-          </v-alert>
-          <div class="d-flex justify-end align-center ga-2">
-            <span
-              v-if="store.currentQuote.total_after_discount !== undefined"
-              class="text-body-1 text-medium-emphasis text-decoration-line-through"
-            >
-              {{ formatPrice(store.currentQuote.total_monthly, store.currentQuote.plugin.currency) }}
-            </span>
-            <span :class="store.currentQuote.total_with_vat === undefined ? 'text-h6' : 'text-body-1'">{{ $t('plugins.monthlySubtotal') }}
-              {{ formatPrice(store.currentQuote.total_after_discount ?? store.currentQuote.total_monthly, store.currentQuote.plugin.currency) }}
-            </span>
-          </div>
-          <template v-if="store.currentQuote.total_with_vat !== undefined">
-            <div class="d-flex justify-end text-body-2 text-medium-emphasis">
-              {{ $t('plugins.vatLine', { percent: store.currentQuote.vat_percent }) }}
-              {{ formatPrice(store.currentQuote.vat_cents ?? 0, store.currentQuote.plugin.currency) }}
-            </div>
-            <div class="d-flex justify-end text-h6">
-              {{ $t('plugins.monthlyTotal') }}
-              {{ formatPrice(store.currentQuote.total_with_vat, store.currentQuote.plugin.currency) }}
-            </div>
-            <v-alert
-              v-if="store.currentQuote.trial?.active"
-              type="success"
-              icon="mdi-gift-outline"
-              class="mt-3"
-            >
-              {{ $t('plugins.trialQuote', {
-                days: store.currentQuote.trial.days_left,
-                date: formatDate(store.currentQuote.trial.ends_at),
-              }) }}
-            </v-alert>
-          </template>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn variant="text" @click="quoteDialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn
-            color="primary"
-            variant="tonal"
-            :loading="quoting || store.saving"
-            @click="confirmActivate"
-          >
-            {{ $t('plugins.confirmActivation') }}
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
   </div>
 </template>
