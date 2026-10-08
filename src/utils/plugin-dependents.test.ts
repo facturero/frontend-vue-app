@@ -20,6 +20,11 @@ describe('dependentCodesOf', () => {
     expect(dependentCodesOf(c, [mi('b'), mi('x', { status: 'disabled' }), c], catalogo)).toEqual(['b']);
   });
 
+  it('lo incluido en la plataforma no cuenta como dependiente aunque en el catálogo figure como que lo necesita', () => {
+    const c = mi('c');
+    expect(dependentCodesOf(c, [c, mi('b', { activationSource: 'included' }), mi('x')], catalogo)).toEqual(['x']);
+  });
+
   it('un módulo que nadie necesita no tiene dependientes', () => {
     expect(dependentCodesOf(mi('a'), [mi('a'), mi('b')], catalogo)).toEqual([]);
   });
