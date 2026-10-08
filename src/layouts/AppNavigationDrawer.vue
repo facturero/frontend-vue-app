@@ -1,15 +1,17 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { useRoute } from 'vue-router';
 import { useDisplay } from 'vuetify';
 import { useUiStore } from '@/stores/ui';
 import { useAuthStore } from '@/stores/auth';
 import { usePluginsStore } from '@/stores/plugins';
-import { getNavigationItems } from '@/menus/navigation';
+import { getNavigationItems, isNavItemActive } from '@/menus/navigation';
 
 const ui = useUiStore();
 const auth = useAuthStore();
 const plugins = usePluginsStore();
 const { mobile } = useDisplay();
+const route = useRoute();
 
 const allowedWhenBlocked = ['/profile', '/organization/settings'];
 
@@ -48,7 +50,9 @@ const items = computed(() =>
             </template>
             <v-list-item-title>{{ $t(item.titleKey) }}</v-list-item-title>
           </v-list-item>
-          <v-list-item v-else :to="item.to" :prepend-icon="item.icon" :title="$t(item.titleKey)" rounded="lg" />
+          <!-- `active` explícito: el router solo marca la ruta exacta, y las pantallas internas (nuevo, editar, detalle) deben dejar marcado el ítem. -->
+          <v-list-item v-else :to="item.to" :active="isNavItemActive(item, route.path)" :prepend-icon="item.icon"
+            :title="$t(item.titleKey)" rounded="lg" />
         </template>
       </v-list>
     </div>
