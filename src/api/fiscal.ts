@@ -10,7 +10,11 @@ export const fiscalApi = {
     formData.append('file', file);
     formData.append('password', password);
     if (alias) formData.append('alias', alias);
-    return http.post<CertificateDTO>('/certificates', formData).then((r) => r.data);
+    // El cliente http fija `Content-Type: application/json` por defecto, y con esa cabecera axios convierte el
+    // FormData en JSON ({"file":{}}: el archivo se pierde). Pedir multipart explícito lo manda como formulario.
+    return http
+      .post<CertificateDTO>('/certificates', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+      .then((r) => r.data);
   },
 
   revokeCertificate: (id: string) =>
