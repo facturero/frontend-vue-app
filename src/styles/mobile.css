@@ -1,29 +1,16 @@
 /*
- * Reglas del teléfono (< 600 px, el mismo corte que `sm` de Vuetify). Lo que depende de un componente concreto se arregla en su
- * vista con las columnas de la rejilla (`cols="12" sm="6"`); aquí solo van las que afectan a TODAS las pantallas por igual.
+ * Lo único del teléfono (< 600 px, el mismo corte que `sm` de Vuetify) que no se resuelve con clases o props de Vuetify. El resto va
+ * con ellas: el margen y el sitio para el botón del asistente en App.vue (`pa-0 pb-16`), los filtros con `cols="12" sm="…"`, los
+ * títulos con `text-wrap` y las filas de acciones con `flex-wrap`.
+ *
+ * Tablas (v-table y v-data-table): cada celda en UNA línea y a su ancho natural, con scroll horizontal (el de `.v-table__wrapper`).
+ * Vuetify tiene `text-no-wrap`, pero sin variante por tamaño de pantalla: aplicarla a cada tabla la dejaría también así en
+ * escritorio, donde conviene que los textos largos se partan. Sin esto, el navegador estruja las columnas para caber en 375 px y un
+ * nombre acaba partido en cinco líneas.
  */
 @media (max-width: 599.98px) {
-  /* App.vue envuelve cada vista en un v-container y cada vista trae el suyo: en el teléfono esa suma eran 32 px de margen por lado,
-     casi un tercio del ancho. Se queda solo el exterior. */
-  .v-main > .v-container .v-container {
-    padding-left: 0;
-    padding-right: 0;
-  }
-
-  /* Tablas (v-table y v-data-table): cada celda en UNA línea y a su ancho natural, con scroll horizontal (el de `.v-table__wrapper`).
-     Si no, el navegador las estruja para caber en 375 px y un nombre acaba partido en cinco líneas. */
   .v-table th,
   .v-table td {
     white-space: nowrap;
-  }
-
-  /* Las tablas con campos dentro (p. ej. las líneas de una factura) no se aplastan por debajo de un ancho usable: se desplazan. */
-  .v-table .v-table__wrapper > table {
-    min-width: 600px;
-  }
-
-  /* El botón flotante del asistente va abajo a la derecha y tapaba el final de cada pantalla (totales, botones de guardar). */
-  .v-main {
-    padding-bottom: 88px;
   }
 }

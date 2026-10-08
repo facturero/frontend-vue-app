@@ -133,12 +133,12 @@ Reglas fijas:
   con las acciones en otra fila). `:sticky="false"` lo apaga. Lo que sea `position: sticky` en una vista debe calcular su `top` con
   `var(--v-layout-top)` más el alto del encabezado (ver el panel de vista previa de `PosThemeEditorView`). Lógica en
   `composable/useStickyHeader.ts`.
-- **Teléfono (< 600 px):** las reglas que valen para todas las pantallas están en `src/styles/mobile.css` — se quita el margen doble de
-  los contenedores anidados (App.vue envuelve la vista y la vista trae el suyo), las tablas muestran cada celda en una línea y se
-  desplazan en horizontal (nunca un nombre partido en cinco líneas), y el contenido deja sitio al botón flotante del asistente. Lo
-  específico de un componente va en su vista: los filtros llevan `cols="12" sm="…"` (a pantalla completa en el teléfono, para que
-  «Todos los estados» no se corte en «Todo…»), y los títulos y botones de acción de una tarjeta usan `flex-wrap` / `text-wrap` en
-  vez de desbordar. Al añadir una vista, míresela a 375 px.
+- **Teléfono (< 600 px):** se resuelve con clases y props de Vuetify, no con CSS: `App.vue` quita el relleno de su contenedor en móvil
+  (`pa-0`, porque cada vista trae el suyo y juntos eran 32 px por lado) y deja sitio al botón del asistente (`pb-16`); los filtros
+  llevan `cols="12" sm="…"` (a pantalla completa en el teléfono, para que «Todos los estados» no se corte en «Todo…»); los títulos de
+  tarjeta usan `text-wrap` y las filas de acciones `flex-wrap` en vez de desbordar. Lo único con CSS propio (`src/styles/mobile.css`) son
+  las celdas de las tablas en una línea con scroll horizontal, porque `text-no-wrap` de Vuetify no tiene variante por tamaño y dejaría
+  las tablas así también en escritorio. Al añadir una vista, míresela a 375 px.
 - Los errores van en un `v-alert` justo debajo del encabezado, no dentro de la
   tarjeta.
 - La acción principal va en `#actions`, alineada a la derecha, **sólida**

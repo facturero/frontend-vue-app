@@ -96,7 +96,7 @@ export function useStickyHeader(el: Ref<HTMLElement | null>, enabled: () => bool
     appliedShrink = shrink;
     // `!important`: las clases utilitarias de la hoja (`pa-6`, `mb-6`, `rounded-lg`) también lo son y, sin esto, ganarían.
     style.value = {
-      position: 'sticky',
+      // `position: sticky` va como clase en PageHeader (`position-sticky`); aquí solo lo que cambia con el scroll o se calcula.
       // La barra superior de Vuetify reserva su alto en esta variable de la capa principal.
       top: 'var(--v-layout-top, 0px)',
       zIndex: 5,

@@ -76,7 +76,9 @@ watch(
         @click="assistant.toggle()"
       />
       <v-main>
-        <v-container :fluid="mobile">
+        <!-- En el teléfono el contenedor de aquí no lleva relleno: cada vista trae el suyo y, sumados, eran 32 px por lado. `pb-16` deja sitio
+             al botón flotante del asistente, que si no tapa el final de cada pantalla. -->
+        <v-container :fluid="mobile" :class="mobile ? 'pa-0 pb-16' : undefined">
           <router-view />
         </v-container>
       </v-main>

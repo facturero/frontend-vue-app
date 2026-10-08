@@ -40,6 +40,7 @@ const stickyStyle = useStickyHeader(sheetEl, () => props.sticky === true);
     ref="sheet"
     color="lightprimary"
     class="d-flex flex-wrap align-center ga-3 mb-6 pa-6"
+    :class="{ 'position-sticky': sticky }"
     :style="stickyStyle"
   >
     <div>
