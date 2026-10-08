@@ -26,12 +26,14 @@ usePluginsRealtime();
 // Reactivar un módulo desactivado lo agrega al carrito y lo abre: pasa por la misma cotización (precio, prueba gratis,
 // código de descuento) que una activación nueva.
 async function reactivate(code: string): Promise<void> {
-  cart.add(code);
+  await cart.add(code);
   await cart.openCart();
 }
 
 onMounted(() => {
   void store.fetchCatalog();
+  // El carrito guardado en el servidor: lo dejado pendiente en otra sesión o equipo aparece aquí.
+  if (!cart.loaded) void cart.load();
 });
 
 const currentProfile = computed(() => store.myProfile?.profile ?? null);
@@ -47,6 +49,10 @@ const profilePending = computed(() => store.myProfile?.status === 'pending');
         </v-badge>
       </template>
     </PageHeader>
+
+    <v-alert v-if="cart.error && !cart.open" type="error" closable class="mb-4" @click:close="cart.error = null">
+      {{ cart.error }}
+    </v-alert>
 
     <v-alert
       v-if="cart.lastActivated !== null"

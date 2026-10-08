@@ -3,6 +3,10 @@ import { createPinia, setActivePinia } from 'pinia';
 import type { CartQuote, CartQuoteItem } from '@/types/plugins';
 
 const api = vi.hoisted(() => ({
+  cartGet: vi.fn(),
+  cartAdd: vi.fn(),
+  cartRemove: vi.fn(),
+  cartClear: vi.fn(),
   cartQuote: vi.fn(),
   cartActivate: vi.fn(),
 }));
@@ -23,39 +27,91 @@ const quote = (items: CartQuoteItem[], extra: Partial<CartQuote> = {}): CartQuot
   ...extra,
 });
 
-describe('carrito de módulos', () => {
+describe('carrito de módulos (guardado en el servidor)', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
-    api.cartQuote.mockReset();
-    api.cartActivate.mockReset();
+    for (const fn of Object.values(api)) fn.mockReset();
+    api.cartAdd.mockResolvedValue([]);
+    api.cartRemove.mockResolvedValue([]);
+    api.cartClear.mockResolvedValue(undefined);
+    api.cartQuote.mockResolvedValue(quote([]));
   });
 
-  it('agregar es idempotente y alternar quita lo que ya estaba', () => {
+  it('al abrir la pantalla recupera el carrito guardado, aunque se haya armado en otro equipo', async () => {
+    api.cartGet.mockResolvedValue([{ code: 'a', addedAt: '', addedByUserId: null }, { code: 'b', addedAt: '', addedByUserId: null }]);
     const cart = usePluginCartStore();
-    cart.add('a');
-    cart.add('a');
+
+    await cart.load();
+
+    expect(cart.codes).toEqual(['a', 'b']);
+    expect(cart.loaded).toBe(true);
+  });
+
+  it('agregar lo guarda en el servidor, y es idempotente', async () => {
+    const cart = usePluginCartStore();
+    await cart.add('a');
+    await cart.add('a');
+
     expect(cart.codes).toEqual(['a']);
-    api.cartQuote.mockResolvedValue(quote([]));
-    cart.toggle('a');
+    expect(api.cartAdd).toHaveBeenCalledTimes(1);
+    expect(api.cartAdd).toHaveBeenCalledWith('a');
+  });
+
+  it('si el servidor rechaza agregar, se revierte y se muestra el motivo', async () => {
+    const cart = usePluginCartStore();
+    api.cartAdd.mockRejectedValue({ response: { data: { message: 'Ya está activo.' } } });
+
+    await cart.add('a');
+
     expect(cart.codes).toEqual([]);
+    expect(cart.error).toBeTruthy();
+  });
+
+  it('quitar y alternar también pasan por el servidor', async () => {
+    const cart = usePluginCartStore();
+    await cart.add('a');
+    await cart.toggle('a');
+
+    expect(cart.codes).toEqual([]);
+    expect(api.cartRemove).toHaveBeenCalledWith('a');
+  });
+
+  it('vaciar borra también el carrito guardado', async () => {
+    const cart = usePluginCartStore();
+    await cart.add('a');
+    await cart.clear();
+
+    expect(cart.codes).toEqual([]);
+    expect(api.cartClear).toHaveBeenCalledTimes(1);
+  });
+
+  it('cerrar sesión limpia la copia local pero NO el carrito del servidor', async () => {
+    const cart = usePluginCartStore();
+    await cart.add('a');
+
+    cart.reset();
+
+    expect(cart.codes).toEqual([]);
+    expect(cart.loaded).toBe(false);
+    expect(api.cartClear).not.toHaveBeenCalled();
   });
 
   it('cotiza los códigos del carrito en el servidor', async () => {
     const cart = usePluginCartStore();
     api.cartQuote.mockResolvedValue(quote([item('a'), item('b', 'required')]));
-    cart.add('a');
+    await cart.add('a');
 
     await cart.refresh();
 
-    expect(api.cartQuote).toHaveBeenCalledWith(['a'], undefined);
+    expect(api.cartQuote).toHaveBeenLastCalledWith(['a'], undefined);
     expect(cart.quote?.items).toHaveLength(2);
   });
 
-  it('quita del carrito, y avisa, lo que el servidor dice que ya no se puede activar o que ya estaba activo', async () => {
+  it('quita del carrito (y del servidor), y avisa, lo que ya no se puede activar o ya estaba activo', async () => {
     const cart = usePluginCartStore();
-    cart.add('a');
-    cart.add('ya');
-    cart.add('roto');
+    await cart.add('a');
+    await cart.add('ya');
+    await cart.add('roto');
     api.cartQuote
       .mockResolvedValueOnce(quote([item('a'), item('ya', 'already_active')], { invalid: [{ code: 'roto', reason: 'not_available' }] }))
       .mockResolvedValueOnce(quote([item('a')]));
@@ -64,23 +120,13 @@ describe('carrito de módulos', () => {
 
     expect(cart.codes).toEqual(['a']);
     expect(cart.dropped.sort()).toEqual(['roto', 'ya']);
-    expect(cart.quote?.items.map((i) => i.plugin.code)).toEqual(['a']);
-  });
-
-  it('un carrito que se queda vacío no deja cotización', async () => {
-    const cart = usePluginCartStore();
-    cart.add('roto');
-    api.cartQuote.mockResolvedValue(quote([], { invalid: [{ code: 'roto', reason: 'not_found' }] }));
-
-    await cart.refresh();
-
-    expect(cart.codes).toEqual([]);
-    expect(cart.quote).toBeNull();
+    expect(api.cartRemove).toHaveBeenCalledWith('roto');
+    expect(api.cartRemove).toHaveBeenCalledWith('ya');
   });
 
   it('el código de descuento solo viaja al activar si la cotización lo aceptó', async () => {
     const cart = usePluginCartStore();
-    cart.add('a');
+    await cart.add('a');
     api.cartQuote.mockResolvedValue(
       quote([item('a')], { discount: { code: 'DIEZ', name: '10 %', kind: 'percent', discount_cents: 100, duration_months: null } }),
     );
@@ -92,9 +138,9 @@ describe('carrito de módulos', () => {
     expect(api.cartActivate).toHaveBeenCalledWith(['a'], 'DIEZ');
   });
 
-  it('activar con éxito vacía el carrito, lo cierra y cuenta lo activado', async () => {
+  it('activar con éxito vacía la copia local, cierra el carrito y cuenta lo activado', async () => {
     const cart = usePluginCartStore();
-    cart.add('a');
+    await cart.add('a');
     cart.open = true;
     api.cartActivate.mockResolvedValue([{ pluginCode: 'a' }, { pluginCode: 'b' }]);
 
@@ -103,11 +149,12 @@ describe('carrito de módulos', () => {
     expect(cart.codes).toEqual([]);
     expect(cart.open).toBe(false);
     expect(cart.lastActivated).toBe(2);
+    expect(api.cartClear).not.toHaveBeenCalled(); // el servidor ya sacó lo activado del carrito
   });
 
-  it('si el servidor rechaza, el carrito queda como estaba y se muestra el motivo', async () => {
+  it('si el servidor rechaza activar, el carrito queda como estaba y se muestra el motivo', async () => {
     const cart = usePluginCartStore();
-    cart.add('a');
+    await cart.add('a');
     cart.open = true;
     api.cartActivate.mockRejectedValue({ response: { data: { message: 'No se pudo.' } } });
 

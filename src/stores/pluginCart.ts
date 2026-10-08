@@ -5,33 +5,16 @@ import { usePluginsStore } from '@/stores/plugins';
 import { extractError } from '@/utils/error';
 import type { CartQuote } from '@/types/plugins';
 
-const STORAGE_KEY = 'crm.plugin-cart';
-
-function load(): string[] {
-  try {
-    const raw = sessionStorage.getItem(STORAGE_KEY);
-    const parsed: unknown = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? parsed.filter((c): c is string => typeof c === 'string') : [];
-  } catch {
-    return [];
-  }
-}
-
-function save(codes: string[]): void {
-  try {
-    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(codes));
-  } catch {
-    /* el carrito sigue funcionando en memoria */
-  }
-}
-
 /**
- * El carrito de módulos: los que la persona quiere activar juntos. Vive en la sesión del navegador (no en el servidor):
- * es una intención, no un dato. Cada cambio se vuelve a cotizar en el servidor, que es quien sabe qué comparten los
- * módulos, qué ya está activo y cuánto cuesta con IVA, descuento y prueba gratis.
+ * El carrito de módulos: los que la organización quiere activar juntos. Vive en el SERVIDOR (por organización), no en el
+ * navegador: quien lo arma puede recargar, cambiar de equipo o dejarlo para otro día y lo encuentra igual, y lo ve
+ * cualquier administrador de la organización. Aquí se guarda una copia para pintar al instante; cada cambio se envía al
+ * servidor y, si lo rechaza, se revierte. El precio, lo que comparten los módulos y lo que ya está activo los calcula el
+ * servidor en cada cotización (IVA, descuento y prueba gratis incluidos).
  */
 export const usePluginCartStore = defineStore('pluginCart', () => {
-  const codes = ref<string[]>(load());
+  const codes = ref<string[]>([]);
+  const loaded = ref(false);
   const quote = ref<CartQuote | null>(null);
   const quoting = ref(false);
   const activating = ref(false);
@@ -47,38 +30,70 @@ export const usePluginCartStore = defineStore('pluginCart', () => {
   const count = computed(() => codes.value.length);
   const has = (code: string): boolean => codes.value.includes(code);
 
-  function persist(): void {
-    save(codes.value);
+  /** Trae el carrito guardado de la organización. Un fallo aquí no bloquea nada: el carrito arranca vacío. */
+  async function load(): Promise<void> {
+    try {
+      codes.value = (await pluginApi.cartGet()).map((i) => i.code);
+      loaded.value = true;
+    } catch {
+      /* el carrito es una comodidad */
+    }
   }
 
-  function add(code: string): void {
-    if (!has(code)) codes.value = [...codes.value, code];
-    persist();
+  async function add(code: string): Promise<void> {
+    if (has(code)) return;
+    codes.value = [...codes.value, code];
+    try {
+      await pluginApi.cartAdd(code);
+    } catch (e) {
+      codes.value = codes.value.filter((c) => c !== code);
+      error.value = extractError(e);
+    }
   }
 
-  function remove(code: string): void {
+  async function remove(code: string): Promise<void> {
+    if (!has(code)) return;
+    const before = codes.value;
     codes.value = codes.value.filter((c) => c !== code);
-    persist();
-    void refresh();
+    try {
+      await pluginApi.cartRemove(code);
+    } catch (e) {
+      codes.value = before;
+      error.value = extractError(e);
+      return;
+    }
+    await refresh();
   }
 
-  function toggle(code: string): void {
-    if (has(code)) remove(code);
-    else add(code);
+  async function toggle(code: string): Promise<void> {
+    if (has(code)) await remove(code);
+    else await add(code);
   }
 
-  function clear(): void {
+  /** Vacía el carrito, también en el servidor. */
+  async function clear(): Promise<void> {
+    const before = codes.value;
+    resetLocal();
+    try {
+      await pluginApi.cartClear();
+    } catch (e) {
+      codes.value = before;
+      error.value = extractError(e);
+    }
+  }
+
+  function resetLocal(): void {
     codes.value = [];
     quote.value = null;
     discountInput.value = '';
     error.value = null;
     dropped.value = [];
-    persist();
   }
 
-  /** Al cerrar sesión: el carrito de una organización no debe sobrevivir a la siguiente. */
+  /** Al cerrar sesión: la copia local no debe sobrevivir a la siguiente sesión. El carrito guardado sigue en el servidor. */
   function reset(): void {
-    clear();
+    resetLocal();
+    loaded.value = false;
     open.value = false;
     lastActivated.value = null;
   }
@@ -94,13 +109,13 @@ export const usePluginCartStore = defineStore('pluginCart', () => {
     try {
       const code = discountCode ?? quote.value?.discount?.code;
       const q = await pluginApi.cartQuote(codes.value, code);
-      // Lo que ya no se puede activar, o que ya está activo, sobra en el carrito: se quita y se avisa.
+      // Lo que ya no se puede activar, o que ya está activo, sobra en el carrito: se quita (también del servidor) y se avisa.
       const activeSelected = q.items.filter((i) => i.kind === 'already_active').map((i) => i.plugin.code);
       const gone = [...q.invalid.map((i) => i.code), ...activeSelected.filter((c) => codes.value.includes(c))];
       if (gone.length) {
         dropped.value = gone;
         codes.value = codes.value.filter((c) => !gone.includes(c));
-        persist();
+        for (const g of gone) void pluginApi.cartRemove(g).catch(() => undefined);
         if (codes.value.length === 0) {
           quote.value = null;
           return;
@@ -138,11 +153,12 @@ export const usePluginCartStore = defineStore('pluginCart', () => {
     activating.value = true;
     error.value = null;
     try {
+      // El servidor saca del carrito guardado lo que activa, en la misma operación.
       const done = await pluginApi.cartActivate(codes.value, quote.value?.discount?.code);
       lastActivated.value = done.length;
       const plugins = usePluginsStore();
       await Promise.all([plugins.fetchMy(), plugins.fetchCatalog()]);
-      clear();
+      resetLocal();
       open.value = false;
       return true;
     } catch (e) {
@@ -155,6 +171,7 @@ export const usePluginCartStore = defineStore('pluginCart', () => {
 
   return {
     codes,
+    loaded,
     quote,
     quoting,
     activating,
@@ -165,6 +182,7 @@ export const usePluginCartStore = defineStore('pluginCart', () => {
     lastActivated,
     count,
     has,
+    load,
     add,
     remove,
     toggle,

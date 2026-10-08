@@ -38,6 +38,16 @@ export const pluginApi = {
       .post<ActivationResult[]>(`${org}/plugins/${code}/activate`, discountCode ? { discountCode } : undefined)
       .then((r) => r.data),
 
+  /** El carrito guardado de la organización (vive en el servidor: sobrevive a recargar y a cambiar de equipo). */
+  cartGet: () =>
+    http.get<{ code: string; addedAt: string; addedByUserId: string | null }[]>(`${org}/plugins/cart`).then((r) => r.data),
+
+  cartAdd: (code: string) => http.put(`${org}/plugins/cart/items/${code}`).then((r) => r.data),
+
+  cartRemove: (code: string) => http.delete(`${org}/plugins/cart/items/${code}`).then((r) => r.data),
+
+  cartClear: () => http.delete(`${org}/plugins/cart`).then(() => undefined),
+
   /** El carrito: cotiza varios módulos juntos (lo compartido se cuenta una vez; un código de descuento aplica a todo). */
   cartQuote: (codes: string[], discountCode?: string) =>
     http
