@@ -5,6 +5,8 @@ type HeaderStyle = Record<string, string | number>;
 
 /** Cuántos píxeles de scroll hacen falta para pasar del encabezado normal al fijo a todo el ancho. */
 const SCROLL_RANGE = 120;
+/** Relleno vertical con el que queda el encabezado ya fijo (arriba del todo conserva el suyo). */
+const STUCK_PADDING = 8;
 
 const px = (value: string): number => Number.parseFloat(value) || 0;
 
@@ -12,8 +14,9 @@ const px = (value: string): number => Number.parseFloat(value) || 0;
  * Encabezado de página que se queda fijo bajo la barra superior al hacer scroll, para que sus acciones (p. ej. el carrito de
  * módulos) no desaparezcan. Arriba del todo es el panel de siempre, dentro del ancho del contenedor; al bajar crece de forma
  * GRADUAL (atado al scroll, no a un salto) hasta ocupar el 100 % del ancho útil de la pantalla, pierde las esquinas
- * redondeadas y proyecta sombra. NO cambia de alto: si lo hiciera, el contenido de debajo se desplazaría mientras se hace
- * scroll y el scroll "pelearía" con ese desplazamiento.
+ * redondeadas y se compacta (menos relleno arriba y abajo), sin sombra. Su hueco en la página NO cambia: lo que pierde de alto
+ * se lo suma al margen inferior; si no, el contenido de debajo se desplazaría mientras se hace scroll y el scroll
+ * "pelearía" con ese desplazamiento.
  *
  * Devuelve el `style` que hay que poner en el elemento. Lo que se anima son márgenes negativos: el contenedor del encabezado
  * no cambia de tamaño, así que el resto de la página no se mueve.
@@ -25,6 +28,8 @@ export function useStickyHeader(el: Ref<HTMLElement | null>, enabled: () => bool
   const style = ref<HeaderStyle>({});
   let observer: ResizeObserver | null = null;
   let radius = 0;
+  let padding = 0;
+  let marginBottom = 0;
   let bleedLeft = 0;
   let bleedRight = 0;
 
@@ -34,7 +39,13 @@ export function useStickyHeader(el: Ref<HTMLElement | null>, enabled: () => bool
     const header = el.value;
     const parent = header?.parentElement;
     if (!header || !parent) return;
-    if (!radius) radius = px(getComputedStyle(header).borderTopLeftRadius);
+    if (!radius) {
+      // Los valores de partida son los de la hoja normal; se leen una vez, antes de que este código los toque.
+      const own = getComputedStyle(header);
+      radius = px(own.borderTopLeftRadius);
+      padding = px(own.paddingTop);
+      marginBottom = px(own.marginBottom);
+    }
 
     const main = header.closest('.v-main');
     if (!main) {
@@ -58,6 +69,8 @@ export function useStickyHeader(el: Ref<HTMLElement | null>, enabled: () => bool
       return;
     }
     const progress = Math.min(1, Math.max(0, window.scrollY / SCROLL_RANGE));
+    const shrink = Math.max(0, padding - STUCK_PADDING) * progress;
+    // `!important`: las clases utilitarias de la hoja (`pa-6`, `mb-6`, `rounded-lg`) también lo son y, sin esto, ganarían.
     style.value = {
       position: 'sticky',
       // La barra superior de Vuetify reserva su alto en esta variable de la capa principal.
@@ -65,12 +78,11 @@ export function useStickyHeader(el: Ref<HTMLElement | null>, enabled: () => bool
       zIndex: 5,
       marginLeft: `${-bleedLeft * progress}px`,
       marginRight: `${-bleedRight * progress}px`,
-      // `!important`: la clase `rounded-lg` de la hoja también lo es y, sin esto, las esquinas nunca se aplanarían.
       borderRadius: `${radius * (1 - progress)}px !important`,
-      boxShadow:
-        progress > 0
-          ? `0 ${4 * progress}px ${12 * progress}px rgba(var(--v-theme-on-surface), ${0.14 * progress})`
-          : 'none',
+      paddingTop: `${padding - shrink}px !important`,
+      paddingBottom: `${padding - shrink}px !important`,
+      // Lo que pierde de alto arriba y abajo (2 × shrink) se devuelve como margen: el hueco en la página es el mismo.
+      marginBottom: `${marginBottom + 2 * shrink}px !important`,
     };
   }
 
