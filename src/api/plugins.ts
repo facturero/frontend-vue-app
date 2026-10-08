@@ -63,6 +63,10 @@ export const pluginApi = {
   deactivate: (code: string) =>
     http.post<DeactivationResult[]>(`${org}/plugins/${code}/deactivate`).then((r) => r.data),
 
+  /** Reactivar SIN costo un módulo desactivado cuyo periodo pago no ha terminado. */
+  reactivate: (code: string) =>
+    http.post<OrganizationPlugin[]>(`${org}/plugins/${code}/reactivate`).then((r) => r.data),
+
   cancelDeactivation: (code: string) =>
     http.post<OrganizationPlugin>(`${org}/plugins/${code}/cancel-deactivation`).then((r) => r.data),
 

@@ -91,6 +91,16 @@ function formatPrice(cents: number, currency: string): string {
   return new Intl.NumberFormat(locale.value, { style: 'currency', currency }).format(cents / 100);
 }
 
+// Un módulo desactivado cuyo periodo pago no terminó se reactiva directo y gratis; lo demás se agrega al carrito.
+async function activateOrReactivate(p: CatalogPlugin): Promise<void> {
+  if (p.display_status === 'desactivado' && store.freeReactivationUntil(p.code)) {
+    if (await store.reactivate(p.code)) return;
+    if (store.errorCode !== 'REACTIVATION_NOT_FREE') return;
+    store.clearError();
+  }
+  await cart.toggle(p.code);
+}
+
 function formatDate(iso: string): string {
   return new Intl.DateTimeFormat(locale.value, { dateStyle: 'long' }).format(new Date(iso));
 }
@@ -214,7 +224,7 @@ function formatDate(iso: string): string {
               variant="tonal"
               size="small"
               :prepend-icon="cart.has(p.code) ? 'mdi-check' : 'mdi-cart-plus'"
-              @click="cart.toggle(p.code)"
+              @click="activateOrReactivate(p)"
             >
               {{ cart.has(p.code)
                 ? $t('plugins.cart.inCart')

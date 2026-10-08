@@ -41,6 +41,8 @@ export interface OrganizationPlugin {
   deactivatedAt: string | null;
   /** Baja programada: sigue activo y funcionando hasta esta fecha. */
   deactivateAt?: string | null;
+  /** Un módulo desactivado cuyo periodo pago no ha terminado: hasta esta fecha reactivarlo no cuesta nada. */
+  reactivableUntil?: string | null;
   /** Dónde termina el periodo pago actual (cuando se haría efectiva una baja). Nulo si el módulo es gratis. */
   periodEndsAt?: string | null;
 }

@@ -164,6 +164,30 @@ export const usePluginsStore = defineStore('plugins', () => {
     }
   }
 
+  /**
+   * Reactivar sin costo un módulo desactivado que todavía tiene pagado el periodo (`reactivableUntil`). Si el servidor dice
+   * que ya no es gratis (`REACTIVATION_NOT_FREE`, p. ej. venció mientras tanto), quien llama lo manda al carrito.
+   */
+  async function reactivate(code: string): Promise<boolean> {
+    saving.value = true;
+    clearError();
+    try {
+      await pluginApi.reactivate(code);
+      await Promise.all([fetchMy(), fetchCatalog()]);
+      return true;
+    } catch (e) {
+      setError(e);
+      return false;
+    } finally {
+      saving.value = false;
+    }
+  }
+
+  /** Hasta cuándo es gratis reactivar este módulo (ya pagado), o null si volver a usarlo es una compra nueva. */
+  function freeReactivationUntil(code: string): string | null {
+    return myPlugins.value.find((p) => p.pluginCode === code && p.status === 'disabled')?.reactivableUntil ?? null;
+  }
+
   /** Arrepentirse de una baja programada: el módulo sigue activo y no se cobra nada de nuevo. */
   async function cancelDeactivation(code: string): Promise<boolean> {
     saving.value = true;
@@ -294,6 +318,8 @@ export const usePluginsStore = defineStore('plugins', () => {
     fetchRequests,
     deactivate,
     cancelDeactivation,
+    reactivate,
+    freeReactivationUntil,
     requestCustom,
     ensureProfileLoaded,
     fetchBusinessProfiles,

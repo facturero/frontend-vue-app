@@ -30,6 +30,18 @@ function dependentsOf(plugin: OrganizationPlugin): BlockingPlugin[] {
   return resolveBlockingPlugins(dependentCodesOf(plugin, store.myPlugins, store.catalog), store.myPlugins);
 }
 
+// Reactivar un módulo cuyo periodo pago no terminó es gratis y directo: el cliente todavía tiene derecho a usarlo y cobrarle de
+// nuevo sería cobrarle dos veces. Si ya terminó (o venció mientras tanto), es una compra nueva y pasa por el carrito.
+async function reactivate(p: OrganizationPlugin): Promise<void> {
+  if (!p.pluginCode) return;
+  if (p.reactivableUntil) {
+    if (await store.reactivate(p.pluginCode)) return;
+    if (store.errorCode !== 'REACTIVATION_NOT_FREE') return;
+    store.clearError();
+  }
+  emit('reactivate', p.pluginCode);
+}
+
 function openBlocker(blocker: BlockingPlugin): void {
   if (!blocker.plugin || blocker.scheduledAt) return;
   store.clearError();
@@ -132,7 +144,11 @@ async function confirmDeactivate(): Promise<void> {
             </div>
             <template v-else>
               <div>{{ $t('plugins.headerDeactivatedAt') }}: {{ formatDate(p.deactivatedAt) }}</div>
-              <div class="mt-2">{{ $t('plugins.disabledHint') }}</div>
+              <div class="mt-2">
+                {{ p.reactivableUntil
+                  ? $t('plugins.reactivateFreeHint', { date: formatDate(p.reactivableUntil) })
+                  : $t('plugins.disabledHint') }}
+              </div>
             </template>
             <div v-if="p.status === 'active' && p.deactivateAt" class="mt-2">
               <v-chip size="x-small" color="lightwarning" variant="flat">
@@ -178,7 +194,7 @@ async function confirmDeactivate(): Promise<void> {
           </v-card-text>
           <v-card-actions v-if="canActivate && p.status !== 'active' && p.pluginCode" class="pt-0">
             <v-spacer />
-            <v-btn color="primary" variant="tonal" size="small" @click="emit('reactivate', p.pluginCode)">
+            <v-btn color="primary" variant="tonal" size="small" :loading="store.saving" @click="reactivate(p)">
               {{ $t('plugins.reactivate') }}
             </v-btn>
           </v-card-actions>
