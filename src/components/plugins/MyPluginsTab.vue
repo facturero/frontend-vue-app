@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { usePluginsStore } from '@/stores/plugins';
 import { useAuthStore } from '@/stores/auth';
 import type { OrganizationPlugin } from '@/types/plugins';
+import { resolveBlockingPlugins, type BlockingPlugin } from '@/utils/plugin-blockers';
 
 const { locale } = useI18n();
 const store = usePluginsStore();
@@ -14,6 +15,18 @@ const canActivate = computed(() => auth.can('plugins:manage'));
 const deactivateDialog = ref<OrganizationPlugin | null>(null);
 const showDeactivateDialog = computed(() => deactivateDialog.value !== null);
 const deactivating = ref(false);
+
+// Si desactivar falla porque otros módulos activos dependen de este, el servidor manda sus códigos. Se muestran con su
+// nombre y como enlace: al pulsarlo se abre directamente la desactivación de ese módulo.
+const blockers = computed<BlockingPlugin[]>(() =>
+  store.errorCode === 'BLOCKING_DEPENDENTS' ? resolveBlockingPlugins(store.errorDetails, store.myPlugins) : [],
+);
+
+function openBlocker(blocker: BlockingPlugin): void {
+  if (!blocker.plugin) return;
+  store.clearError();
+  deactivateDialog.value = blocker.plugin;
+}
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString(locale.value, { dateStyle: 'medium' });
@@ -39,7 +52,20 @@ async function confirmDeactivate(): Promise<void> {
       @click:close="store.clearError()"
     >
       {{ store.error }}
-      <template v-if="store.errorDetails.length">
+      <template v-if="blockers.length">
+        <ul class="ml-4 text-body-2">
+          <li v-for="b in blockers" :key="b.code">
+            <a
+              v-if="b.plugin"
+              href="#"
+              class="text-primary font-weight-medium"
+              @click.prevent="openBlocker(b)"
+            >{{ b.name }}</a>
+            <span v-else>{{ b.name }}</span>
+          </li>
+        </ul>
+      </template>
+      <template v-else-if="store.errorDetails.length">
         <ul class="ml-4 text-caption">
           <li v-for="d in store.errorDetails" :key="d">{{ d }}</li>
         </ul>
