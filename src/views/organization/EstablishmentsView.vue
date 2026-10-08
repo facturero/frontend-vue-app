@@ -347,7 +347,7 @@ onUnmounted(() => {
           <p class="text-body-2 text-medium-emphasis mb-4">
             {{ $t('establishments.pairHint') }}
           </p>
-          <p class="text-h3 font-weight-bold font-mono" style="letter-spacing: 0.3em;">
+          <p class="text-h4 text-sm-h3 font-weight-bold font-mono" style="letter-spacing: 0.3em;">
             {{ store.pairingCode ?? '······' }}
           </p>
           <p class="text-caption text-medium-emphasis mt-2">

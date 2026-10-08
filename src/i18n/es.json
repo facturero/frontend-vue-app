@@ -827,8 +827,8 @@
       "requiredBy": "Lo necesita {name}",
       "dropped": "Se quitaron del carrito módulos que ya no se pueden activar o que ya estaban activos: {names}.",
       "missing": "Antes hay que activar por separado: {names}.",
-      "confirm": "Activar {count} módulos",
-      "activated": "Se activaron {count} módulos."
+      "confirm": "Activar {count} módulo | Activar {count} módulos",
+      "activated": "Se activó {count} módulo. | Se activaron {count} módulos."
     },
     "scheduledChip": "Se desactiva el {date}",
     "scheduledHint": "Sigue funcionando hasta esa fecha. No se te cobrará el mes siguiente.",

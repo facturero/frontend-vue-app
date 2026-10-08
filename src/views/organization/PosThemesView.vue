@@ -271,33 +271,37 @@ onUnmounted(() => {
             {{ $t('common.loading') }}
           </div>
 
-          <v-list v-else density="compact">
-            <v-list-item v-for="point in posPoints" :key="point.id">
-              <v-list-item-title>
-                {{ point.name || $t('posThemes.pointFallback', { code: point.code }) }}
-              </v-list-item-title>
-              <v-list-item-subtitle>
-                {{ $t('posThemes.currentTheme', {
-                  name: point.posThemeName ?? $t('posThemes.organizationDefault'),
-                }) }}
-              </v-list-item-subtitle>
-              <template #append>
-                <v-select
-                  v-model="assignSelection[point.id]"
-                  :items="[
-                    { title: $t('posThemes.useOrganizationDefault'), value: '' },
-                    ...store.themes.map((th) => ({ title: th.name, value: th.id })),
-                  ]"
-                  style="max-width: 240px;"
-                />
-              </template>
-            </v-list-item>
-            <v-list-item v-if="posPoints.length === 0">
-              <v-list-item-title class="text-medium-emphasis">
-                {{ $t('posThemes.noPosPoints') }}
-              </v-list-item-title>
-            </v-list-item>
-          </v-list>
+          <!-- Cada punto: nombre y tema actual arriba y el selector debajo en el teléfono; en una fila desde `sm`. Antes el selector
+               fijo de 240 px iba en el `append` del ítem y no dejaba sitio al nombre en 327 px. -->
+          <div v-else class="d-flex flex-column ga-4">
+            <div
+              v-for="point in posPoints"
+              :key="point.id"
+              class="d-flex flex-column flex-sm-row align-sm-center justify-space-between ga-2"
+            >
+              <div>
+                <div class="text-body-2 font-weight-medium">
+                  {{ point.name || $t('posThemes.pointFallback', { code: point.code }) }}
+                </div>
+                <div class="text-caption text-medium-emphasis">
+                  {{ $t('posThemes.currentTheme', {
+                    name: point.posThemeName ?? $t('posThemes.organizationDefault'),
+                  }) }}
+                </div>
+              </div>
+              <v-select
+                v-model="assignSelection[point.id]"
+                :items="[
+                  { title: $t('posThemes.useOrganizationDefault'), value: '' },
+                  ...store.themes.map((th) => ({ title: th.name, value: th.id })),
+                ]"
+                :min-width="200"
+              />
+            </div>
+            <div v-if="posPoints.length === 0" class="text-medium-emphasis">
+              {{ $t('posThemes.noPosPoints') }}
+            </div>
+          </div>
         </v-card-text>
         <v-card-actions>
           <v-spacer />

@@ -61,7 +61,7 @@ const profilePending = computed(() => store.myProfile?.status === 'pending');
       class="mb-4"
       @click:close="cart.lastActivated = null"
     >
-      {{ $t('plugins.cart.activated', { count: cart.lastActivated }) }}
+      {{ $t('plugins.cart.activated', { count: cart.lastActivated }, cart.lastActivated) }}
     </v-alert>
 
     <v-alert

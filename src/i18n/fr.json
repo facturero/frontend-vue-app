@@ -827,8 +827,8 @@
       "requiredBy": "Requis par {name}",
       "dropped": "Des modules qui ne peuvent plus être activés ou étaient déjà actifs ont été retirés du panier : {names}.",
       "missing": "Il faut d'abord activer séparément : {names}.",
-      "confirm": "Activer {count} modules",
-      "activated": "{count} modules ont été activés."
+      "confirm": "Activer {count} module | Activer {count} modules",
+      "activated": "{count} module a été activé. | {count} modules ont été activés."
     },
     "scheduledChip": "Désactivation le {date}",
     "scheduledHint": "Il continue de fonctionner jusqu'à cette date. Il ne sera pas facturé le mois suivant.",

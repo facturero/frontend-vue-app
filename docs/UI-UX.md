@@ -136,7 +136,7 @@ Reglas fijas:
 - **Teléfono (< 600 px):** se resuelve con clases y props de Vuetify, no con CSS: `App.vue` quita el relleno de su contenedor en móvil
   (`pa-0`, porque cada vista trae el suyo y juntos eran 32 px por lado) y deja sitio al botón del asistente (`pb-16`); los filtros
   llevan `cols="12" sm="…"` (a pantalla completa en el teléfono, para que «Todos los estados» no se corte en «Todo…»); los títulos de
-  tarjeta usan `text-wrap` y las filas de acciones `flex-wrap` en vez de desbordar. Lo único con CSS propio (`src/styles/mobile.css`) son
+  tarjeta y de diálogo se parten en líneas por defecto (`VCardTitle`/`VCardSubtitle` llevan `text-wrap` en `vuetify.ts`; Vuetify los cortaba con «…») y las filas de acciones usan `flex-wrap` en vez de desbordar. **Diálogos:** mídelos a 375 px (ancho útil ~327 px): un selector de ancho fijo o tres botones en una fila no caben; apila los campos (`flex-column flex-sm-row`) y deja que `v-card-actions` envuelva (`flex-wrap ga-2`). Lo único con CSS propio (`src/styles/mobile.css`) son
   las celdas de las tablas en una línea con scroll horizontal, porque `text-no-wrap` de Vuetify no tiene variante por tamaño y dejaría
   las tablas así también en escritorio. Al añadir una vista, míresela a 375 px.
 - Los errores van en un `v-alert` justo debajo del encabezado, no dentro de la

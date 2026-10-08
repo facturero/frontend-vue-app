@@ -57,7 +57,7 @@ function discountErrorText(error: { code: string; message: string }): string {
           <div class="text-subtitle-2 mb-2">{{ $t('plugins.cart.chosen') }}</div>
           <v-list class="mb-4">
             <v-list-item v-for="i in selected" :key="i.plugin.code">
-              <v-list-item-title>{{ i.plugin.name }}</v-list-item-title>
+              <v-list-item-title class="text-wrap">{{ i.plugin.name }}</v-list-item-title>
               <template #append>
                 <span class="text-body-2 mr-2">{{ priceOf(i) }}</span>
                 <v-btn
@@ -75,7 +75,7 @@ function discountErrorText(error: { code: string; message: string }): string {
             <div class="text-subtitle-2 mb-2">{{ $t('plugins.cart.alsoIncluded') }}</div>
             <v-list class="mb-4">
               <v-list-item v-for="i in extras" :key="i.plugin.code">
-                <v-list-item-title>{{ i.plugin.name }}</v-list-item-title>
+                <v-list-item-title class="text-wrap">{{ i.plugin.name }}</v-list-item-title>
                 <v-list-item-subtitle v-if="i.kind === 'required'">
                   {{ $t('plugins.cart.requiredBy', { name: requiredByName(i) }) }}
                 </v-list-item-subtitle>
@@ -89,8 +89,9 @@ function discountErrorText(error: { code: string; message: string }): string {
             </v-list>
           </template>
 
-          <div class="d-flex align-start ga-2 mb-2">
+          <div class="d-flex flex-wrap align-start ga-2 mb-2">
             <v-text-field
+              :min-width="200"
               v-model="cart.discountInput"
               :label="$t('plugins.discountCode')"
               :disabled="Boolean(cart.quote.discount)"
@@ -150,7 +151,8 @@ function discountErrorText(error: { code: string; message: string }): string {
         </template>
       </v-card-text>
 
-      <v-card-actions>
+      <!-- flex-wrap: en el teléfono los tres botones no caben en una fila y el primero se salía del diálogo. -->
+      <v-card-actions class="flex-wrap ga-2">
         <v-btn v-if="cart.count" variant="text" @click="cart.clear()">{{ $t('plugins.cart.clear') }}</v-btn>
         <v-spacer />
         <v-btn variant="text" @click="cart.open = false">{{ $t('common.cancel') }}</v-btn>
@@ -161,7 +163,7 @@ function discountErrorText(error: { code: string; message: string }): string {
           :loading="cart.activating"
           @click="cart.checkout()"
         >
-          {{ $t('plugins.cart.confirm', { count: selected.length }) }}
+          {{ $t('plugins.cart.confirm', { count: selected.length }, selected.length) }}
         </v-btn>
       </v-card-actions>
     </v-card>

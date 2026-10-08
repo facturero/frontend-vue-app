@@ -194,13 +194,13 @@ function formatDate(iso: string): string {
     <v-row>
       <v-col v-for="p in filtered" :key="p.id" cols="12" sm="6" lg="4" xl="3">
         <v-card class="d-flex flex-column fill-height">
-          <v-card-title class="d-flex align-start justify-space-between ga-2 text-wrap">
+          <v-card-title class="d-flex align-start justify-space-between ga-2">
             <span class="text-subtitle-1 font-weight-medium">{{ p.name }}</span>
             <v-chip v-if="p.is_exclusive" size="x-small" color="deep-purple">
               {{ $t('plugins.exclusive') }}
             </v-chip>
           </v-card-title>
-          <v-card-subtitle class="text-caption text-wrap">{{ p.code }} · {{ p.category }}</v-card-subtitle>
+          <v-card-subtitle class="text-caption">{{ p.code }} · {{ p.category }}</v-card-subtitle>
           <v-card-text class="text-body-2 flex-grow-1">
             {{ p.description }}
             <div v-if="p.depends_on.length" class="mt-2 text-caption text-medium-emphasis">

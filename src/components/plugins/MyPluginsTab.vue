@@ -127,7 +127,7 @@ async function confirmDeactivate(): Promise<void> {
     <v-row>
       <v-col v-for="p in visiblePlugins" :key="p.pluginId" cols="12" sm="6" lg="4">
         <v-card class="d-flex flex-column fill-height">
-          <v-card-title class="d-flex align-start justify-space-between ga-2 text-wrap">
+          <v-card-title class="d-flex align-start justify-space-between ga-2">
             <span class="text-subtitle-1 font-weight-medium">{{ p.pluginName }}</span>
             <v-chip
               size="x-small"
@@ -138,7 +138,7 @@ async function confirmDeactivate(): Promise<void> {
               {{ p.status === 'active' ? $t('common.active') : $t('plugins.status.desactivado') }}
             </v-chip>
           </v-card-title>
-          <v-card-subtitle class="text-caption text-wrap">{{ p.pluginCode }}</v-card-subtitle>
+          <v-card-subtitle class="text-caption">{{ p.pluginCode }}</v-card-subtitle>
           <v-card-text class="text-caption text-medium-emphasis flex-grow-1">
             <div v-if="p.status === 'active' || !p.deactivatedAt">
               {{ $t('plugins.headerActivatedAt') }}: {{ formatDate(p.activatedAt) }}

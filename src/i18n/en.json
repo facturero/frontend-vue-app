@@ -827,8 +827,8 @@
       "requiredBy": "Needed by {name}",
       "dropped": "Modules that can no longer be activated or were already active were removed from the cart: {names}.",
       "missing": "These must be activated separately first: {names}.",
-      "confirm": "Activate {count} modules",
-      "activated": "{count} modules were activated."
+      "confirm": "Activate {count} module | Activate {count} modules",
+      "activated": "{count} module was activated. | {count} modules were activated."
     },
     "scheduledChip": "Deactivates on {date}",
     "scheduledHint": "It keeps working until that date. You won't be charged next month.",

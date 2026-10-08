@@ -23,6 +23,10 @@ export default createVuetify({
     // Superficies. Sin elevación de Vuetify: el radio (7px) y la sombra suave
     // los aporta la clase `card-surface`, definida en index.html.
     VCard: { elevation: 0, class: 'card-surface' },
+    // Un título o subtítulo largo se parte en líneas: por defecto Vuetify lo corta con «…» (en un diálogo del teléfono quedaba
+    // «Asignar «Tema clásico» a los …»).
+    VCardTitle: { class: 'text-wrap' },
+    VCardSubtitle: { class: 'text-wrap' },
     VSheet: { rounded: 'lg' },
 
     // Acciones

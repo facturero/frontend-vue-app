@@ -198,7 +198,7 @@ onMounted(async () => {
 
     <template v-if="store.current">
       <v-card class="mb-4">
-        <v-card-title class="d-flex align-center flex-wrap ga-2 text-wrap">
+        <v-card-title class="d-flex align-center flex-wrap ga-2">
           {{ $t('invoices.singular') }} {{ store.current.number || $t('invoices.draftSuffix') }}
           <v-chip :color="statusColor(store.current.status)" size="small">
             {{ statusLabel(store.current.status) }}
