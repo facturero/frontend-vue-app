@@ -13,6 +13,17 @@ const STUCK_PADDING = 8;
 const px = (value: string): number => Number.parseFloat(value) || 0;
 
 /**
+ * Cuánto se ha hecho scroll. Mientras un diálogo está abierto, Vuetify bloquea el scroll de la página dejándola con
+ * `position: fixed` y la desplaza con `--v-body-scroll-y`: `window.scrollY` pasa a valer 0 aunque la persona esté a media página,
+ * y el encabezado volvería de golpe a su tamaño normal detrás del diálogo. Por eso, bloqueado, se lee la posición guardada.
+ */
+function currentScroll(): number {
+  const root = document.documentElement;
+  if (root.classList.contains('v-overlay-scroll-blocked')) return -px(root.style.getPropertyValue('--v-body-scroll-y'));
+  return window.scrollY;
+}
+
+/**
  * Encabezado de página que se queda fijo bajo la barra superior al hacer scroll, para que sus acciones (p. ej. el carrito de
  * módulos) no desaparezcan. Arriba del todo es el panel de siempre, dentro del ancho del contenedor; al bajar crece de forma
  * GRADUAL (atado al scroll, no a un salto) hasta ocupar el 100 % del ancho útil de la pantalla, pierde las esquinas
@@ -31,6 +42,7 @@ const px = (value: string): number => Number.parseFloat(value) || 0;
 export function useStickyHeader(el: Ref<HTMLElement | null>, enabled: () => boolean): Ref<HeaderStyle> {
   const style = ref<HeaderStyle>({});
   let observer: ResizeObserver | null = null;
+  let scrollLockObserver: MutationObserver | null = null;
   let radius = 0;
   let padding = 0;
   let marginBottom = 0;
@@ -79,7 +91,7 @@ export function useStickyHeader(el: Ref<HTMLElement | null>, enabled: () => bool
       style.value = {};
       return;
     }
-    const progress = Math.min(1, Math.max(0, window.scrollY / SCROLL_RANGE));
+    const progress = Math.min(1, Math.max(0, currentScroll() / SCROLL_RANGE));
     const shrink = Math.max(0, padding - STUCK_PADDING) * progress;
     appliedShrink = shrink;
     // `!important`: las clases utilitarias de la hoja (`pa-6`, `mb-6`, `rounded-lg`) también lo son y, sin esto, ganarían.
@@ -111,6 +123,11 @@ export function useStickyHeader(el: Ref<HTMLElement | null>, enabled: () => bool
       observer = new ResizeObserver(remeasure);
       if (el.value?.parentElement) observer.observe(el.value.parentElement);
     }
+    // Abrir o cerrar un diálogo no genera evento de scroll: se vigila el bloqueo para no dejar el encabezado a medias.
+    if (typeof MutationObserver !== 'undefined') {
+      scrollLockObserver = new MutationObserver(apply);
+      scrollLockObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'style'] });
+    }
     remeasure();
   });
 
@@ -118,6 +135,7 @@ export function useStickyHeader(el: Ref<HTMLElement | null>, enabled: () => bool
     window.removeEventListener('scroll', apply);
     window.removeEventListener('resize', remeasure);
     observer?.disconnect();
+    scrollLockObserver?.disconnect();
   });
 
   watch([el, enabled], remeasure);
