@@ -45,10 +45,16 @@
       "document": "Documents",
       "inventory": "Inventaire",
       "fiscal": "Facturation électronique",
-      "auth": "Sessions et accès"
+      "auth": "Sessions et accès",
+      "assistant": "Assistant IA"
     },
     "empty": "Aucune activité enregistrée avec ces filtres",
     "event": {
+      "assistant_action_executed": "Action de l'assistant exécutée",
+      "assistant_action_failed": "Action de l'assistant refusée par le système",
+      "assistant_action_proposed": "L'assistant a proposé une action",
+      "assistant_action_rejected": "Action de l'assistant refusée par l'utilisateur",
+      "assistant_conversation_deleted": "Conversation avec l'assistant supprimée",
       "auth_credential_linked_google": "Compte Google lié",
       "auth_session_login_failed": "Tentative de connexion échouée",
       "auth_session_login_succeeded": "Connexion réussie",

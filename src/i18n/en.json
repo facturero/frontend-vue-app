@@ -45,10 +45,16 @@
       "document": "Documents",
       "inventory": "Inventory",
       "fiscal": "Electronic invoicing",
-      "auth": "Sessions and access"
+      "auth": "Sessions and access",
+      "assistant": "AI assistant"
     },
     "empty": "No activity recorded with these filters",
     "event": {
+      "assistant_action_executed": "Assistant action executed",
+      "assistant_action_failed": "Assistant action failed",
+      "assistant_action_proposed": "The assistant proposed an action",
+      "assistant_action_rejected": "Assistant action declined",
+      "assistant_conversation_deleted": "Assistant conversation deleted",
       "auth_credential_linked_google": "Google account linked",
       "auth_session_login_failed": "Failed sign-in attempt",
       "auth_session_login_succeeded": "Signed in",

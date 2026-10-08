@@ -1,20 +1,24 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import LocaleSwitcher from '@/components/LocaleSwitcher.vue';
 import GoogleSignIn from '@/components/GoogleSignIn.vue';
 import loginBg from '@/assets/login-bg.svg';
+import { initialAuthMode, prefilledCredentials } from '@/utils/auth-mode';
 
 const { t } = useI18n();
 
 const auth = useAuthStore();
 const router = useRouter();
+const route = useRoute();
 
-const mode = ref<'login' | 'register'>('login');
-const email = ref('admin@admin.com');
-const password = ref('admin');
+const startMode = initialAuthMode(route.query);
+const mode = ref<'login' | 'register'>(startMode);
+const initial = prefilledCredentials(import.meta.env.DEV, startMode);
+const email = ref(initial.email);
+const password = ref(initial.password);
 const confirmPassword = ref('');
 const identification = ref('');
 const rememberDevice = ref(true);

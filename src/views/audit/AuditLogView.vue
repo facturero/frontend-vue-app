@@ -49,6 +49,7 @@ const domains = computed(() => [
   { title: t('audit.domain.inventory'), value: 'inventory.' },
   { title: t('audit.domain.fiscal'), value: 'fiscal.' },
   { title: t('audit.domain.auth'), value: 'auth.' },
+  { title: t('audit.domain.assistant'), value: 'assistant.' },
 ]);
 
 const rangeOptions = computed(() => [
