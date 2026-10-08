@@ -8,7 +8,7 @@ import { resolveBlockingPlugins, type BlockingPlugin } from '@/utils/plugin-bloc
 
 const emit = defineEmits<{ reactivate: [code: string] }>();
 
-const { locale } = useI18n();
+const { locale, t } = useI18n();
 const store = usePluginsStore();
 const auth = useAuthStore();
 
@@ -25,7 +25,7 @@ const blockers = computed<BlockingPlugin[]>(() =>
 );
 
 function openBlocker(blocker: BlockingPlugin): void {
-  if (!blocker.plugin) return;
+  if (!blocker.plugin || blocker.scheduledAt) return;
   store.clearError();
   deactivateDialog.value = blocker.plugin;
 }
@@ -41,6 +41,18 @@ const visiblePlugins = computed(() =>
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString(locale.value, { dateStyle: 'medium' });
 }
+
+// Desactivar es «suave»: lo ya pagado se respeta. El texto dice hasta cuándo seguirá funcionando el módulo.
+const deactivateNotice = computed(() => {
+  const target = deactivateDialog.value;
+  if (!target) return '';
+  if (!target.periodEndsAt) return t('plugins.deactivateNoticeFree');
+  const trial = store.subscription?.trial;
+  const endsWithTrial = trial?.active && new Date(trial.ends_at).getTime() === new Date(target.periodEndsAt).getTime();
+  return t(endsWithTrial ? 'plugins.deactivateNoticeTrial' : 'plugins.deactivateNoticePaid', {
+    date: formatDate(target.periodEndsAt),
+  });
+});
 
 async function confirmDeactivate(): Promise<void> {
   const target = deactivateDialog.value;
@@ -66,12 +78,15 @@ async function confirmDeactivate(): Promise<void> {
         <ul class="ml-4 text-body-2">
           <li v-for="b in blockers" :key="b.code">
             <a
-              v-if="b.plugin"
+              v-if="b.plugin && !b.scheduledAt"
               href="#"
               class="text-primary font-weight-medium"
               @click.prevent="openBlocker(b)"
             >{{ b.name }}</a>
             <span v-else>{{ b.name }}</span>
+            <span v-if="b.scheduledAt" class="text-medium-emphasis">
+              — {{ $t('plugins.scheduledChip', { date: formatDate(b.scheduledAt) }) }}
+            </span>
           </li>
         </ul>
       </template>
@@ -110,6 +125,12 @@ async function confirmDeactivate(): Promise<void> {
               <div>{{ $t('plugins.headerDeactivatedAt') }}: {{ formatDate(p.deactivatedAt) }}</div>
               <div class="mt-2">{{ $t('plugins.disabledHint') }}</div>
             </template>
+            <div v-if="p.status === 'active' && p.deactivateAt" class="mt-2">
+              <v-chip size="x-small" color="lightwarning" variant="flat">
+                {{ $t('plugins.scheduledChip', { date: formatDate(p.deactivateAt) }) }}
+              </v-chip>
+              <div class="mt-1">{{ $t('plugins.scheduledHint') }}</div>
+            </div>
             <v-chip
               v-if="p.status === 'active'"
               size="x-small"
@@ -124,6 +145,18 @@ async function confirmDeactivate(): Promise<void> {
             <v-spacer />
             <v-btn color="primary" variant="tonal" size="small" @click="emit('reactivate', p.pluginCode)">
               {{ $t('plugins.reactivate') }}
+            </v-btn>
+          </v-card-actions>
+          <v-card-actions v-else-if="canActivate && p.status === 'active' && p.deactivateAt" class="pt-0">
+            <v-spacer />
+            <v-btn
+              color="primary"
+              variant="tonal"
+              size="small"
+              :loading="store.saving"
+              @click="p.pluginCode && store.cancelDeactivation(p.pluginCode)"
+            >
+              {{ $t('plugins.cancelDeactivation') }}
             </v-btn>
           </v-card-actions>
           <v-card-actions
@@ -155,7 +188,7 @@ async function confirmDeactivate(): Promise<void> {
           <i18n-t keypath="plugins.deactivateConfirm" tag="span">
             <template #name><strong>{{ deactivateDialog.pluginName }}</strong></template>
           </i18n-t>
-          <v-alert type="info" class="mt-4">{{ $t('plugins.deactivateNotice') }}</v-alert>
+          <v-alert type="info" class="mt-4">{{ deactivateNotice }}</v-alert>
         </v-card-text>
         <v-card-actions>
           <v-spacer />

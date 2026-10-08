@@ -40,6 +40,9 @@ export const pluginApi = {
   deactivate: (code: string) =>
     http.post<DeactivationResult[]>(`${org}/plugins/${code}/deactivate`).then((r) => r.data),
 
+  cancelDeactivation: (code: string) =>
+    http.post<OrganizationPlugin>(`${org}/plugins/${code}/cancel-deactivation`).then((r) => r.data),
+
   listRequests: () =>
     http.get<PluginCustomRequest[]>(`${org}/plugin-requests`).then((r) => r.data),
 

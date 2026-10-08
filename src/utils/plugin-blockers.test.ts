@@ -21,7 +21,13 @@ describe('resolveBlockingPlugins', () => {
 
   it('un código que no está entre los módulos de la organización se muestra tal cual y sin enlace', () => {
     const [b] = resolveBlockingPlugins(['hr.payroll'], activos);
-    expect(b).toEqual({ code: 'hr.payroll', name: 'hr.payroll', plugin: null });
+    expect(b).toEqual({ code: 'hr.payroll', name: 'hr.payroll', plugin: null, scheduledAt: null });
+  });
+
+  it('un módulo con su baja ya programada informa la fecha: no se vuelve a desactivar', () => {
+    const programado = { ...mi('pos.core', 'Punto de Venta (POS)'), deactivateAt: '2026-11-08T12:00:00Z' } as OrganizationPlugin;
+    const [b] = resolveBlockingPlugins(['pos.core'], [programado]);
+    expect(b.scheduledAt).toBe('2026-11-08T12:00:00Z');
   });
 
   it('un módulo que ya está desactivado conserva su nombre pero no se puede abrir para desactivar', () => {

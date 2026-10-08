@@ -197,6 +197,22 @@ export const usePluginsStore = defineStore('plugins', () => {
     }
   }
 
+  /** Arrepentirse de una baja programada: el módulo sigue activo y no se cobra nada de nuevo. */
+  async function cancelDeactivation(code: string): Promise<boolean> {
+    saving.value = true;
+    clearError();
+    try {
+      await pluginApi.cancelDeactivation(code);
+      await fetchMy();
+      return true;
+    } catch (e) {
+      setError(e);
+      return false;
+    } finally {
+      saving.value = false;
+    }
+  }
+
   async function requestCustom(description: string, basedOnPluginCodes: string[]): Promise<boolean> {
     saving.value = true;
     clearError();
@@ -313,6 +329,7 @@ export const usePluginsStore = defineStore('plugins', () => {
     fetchQuote,
     activate,
     deactivate,
+    cancelDeactivation,
     requestCustom,
     ensureProfileLoaded,
     fetchBusinessProfiles,

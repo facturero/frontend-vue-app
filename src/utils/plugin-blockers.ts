@@ -7,6 +7,8 @@ export interface BlockingPlugin {
   name: string;
   /** El módulo activo de la organización, para abrir su diálogo de desactivación; null si ya no está activo. */
   plugin: OrganizationPlugin | null;
+  /** Si ese módulo ya tiene su baja programada, la fecha: no se puede volver a desactivar, solo esperar a que llegue. */
+  scheduledAt: string | null;
 }
 
 /**
@@ -18,6 +20,6 @@ export function resolveBlockingPlugins(codes: string[], myPlugins: OrganizationP
   return codes.map((code) => {
     const plugin = myPlugins.find((p) => p.pluginCode === code && p.status === 'active') ?? null;
     const known = myPlugins.find((p) => p.pluginCode === code);
-    return { code, name: known?.pluginName || code, plugin };
+    return { code, name: known?.pluginName || code, plugin, scheduledAt: plugin?.deactivateAt ?? null };
   });
 }
