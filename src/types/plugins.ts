@@ -6,7 +6,8 @@ export type DisplayStatus =
   | 'desactivado'
   /** Plugin del núcleo: activo para todas las organizaciones, no se compra ni se apaga. */
   | 'incluido';
-export type ActivationSource = 'direct' | 'dependency';
+/** `included`: viene con la plataforma (núcleo y módulos base gratuitos): siempre activo, no se compra ni se apaga. */
+export type ActivationSource = 'direct' | 'dependency' | 'included';
 export type CustomRequestStatus = 'requested' | 'quoted' | 'created' | 'rejected';
 
 export interface Plugin {

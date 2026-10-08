@@ -33,9 +33,12 @@ function openBlocker(blocker: BlockingPlugin): void {
 // Un módulo desactivado sigue en la lista (es el historial de la organización), pero ya no se cobra: por defecto solo
 // se ven los activos y los demás quedan a un clic, para que no parezca que se siguen usando.
 const showDisabled = ref(false);
-const disabledCount = computed(() => store.myPlugins.filter((p) => p.status !== 'active').length);
+// «Mis plugins» es lo contratado (lo que figura en el cobro): lo que viene incluido en la plataforma —los módulos base
+// gratuitos— está siempre activo, no se puede apagar y no se lista aquí; en el Catálogo figura como «Incluido».
+const contracted = computed(() => store.myPlugins.filter((p) => p.activationSource !== 'included'));
+const disabledCount = computed(() => contracted.value.filter((p) => p.status !== 'active').length);
 const visiblePlugins = computed(() =>
-  store.myPlugins.filter((p) => p.status === 'active' || showDisabled.value),
+  contracted.value.filter((p) => p.status === 'active' || showDisabled.value),
 );
 
 function formatDate(iso: string): string {
