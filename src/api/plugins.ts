@@ -22,11 +22,15 @@ export const pluginApi = {
   listMine: () =>
     http.get<OrganizationPlugin[]>(`${org}/plugins`).then((r) => r.data),
 
-  quote: (code: string) =>
-    http.get<Quote>(`${org}/plugins/${code}/quote`).then((r) => r.data),
+  quote: (code: string, discountCode?: string) =>
+    http
+      .get<Quote>(`${org}/plugins/${code}/quote`, { params: discountCode ? { discountCode } : undefined })
+      .then((r) => r.data),
 
-  activate: (code: string) =>
-    http.post<ActivationResult[]>(`${org}/plugins/${code}/activate`).then((r) => r.data),
+  activate: (code: string, discountCode?: string) =>
+    http
+      .post<ActivationResult[]>(`${org}/plugins/${code}/activate`, discountCode ? { discountCode } : undefined)
+      .then((r) => r.data),
 
   deactivate: (code: string) =>
     http.post<DeactivationResult[]>(`${org}/plugins/${code}/deactivate`).then((r) => r.data),

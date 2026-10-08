@@ -46,7 +46,8 @@
       "inventory": "Inventory",
       "fiscal": "Electronic invoicing",
       "auth": "Sessions and access",
-      "assistant": "AI assistant"
+      "assistant": "AI assistant",
+      "pricing": "Pricing and discounts"
     },
     "empty": "No activity recorded with these filters",
     "event": {
@@ -134,6 +135,11 @@
       "plugin_custom_request_fulfilled": "Module request fulfilled",
       "plugin_custom_request_rejected": "Module request rejected",
       "plugin_deactivated": "Module deactivated",
+      "pricing_discount_created": "Discount created",
+      "pricing_discount_deactivated": "Discount deactivated",
+      "pricing_discount_reactivated": "Discount reactivated",
+      "pricing_discount_redeemed": "Discount redeemed",
+      "pricing_discount_updated": "Discount updated",
       "product_category_created": "Category created",
       "product_category_deleted": "Category deleted",
       "product_category_updated": "Category updated",
@@ -840,7 +846,22 @@
     "tabCustom": "Custom",
     "tabMine": "My plugins",
     "title": "Plugins",
-    "whatDoYouNeed": "What do you need?"
+    "whatDoYouNeed": "What do you need?",
+    "discountCode": "Discount code",
+    "discountApply": "Apply",
+    "discountRemove": "Remove",
+    "discountApplied": "{name}: you save {amount} per month.",
+    "discountDuration": "For {months} months.",
+    "discountErrors": {
+      "DISCOUNT_NOT_FOUND": "That code does not exist.",
+      "DISCOUNT_EXPIRED": "This code has expired.",
+      "DISCOUNT_NOT_STARTED": "This code is not valid yet.",
+      "DISCOUNT_EXHAUSTED": "This code has reached its usage limit.",
+      "DISCOUNT_ALREADY_REDEEMED": "Your organization already used this code.",
+      "DISCOUNT_INACTIVE": "This code is no longer available.",
+      "DISCOUNT_NOT_APPLICABLE": "This code does not apply to this module."
+    },
+    "included": "Included"
   },
   "posThemes": {
     "tabTitle": "POS appearance",

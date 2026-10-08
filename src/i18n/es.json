@@ -46,7 +46,8 @@
       "inventory": "Inventario",
       "fiscal": "Facturación electrónica",
       "auth": "Sesiones y accesos",
-      "assistant": "Asistente de IA"
+      "assistant": "Asistente de IA",
+      "pricing": "Precios y descuentos"
     },
     "empty": "No hay actividad registrada con estos filtros",
     "event": {
@@ -134,6 +135,11 @@
       "plugin_custom_request_fulfilled": "Solicitud de módulo atendida",
       "plugin_custom_request_rejected": "Solicitud de módulo rechazada",
       "plugin_deactivated": "Módulo desactivado",
+      "pricing_discount_created": "Descuento creado",
+      "pricing_discount_deactivated": "Descuento desactivado",
+      "pricing_discount_reactivated": "Descuento reactivado",
+      "pricing_discount_redeemed": "Descuento canjeado",
+      "pricing_discount_updated": "Descuento modificado",
       "product_category_created": "Categoría creada",
       "product_category_deleted": "Categoría eliminada",
       "product_category_updated": "Categoría modificada",
@@ -840,7 +846,22 @@
     "tabCustom": "A medida",
     "tabMine": "Mis plugins",
     "title": "Plugins",
-    "whatDoYouNeed": "¿Qué necesitas?"
+    "whatDoYouNeed": "¿Qué necesitas?",
+    "discountCode": "Código de descuento",
+    "discountApply": "Aplicar",
+    "discountRemove": "Quitar",
+    "discountApplied": "{name}: te ahorras {amount} al mes.",
+    "discountDuration": "Durante {months} meses.",
+    "discountErrors": {
+      "DISCOUNT_NOT_FOUND": "Ese código no existe.",
+      "DISCOUNT_EXPIRED": "Este código venció.",
+      "DISCOUNT_NOT_STARTED": "Este código todavía no está vigente.",
+      "DISCOUNT_EXHAUSTED": "Este código ya alcanzó su límite de usos.",
+      "DISCOUNT_ALREADY_REDEEMED": "Tu organización ya usó este código.",
+      "DISCOUNT_INACTIVE": "Este código ya no está disponible.",
+      "DISCOUNT_NOT_APPLICABLE": "Este código no aplica a este módulo."
+    },
+    "included": "Incluido"
   },
   "posThemes": {
     "tabTitle": "Apariencia del POS",

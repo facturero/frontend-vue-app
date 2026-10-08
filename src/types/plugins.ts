@@ -46,11 +46,26 @@ export interface QuoteRequirement {
   already_active: boolean;
 }
 
+export interface QuoteDiscount {
+  code: string;
+  name: string;
+  kind: 'percent' | 'fixed';
+  /** Total descontado al mes, en centavos. */
+  discount_cents: number;
+  /** Meses que dura el descuento; null = mientras el módulo siga activo. */
+  duration_months: number | null;
+}
+
 export interface Quote {
   plugin: Plugin;
   price: number;
   requires: QuoteRequirement[];
   total_monthly: number;
+  /** Solo si se cotizó con un código que vale. */
+  discount?: QuoteDiscount;
+  /** Solo si se cotizó con un código que NO vale: el precio de lista viene igual. */
+  discount_error?: { code: string; message: string };
+  total_after_discount?: number;
 }
 
 export interface ActivationResult {

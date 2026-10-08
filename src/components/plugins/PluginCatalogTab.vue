@@ -7,7 +7,7 @@ import type { CatalogPlugin } from '@/types/plugins';
 
 const props = defineProps<{ initialSearch?: string }>();
 
-const { t, locale } = useI18n();
+const { t, te, locale } = useI18n();
 const store = usePluginsStore();
 const auth = useAuthStore();
 
@@ -24,6 +24,9 @@ const sortBy = ref('name-asc');
 const quoteDialog = ref(false);
 const quoting = ref(false);
 const activatingCode = ref<string | null>(null);
+// Código de descuento escrito en el diálogo. Solo viaja al activar si la cotización lo aceptó (quote.discount).
+const discountInput = ref('');
+const applyingDiscount = ref(false);
 
 const categories = computed(() =>
   Array.from(new Set(store.catalog.map((p) => p.category))).sort(),
@@ -92,14 +95,35 @@ function formatPrice(cents: number, currency: string): string {
 
 async function openQuote(plugin: CatalogPlugin): Promise<void> {
   activatingCode.value = plugin.code;
+  discountInput.value = '';
   const ok = await store.fetchQuote(plugin.code);
   if (ok) quoteDialog.value = true;
+}
+
+async function applyDiscount(): Promise<void> {
+  if (!activatingCode.value || !discountInput.value.trim()) return;
+  applyingDiscount.value = true;
+  await store.fetchQuote(activatingCode.value, discountInput.value.trim());
+  applyingDiscount.value = false;
+}
+
+async function removeDiscount(): Promise<void> {
+  if (!activatingCode.value) return;
+  discountInput.value = '';
+  await store.fetchQuote(activatingCode.value);
+}
+
+/** Mensaje del código rechazado: traducido si lo conocemos; si no, el que manda el servidor. */
+function discountErrorText(error: { code: string; message: string }): string {
+  const key = `plugins.discountErrors.${error.code}`;
+  return te(key) ? t(key) : error.message;
 }
 
 async function confirmActivate(): Promise<void> {
   if (!activatingCode.value) return;
   quoting.value = true;
-  const ok = await store.activate(activatingCode.value);
+  const code = store.currentQuote?.discount ? store.currentQuote.discount.code : undefined;
+  const ok = await store.activate(activatingCode.value, code);
   quoting.value = false;
   if (ok) quoteDialog.value = false;
 }
@@ -198,7 +222,7 @@ async function confirmActivate(): Promise<void> {
               {{ statusMeta[p.display_status].label }}
             </v-chip>
             <v-spacer />
-            <span class="text-subtitle-2 mr-2">{{ formatPrice(p.priceCents, p.currency) }}{{ $t('plugins.perMonth') }}</span>
+            <span class="text-subtitle-2 mr-2">{{ p.priceCents === 0 ? $t('plugins.included') : formatPrice(p.priceCents, p.currency) + $t('plugins.perMonth') }}</span>
             <v-btn
               v-if="canActivate && p.display_status === 'disponible'"
               color="primary"
@@ -232,7 +256,7 @@ async function confirmActivate(): Promise<void> {
               </template>
               <v-list-item-title>{{ store.currentQuote.plugin.name }}</v-list-item-title>
               <template #append>
-                <span class="text-body-2">{{ formatPrice(store.currentQuote.price, store.currentQuote.plugin.currency) }}</span>
+                <span class="text-body-2">{{ store.currentQuote.price === 0 ? $t('plugins.included') : formatPrice(store.currentQuote.price, store.currentQuote.plugin.currency) }}</span>
               </template>
             </v-list-item>
             <v-list-item v-for="r in store.currentQuote.requires" :key="r.plugin.id">
@@ -249,13 +273,48 @@ async function confirmActivate(): Promise<void> {
                 >
                   {{ $t('plugins.alreadyActive') }}
                 </v-chip>
-                <span class="text-body-2">{{ formatPrice(r.price, r.plugin.currency) }}</span>
+                <span class="text-body-2">{{ r.price === 0 ? $t('plugins.included') : formatPrice(r.price, r.plugin.currency) }}</span>
               </template>
             </v-list-item>
           </v-list>
-          <div class="d-flex justify-end align-center">
-            <span class="text-h6">{{ $t('plugins.monthlyTotal') }}
+          <div class="d-flex align-start ga-2 mb-2">
+            <v-text-field
+              v-model="discountInput"
+              :label="$t('plugins.discountCode')"
+              :disabled="Boolean(store.currentQuote.discount)"
+              prepend-inner-icon="mdi-ticket-percent-outline"
+              :error-messages="store.currentQuote.discount_error ? [discountErrorText(store.currentQuote.discount_error)] : []"
+              @keyup.enter="applyDiscount"
+            />
+            <v-btn
+              v-if="!store.currentQuote.discount"
+              variant="tonal"
+              :loading="applyingDiscount"
+              :disabled="!discountInput.trim()"
+              @click="applyDiscount"
+            >
+              {{ $t('plugins.discountApply') }}
+            </v-btn>
+            <v-btn v-else variant="text" @click="removeDiscount">{{ $t('plugins.discountRemove') }}</v-btn>
+          </div>
+          <v-alert v-if="store.currentQuote.discount" type="success" class="mb-2">
+            {{ $t('plugins.discountApplied', {
+              name: store.currentQuote.discount.name,
+              amount: formatPrice(store.currentQuote.discount.discount_cents, store.currentQuote.plugin.currency),
+            }) }}
+            <span v-if="store.currentQuote.discount.duration_months">
+              {{ $t('plugins.discountDuration', { months: store.currentQuote.discount.duration_months }) }}
+            </span>
+          </v-alert>
+          <div class="d-flex justify-end align-center ga-2">
+            <span
+              v-if="store.currentQuote.total_after_discount !== undefined"
+              class="text-body-1 text-medium-emphasis text-decoration-line-through"
+            >
               {{ formatPrice(store.currentQuote.total_monthly, store.currentQuote.plugin.currency) }}
+            </span>
+            <span class="text-h6">{{ $t('plugins.monthlyTotal') }}
+              {{ formatPrice(store.currentQuote.total_after_discount ?? store.currentQuote.total_monthly, store.currentQuote.plugin.currency) }}
             </span>
           </div>
         </v-card-text>

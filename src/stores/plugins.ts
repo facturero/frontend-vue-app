@@ -135,11 +135,11 @@ export const usePluginsStore = defineStore('plugins', () => {
     }
   }
 
-  async function fetchQuote(code: string): Promise<boolean> {
+  async function fetchQuote(code: string, discountCode?: string): Promise<boolean> {
     clearError();
     loading.value = true;
     try {
-      currentQuote.value = await pluginApi.quote(code);
+      currentQuote.value = await pluginApi.quote(code, discountCode);
       return true;
     } catch (e) {
       setError(e);
@@ -149,11 +149,11 @@ export const usePluginsStore = defineStore('plugins', () => {
     }
   }
 
-  async function activate(code: string): Promise<boolean> {
+  async function activate(code: string, discountCode?: string): Promise<boolean> {
     saving.value = true;
     clearError();
     try {
-      await pluginApi.activate(code);
+      await pluginApi.activate(code, discountCode);
       currentQuote.value = null;
       await Promise.all([fetchMy(), fetchCatalog()]);
       return true;
