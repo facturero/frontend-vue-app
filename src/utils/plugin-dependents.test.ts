@@ -29,6 +29,11 @@ describe('dependentCodesOf', () => {
     expect(dependentCodesOf(mi('a'), [mi('a'), mi('b')], catalogo)).toEqual([]);
   });
 
+  it('el respaldo tampoco nombra a un módulo que ya pasó a ser incluido', () => {
+    const c = mi('c', { activationSource: 'dependency', requiredByPluginId: 'id-b' });
+    expect(dependentCodesOf(c, [mi('b', { activationSource: 'included' }), c], [])).toEqual([]);
+  });
+
   it('si el catálogo aún no cargó, usa el módulo que lo activó', () => {
     const c = mi('c', { activationSource: 'dependency', requiredByPluginId: 'id-b' });
     expect(dependentCodesOf(c, [mi('b'), c], [])).toEqual(['b']);

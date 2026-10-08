@@ -19,6 +19,8 @@ export function dependentCodesOf(
     .map((p) => p.pluginCode as string);
   if (found.length) return found;
 
-  const requiredBy = myPlugins.find((p) => p.pluginId === plugin.requiredByPluginId && p.status === 'active');
+  const requiredBy = myPlugins.find(
+    (p) => p.pluginId === plugin.requiredByPluginId && p.status === 'active' && p.activationSource !== 'included',
+  );
   return requiredBy?.pluginCode ? [requiredBy.pluginCode] : [];
 }
