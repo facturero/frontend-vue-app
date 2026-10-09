@@ -217,7 +217,7 @@ onMounted(async () => {
         <!-- Líneas -->
         <div class="text-subtitle-2 font-weight-medium mb-2">{{ $t('invoices.lines') }}</div>
 
-        <InvoiceLinesEditor :disabled="!hasCustomer" @error="errorMessage = $event" />
+        <InvoiceLinesEditor :disabled="!hasCustomer" />
 
         <p v-if="!hasCustomer" class="text-caption text-medium-emphasis mb-6">
           {{ $t('invoices.confirmCustomerFirst') }}

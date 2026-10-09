@@ -5,7 +5,7 @@ import { useInvoiceStore } from '@/stores/invoices';
 import { useProductStore } from '@/stores/products';
 
 const props = defineProps<{ disabled: boolean }>();
-const emit = defineEmits<{ error: [message: string] }>();
+const errorMessage = ref('');
 
 const { t } = useI18n();
 const store = useInvoiceStore();
@@ -20,12 +20,11 @@ const productOptions = computed(() =>
     .map(p => ({ title: `${p.name} · ${p.type === 'service' ? t('products.service') : t('products.good')}`, value: p.id })),
 );
 
-const priceOk = computed(() => {
-  const price = parseFloat(newLine.value.unitPrice);
-  return !Number.isNaN(price) && price > 0;
-});
+// El servidor solo acepta dígitos con hasta 2 decimales y punto; quien escribe "2,50" (coma) ve el mismo precio sin que falle.
+const normalizedPrice = computed(() => String(newLine.value.unitPrice).trim().replace(',', '.'));
+const priceOk = computed(() => /^\d+(\.\d{1,2})?$/.test(normalizedPrice.value) && parseFloat(normalizedPrice.value) > 0);
 const canAddLine = computed(() => !!newLine.value.productId && newLine.value.quantity > 0 && priceOk.value);
-// Un producto con precio 0 deja el botón apagado sin decir por qué: se avisa en el propio campo.
+// Un precio inválido deja el botón apagado sin decir por qué: se avisa en el propio campo.
 const priceInvalid = computed(() => !!newLine.value.productId && !priceOk.value);
 
 function lineItemName(line: { productSnapshot: { name: string } | null; productId: string }): string {
@@ -44,6 +43,7 @@ watch(() => newLine.value.productId, (productId) => {
 
 async function addLine() {
   if (!store.current || !canAddLine.value) return;
+  errorMessage.value = '';
   const product = productStore.list.find(p => p.id === newLine.value.productId);
 
   try {
@@ -51,12 +51,12 @@ async function addLine() {
       productId: newLine.value.productId,
       description: newLine.value.description || product?.name || '',
       quantity: newLine.value.quantity,
-      unitPrice: newLine.value.unitPrice,
+      unitPrice: normalizedPrice.value,
       discountCents: 0,
     });
     newLine.value = { productId: '', description: '', quantity: 1, unitPrice: '0.00' };
   } catch (e: any) {
-    emit('error', e.message || t('invoices.addLineError'));
+    errorMessage.value = e.message || t('invoices.addLineError');
   }
 }
 
@@ -98,6 +98,9 @@ async function removeLine(lineId: string) {
       </tr>
     </tbody>
   </v-table>
+
+  <!-- El error se muestra aquí, junto al formulario: arriba de la página quedaba fuera de la vista al estar más abajo. -->
+  <v-alert v-if="errorMessage" type="error" closable class="mb-2" @click:close="errorMessage = ''">{{ errorMessage }}</v-alert>
 
   <!-- Captura de la línea nueva: columnas de Vuetify en vez de una fila de la tabla, para que en el teléfono se apile y el botón
        no quede fuera de la pantalla dentro del desplazamiento horizontal de la tabla. -->

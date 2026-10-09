@@ -568,7 +568,7 @@
   },
   "invoices": {
     "addLine": "Add line",
-    "priceRequired": "Enter a price greater than 0",
+    "priceRequired": "Invalid price: use a number greater than 0 with up to 2 decimals",
     "addLineError": "Error adding the line",
     "addLineFirst": "Add at least one product line to issue the invoice.",
     "certAlias": "Name to identify it (optional)",

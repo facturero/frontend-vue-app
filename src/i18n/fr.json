@@ -568,7 +568,7 @@
   },
   "invoices": {
     "addLine": "Ajouter une ligne",
-    "priceRequired": "Indiquez un prix supérieur à 0",
+    "priceRequired": "Prix invalide : utilisez un nombre supérieur à 0 avec 2 décimales au maximum",
     "addLineError": "Erreur lors de l'ajout de la ligne",
     "addLineFirst": "Ajoutez au moins une ligne de produit pour émettre la facture.",
     "certAlias": "Nom pour l'identifier (facultatif)",
