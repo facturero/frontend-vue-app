@@ -568,6 +568,7 @@
   },
   "invoices": {
     "addLine": "Agregar línea",
+    "priceRequired": "Indica un precio mayor a 0",
     "addLineError": "Error al agregar la línea",
     "addLineFirst": "Agrega al menos una línea de producto para poder emitir la factura.",
     "certAlias": "Nombre para identificarlo (opcional)",

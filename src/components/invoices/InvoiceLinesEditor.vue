@@ -20,10 +20,13 @@ const productOptions = computed(() =>
     .map(p => ({ title: `${p.name} · ${p.type === 'service' ? t('products.service') : t('products.good')}`, value: p.id })),
 );
 
-const canAddLine = computed(() => {
+const priceOk = computed(() => {
   const price = parseFloat(newLine.value.unitPrice);
-  return !!newLine.value.productId && newLine.value.quantity > 0 && !Number.isNaN(price) && price > 0;
+  return !Number.isNaN(price) && price > 0;
 });
+const canAddLine = computed(() => !!newLine.value.productId && newLine.value.quantity > 0 && priceOk.value);
+// Un producto con precio 0 deja el botón apagado sin decir por qué: se avisa en el propio campo.
+const priceInvalid = computed(() => !!newLine.value.productId && !priceOk.value);
 
 function lineItemName(line: { productSnapshot: { name: string } | null; productId: string }): string {
   if (line.productSnapshot?.name) return line.productSnapshot.name;
@@ -64,7 +67,7 @@ async function removeLine(lineId: string) {
 </script>
 
 <template>
-  <v-table class="mb-2 bg-transparent">
+  <v-table v-if="lines.length" class="mb-2 bg-transparent">
     <thead>
       <tr>
         <th>{{ $t('invoices.item') }}</th>
@@ -93,68 +96,67 @@ async function removeLine(lineId: string) {
           />
         </td>
       </tr>
-      <tr class="line-input-row">
-        <td style="min-width: 220px">
-          <v-select
-            v-model="newLine.productId"
-            :items="productOptions"
-            :placeholder="$t('invoices.productOrService')"
-            hide-details
-            :disabled="disabled"
-          />
-        </td>
-        <td style="min-width: 220px">
-          <v-text-field
-            v-model="newLine.description"
-            :placeholder="$t('invoices.descriptionOptional')"
-            hide-details
-            :disabled="disabled"
-          />
-        </td>
-        <td style="width: 100px">
-          <v-text-field
-            v-model.number="newLine.quantity"
-            type="number"
-            min="1"
-            hide-details
-            class="mono"
-            :disabled="disabled"
-          />
-        </td>
-        <td style="width: 130px">
-          <v-text-field
-            v-model="newLine.unitPrice"
-            hide-details
-            class="mono"
-            :disabled="disabled"
-          />
-        </td>
-        <td class="text-right mono text-medium-emphasis">—</td>
-        <td class="text-right">
-          <v-btn
-            icon="mdi-plus"
-            variant="tonal"
-            color="primary"
-            size="small"
-            :title="$t('invoices.addLine')"
-            :disabled="disabled || !canAddLine"
-            @click="addLine"
-          />
-        </td>
-      </tr>
     </tbody>
   </v-table>
+
+  <!-- Captura de la línea nueva: columnas de Vuetify en vez de una fila de la tabla, para que en el teléfono se apile y el botón
+       no quede fuera de la pantalla dentro del desplazamiento horizontal de la tabla. -->
+  <v-row dense class="mb-2">
+    <v-col cols="12" md="4">
+      <v-select
+        v-model="newLine.productId"
+        :items="productOptions"
+        :label="$t('invoices.productOrService')"
+        hide-details
+        :disabled="disabled"
+      />
+    </v-col>
+    <v-col cols="12" md="3">
+      <v-text-field
+        v-model="newLine.description"
+        :label="$t('invoices.descriptionOptional')"
+        hide-details
+        :disabled="disabled"
+      />
+    </v-col>
+    <v-col cols="4" md="1">
+      <v-text-field
+        v-model.number="newLine.quantity"
+        :label="$t('invoices.qtyShort')"
+        type="number"
+        min="1"
+        hide-details
+        class="mono"
+        :disabled="disabled"
+      />
+    </v-col>
+    <v-col cols="8" md="2">
+      <v-text-field
+        v-model="newLine.unitPrice"
+        :label="$t('products.price')"
+        :error-messages="priceInvalid ? [$t('invoices.priceRequired')] : []"
+        :hide-details="!priceInvalid"
+        class="mono"
+        :disabled="disabled"
+      />
+    </v-col>
+    <v-col cols="12" md="2">
+      <v-btn
+        block
+        color="primary"
+        variant="tonal"
+        prepend-icon="mdi-plus"
+        :disabled="disabled || !canAddLine"
+        :loading="store.saving"
+        @click="addLine"
+      >
+        {{ $t('invoices.addLine') }}
+      </v-btn>
+    </v-col>
+  </v-row>
 </template>
 
 <style scoped>
-/* La fila de captura lleva campos completos, no texto: necesita más aire
-   vertical que las filas de sólo lectura de la tabla. */
-.line-input-row > td {
-  padding-top: 12px;
-  padding-bottom: 12px;
-  vertical-align: middle;
-}
-
 .mono {
   font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', 'Roboto Mono', monospace;
   font-variant-numeric: tabular-nums;
