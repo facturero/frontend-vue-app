@@ -1200,6 +1200,25 @@
       "newRole": "create role permissions access"
     }
   },
+  "report": {
+    "menu": "Report a problem",
+    "title": "Report a problem",
+    "intro": "Tell us what happened. The more specific, the faster we can find it.",
+    "label": "What happened?",
+    "placeholder": "For example: adding the second line of an invoice does nothing.",
+    "includeActivity": "Include my latest steps in the app",
+    "includeActivityHint": "Which screens I opened and which calls the app made (for example “POST /invoices/:id/lines → 400”), without what I typed in the fields.",
+    "privacy": "Do not write passwords or keys.",
+    "send": "Send report",
+    "sentTitle": "Report sent",
+    "sentBody": "Thank you. If you talk to support, give them this code:",
+    "code": "Report code",
+    "copy": "Copy code",
+    "copied": "Code copied",
+    "notSent": "This environment does not send reports (telemetry is off).",
+    "error": "The report could not be sent. Please try again.",
+    "close": "Close"
+  },
   "tour": {
     "help": "View app guide",
     "progress": "{current} / {total}",

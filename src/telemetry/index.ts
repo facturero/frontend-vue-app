@@ -1,6 +1,7 @@
 import { context, propagation, SpanStatusCode, trace, type Span } from '@opentelemetry/api';
 import type { AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { maskBody, normalizePath } from './sanitize';
+import { addBreadcrumb } from './breadcrumbs';
 
 /**
  * Telemetría del navegador hacia SigNoz. Este archivo es la parte LIGERA: solo usa `@opentelemetry/api`, que sin SDK registrado
@@ -47,31 +48,59 @@ export async function startTelemetry(): Promise<void> {
   }
 }
 
+/** Envía ya lo pendiente (en vez de esperar al próximo lote de 5 s): un reporte de problema no debe perderse si la persona cierra. */
+export async function flushTelemetry(): Promise<void> {
+  if (!sdkReady) return;
+  try {
+    const { flush } = await import('./start');
+    await flush();
+  } catch {
+    // la telemetría nunca rompe la app
+  }
+}
+
+export function isTelemetryReady(): boolean {
+  return sdkReady;
+}
+
 // ── Llamadas HTTP ──────────────────────────────────────────────────────────────────────────────────────────────────────────
 
-const requestSpans = new WeakMap<object, Span>();
+interface InFlight {
+  span: Span | undefined;
+  start: number;
+  label: string;
+}
+const requests = new WeakMap<object, InFlight>();
+
+/** Deja constancia en la lista de «lo último que hizo la persona» (solo con la telemetría activa: es lo que luego se reporta). */
+function noteRequest(call: InFlight, status: number | undefined): void {
+  if (!telemetryEnabled()) return;
+  addBreadcrumb({ kind: 'http', text: call.label, status, ms: performance.now() - call.start, traceId: call.span?.spanContext().traceId });
+}
 
 /** Abre el span de una llamada y le pone `traceparent` a la petición para que el gateway y los servicios cuelguen de él. */
 export function traceRequest(config: InternalAxiosRequestConfig): void {
-  const span = trace.getTracer(TRACER).startSpan(`HTTP ${(config.method ?? 'get').toUpperCase()} ${normalizePath(config.url ?? '')}`, {
-    attributes: {
-      'http.request.method': (config.method ?? 'get').toUpperCase(),
-      'url.path': normalizePath(config.url ?? ''),
-    },
+  const method = (config.method ?? 'get').toUpperCase();
+  const path = normalizePath(config.url ?? '');
+  const span = trace.getTracer(TRACER).startSpan(`HTTP ${method} ${path}`, {
+    attributes: { 'http.request.method': method, 'url.path': path },
   });
-  if (!span.isRecording()) return;
-  requestSpans.set(config, span);
+  const recording = span.isRecording();
+  requests.set(config, { span: recording ? span : undefined, start: performance.now(), label: `${method} ${path}` });
+  if (!recording) return;
   propagation.inject(trace.setSpan(context.active(), span), config.headers, {
     set: (carrier, key, value) => carrier.set(key, value),
   });
 }
 
 export function traceResponse(response: AxiosResponse): void {
-  const span = requestSpans.get(response.config);
-  if (!span) return;
-  requestSpans.delete(response.config);
-  span.setAttribute('http.response.status_code', response.status);
-  span.end();
+  const call = requests.get(response.config);
+  if (!call) return;
+  requests.delete(response.config);
+  noteRequest(call, response.status);
+  if (!call.span) return;
+  call.span.setAttribute('http.response.status_code', response.status);
+  call.span.end();
 }
 
 /**
@@ -80,10 +109,13 @@ export function traceResponse(response: AxiosResponse): void {
  */
 export function traceFailure(error: AxiosError): void {
   const config = error.config;
-  const span = config ? requestSpans.get(config) : undefined;
-  if (!span || !config) return;
-  requestSpans.delete(config);
+  const call = config ? requests.get(config) : undefined;
+  if (!call || !config) return;
+  requests.delete(config);
   const status = error.response?.status;
+  noteRequest(call, status);
+  const span = call.span;
+  if (!span) return;
   if (status) span.setAttribute('http.response.status_code', status);
   if (status !== 401) {
     const request = maskBody(config.data);
@@ -123,6 +155,7 @@ export function reportError(error: unknown, source: string): void {
   recent.set(key, now);
   reportedThisMinute.push(now);
   if (!telemetryEnabled()) return;
+  addBreadcrumb({ kind: 'error', text: `error: ${error instanceof Error ? error.message : String(error)}`.slice(0, 160) });
   // Los errores de arranque ocurren antes de que el SDK termine de cargar: se guardan y salen cuando esté listo.
   if (!sdkReady) {
     if (pending.length < 10) pending.push({ error, source, at: now });

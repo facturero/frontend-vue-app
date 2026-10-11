@@ -11,6 +11,7 @@ import { useBareShell } from '@/composable/useBareShell';
 import AssistantPanel from '@/components/AssistantPanel.vue';
 import AppNavigationDrawer from '@/layouts/AppNavigationDrawer.vue';
 import AppTopBar from '@/layouts/AppTopBar.vue';
+import ReportProblemDialog from '@/components/ReportProblemDialog.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -88,5 +89,8 @@ watch(
         <router-view />
       </v-main>
     </template>
+
+    <!-- Fuera de los dos casos de arriba: también se reporta desde el login, donde están los errores más difíciles de ver. -->
+    <ReportProblemDialog />
   </v-app>
 </template>

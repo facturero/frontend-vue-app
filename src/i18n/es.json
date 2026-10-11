@@ -1200,6 +1200,25 @@
       "newRole": "crear rol permisos accesos"
     }
   },
+  "report": {
+    "menu": "Reportar un problema",
+    "title": "Reportar un problema",
+    "intro": "Cuéntanos qué pasó. Mientras más concreto, más rápido lo encontramos.",
+    "label": "¿Qué pasó?",
+    "placeholder": "Por ejemplo: al agregar la segunda línea de una factura no hace nada.",
+    "includeActivity": "Incluir mis últimos pasos en la aplicación",
+    "includeActivityHint": "Qué pantallas abrí y qué llamadas hizo la aplicación (por ejemplo «POST /invoices/:id/lines → 400»), sin lo que escribí en los campos.",
+    "privacy": "No escribas contraseñas ni claves.",
+    "send": "Enviar reporte",
+    "sentTitle": "Reporte enviado",
+    "sentBody": "Gracias. Si hablas con soporte, dale este código:",
+    "code": "Código del reporte",
+    "copy": "Copiar código",
+    "copied": "Código copiado",
+    "notSent": "Este entorno no envía reportes (la telemetría está apagada).",
+    "error": "No se pudo enviar el reporte. Inténtalo de nuevo.",
+    "close": "Cerrar"
+  },
   "tour": {
     "help": "Ver guía de la aplicación",
     "progress": "{current} / {total}",

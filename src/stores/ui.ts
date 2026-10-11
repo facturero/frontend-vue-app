@@ -12,6 +12,8 @@ import { ref } from 'vue';
 export const useUiStore = defineStore('ui', () => {
   const drawer = ref(true);
   const rail = ref(true);
+  /** Diálogo «Reportar un problema»: lo abre el menú del avatar y el login; vive en App.vue para existir también sin sesión. */
+  const reportOpen = ref(false);
 
   function toggleDrawer(): void {
     drawer.value = !drawer.value;
@@ -23,5 +25,9 @@ export const useUiStore = defineStore('ui', () => {
     drawer.value = value;
   }
 
-  return { drawer, rail, toggleDrawer, toggleRail, setDrawer };
+  function openReport(): void {
+    reportOpen.value = true;
+  }
+
+  return { drawer, rail, reportOpen, toggleDrawer, toggleRail, setDrawer, openReport };
 });

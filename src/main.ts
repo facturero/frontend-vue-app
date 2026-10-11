@@ -9,6 +9,7 @@ import router from '@/router';
 import i18n from '@/plugins/i18n';
 import { useAuthStore } from '@/stores/auth';
 import { installGlobalErrorHandlers, reportError, setTelemetryContext, startTelemetry } from '@/telemetry';
+import { addBreadcrumb } from '@/telemetry/breadcrumbs';
 
 const app = createApp(App);
 
@@ -32,6 +33,9 @@ setTelemetryContext(() => {
     'app.viewport': `${window.innerWidth}x${window.innerHeight}`,
   };
 });
+
+// Cada cambio de pantalla entra en «lo último que hizo la persona» (con la plantilla de ruta, sin ids).
+router.afterEach((to) => addBreadcrumb({ kind: 'route', text: `abrió ${to.matched.at(-1)?.path ?? to.path}` }));
 
 app.mount('#app');
 // Después de montar: el SDK se carga aparte y no retrasa la primera pantalla.

@@ -3,6 +3,7 @@ import { computed, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
+import { useUiStore } from '@/stores/ui';
 import LocaleSwitcher from '@/components/LocaleSwitcher.vue';
 import GoogleSignIn from '@/components/GoogleSignIn.vue';
 import loginBg from '@/assets/login-bg.svg';
@@ -11,6 +12,7 @@ import { initialAuthMode, prefilledCredentials } from '@/utils/auth-mode';
 const { t } = useI18n();
 
 const auth = useAuthStore();
+const ui = useUiStore();
 const router = useRouter();
 const route = useRoute();
 
@@ -80,7 +82,10 @@ function toggleMode(): void {
     <!-- Formulario -->
     <v-col cols="12" lg="5" class="d-flex align-center justify-center pa-3">
       <v-sheet :max-width="420" width="100%" color="transparent">
-        <div class="d-flex justify-end mb-2">
+        <div class="d-flex justify-end align-center ga-2 mb-2">
+          <v-btn variant="text" size="small" prepend-icon="mdi-bug-outline" @click="ui.openReport()">
+            {{ t('report.menu') }}
+          </v-btn>
           <LocaleSwitcher />
         </div>
 

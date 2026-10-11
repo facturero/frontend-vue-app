@@ -84,6 +84,11 @@ function openTour(): void {
   startTour();
 }
 
+function openReport(): void {
+  menuOpen.value = false;
+  ui.openReport();
+}
+
 function logout(): void {
   menuOpen.value = false;
   auth.logout();
@@ -168,6 +173,8 @@ function logout(): void {
 
         <v-list-item v-if="!bareShell" prepend-icon="mdi-help-circle-outline" :title="$t('tour.help')" value="tour"
           @click="openTour" />
+
+        <v-list-item prepend-icon="mdi-bug-outline" :title="$t('report.menu')" value="report" @click="openReport" />
       </v-list>
 
       <v-divider />

@@ -10,10 +10,29 @@ qué le pasó a una persona. Código en `src/telemetry/`.
 | Cada llamada de `utils/http.ts` | Servicio `crm-frontend`, span `HTTP POST /invoices/:id/lines`. Enlazado con la traza del gateway y de los servicios (cabecera `traceparent`): una sola traza de punta a punta |
 | Errores de Vue, `window.onerror` y promesas rechazadas | Span `frontend.error` con la excepción y su pila (pestaña Exceptions) |
 | Contexto en cada span | `app.route`, `app.user_id`, `app.org_id`, `app.locale`, `app.viewport`, versión del front (`service.version`) |
+| Reporte de la persona | Span `frontend.user_report` con su texto y, si lo permite, sus últimos pasos (ver abajo) |
 | Cuerpo de la petición y de la respuesta | **Solo si la llamada falla** (excepto 401): `app.http.request_body` y `app.http.response_body`, enmascarados |
 
 Buscar un caso: en Traces, filtrar `serviceName = crm-frontend` y `hasError = true`; con `app.user_id` o `app.org_id` se acota a una
 persona u organización. Para ver qué hizo el backend, abrir la traza: el árbol continúa en el gateway y los servicios.
+
+## «Reportar un problema»
+
+Botón en el menú del avatar y en la pantalla de login (donde están los errores más difíciles de ver). Abre un diálogo donde la persona
+cuenta qué pasó; al enviar sale un span `frontend.user_report` y se le muestra un **código de reporte**, que es el id de su traza.
+El código llega a soporte y en SigNoz se busca por `trace_id`.
+
+- Siempre se envía ya (no espera al lote de 5 s) y nunca se descarta por `VITE_OTEL_SAMPLE_RATIO`: los `frontend.user_report` y
+  `frontend.error` se muestrean siempre.
+- Lleva el texto de la persona (máx. 2 000 caracteres), el contexto de siempre (ruta, usuario, organización, versión) y el navegador.
+- **Los últimos pasos** (`app.report.activity`) viajan solo si la persona deja marcada la casilla: hasta 30 líneas con las pantallas
+  que abrió y las llamadas a la API (`POST /invoices/:id/lines → 400 (120 ms) traza=…`), sin cuerpos ni valores de campos. La traza de
+  cada línea permite saltar a la llamada completa (con su cuerpo enmascarado si falló).
+- El texto libre NO se enmascara: el diálogo avisa de no escribir contraseñas. Es lo único que la persona controla por completo.
+- Con la telemetría apagada (desarrollo) no sale nada: el reporte queda en consola y el código es local.
+
+Buscar reportes: en Traces, `name = frontend.user_report`. Con `app.report.message` ves lo que escribió y con `app.org_id` de qué
+organización es. El resto de lo que pasó en ese momento está en las trazas de `serviceName = crm-frontend` con el mismo `app.user_id`.
 
 ## Qué NO viaja, y cómo se enmascara (`sanitize.ts`)
 

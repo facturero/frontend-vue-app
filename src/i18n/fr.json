@@ -1200,6 +1200,25 @@
       "newRole": "créer rôle permissions accès"
     }
   },
+  "report": {
+    "menu": "Signaler un problème",
+    "title": "Signaler un problème",
+    "intro": "Dites-nous ce qui s'est passé. Plus c'est précis, plus vite nous le trouvons.",
+    "label": "Que s'est-il passé ?",
+    "placeholder": "Par exemple : ajouter la deuxième ligne d'une facture ne fait rien.",
+    "includeActivity": "Inclure mes dernières actions dans l'application",
+    "includeActivityHint": "Quels écrans j'ai ouverts et quels appels l'application a faits (par exemple « POST /invoices/:id/lines → 400 »), sans ce que j'ai saisi dans les champs.",
+    "privacy": "N'écrivez pas de mots de passe ni de clés.",
+    "send": "Envoyer le signalement",
+    "sentTitle": "Signalement envoyé",
+    "sentBody": "Merci. Si vous contactez le support, donnez-lui ce code :",
+    "code": "Code du signalement",
+    "copy": "Copier le code",
+    "copied": "Code copié",
+    "notSent": "Cet environnement n'envoie pas de signalements (la télémétrie est désactivée).",
+    "error": "Le signalement n'a pas pu être envoyé. Veuillez réessayer.",
+    "close": "Fermer"
+  },
   "tour": {
     "help": "Voir le guide de l'application",
     "progress": "{current} / {total}",
