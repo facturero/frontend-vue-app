@@ -1,4 +1,5 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios';
+import { traceFailure, traceRequest, traceResponse } from '@/telemetry';
 
 const ACCESS_KEY = 'accessToken';
 const REFRESH_KEY = 'refreshToken';
@@ -41,6 +42,7 @@ http.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   // El backend traduce con esto lo que no vive en el front: nombres y
   // descripciones del catálogo de plugins, y los mensajes de error.
   config.headers['Accept-Language'] = currentLocale();
+  traceRequest(config);
   return config;
 });
 
@@ -55,8 +57,12 @@ async function doRefresh(): Promise<string> {
 }
 
 http.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    traceResponse(response);
+    return response;
+  },
   async (error: AxiosError) => {
+    traceFailure(error);
     const original = error.config as (InternalAxiosRequestConfig & { _retry?: boolean }) | undefined;
     const status = error.response?.status;
     const url = original?.url ?? '';
