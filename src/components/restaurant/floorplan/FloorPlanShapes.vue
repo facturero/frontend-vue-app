@@ -192,6 +192,17 @@ function doorSwing(widthCm: number): string {
 
     <!-- Paredes -->
     <g>
+      <!-- Halo de la pared seleccionada: se ve cuál se va a mover y que se puede arrastrar. -->
+      <template v-for="wall in walls" :key="`halo-${wall.id}`">
+        <line
+          v-if="isSelected('element', wall.id)"
+          :x1="wall.x1"
+          :y1="wall.y1"
+          :x2="wall.x2"
+          :y2="wall.y2"
+          :style="{ stroke: token('primary', 0.35), strokeWidth: String(wall.thicknessCm + 16), strokeLinecap: 'square', pointerEvents: 'none' }"
+        />
+      </template>
       <line
         v-for="wall in walls"
         :key="wall.id"
@@ -202,6 +213,18 @@ function doorSwing(widthCm: number): string {
         data-kind="element"
         :data-id="wall.id"
         :style="wallStyle(wall)"
+      />
+      <!-- Zona de toque más ancha que la pared (10 cm es muy delgada para acertar con el dedo o el ratón): invisible pero clicable. -->
+      <line
+        v-for="wall in walls"
+        :key="`hit-${wall.id}`"
+        :x1="wall.x1"
+        :y1="wall.y1"
+        :x2="wall.x2"
+        :y2="wall.y2"
+        data-kind="element"
+        :data-id="wall.id"
+        :style="{ stroke: 'transparent', strokeWidth: String(Math.max(wall.thicknessCm, 36)), strokeLinecap: 'square' }"
       />
     </g>
 

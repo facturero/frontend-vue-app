@@ -130,6 +130,12 @@ async function copyMine(): Promise<void> {
   }
 }
 
+/** «Unir paredes»: pega los extremos que casi llegaban a otra pared y dice cuántos arregló. */
+function joinWalls(): void {
+  const joined = editor.joinWalls();
+  snackbar.value = joined > 0 ? t('restaurant.plan.joined', { count: joined }) : t('restaurant.plan.nothingToJoin');
+}
+
 function openRoom(): void {
   roomError.value = null;
   roomForm.value = { widthM: 8, heightM: 6 };
@@ -274,6 +280,7 @@ function leaveAnyway(): void {
         v-model:preset="preset"
         v-model:object-kind="objectKind"
         @room="openRoom"
+        @join="joinWalls"
         @fit="canvas?.fit()"
       />
 
@@ -285,7 +292,7 @@ function leaveAnyway(): void {
         <v-sheet
           v-if="editor.activeTool === 'wall'"
           class="pa-2 position-absolute d-flex align-center ga-3 flex-wrap"
-          style="top: 8px; left: 8px; right: 8px"
+          style="top: 8px; left: 8px; right: 8px; pointer-events: none"
           elevation="2"
         >
           <span class="text-body-2 text-medium-emphasis">{{ $t('restaurant.plan.wallHint') }}</span>
@@ -297,10 +304,10 @@ function leaveAnyway(): void {
             step="0.1"
             :label="$t('restaurant.plan.wallLength')"
             suffix="m"
-            style="max-width: 140px"
+            style="max-width: 140px; pointer-events: auto"
             @change="applyWallLength"
           />
-          <v-btn v-if="editor.wallAnchor" size="small" variant="tonal" @click="editor.finishWall()">
+          <v-btn v-if="editor.wallAnchor" size="small" variant="tonal" style="pointer-events: auto" @click="editor.finishWall()">
             {{ $t('common.close') }}
           </v-btn>
         </v-sheet>

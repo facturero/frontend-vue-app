@@ -1394,7 +1394,7 @@
       "preset": "Table",
       "objectKind": "Objet",
       "wallLength": "Longueur",
-      "wallHint": "Cliquez pour commencer. Chaque clic enchaîne un autre mur à angle droit. Saisissez une mesure pour la fixer exactement. Échap termine.",
+      "wallHint": "Cliquez pour commencer ; chaque clic enchaîne un mur à angle droit et s'aimante aux angles et murs proches. Saisissez une longueur pour la fixer. Échap termine.",
       "wallTouchHint": "Dessiner les murs nécessite un écran plus grand ; utilisez le téléphone pour déplacer et placer les tables.",
       "emptyCanvas": "Votre local est vide. Commencez par « Salle » pour dessiner les murs.",
       "draftNotice": "Vous avez un brouillon non enregistré de ce plan.",
@@ -1443,7 +1443,16 @@
         "overlapping": "{count} tables se chevauchent",
         "narrowAisles": "{count} tables avec un passage étroit (moins de 60 cm)",
         "outsideFloor": "{count} tables hors de la salle",
-        "invalidCapacity": "{count} tables avec une capacité invalide"
+        "invalidCapacity": "{count} tables avec une capacité invalide",
+        "looseWalls": "Murs non joints : {count}. Il leur manque peu pour toucher un autre mur."
+      },
+      "join": "Joindre les murs",
+      "joined": "Murs joints : {count}.",
+      "nothingToJoin": "Tous les murs sont déjà joints.",
+      "snap": {
+        "endpoint": "Angle",
+        "segment": "Joindre au mur",
+        "align": "Aligné"
       }
     },
     "inspector": {
@@ -1454,7 +1463,6 @@
       "name": "Nom",
       "capacityMin": "Minimum",
       "capacityMax": "Maximum",
-      "zone": "Zone",
       "shape": "Forme",
       "shapes": {
         "rect": "Rectangulaire",
@@ -1480,7 +1488,8 @@
       "duplicateRight": "Vers la droite",
       "duplicateDown": "Vers le bas",
       "duplicateSpacing": "Espacement",
-      "duplicateConfirm": "Dupliquer"
+      "duplicateConfirm": "Dupliquer",
+      "wallDragHint": "Faites glisser le mur pour le déplacer : les murs qui le rejoignent le suivent et tout reste joint."
     },
     "schedule": {
       "title": "Horaires",

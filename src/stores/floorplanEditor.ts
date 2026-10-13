@@ -5,6 +5,7 @@ import type {
   Floor,
   FloorPlan,
   PlanElement,
+  PlanWall,
   RotationDeg,
   SaveFloorPlanInput,
   Zone,
@@ -29,6 +30,15 @@ import {
   type PlanIssues,
   type ViewBox,
 } from '@/utils/restaurant-plan';
+import {
+  alignmentCandidates,
+  findLooseEnds,
+  joinLooseEnds,
+  moveWallPerpendicular,
+  snapWallTarget,
+  type LooseEnd,
+  type WallSnap,
+} from '@/utils/wall-snap';
 
 export type EditorTool = 'select' | 'wall' | 'door' | 'table' | 'zone' | 'object' | 'erase';
 
@@ -107,6 +117,15 @@ export const useFloorPlanEditorStore = defineStore('floorplanEditor', () => {
   // confirmado y `pendingWall` el que sigue al cursor (ortogonal y con imán).
   const wallAnchor = ref<Point | null>(null);
   const pendingWall = ref<Point | null>(null);
+  /** Qué imán actúa ahora (esquina, cuerpo de pared, alineación) para dibujarlo en el lienzo. */
+  const wallSnap = ref<WallSnap | null>(null);
+  /** Radio del imán en cm: el lienzo lo fija a unos 14 px, así se siente igual con cualquier zoom. */
+  const snapRadiusCm = ref(20);
+
+  const isWall = (e: PlanElement): e is PlanWall => e.type === 'wall';
+  const walls = computed(() => elements.value.filter(isWall));
+  /** Extremos de pared que casi llegan a otra pared: el aviso «sin unir» y lo que arregla «Unir paredes». */
+  const looseWallEnds = computed<LooseEnd[]>(() => findLooseEnds(walls.value));
 
   const view = ref<ViewBox | null>(null);
 
@@ -179,6 +198,7 @@ export const useFloorPlanEditorStore = defineStore('floorplanEditor', () => {
     selection.value = null;
     wallAnchor.value = null;
     pendingWall.value = null;
+    wallSnap.value = null;
     dirty.value = true;
     persistDraft();
   }
@@ -298,6 +318,7 @@ export const useFloorPlanEditorStore = defineStore('floorplanEditor', () => {
     activeTool.value = 'select';
     wallAnchor.value = null;
     pendingWall.value = null;
+    wallSnap.value = null;
 
     const draft = options.preferDraft === false ? null : readDraft(targetScope, plan.floor.id);
     if (draft) {
@@ -313,6 +334,7 @@ export const useFloorPlanEditorStore = defineStore('floorplanEditor', () => {
     if (tool !== 'wall') {
       wallAnchor.value = null;
       pendingWall.value = null;
+      wallSnap.value = null;
     }
     if (tool !== 'select') selection.value = null;
   }
@@ -336,10 +358,18 @@ export const useFloorPlanEditorStore = defineStore('floorplanEditor', () => {
     return orthogonalPoint(from, x, y);
   }
 
+  function setSnapRadius(cm: number): void {
+    snapRadiusCm.value = Math.max(5, Math.min(60, cm));
+  }
+
+  /**
+   * El punto al que se pegaría la pared. Va a las esquinas y al cuerpo de las paredes que ya hay (ver `utils/wall-snap.ts`); sin ninguna
+   * cerca queda el imán de 10 cm en ángulo recto de siempre. También se calcula antes del primer clic, para ver dónde empezará.
+   */
   function moveWallCursor(x: number, y: number, free = false): void {
-    const anchor = wallAnchor.value;
-    if (!anchor) return;
-    pendingWall.value = constrainPoint(anchor, x, y, free);
+    const snap = snapWallTarget(wallAnchor.value, { x, y }, walls.value, snapRadiusCm.value, { free });
+    wallSnap.value = snap.kind === 'none' ? null : snap;
+    if (wallAnchor.value) pendingWall.value = snap.point;
   }
 
   /** Escribir una medida mientras se dibuja fija esa longitud exacta. */
@@ -349,21 +379,32 @@ export const useFloorPlanEditorStore = defineStore('floorplanEditor', () => {
     const horizontal = pendingWall.value.y === anchor.y;
     const value = Math.max(0, Math.round(lengthCm));
     pendingWall.value = horizontal ? { x: anchor.x + value, y: anchor.y } : { x: anchor.x, y: anchor.y + value };
+    wallSnap.value = null; // la medida escrita manda sobre el imán
   }
 
   function commitWallPoint(x?: number, y?: number): void {
     const anchor = wallAnchor.value;
     if (!anchor) {
-      const start = { x: snapCm(x ?? 0), y: snapCm(y ?? 0) };
+      const start = snapWallTarget(null, { x: x ?? 0, y: y ?? 0 }, walls.value, snapRadiusCm.value).point;
       wallAnchor.value = start;
       pendingWall.value = start;
+      wallSnap.value = null;
       return;
     }
     const target = pendingWall.value ?? constrainPoint(anchor, x ?? anchor.x, y ?? anchor.y);
     if (target.x === anchor.x && target.y === anchor.y) return;
+    // Si el extremo quedó pegado a una esquina o al cuerpo de otra pared, la pared se UNIÓ: la cadena termina ahí (cerrar un cuarto,
+    // o llegar a otra pared, no deja un «siguiente tramo» colgando del cursor).
+    const joined = wallSnap.value?.kind === 'endpoint' || wallSnap.value?.kind === 'segment';
     commit(() => {
       elements.value = [...elements.value, makeWall(anchor.x, anchor.y, target.x, target.y)];
     });
+    wallSnap.value = null;
+    if (joined) {
+      wallAnchor.value = null;
+      pendingWall.value = null;
+      return;
+    }
     wallAnchor.value = target;
     pendingWall.value = target;
   }
@@ -371,6 +412,34 @@ export const useFloorPlanEditorStore = defineStore('floorplanEditor', () => {
   function finishWall(): void {
     wallAnchor.value = null;
     pendingWall.value = null;
+    wallSnap.value = null;
+  }
+
+  /** «Unir paredes»: pega de una vez los extremos que casi llegaban a otra pared. Devuelve cuántos unió (0 = no hizo nada ni ensució el historial). */
+  function joinWalls(): number {
+    const result = joinLooseEnds(walls.value);
+    if (result.joined === 0) return 0;
+    const byId = new Map(result.walls.map((w) => [w.id, w]));
+    commit(() => {
+      elements.value = elements.value.map((e) => (isWall(e) ? (byId.get(e.id) ?? e) : e));
+    });
+    return result.joined;
+  }
+
+  /** Mueve una pared en perpendicular (la horizontal sube o baja…) y arrastra a las que le llegan; un solo paso del historial. */
+  function moveWall(id: string, delta: number): void {
+    if (delta === 0) return;
+    const moved = moveWallPerpendicular(walls.value, id, delta);
+    if (moved === walls.value) return;
+    const byId = new Map(moved.map((w) => [w.id, w]));
+    commit(() => {
+      elements.value = elements.value.map((e) => (isWall(e) ? (byId.get(e.id) ?? e) : e));
+    });
+  }
+
+  /** Coordenadas de las paredes paralelas, para que la que se arrastra se alinee con ellas. */
+  function wallAlignments(id: string): number[] {
+    return alignmentCandidates(walls.value, id);
   }
 
   /** «Salón 8 × 6 m»: las cuatro paredes de una vez y el tamaño del local. */
@@ -647,6 +716,14 @@ export const useFloorPlanEditorStore = defineStore('floorplanEditor', () => {
     selection,
     wallAnchor,
     pendingWall,
+    wallSnap,
+    snapRadiusCm,
+    walls,
+    looseWallEnds,
+    setSnapRadius,
+    joinWalls,
+    moveWall,
+    wallAlignments,
     view,
     canUndo,
     canRedo,

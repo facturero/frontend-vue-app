@@ -18,6 +18,7 @@ const emit = defineEmits<{
   'update:preset': [string];
   'update:objectKind': [ObjectKind];
   room: [];
+  join: [];
   fit: [];
 }>();
 
@@ -103,6 +104,11 @@ function label(tool: ToolDef): string {
       :title="$t('restaurant.plan.room')"
       @click="emit('room')"
     />
+
+    <!-- «Unir paredes»: solo cuando hay paredes; el número avisa cuántos extremos casi tocan a otra pared. -->
+    <v-badge v-if="canManage && store.walls.length > 0" :content="store.looseWallEnds.length" :model-value="store.looseWallEnds.length > 0" color="warning">
+      <v-btn icon="mdi-vector-combine" size="small" variant="text" :title="$t('restaurant.plan.join')" @click="emit('join')" />
+    </v-badge>
 
     <v-select
       v-if="store.activeTool === 'table'"

@@ -119,6 +119,7 @@ const issues = computed(() => {
     { key: 'narrowAisles', ids: found.narrowAisles },
     { key: 'outsideFloor', ids: found.outsideFloor },
     { key: 'invalidCapacity', ids: found.invalidCapacity },
+    { key: 'looseWalls', ids: store.looseWallEnds },
   ].filter((entry) => entry.ids.length > 0);
 });
 
@@ -292,17 +293,20 @@ function confirmDuplicate(): void {
         />
       </template>
 
-      <div v-else class="text-body-2 text-medium-emphasis">
-        {{ $t('restaurant.inspector.length') }}:
-        {{
-          formatMeters(
-            Math.hypot(
-              store.selectedElement.x2 - store.selectedElement.x1,
-              store.selectedElement.y2 - store.selectedElement.y1,
-            ),
-          )
-        }}
-      </div>
+      <template v-else>
+        <div class="text-body-2 text-medium-emphasis">
+          {{ $t('restaurant.inspector.length') }}:
+          {{
+            formatMeters(
+              Math.hypot(
+                store.selectedElement.x2 - store.selectedElement.x1,
+                store.selectedElement.y2 - store.selectedElement.y1,
+              ),
+            )
+          }}
+        </div>
+        <div v-if="canManage" class="text-caption text-medium-emphasis">{{ $t('restaurant.inspector.wallDragHint') }}</div>
+      </template>
 
       <v-btn
         v-if="canManage && store.selectedElement.type !== 'wall'"
@@ -359,7 +363,14 @@ function confirmDuplicate(): void {
       <div class="text-subtitle-2">{{ $t('restaurant.plan.issues.title') }}</div>
       <!-- Cada aviso va en su `div`: `v-alert` trae `flex: 1 1 0%` y, directo en una columna flex, se encoge a 0 o se estira a todo el alto. -->
       <div v-for="issue in issues" :key="issue.key">
-        <v-alert type="warning">{{ $t(`restaurant.plan.issues.${issue.key}`, { count: issue.ids.length }) }}</v-alert>
+        <v-alert type="warning">
+          {{ $t(`restaurant.plan.issues.${issue.key}`, { count: issue.ids.length }) }}
+          <div v-if="issue.key === 'looseWalls' && canManage" class="mt-2">
+            <v-btn size="small" variant="flat" color="warning" prepend-icon="mdi-vector-combine" @click="store.joinWalls()">
+              {{ $t('restaurant.plan.join') }}
+            </v-btn>
+          </div>
+        </v-alert>
       </div>
     </template>
 

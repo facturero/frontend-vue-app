@@ -16,7 +16,8 @@
  */
 import { computed, onMounted, ref } from 'vue';
 import { useFloorPlanEditorStore } from '@/stores/floorplanEditor';
-import type { ObjectKind } from '@/types/restaurant';
+import type { ObjectKind, PlanElement } from '@/types/restaurant';
+import { moveWallPerpendicular, orientationOf } from '@/utils/wall-snap';
 import { formatMeters, planBounds, snapCm, SNAP_CM, SNAP_FINE_CM, type ViewBox } from '@/utils/restaurant-plan';
 import FloorPlanShapes from './FloorPlanShapes.vue';
 
@@ -38,13 +39,15 @@ const fallbackView: ViewBox = { x: -100, y: -100, w: 1200, h: 900 };
 const view = computed<ViewBox>(() => store.view ?? fallbackView);
 
 interface DragState {
-  kind: 'table' | 'element';
+  kind: 'table' | 'element' | 'wall';
   id: string;
   start: { x: number; y: number };
   origin: { x: number; y: number };
 }
 
 const ghost = ref<{ id: string; xCm: number; yCm: number } | null>(null);
+/** Mientras se arrastra una pared: cuánto se movió. Las que le llegan la siguen en el dibujo, y se confirma una vez al soltar. */
+const wallGhost = ref<{ id: string; delta: number } | null>(null);
 
 const pointers = new Map<number, { x: number; y: number }>();
 let drag: DragState | null = null;
@@ -71,6 +74,14 @@ const displayTables = computed(() =>
     ? store.tables.map((t) => (t.id === ghost.value!.id ? { ...t, xCm: ghost.value!.xCm, yCm: ghost.value!.yCm } : t))
     : store.tables,
 );
+
+/** Elementos con la pared arrastrada (y las que le llegan) en su posición provisional. */
+const displayElements = computed<PlanElement[]>(() => {
+  const g = wallGhost.value;
+  if (!g) return store.elements;
+  const moved = new Map(moveWallPerpendicular(store.walls, g.id, g.delta).map((w) => [w.id, w]));
+  return store.elements.map((e) => (e.type === 'wall' ? (moved.get(e.id) ?? e) : e));
+});
 
 const zoomedIn = computed(() => view.value.w < 600);
 
@@ -101,6 +112,31 @@ function distanceBetween(a: { x: number; y: number }, b: { x: number; y: number 
   return Math.hypot(a.x - b.x, a.y - b.y);
 }
 
+/** El radio del imán se mide en pantalla (≈14 px) y aquí se pasa a cm con el zoom actual: se siente igual de cerca con cualquier zoom. */
+function syncSnapRadius(): void {
+  const scale = svgEl()?.getScreenCTM()?.a;
+  if (scale && scale > 0) store.setSnapRadius(14 / scale);
+}
+
+/** Cuánto se mueve la pared arrastrada (en perpendicular a sí misma): imán de 10 cm y se alinea con las paredes paralelas cercanas. */
+function wallDragDelta(id: string, p: { x: number; y: number }, start: { x: number; y: number }, step: number): number {
+  const wall = store.walls.find((w) => w.id === id);
+  if (!wall) return 0;
+  const horizontal = orientationOf(wall) === 'h';
+  const base = horizontal ? wall.y1 : wall.x1;
+  const raw = base + (horizontal ? p.y - start.y : p.x - start.x);
+  let target = snapCm(raw, step);
+  let bestD = store.snapRadiusCm;
+  for (const c of store.wallAlignments(id)) {
+    const d = Math.abs(raw - c);
+    if (d <= bestD) {
+      target = c;
+      bestD = d;
+    }
+  }
+  return target - base;
+}
+
 function hitTest(e: PointerEvent): { kind: string; id: string } | null {
   const target = e.target as Element | null;
   const owner = target?.closest?.('[data-kind]') ?? null;
@@ -116,9 +152,11 @@ function startDragFromHit(hit: { kind: string; id: string }, p: { x: number; y: 
       drag = { kind: 'table', id: table.id, start: p, origin: { x: table.xCm ?? 0, y: table.yCm ?? 0 } };
     }
   } else if (hit.kind === 'element') {
-    // Las paredes se seleccionan pero no se arrastran (su caja es una línea).
     const element = store.elements.find((el) => el.id === hit.id);
-    if (element && element.type !== 'wall') {
+    if (element && element.type === 'wall') {
+      // Una pared se mueve en perpendicular a sí misma (la horizontal sube o baja); las diagonales no se arrastran.
+      if (orientationOf(element) !== 'd') drag = { kind: 'wall', id: element.id, start: p, origin: { x: 0, y: 0 } };
+    } else if (element) {
       drag = { kind: 'element', id: element.id, start: p, origin: { x: element.x, y: element.y } };
     }
   }
@@ -158,6 +196,9 @@ function onPointerDown(e: PointerEvent): void {
   }
 
   if (tool === 'wall') {
+    // Se recalcula el imán en el punto exacto del clic (en una tablet no hubo movimiento previo del puntero).
+    syncSnapRadius();
+    store.moveWallCursor(p.x, p.y, e.shiftKey);
     store.commitWallPoint(p.x, p.y);
     return;
   }
@@ -203,6 +244,11 @@ function onPointerMove(e: PointerEvent): void {
     const y = snapCm(drag.origin.y + (p.y - drag.start.y), step);
     moved = true;
     if (drag.kind === 'table') ghost.value = { id: drag.id, xCm: x, yCm: y };
+    else if (drag.kind === 'wall') {
+      syncSnapRadius();
+      const delta = wallDragDelta(drag.id, p, drag.start, step);
+      wallGhost.value = delta === 0 ? null : { id: drag.id, delta };
+    }
     return;
   }
 
@@ -219,7 +265,10 @@ function onPointerMove(e: PointerEvent): void {
     return;
   }
 
-  if (store.activeTool === 'wall') store.moveWallCursor(p.x, p.y, e.shiftKey);
+  if (store.activeTool === 'wall') {
+    syncSnapRadius();
+    store.moveWallCursor(p.x, p.y, e.shiftKey);
+  }
 }
 
 function endGesture(e: PointerEvent): void {
@@ -231,6 +280,8 @@ function endGesture(e: PointerEvent): void {
     const active = drag;
     if (active.kind === 'table' && ghost.value) {
       store.setTablePosition(active.id, ghost.value.xCm, ghost.value.yCm);
+    } else if (active.kind === 'wall' && wallGhost.value) {
+      store.moveWall(active.id, wallGhost.value.delta);
     } else if (active.kind === 'element' && moved) {
       const p = toCm(e.clientX, e.clientY);
       const step = e.shiftKey ? SNAP_FINE_CM : SNAP_CM;
@@ -239,6 +290,7 @@ function endGesture(e: PointerEvent): void {
       if (dx !== 0 || dy !== 0) store.moveSelection(dx, dy);
     }
     ghost.value = null;
+    wallGhost.value = null;
     drag = null;
     return;
   }
@@ -279,11 +331,34 @@ defineExpose({ fit });
       :height-cm="store.heightCm"
       :zones="store.zones"
       :tables="displayTables"
-      :elements="store.elements"
+      :elements="displayElements"
       :selected="store.selection"
       :issue-ids="store.issueIds"
     >
       <template #overlay>
+        <!-- Imán: dónde se va a pegar la pared (esquina, cuerpo de otra pared o alineada con una esquina). -->
+        <g v-if="store.activeTool === 'wall' && store.wallSnap" aria-hidden="true">
+          <circle
+            :cx="store.wallSnap.point.x"
+            :cy="store.wallSnap.point.y"
+            :r="store.snapRadiusCm * 0.7"
+            :style="{
+              fill: store.wallSnap.kind === 'align' ? 'none' : 'rgba(var(--v-theme-success), 0.25)',
+              stroke: store.wallSnap.kind === 'align' ? 'rgb(var(--v-theme-primary))' : 'rgb(var(--v-theme-success))',
+              strokeWidth: '3',
+              strokeDasharray: store.wallSnap.kind === 'align' ? '6 5' : 'none',
+            }"
+          />
+          <text
+            :x="store.wallSnap.point.x"
+            :y="store.wallSnap.point.y - store.snapRadiusCm * 0.7 - 10"
+            text-anchor="middle"
+            :font-size="Math.max(16, view.w / 50)"
+            :style="{ fill: store.wallSnap.kind === 'align' ? 'rgb(var(--v-theme-primary))' : 'rgb(var(--v-theme-success))', fontWeight: '600' }"
+          >
+            {{ $t(`restaurant.plan.snap.${store.wallSnap.kind}`) }}
+          </text>
+        </g>
         <g v-if="wallPreview" aria-hidden="true">
           <line
             :x1="wallPreview.a.x"

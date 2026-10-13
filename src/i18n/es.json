@@ -1394,7 +1394,7 @@
       "preset": "Mesa",
       "objectKind": "Objeto",
       "wallLength": "Longitud",
-      "wallHint": "Clic para empezar. Cada clic encadena otra pared en ángulo recto. Escribe una medida para fijarla exacta. Esc termina.",
+      "wallHint": "Clic para empezar; cada clic encadena otra pared en ángulo recto y se pega sola a esquinas y paredes cercanas. Escribe una medida para fijarla. Esc termina.",
       "wallTouchHint": "Dibujar paredes necesita una pantalla más grande; usa el móvil para mover y colocar mesas.",
       "emptyCanvas": "Tu local está vacío. Empieza con «Salón» para dibujar las paredes.",
       "draftNotice": "Tienes un borrador sin guardar de este plano.",
@@ -1443,7 +1443,16 @@
         "overlapping": "{count} mesas se solapan",
         "narrowAisles": "{count} mesas con pasillo estrecho (menos de 60 cm)",
         "outsideFloor": "{count} mesas fuera del salón",
-        "invalidCapacity": "{count} mesas con capacidad inválida"
+        "invalidCapacity": "{count} mesas con capacidad inválida",
+        "looseWalls": "Paredes sin unir: {count}. Les falta poco para tocar otra pared."
+      },
+      "join": "Unir paredes",
+      "joined": "Paredes unidas: {count}.",
+      "nothingToJoin": "Todas las paredes ya están unidas.",
+      "snap": {
+        "endpoint": "Esquina",
+        "segment": "Unir a la pared",
+        "align": "Alineada"
       }
     },
     "inspector": {
@@ -1454,7 +1463,6 @@
       "name": "Nombre",
       "capacityMin": "Mínimo",
       "capacityMax": "Máximo",
-      "zone": "Zona",
       "shape": "Forma",
       "shapes": {
         "rect": "Rectangular",
@@ -1480,7 +1488,8 @@
       "duplicateRight": "A la derecha",
       "duplicateDown": "Hacia abajo",
       "duplicateSpacing": "Separación",
-      "duplicateConfirm": "Duplicar"
+      "duplicateConfirm": "Duplicar",
+      "wallDragHint": "Arrastra la pared para moverla: las paredes que le llegan la siguen y todo queda unido."
     },
     "schedule": {
       "title": "Horarios",

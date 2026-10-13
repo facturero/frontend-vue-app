@@ -1394,7 +1394,7 @@
       "preset": "Table",
       "objectKind": "Object",
       "wallLength": "Length",
-      "wallHint": "Click to start. Each click chains another wall at a right angle. Type a measurement to set it exactly. Esc finishes.",
+      "wallHint": "Click to start; each click chains another wall at a right angle and snaps to nearby corners and walls. Type a length to set it. Esc finishes.",
       "wallTouchHint": "Drawing walls needs a bigger screen; use the phone to move and place tables.",
       "emptyCanvas": "Your venue is empty. Start with “Room” to draw the walls.",
       "draftNotice": "You have an unsaved draft of this floor plan.",
@@ -1443,7 +1443,16 @@
         "overlapping": "{count} tables overlap",
         "narrowAisles": "{count} tables with a narrow aisle (under 60 cm)",
         "outsideFloor": "{count} tables outside the room",
-        "invalidCapacity": "{count} tables with an invalid capacity"
+        "invalidCapacity": "{count} tables with an invalid capacity",
+        "looseWalls": "Walls not joined: {count}. They almost touch another wall."
+      },
+      "join": "Join walls",
+      "joined": "Walls joined: {count}.",
+      "nothingToJoin": "All walls are already joined.",
+      "snap": {
+        "endpoint": "Corner",
+        "segment": "Join to wall",
+        "align": "Aligned"
       }
     },
     "inspector": {
@@ -1454,7 +1463,6 @@
       "name": "Name",
       "capacityMin": "Minimum",
       "capacityMax": "Maximum",
-      "zone": "Zone",
       "shape": "Shape",
       "shapes": {
         "rect": "Rectangular",
@@ -1480,7 +1488,8 @@
       "duplicateRight": "To the right",
       "duplicateDown": "Downwards",
       "duplicateSpacing": "Spacing",
-      "duplicateConfirm": "Duplicate"
+      "duplicateConfirm": "Duplicate",
+      "wallDragHint": "Drag the wall to move it: walls that reach it follow, and everything stays joined."
     },
     "schedule": {
       "title": "Opening hours",

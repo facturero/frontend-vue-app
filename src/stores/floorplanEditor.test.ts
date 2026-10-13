@@ -276,3 +276,99 @@ describe('serialización y guardado', () => {
     expect(store.hasDraft('org-1:u1', 'floor-1')).toBe(false);
   });
 });
+
+describe('unir paredes', () => {
+  function dibujar(store: ReturnType<typeof editor>, puntos: Array<[number, number]>, radio = 25): void {
+    store.setTool('wall');
+    store.setSnapRadius(radio);
+    store.moveWallCursor(puntos[0]![0], puntos[0]![1]);
+    store.commitWallPoint(puntos[0]![0], puntos[0]![1]);
+    for (const [x, y] of puntos.slice(1)) {
+      store.moveWallCursor(x, y);
+      store.commitWallPoint(x, y);
+    }
+  }
+
+  it('cerrar el cuarto: el último clic se pega a la esquina de partida y la cadena termina', () => {
+    const store = editor();
+    // El último punto, (5, 8), cae cerca de (0, 0) pero no justo encima.
+    dibujar(store, [[0, 0], [800, 0], [800, 600], [0, 600], [5, 8]]);
+    expect(store.walls).toHaveLength(4);
+    expect(store.walls[3]).toMatchObject({ x1: 0, y1: 600, x2: 0, y2: 0 });
+    expect(store.wallAnchor).toBeNull();
+    expect(store.looseWallEnds).toEqual([]);
+  });
+
+  it('una pared que llega al cuerpo de otra se detiene en ella y termina la cadena (una «T»)', () => {
+    const store = editor();
+    store.createRoom(800, 600);
+    dibujar(store, [[0, 300], [790, 305]]);
+    expect(store.walls).toHaveLength(5);
+    expect(store.walls[4]).toMatchObject({ x1: 0, y1: 300, x2: 800, y2: 300 });
+    expect(store.wallAnchor).toBeNull();
+  });
+
+  it('lejos de otras paredes la cadena sigue como siempre', () => {
+    const store = editor();
+    dibujar(store, [[0, 0], [300, 0], [300, 200]]);
+    expect(store.walls).toHaveLength(2);
+    expect(store.wallAnchor).toEqual({ x: 300, y: 200 });
+  });
+
+  it('el primer clic cerca de una esquina empieza exactamente en ella', () => {
+    const store = editor();
+    store.createRoom(800, 600);
+    store.setTool('wall');
+    store.setSnapRadius(25);
+    store.commitWallPoint(812, 9);
+    expect(store.wallAnchor).toEqual({ x: 800, y: 0 });
+  });
+
+  it('el imán sale en `wallSnap` para dibujarlo, y se apaga al cambiar de herramienta', () => {
+    const store = editor();
+    store.createRoom(800, 600);
+    store.setTool('wall');
+    store.setSnapRadius(25);
+    store.moveWallCursor(806, 6);
+    expect(store.wallSnap).toEqual({ point: { x: 800, y: 0 }, kind: 'endpoint' });
+    store.setTool('select');
+    expect(store.wallSnap).toBeNull();
+  });
+
+  it('«Unir paredes» cierra el hueco de una esquina, en UN paso de deshacer', () => {
+    const store = editor();
+    // Con el imán casi apagado (5 cm) para dejar a propósito el hueco de 20 cm que luego arregla «Unir paredes».
+    dibujar(store, [[0, 0], [780, 0]], 5);
+    store.finishWall();
+    dibujar(store, [[800, 0], [800, 600]], 5);
+    expect(store.looseWallEnds).toHaveLength(1);
+    expect(store.joinWalls()).toBe(1);
+    expect(store.walls[0]).toMatchObject({ x2: 800, y2: 0 });
+    expect(store.looseWallEnds).toEqual([]);
+    store.undo();
+    expect(store.walls[0]).toMatchObject({ x2: 780 });
+    expect(store.looseWallEnds).toHaveLength(1);
+  });
+
+  it('«Unir paredes» sin nada que unir no hace nada ni ensucia el historial', () => {
+    const store = editor();
+    store.createRoom(800, 600);
+    const pasos = store.canUndo;
+    expect(store.joinWalls()).toBe(0);
+    expect(store.canUndo).toBe(pasos);
+  });
+
+  it('mover una pared arrastra las que le llegan, en un solo paso, y todo sigue unido', () => {
+    const store = editor();
+    store.createRoom(800, 600);
+    const arriba = store.walls[0]!;
+    store.moveWall(arriba.id, 100);
+    expect(store.walls[0]).toMatchObject({ y1: 100, y2: 100 });
+    expect(store.walls[1]).toMatchObject({ x1: 800, y1: 100, x2: 800, y2: 600 });
+    expect(store.walls[3]).toMatchObject({ x1: 0, y1: 600, x2: 0, y2: 100 });
+    expect(store.looseWallEnds).toEqual([]);
+    store.undo();
+    expect(store.walls[0]).toMatchObject({ y1: 0, y2: 0 });
+    expect(store.walls[1]).toMatchObject({ y1: 0 });
+  });
+});
