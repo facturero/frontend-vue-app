@@ -45,6 +45,30 @@ export function saleTotals(lines: SaleLineInput[]): LineTotals {
   );
 }
 
+export interface TaxBreakdownRow {
+  /** Tarifa en porcentaje (15 = 15 %). */
+  ratePercent: number;
+  /** Suma de las bases de las líneas que llevan esta tarifa. */
+  baseCents: number;
+  /** Impuesto de esta tarifa; las filas suman exactamente el `taxCents` de la venta (mismo redondeo por línea). */
+  amountCents: number;
+}
+
+/** El IVA desglosado por tarifa («IVA 15 % (base $x)»), como lo enseña la caja de escritorio. De mayor a menor tarifa. */
+export function taxBreakdown(lines: SaleLineInput[]): TaxBreakdownRow[] {
+  const rows = new Map<number, TaxBreakdownRow>();
+  for (const line of lines) {
+    const { baseCents } = lineTotals(line);
+    for (const rate of line.ratesPercent) {
+      const row = rows.get(rate) ?? { ratePercent: rate, baseCents: 0, amountCents: 0 };
+      row.baseCents += baseCents;
+      row.amountCents += Math.round(baseCents * (rate / 100));
+      rows.set(rate, row);
+    }
+  }
+  return [...rows.values()].sort((a, b) => b.ratePercent - a.ratePercent);
+}
+
 /** «12.5» o «12,50» → 1250. Devuelve null si no es un importe válido (letras, negativo, más de 2 decimales). */
 export function parseMoneyToCents(text: string): number | null {
   const normalized = text.trim().replace(',', '.');

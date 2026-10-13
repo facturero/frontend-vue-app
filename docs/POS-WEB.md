@@ -15,7 +15,8 @@ organización con un token nuevo: no existe y no se hizo aquí.
 
 | Pieza | Dónde | Qué hace |
 |---|---|---|
-| Pantalla de caja | `src/views/pos/PosView.vue` + `src/components/pos/` | Buscar, carrito, cliente, cobro |
+| Pantalla de caja | `src/views/pos/PosView.vue` + `src/components/pos/` | Cabecera, catálogo con categorías, carrito, cobro, barra de estado |
+| Aspecto | `src/styles/pos-kiosk.css`, `src/utils/pos-theme.ts`, `src/stores/posCashierTheme.ts` | Mismo diseño y mismo tema que la caja de escritorio (ver «Aspecto») |
 | Estado de la venta | `src/stores/pos.ts` | Carrito, id de venta, borrador, cobro |
 | Totales | `src/utils/pos-totals.ts` | Mismo cálculo que billing (ver abajo) |
 | Modo por dominio | `src/utils/host-mode.ts` + `router/index.ts` | En `pos.` solo existe la caja |
@@ -23,6 +24,21 @@ organización con un token nuevo: no existe y no se hizo aquí.
 
 El mismo bundle se sirve en `crm.` y `pos.`. En `pos.` el router lleva cualquier ruta a `/pos` (el CRM no existe allí) y la caja se
 muestra sin menú lateral. En `crm.` la caja es la ruta `/pos`, con su ítem en el menú (módulo `pos.core`, permiso `invoice:create`).
+
+## Aspecto: igual que la caja de escritorio
+
+La pantalla replica la de `pos/frontend` (cabecera con la marca «POS KIOSKO», buscador con botón de imágenes, categorías en píldoras,
+tarjetas de producto, carrito con cliente, líneas con − cantidad +, IVA por tarifa y «Cobrar», modal «Confirmar cobro», barra de estado).
+Cambios que son de la web y no de la caja instalada: el descuento es **por línea** (billing lo guarda así; en escritorio es global), el
+chip de la cabecera muestra el punto de emisión en lugar del estado de sincronización, y no hay «Historial» ni apagar el equipo.
+
+Se pinta con el **tema de la organización**: `GET /establishments/:e/billing-points/:p/theme` (el mismo endpoint de la caja de
+escritorio). Cada punto recibe el override que tenga o, si no, el tema predeterminado de la organización o el integrado. Para que un punto
+`web` pueda pedirlo, `organization-service` dejó de exigir que el punto sea de tipo `pos` al **leer** el tema (asignar un override sigue
+siendo solo para puntos `pos`). El cajero necesita `organization:read`; sin él se ve con el tema «Clásico». El dólar se escribe `$12.50`,
+como en escritorio.
+
+Las fuentes del tema (Inter, Poppins…) no se descargan en la web: si la familia no está en el equipo, se usa la del sistema.
 
 ## La venta: idempotencia
 
@@ -50,7 +66,7 @@ La caja ofrece los códigos de la Tabla 24 del SRI: `01` efectivo, `16` débito,
 ## Permisos del cajero
 
 Para usarla, el rol necesita: `invoice:create` e `invoice:issue` (billing exige ambos en `from-pos`), `product:read`, `customer:read` y
-`establishment:read` (para elegir el punto de emisión). La organización necesita el módulo `pos.core` activo. Si falta algo, en `pos.` la
+`establishment:read` (para elegir el punto de emisión) y, para ver el tema de su organización, `organization:read`. La organización necesita el módulo `pos.core` activo. Si falta algo, en `pos.` la
 persona ve una pantalla que lo explica (`/pos/unavailable`) en vez de rebotar entre rutas.
 
 ## Punto de emisión
@@ -66,7 +82,7 @@ pelean por la secuencia. Se recuerda por usuario y organización.
    frontend. Se edita con `sops` en el servidor (ahí está la clave age).
 3. **Gateway**: `CORS_ORIGIN` ya incluye `https://pos.noahsolution.com` en `api-gateway-node/k8s/deployment.yaml`.
 
-Orden de despliegue: `billing-service` (migración que añade una columna nula), luego `api-gateway-node`, luego `frontend`.
+Orden de despliegue: `billing-service` (migración que añade una columna nula), `organization-service` (el tema para puntos web), `api-gateway-node` y por último `frontend`.
 
 ## Lo que no hace (todavía)
 
@@ -75,4 +91,4 @@ Orden de despliegue: `billing-service` (migración que añade una columna nula),
 - **Sin RIDE ni impresión**: la autorización del SRI es asíncrona y su PDF es de otro servicio (`/fiscal-invoices/:id/ride`); la caja muestra
   el número de factura y el total.
 - **Pensada para laptop.** En un teléfono funciona, pero el carrito queda debajo del catálogo.
-- **Sin imágenes de producto** ni descuentos globales (solo por línea).
+- **Sin descuento global** (solo por línea) ni «Historial» de ventas.

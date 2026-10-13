@@ -60,6 +60,17 @@ describe('carrito', () => {
     expect(pos.totals).toEqual({ baseCents: 178, taxCents: 21, totalCents: 199 });
   });
 
+  it('desglosa el IVA por tarifa y suma lo descontado (lo que enseña el panel del carrito)', async () => {
+    const pos = nuevaCaja();
+    await pos.addProduct(product({ id: 'p1', priceIncludesTax: false, priceCents: 1000 }));
+    await pos.addProduct(product({ id: 'p2', priceIncludesTax: false, priceCents: 500 }));
+    pos.setDiscount('p1', 100);
+    expect(pos.discountTotalCents).toBe(100);
+    expect(pos.taxRows).toHaveLength(1);
+    expect(pos.taxRows[0]).toMatchObject({ ratePercent: 12, baseCents: 900 + 500 });
+    expect(pos.taxRows.reduce((sum, r) => sum + r.amountCents, 0)).toBe(pos.totals.taxCents);
+  });
+
   it('el producto repetido suma la cantidad y no vuelve a pedir sus impuestos', async () => {
     const pos = nuevaCaja();
     await pos.addProduct(product());

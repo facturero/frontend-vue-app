@@ -1,23 +1,28 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import PageHeader from '@/components/ui/PageHeader.vue';
 import PosCart from '@/components/pos/PosCart.vue';
+import PosCatalog from '@/components/pos/PosCatalog.vue';
+import PosHeader from '@/components/pos/PosHeader.vue';
 import PosPaymentDialog from '@/components/pos/PosPaymentDialog.vue';
-import PosProductSearch from '@/components/pos/PosProductSearch.vue';
 import PosSetupDialog from '@/components/pos/PosSetupDialog.vue';
+import PosStatusBar from '@/components/pos/PosStatusBar.vue';
 import { usePosMoney } from '@/composable/usePosMoney';
 import { useOrganizationStore } from '@/stores/organization';
 import { usePosStore } from '@/stores/pos';
+import { usePosCashierThemeStore } from '@/stores/posCashierTheme';
 import type { ProductSummary } from '@/types/products';
+import '@/styles/pos-kiosk.css';
 
 /**
- * Caja web (`/pos`, y única pantalla del dominio `pos.`): vender y facturar desde una laptop con la sesión de quien vende. La
- * organización la pone el JWT, así que el mismo dominio sirve a todas; nada se configura por organización. Sin modo sin conexión:
- * si no hay internet no se factura. Ver docs/POS-WEB.md.
+ * Caja web (`/pos`, y única pantalla del dominio `pos.`): la misma pantalla que la caja de escritorio (cabecera, catálogo con
+ * categorías, carrito a un lado, barra de estado) pintada con el tema de la organización, para vender y facturar desde una laptop con
+ * la sesión de quien vende. La organización la pone el JWT, así que el mismo dominio sirve a todas; nada se configura por
+ * organización. Sin modo sin conexión: si no hay internet no se factura. Ver docs/POS-WEB.md.
  */
 const { t } = useI18n();
 const pos = usePosStore();
+const theme = usePosCashierThemeStore();
 const org = useOrganizationStore();
 const { money } = usePosMoney();
 
@@ -26,17 +31,27 @@ const payOpen = ref(false);
 const notice = ref<string | null>(null);
 
 const pointLabel = computed(() => {
-  if (!pos.point) return undefined;
+  if (!pos.point) return null;
   const est = org.establishments.find((e) => e.id === pos.point?.establishmentId);
   const ep = org.emissionPoints.find((p) => p.id === pos.point?.emissionPointId);
-  return est && ep ? t('pos.subtitle', { point: `${est.code}-${ep.code}`, terminal: pos.terminalId }) : undefined;
+  return est && ep ? `${est.code}-${ep.code}` : null;
 });
 
 /** El total que la caja calculó y el que facturó el servidor difieren (un precio cambió en el CRM): se avisa, la factura vale la del servidor. */
 const mismatch = computed(() => !!pos.lastSale && pos.lastSale.totalCents !== pos.lastSale.expectedCents);
 
+// El tema es el del punto con el que se factura: se pide al elegirlo o cambiarlo.
+watch(
+  () => pos.point,
+  (point) => {
+    if (point) void theme.load(point.establishmentId, point.emissionPointId);
+  },
+);
+
 onMounted(async () => {
   pos.init();
+  theme.restore();
+  if (pos.point) void theme.load(pos.point.establishmentId, pos.point.emissionPointId);
   void org.fetch();
   await org.fetchEstablishments();
   if (pos.point) await org.fetchEmissionPoints(pos.point.establishmentId);
@@ -45,43 +60,48 @@ onMounted(async () => {
 
 async function onAdd(product: ProductSummary): Promise<void> {
   pos.dismissLastSale();
+  notice.value = null;
   const failure = await pos.addProduct(product);
   if (failure) notice.value = t(`pos.addFailed.${failure}`, { name: product.name });
 }
 </script>
 
 <template>
-  <div class="pa-4 pa-md-6">
-    <PageHeader :title="$t('pos.title')" :subtitle="pointLabel" :sticky="false">
-      <template #actions>
-        <v-btn variant="tonal" prepend-icon="mdi-swap-horizontal" @click="setupOpen = true">{{ $t('pos.setup.change') }}</v-btn>
-      </template>
-    </PageHeader>
+  <div class="pk" :style="theme.vars" :data-mode="theme.mode">
+    <PosStatusBar v-if="theme.config.layout.statusBarPosition === 'top'" />
+    <PosHeader :point-label="pointLabel" @change-point="setupOpen = true" />
 
-    <v-alert v-if="pos.lastSale" type="success" closable class="mb-4" @click:close="pos.dismissLastSale()">
-      <div class="font-weight-medium">
-        {{ $t('pos.done.title', { number: pos.lastSale.number ?? '—', total: money(pos.lastSale.totalCents) }) }}
+    <main class="pk-main">
+      <div v-if="pos.lastSale" class="pk-banner pk-banner--ok" role="status">
+        <i class="mdi mdi-check-circle-outline" />
+        <div class="pk-grow">
+          <strong>{{ $t('pos.done.title', { number: pos.lastSale.number ?? '—', total: money(pos.lastSale.totalCents) }) }}</strong>
+          <span v-if="pos.lastSale.paymentMethodCode === '01' && pos.lastSale.receivedCents !== null">
+            {{ $t('pos.done.change', { change: money(pos.lastSale.changeCents) }) }}
+          </span>
+          <span>{{ $t('pos.done.sri') }}</span>
+        </div>
+        <button type="button" class="pk-banner__x" :aria-label="$t('common.close')" @click="pos.dismissLastSale()"><i class="mdi mdi-close" /></button>
       </div>
-      <div v-if="pos.lastSale.paymentMethodCode === '01' && pos.lastSale.receivedCents !== null">
-        {{ $t('pos.done.change', { change: money(pos.lastSale.changeCents) }) }}
+      <div v-if="mismatch && pos.lastSale" class="pk-banner pk-banner--warn" role="alert">
+        <i class="mdi mdi-alert-outline" />
+        <div class="pk-grow">{{ $t('pos.done.mismatch', { expected: money(pos.lastSale.expectedCents), total: money(pos.lastSale.totalCents) }) }}</div>
       </div>
-      <div class="text-caption">{{ $t('pos.done.sri') }}</div>
-    </v-alert>
-    <v-alert v-if="mismatch && pos.lastSale" type="warning" class="mb-4">
-      {{ $t('pos.done.mismatch', { expected: money(pos.lastSale.expectedCents), total: money(pos.lastSale.totalCents) }) }}
-    </v-alert>
+      <div v-if="notice" class="pk-banner pk-banner--warn" role="alert">
+        <i class="mdi mdi-alert-outline" />
+        <div class="pk-grow">{{ notice }}</div>
+        <button type="button" class="pk-banner__x" :aria-label="$t('common.close')" @click="notice = null"><i class="mdi mdi-close" /></button>
+      </div>
 
-    <v-row>
-      <v-col cols="12" md="7">
-        <PosProductSearch @add="onAdd" />
-      </v-col>
-      <v-col cols="12" md="5">
+      <div class="pk-body" :class="{ 'pk-body--cart-left': theme.config.layout.cartPosition === 'left' }">
+        <PosCatalog @add="onAdd" />
         <PosCart @charge="payOpen = true" />
-      </v-col>
-    </v-row>
+      </div>
+    </main>
+
+    <PosStatusBar v-if="theme.config.layout.statusBarPosition !== 'top'" />
 
     <PosSetupDialog v-model="setupOpen" />
     <PosPaymentDialog v-model="payOpen" />
-    <v-snackbar :model-value="!!notice" color="warning" @update:model-value="notice = null">{{ notice }}</v-snackbar>
   </div>
 </template>

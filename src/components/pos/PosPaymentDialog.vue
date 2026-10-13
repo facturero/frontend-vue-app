@@ -6,9 +6,9 @@ import { PAYMENT_METHODS, type PaymentMethodCode } from '@/types/pos';
 import { parseMoneyToCents } from '@/utils/pos-totals';
 
 /**
- * Cobro: elegir la forma de pago y, en efectivo, cuánto entrega el cliente para ver el vuelto. «Facturar» manda la venta; si
- * falla (se cayó la red, billing rechazó algo) el diálogo sigue abierto con el motivo y reintentar es seguro: la venta conserva
- * su id, así que billing devuelve la misma factura en vez de crear otra.
+ * «Confirmar cobro», como el modal de la caja de escritorio: el total, la forma de pago y, en efectivo, cuánto entrega el cliente
+ * para ver el vuelto. «Confirmar» manda la venta; si falla (se cayó la red, billing rechazó algo) el modal sigue abierto con el
+ * motivo y reintentar es seguro: la venta conserva su id, así que billing devuelve la misma factura en vez de crear otra.
  */
 const props = defineProps<{ modelValue: boolean }>();
 const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>();
@@ -38,8 +38,12 @@ watch(
   },
 );
 
-function method(code: PaymentMethodCode): void {
-  pos.setPaymentMethod(code);
+function setMethod(event: Event): void {
+  pos.setPaymentMethod((event.target as HTMLSelectElement).value as PaymentMethodCode);
+}
+
+function close(): void {
+  if (!pos.submitting) emit('update:modelValue', false);
 }
 
 async function confirm(): Promise<void> {
@@ -48,67 +52,59 @@ async function confirm(): Promise<void> {
     await pos.submit(isCash.value ? receivedCents.value : null);
     emit('update:modelValue', false);
   } catch {
-    // el motivo queda en pos.error y se muestra abajo; el diálogo sigue abierto para reintentar
+    // el motivo queda en pos.error y se muestra abajo; el modal sigue abierto para reintentar
   }
 }
 </script>
 
 <template>
-  <v-dialog :model-value="modelValue" :persistent="pos.submitting" @update:model-value="(v) => emit('update:modelValue', v)">
-    <v-card>
-      <v-card-title>{{ $t('pos.payment.title') }}</v-card-title>
-      <v-card-text>
-        <div class="d-flex justify-space-between align-baseline text-h5 font-weight-bold mb-4">
-          <span>{{ $t('pos.totals.total') }}</span>
-          <span>{{ money(total) }}</span>
+  <div v-if="modelValue" class="pk-overlay" @click.self="close" @keydown.esc="close">
+    <div class="pk-modal" role="dialog" aria-modal="true" :aria-label="$t('pos.payment.title')">
+      <h2 class="pk-modal__title">{{ $t('pos.payment.title') }}</h2>
+      <p class="pk-modal__total">{{ money(total) }}</p>
+
+      <label class="pk-label" for="pk-method">{{ $t('pos.payment.method') }}</label>
+      <select id="pk-method" class="pk-select" :value="pos.paymentMethodCode" :disabled="pos.submitting" @change="setMethod">
+        <option v-for="m in PAYMENT_METHODS" :key="m.code" :value="m.code">{{ $t(m.labelKey) }}</option>
+      </select>
+
+      <template v-if="isCash">
+        <label class="pk-label" for="pk-received">{{ $t('pos.payment.received') }}</label>
+        <input
+          id="pk-received"
+          v-model="received"
+          class="pk-input"
+          inputmode="decimal"
+          autofocus
+          autocomplete="off"
+          placeholder="0.00"
+          @keyup.enter="confirm"
+        />
+        <p v-if="insufficient" class="pk-error">{{ $t('pos.payment.insufficient') }}</p>
+        <div class="pk-quick">
+          <button type="button" @click="received = (total / 100).toFixed(2)">{{ $t('pos.payment.exact') }}</button>
+          <button v-for="c in quick" :key="c" type="button" @click="received = (c / 100).toFixed(2)">{{ money(c) }}</button>
         </div>
-
-        <div class="d-flex flex-wrap ga-2 mb-4">
-          <v-btn
-            v-for="m in PAYMENT_METHODS"
-            :key="m.code"
-            :prepend-icon="m.icon"
-            :variant="pos.paymentMethodCode === m.code ? 'flat' : 'tonal'"
-            :color="pos.paymentMethodCode === m.code ? 'primary' : undefined"
-            :disabled="pos.submitting"
-            @click="method(m.code)"
-          >
-            {{ $t(m.labelKey) }}
-          </v-btn>
+        <div v-if="typed && !insufficient" class="pk-change">
+          <span>{{ $t('pos.payment.change') }}</span>
+          <span>{{ money(change) }}</span>
         </div>
+      </template>
 
-        <template v-if="isCash">
-          <v-text-field
-            v-model="received"
-            :label="$t('pos.payment.received')"
-            prefix="$"
-            inputmode="decimal"
-            autofocus
-            :error-messages="insufficient ? [$t('pos.payment.insufficient')] : []"
-            @keyup.enter="confirm"
-          />
-          <div class="d-flex flex-wrap ga-2 mt-2">
-            <v-btn size="small" variant="tonal" @click="received = (total / 100).toFixed(2)">{{ $t('pos.payment.exact') }}</v-btn>
-            <v-btn v-for="c in quick" :key="c" size="small" variant="tonal" @click="received = (c / 100).toFixed(2)">{{ money(c) }}</v-btn>
-          </div>
-          <div v-if="typed && !insufficient" class="d-flex justify-space-between text-h6 mt-4">
-            <span>{{ $t('pos.payment.change') }}</span>
-            <span class="text-success">{{ money(change) }}</span>
-          </div>
-        </template>
+      <div v-if="pos.error" class="pk-banner pk-banner--err" :style="{ margin: '0 0 1rem' }" role="alert">
+        <div class="pk-grow">
+          <strong>{{ pos.errorIsNetwork ? $t('pos.payment.network') : pos.error }}</strong>
+          <span>{{ $t('pos.payment.retryHint') }}</span>
+        </div>
+      </div>
 
-        <v-alert v-if="pos.error" type="error" class="mt-4">
-          <div>{{ pos.errorIsNetwork ? $t('pos.payment.network') : pos.error }}</div>
-          <div class="text-caption">{{ $t('pos.payment.retryHint') }}</div>
-        </v-alert>
-      </v-card-text>
-      <v-card-actions class="flex-wrap ga-2">
-        <v-spacer />
-        <v-btn variant="text" :disabled="pos.submitting" @click="emit('update:modelValue', false)">{{ $t('common.cancel') }}</v-btn>
-        <v-btn color="primary" variant="tonal" :loading="pos.submitting" :disabled="insufficient || (!pos.canCharge && !pos.submitting)" @click="confirm">
-          {{ pos.error ? $t('pos.payment.retry') : $t('pos.payment.confirm') }}
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+      <div class="pk-modal__actions">
+        <button type="button" class="pk-btn pk-btn--alt" :disabled="pos.submitting" @click="close">{{ $t('common.cancel') }}</button>
+        <button type="button" class="pk-btn pk-btn--primary" :disabled="insufficient || pos.submitting || (!pos.canCharge && !pos.submitting)" @click="confirm">
+          <i class="mdi mdi-cash-register" />
+          {{ pos.submitting ? $t('pos.payment.processing') : pos.error ? $t('pos.payment.retry') : $t('pos.payment.confirm') }}
+        </button>
+      </div>
+    </div>
+  </div>
 </template>

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { isAllowedOnPosHost, isPosHost } from './host-mode';
-import { lineTotals, parseMoneyToCents, saleTotals } from './pos-totals';
+import { lineTotals, parseMoneyToCents, saleTotals, taxBreakdown } from './pos-totals';
 
 describe('dominio de la caja', () => {
   it.each([
@@ -84,4 +84,24 @@ describe('importes escritos por el cajero', () => {
   ])('%s → %s', (texto, centavos) => expect(parseMoneyToCents(texto)).toBe(centavos));
 
   it.each(['', 'abc', '-3', '1.234', '1,2,3', '1e3'])('«%s» no es un importe', (texto) => expect(parseMoneyToCents(texto)).toBeNull());
+});
+
+describe('desglose del IVA por tarifa', () => {
+  const line = (unitPriceCents: number, ratesPercent: number[], quantity = 1) => ({ quantity, unitPriceCents, discountCents: 0, priceIncludesTax: false, ratesPercent });
+
+  it('agrupa por tarifa, de mayor a menor, y la suma de los impuestos es el IVA de la venta', () => {
+    const lines = [line(1000, [15]), line(333, [15], 3), line(500, [0]), line(250, [5])];
+    const rows = taxBreakdown(lines);
+    expect(rows.map((r) => r.ratePercent)).toEqual([15, 5, 0]);
+    expect(rows.find((r) => r.ratePercent === 15)?.baseCents).toBe(1000 + 999);
+    expect(rows.reduce((sum, r) => sum + r.amountCents, 0)).toBe(saleTotals(lines).taxCents);
+  });
+
+  it('una venta de productos sin impuestos queda en una fila al 0 %', () => {
+    expect(taxBreakdown([line(500, [0])])).toEqual([{ ratePercent: 0, baseCents: 500, amountCents: 0 }]);
+  });
+
+  it('sin líneas no hay filas', () => {
+    expect(taxBreakdown([])).toEqual([]);
+  });
 });

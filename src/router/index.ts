@@ -40,7 +40,13 @@ import BusinessProfileRecommendationsView from '@/views/onboarding/BusinessProfi
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/login', name: 'login', component: AuthView },
+    // En el dominio de la caja el acceso es el de la caja de escritorio (tarjeta centrada con su marca), no el del CRM.
+    {
+      path: '/login',
+      name: 'login',
+      component: isPosHost() ? () => import('@/views/pos/PosLoginView.vue') : AuthView,
+      meta: { kiosk: isPosHost() },
+    },
     { path: '/accept-invite', name: 'accept-invite', component: AcceptInviteView },
     { path: '/restablecer-contrasena', name: 'reset-password', component: ResetPasswordView },
 
@@ -64,19 +70,20 @@ const router = createRouter({
 
     { path: '/', name: 'home', component: HomeView, meta: { requiresAuth: true } },
 
-    // Caja web. Carga perezosa: es una pantalla aparte que la mayoría del CRM no usa. `fluid`: ocupa todo el ancho.
+    // Caja web. Carga perezosa: es una pantalla aparte que la mayoría del CRM no usa. `kiosk`: ocupa toda la ventana, con su propia
+    // cabecera, sin el armazón del CRM (menú, barra superior, asistente).
     {
       path: '/pos',
       name: 'pos',
       component: () => import('@/views/pos/PosView.vue'),
-      meta: { requiresAuth: true, requiredPermission: 'invoice:create', requiredPlugin: 'pos.core', fluid: true },
+      meta: { requiresAuth: true, requiredPermission: 'invoice:create', requiredPlugin: 'pos.core', kiosk: true },
     },
     {
       // En el dominio de la caja no hay a dónde mandar a quien no puede usarla (el CRM no existe allí): se le explica y puede salir.
       path: '/pos/unavailable',
       name: 'pos-unavailable',
       component: () => import('@/views/pos/PosUnavailableView.vue'),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, kiosk: true },
     },
 
     {

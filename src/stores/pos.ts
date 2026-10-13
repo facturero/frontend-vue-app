@@ -4,7 +4,7 @@ import { posApi } from '@/api/pos';
 import { productApi } from '@/api/products';
 import { useAuthStore } from '@/stores/auth';
 import { extractError } from '@/utils/error';
-import { saleTotals } from '@/utils/pos-totals';
+import { saleTotals, taxBreakdown } from '@/utils/pos-totals';
 import type { FromPosBody, PaymentMethodCode, PosCustomer, PosLine, PosSaleResult } from '@/types/pos';
 import type { ProductSummary } from '@/types/products';
 
@@ -115,6 +115,10 @@ export const usePosStore = defineStore('pos', () => {
 
   // ── Totales ───────────────────────────────────────────────────────────────────────────────────────────────────────────
   const totals = computed(() => saleTotals(lines.value));
+  /** El IVA por tarifa, para enseñar «IVA 15 % (base …)» como la caja de escritorio. */
+  const taxRows = computed(() => taxBreakdown(lines.value));
+  /** Lo descontado en total, en los mismos términos que el precio de lista (con IVA si el precio lo incluye): es lo que escribe el cajero. */
+  const discountTotalCents = computed(() => lines.value.reduce((sum, l) => sum + l.discountCents, 0));
   const itemCount = computed(() => lines.value.reduce((sum, l) => sum + l.quantity, 0));
   const canCharge = computed(() => lines.value.length > 0 && !!point.value && totals.value.totalCents > 0 && !submitting.value);
 
@@ -282,7 +286,7 @@ export const usePosStore = defineStore('pos', () => {
 
   return {
     terminalId, point, lines, customer, paymentMethodCode, posSaleId, submitting, error, errorIsNetwork, lastSale,
-    totals, itemCount, canCharge,
+    totals, taxRows, discountTotalCents, itemCount, canCharge,
     init, selectPoint, addProduct, setQuantity, setDiscount, removeLine, setCustomer, setPaymentMethod, clearSale, dismissLastSale, submit,
   };
 });

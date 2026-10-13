@@ -278,3 +278,20 @@ previa**, y por eso vive aislada.
 - **Defaults = aspecto actual del POS:** el tema "Clásico" reproduce los colores y la
   distribución que la caja tiene hoy (paleta gray/blue de Tailwind). Si se toca, hay
   que tocar también el tema integrado del POS.
+
+## La caja web no usa el sistema de UI del CRM (`/pos`, `pos.noahsolution.com`)
+
+La pantalla de caja es **la misma que la de escritorio** (`pos/frontend`) y su aspecto lo decide el **tema de la organización**
+(colores, radio, densidad, ancho del carrito, columnas, logo), no `vuetify.ts`. Por eso es la segunda excepción deliberada:
+
+- **No lleva Vuetify**: ni `<PageHeader>` ni `v-card`/`v-btn`. Los defaults globales (radio de 7 px, sombras, color del CRM) la
+  falsearían. Se escribe con HTML y clases `pk-*`.
+- **Sus estilos viven en `src/styles/pos-kiosk.css`**, no en un `<style>` de la vista (que `lint:ui` prohíbe). Cada clase `pk-*` lleva el
+  mismo valor que su equivalente Tailwind de la caja de escritorio (`px-3 py-2` → `calc(var(--u) * 3)`…). Si se cambia algo allí, hay
+  que cambiarlo aquí también: la gracia es que se vean igual.
+- **Los colores son variables CSS** (`--c-*`, `--r-*`, `--dens`…) que `utils/pos-theme.ts` deriva del tema y `PosView` pone en su raíz
+  `.pk` por `:style`. Es el mismo cálculo que `pos/frontend/src/theme/theme.ts`: no se escribe ningún hexadecimal a mano.
+- **El tema se pide al CRM** con la sesión de quien vende (`GET /establishments/:e/billing-points/:p/theme`, el mismo que usa la caja de
+  escritorio); sin permiso (`organization:read`) o sin red se ve con el tema integrado «Clásico» y sigue funcionando.
+- **Ruta con `meta.kiosk`**: ocupa toda la ventana, sin menú, barra superior ni asistente del CRM, y no lanza el recorrido guiado.
+

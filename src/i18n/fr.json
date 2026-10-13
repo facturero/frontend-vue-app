@@ -922,34 +922,46 @@
     },
     "search": {
       "label": "Rechercher un produit",
-      "placeholder": "Nom ou code-barres",
+      "placeholder": "Rechercher un produit, un SKU ou un code-barres...",
       "error": "Le catalogue n'a pas pu être chargé.",
       "empty": "Aucun produit ne correspond.",
-      "noPrice": "Sans prix"
+      "noPrice": "Sans prix",
+      "all": "Tous",
+      "loading": "Chargement...",
+      "more": "Charger plus",
+      "showImages": "Afficher les images",
+      "hideImages": "Masquer les images"
     },
     "customer": {
       "label": "Client",
-      "final": "Consommateur final",
-      "hint": "Saisissez au moins 2 lettres du nom ou de l'identification"
+      "final": "Sans client, la vente est facturée au Consommateur final",
+      "hint": "Saisissez au moins 2 lettres du nom ou de l'identification",
+      "placeholder": "Rechercher un client (nom, identifiant, e-mail)...",
+      "searching": "Recherche...",
+      "remove": "Retirer le client"
     },
     "cart": {
-      "title": "Vente",
+      "title": "Panier",
       "items": "{count} article | {count} articles",
       "clear": "Vider",
-      "empty": "Ajoutez des produits pour commencer la vente.",
+      "empty": "Ajoutez des produits en touchant le catalogue",
       "remove": "Retirer",
       "less": "Moins",
       "more": "Plus",
       "quantity": "Qté",
-      "discount": "Rem."
+      "discount": "Remise",
+      "each": "pièce"
     },
     "totals": {
-      "subtotal": "Sous-total",
+      "subtotal": "Sous-total (hors TVA)",
       "tax": "Taxes",
-      "total": "Total"
+      "total": "Total",
+      "discount": "Remise incluse",
+      "vat": "TVA",
+      "base": "base"
     },
     "payment": {
-      "title": "Encaisser",
+      "title": "Confirmer le paiement",
       "cash": "Espèces",
       "debit": "Carte de débit",
       "credit": "Carte de crédit",
@@ -958,10 +970,12 @@
       "insufficient": "Le montant reçu ne suffit pas",
       "exact": "Exact",
       "change": "Monnaie à rendre",
-      "confirm": "Facturer",
+      "confirm": "Confirmer",
       "retry": "Réessayer",
       "network": "Pas de connexion au serveur. Vérifiez votre internet et réessayez.",
-      "retryHint": "La facture ne sera pas dupliquée : la vente conserve son identifiant."
+      "retryHint": "La facture ne sera pas dupliquée : la vente conserve son identifiant.",
+      "method": "Mode de paiement",
+      "processing": "Traitement..."
     },
     "done": {
       "title": "Facture {number} émise pour {total}",
@@ -979,6 +993,28 @@
       "plugin": "Votre organisation n'a pas activé le module de point de vente. Demandez à un administrateur de l'activer depuis le CRM.",
       "permission": "Votre utilisateur n'est pas autorisé à facturer. Demandez à un administrateur de vous attribuer un rôle avec cette permission.",
       "home": "Aller au CRM"
+    },
+    "brand": {
+      "byline": "un produit de noahsolutions"
+    },
+    "header": {
+      "crm": "Aller au CRM",
+      "logout": "Quitter"
+    },
+    "login": {
+      "title": "Connexion",
+      "email": "E-mail",
+      "password": "Mot de passe",
+      "submit": "Se connecter",
+      "submitting": "Connexion..."
+    },
+    "status": {
+      "web": "Caisse web",
+      "dev": "développement",
+      "online": "En ligne",
+      "offline": "Hors ligne",
+      "lightMode": "Mode clair",
+      "darkMode": "Mode sombre"
     }
   },
   "posThemes": {

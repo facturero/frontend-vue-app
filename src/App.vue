@@ -23,6 +23,8 @@ const { startTour } = useAppTour();
 const { mobile } = useDisplay();
 const bareShell = useBareShell();
 
+/** La caja web (y su acceso en el dominio `pos.`) ocupa toda la ventana con su propia cabecera: sin el armazón del CRM. */
+const kiosk = computed(() => route.meta.kiosk === true);
 const showShell = computed(() => !!route.meta.requiresAuth);
 
 /**
@@ -38,10 +40,11 @@ const showShell = computed(() => !!route.meta.requiresAuth);
 const autoStarted = ref(false);
 
 watch(
-  [showShell, () => auth.user, () => plugins.myLoaded, () => auth.needsOrgSetup, () => route.name],
+  [showShell, kiosk, () => auth.user, () => plugins.myLoaded, () => auth.needsOrgSetup, () => route.name],
   () => {
     if (autoStarted.value) return;
-    if (showShell.value && auth.user && plugins.myLoaded && !auth.needsOrgSetup && !bareShell.value) {
+    // El recorrido guiado es del CRM: en la caja (pantalla completa, sin menú) taparía la venta con su capa.
+    if (showShell.value && !kiosk.value && auth.user && plugins.myLoaded && !auth.needsOrgSetup && !bareShell.value) {
       autoStarted.value = true;
       if (shouldAutoStartTour(auth.user.id, 'app')) startTour();
     }
@@ -58,7 +61,10 @@ watch(
 
 <template>
   <v-app>
-    <template v-if="showShell">
+    <template v-if="kiosk">
+      <router-view />
+    </template>
+    <template v-else-if="showShell">
       <AppNavigationDrawer v-if="!bareShell" />
       <AppTopBar />
       <AssistantPanel v-if="!bareShell" />
@@ -79,7 +85,7 @@ watch(
       <v-main>
         <!-- En el teléfono el contenedor de aquí no lleva relleno: cada vista trae el suyo y, sumados, eran 32 px por lado. `pb-16` deja sitio
              al botón flotante del asistente, que si no tapa el final de cada pantalla. -->
-        <v-container :fluid="mobile || route.meta.fluid === true" :class="mobile ? 'pa-0 pb-16' : undefined">
+        <v-container :fluid="mobile" :class="mobile ? 'pa-0 pb-16' : undefined">
           <router-view />
         </v-container>
       </v-main>

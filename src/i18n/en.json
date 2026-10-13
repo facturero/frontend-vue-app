@@ -922,34 +922,46 @@
     },
     "search": {
       "label": "Search product",
-      "placeholder": "Name or barcode",
+      "placeholder": "Search product, SKU or barcode...",
       "error": "The catalog could not be loaded.",
       "empty": "No products match.",
-      "noPrice": "No price"
+      "noPrice": "No price",
+      "all": "All",
+      "loading": "Loading...",
+      "more": "Load more",
+      "showImages": "Show images",
+      "hideImages": "Hide images"
     },
     "customer": {
       "label": "Customer",
-      "final": "Final consumer",
-      "hint": "Type at least 2 letters of the name or the ID number"
+      "final": "Without a customer, the sale is invoiced to Final consumer",
+      "hint": "Type at least 2 letters of the name or the ID number",
+      "placeholder": "Search customer (name, tax ID, email)...",
+      "searching": "Searching...",
+      "remove": "Remove customer"
     },
     "cart": {
-      "title": "Sale",
+      "title": "Cart",
       "items": "{count} item | {count} items",
       "clear": "Clear",
-      "empty": "Add products to start the sale.",
+      "empty": "Add products by tapping the catalog",
       "remove": "Remove",
       "less": "Less",
       "more": "More",
       "quantity": "Qty",
-      "discount": "Disc."
+      "discount": "Disc.",
+      "each": "each"
     },
     "totals": {
-      "subtotal": "Subtotal",
+      "subtotal": "Subtotal (excl. VAT)",
       "tax": "Taxes",
-      "total": "Total"
+      "total": "Total",
+      "discount": "Discount included",
+      "vat": "VAT",
+      "base": "base"
     },
     "payment": {
-      "title": "Charge",
+      "title": "Confirm payment",
       "cash": "Cash",
       "debit": "Debit card",
       "credit": "Credit card",
@@ -958,10 +970,12 @@
       "insufficient": "The amount received is not enough",
       "exact": "Exact",
       "change": "Change",
-      "confirm": "Issue invoice",
+      "confirm": "Confirm",
       "retry": "Retry",
       "network": "There is no connection to the server. Check your internet and retry.",
-      "retryHint": "The invoice will not be duplicated: the sale keeps its identifier."
+      "retryHint": "The invoice will not be duplicated: the sale keeps its identifier.",
+      "method": "Payment method",
+      "processing": "Processing..."
     },
     "done": {
       "title": "Invoice {number} issued for {total}",
@@ -979,6 +993,28 @@
       "plugin": "Your organization does not have the point-of-sale module active. Ask an administrator to activate it from the CRM.",
       "permission": "Your user is not allowed to issue invoices. Ask an administrator to give you a role with that permission.",
       "home": "Go to the CRM"
+    },
+    "brand": {
+      "byline": "a noahsolutions product"
+    },
+    "header": {
+      "crm": "Go to CRM",
+      "logout": "Sign out"
+    },
+    "login": {
+      "title": "Sign in",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "submitting": "Signing in..."
+    },
+    "status": {
+      "web": "Web POS",
+      "dev": "development",
+      "online": "Online",
+      "offline": "Offline",
+      "lightMode": "Light mode",
+      "darkMode": "Dark mode"
     }
   },
   "posThemes": {

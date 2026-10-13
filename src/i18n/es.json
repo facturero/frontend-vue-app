@@ -922,34 +922,46 @@
     },
     "search": {
       "label": "Buscar producto",
-      "placeholder": "Nombre o código de barras",
+      "placeholder": "Buscar producto, SKU o código de barras...",
       "error": "No se pudo cargar el catálogo.",
       "empty": "No hay productos que coincidan.",
-      "noPrice": "Sin precio"
+      "noPrice": "Sin precio",
+      "all": "Todos",
+      "loading": "Cargando...",
+      "more": "Cargar más",
+      "showImages": "Mostrar imágenes",
+      "hideImages": "Ocultar imágenes"
     },
     "customer": {
       "label": "Cliente",
-      "final": "Consumidor final",
-      "hint": "Escribe al menos 2 letras del nombre o de la identificación"
+      "final": "Sin cliente se factura a Consumidor final",
+      "hint": "Escribe al menos 2 letras del nombre o de la identificación",
+      "placeholder": "Buscar cliente (nombre, RUC, email)...",
+      "searching": "Buscando...",
+      "remove": "Quitar cliente"
     },
     "cart": {
-      "title": "Venta",
+      "title": "Carrito",
       "items": "{count} artículo | {count} artículos",
       "clear": "Vaciar",
-      "empty": "Agrega productos para empezar la venta.",
+      "empty": "Agrega productos tocando el catálogo",
       "remove": "Quitar",
       "less": "Menos",
       "more": "Más",
       "quantity": "Cant.",
-      "discount": "Desc."
+      "discount": "Desc.",
+      "each": "c/u"
     },
     "totals": {
-      "subtotal": "Subtotal",
+      "subtotal": "Subtotal (sin IVA)",
       "tax": "Impuestos",
-      "total": "Total"
+      "total": "Total",
+      "discount": "Descuento incluido",
+      "vat": "IVA",
+      "base": "base"
     },
     "payment": {
-      "title": "Cobrar",
+      "title": "Confirmar cobro",
       "cash": "Efectivo",
       "debit": "Tarjeta de débito",
       "credit": "Tarjeta de crédito",
@@ -958,10 +970,12 @@
       "insufficient": "El monto recibido no alcanza",
       "exact": "Exacto",
       "change": "Vuelto",
-      "confirm": "Facturar",
+      "confirm": "Confirmar",
       "retry": "Reintentar",
       "network": "No hay conexión con el servidor. Revisa tu internet y reintenta.",
-      "retryHint": "No se duplicará la factura: la venta conserva su identificador."
+      "retryHint": "No se duplicará la factura: la venta conserva su identificador.",
+      "method": "Método de pago",
+      "processing": "Procesando..."
     },
     "done": {
       "title": "Factura {number} emitida por {total}",
@@ -979,6 +993,28 @@
       "plugin": "Tu organización no tiene activo el módulo de punto de venta. Pídele a un administrador que lo active desde el CRM.",
       "permission": "Tu usuario no tiene permiso para facturar. Pídele a un administrador que te asigne un rol con ese permiso.",
       "home": "Ir al CRM"
+    },
+    "brand": {
+      "byline": "un producto de noahsolutions"
+    },
+    "header": {
+      "crm": "Ir al CRM",
+      "logout": "Salir"
+    },
+    "login": {
+      "title": "Iniciar sesión",
+      "email": "Correo",
+      "password": "Contraseña",
+      "submit": "Ingresar",
+      "submitting": "Ingresando..."
+    },
+    "status": {
+      "web": "Caja web",
+      "dev": "desarrollo",
+      "online": "En línea",
+      "offline": "Sin conexión",
+      "lightMode": "Modo claro",
+      "darkMode": "Modo oscuro"
     }
   },
   "posThemes": {
