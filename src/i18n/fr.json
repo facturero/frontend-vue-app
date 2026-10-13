@@ -988,25 +988,9 @@
       "taxes": "Les taxes de « {name} » n’ont pas pu être chargées.",
       "error": "« {name} » n’a pas pu être ajouté. Veuillez réessayer."
     },
-    "unavailable": {
-      "title": "Caisse indisponible",
-      "plugin": "Votre organisation n'a pas activé le module de point de vente. Demandez à un administrateur de l'activer depuis le CRM.",
-      "permission": "Votre utilisateur n'est pas autorisé à facturer. Demandez à un administrateur de vous attribuer un rôle avec cette permission.",
-      "home": "Aller au CRM"
-    },
-    "brand": {
-      "byline": "un produit de noahsolutions"
-    },
     "header": {
       "crm": "Aller au CRM",
       "logout": "Quitter"
-    },
-    "login": {
-      "title": "Connexion",
-      "email": "E-mail",
-      "password": "Mot de passe",
-      "submit": "Se connecter",
-      "submitting": "Connexion..."
     },
     "status": {
       "web": "Caisse web",

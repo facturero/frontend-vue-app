@@ -3,7 +3,6 @@ import { getAccessToken } from '@/utils/http';
 import { connectRealtime, disconnectRealtime } from '@/utils/realtime';
 import { useAuthStore } from '@/stores/auth';
 import { usePluginsStore } from '@/stores/plugins';
-import { isAllowedOnPosHost, isPosHost } from '@/utils/host-mode';
 import AuthView from '@/views/AuthView.vue';
 import AcceptInviteView from '@/views/AcceptInviteView.vue';
 import ResetPasswordView from '@/views/ResetPasswordView.vue';
@@ -40,13 +39,7 @@ import BusinessProfileRecommendationsView from '@/views/onboarding/BusinessProfi
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    // En el dominio de la caja el acceso es el de la caja de escritorio (tarjeta centrada con su marca), no el del CRM.
-    {
-      path: '/login',
-      name: 'login',
-      component: isPosHost() ? () => import('@/views/pos/PosLoginView.vue') : AuthView,
-      meta: { kiosk: isPosHost() },
-    },
+    { path: '/login', name: 'login', component: AuthView },
     { path: '/accept-invite', name: 'accept-invite', component: AcceptInviteView },
     { path: '/restablecer-contrasena', name: 'reset-password', component: ResetPasswordView },
 
@@ -70,20 +63,13 @@ const router = createRouter({
 
     { path: '/', name: 'home', component: HomeView, meta: { requiresAuth: true } },
 
-    // Caja web. Carga perezosa: es una pantalla aparte que la mayoría del CRM no usa. `kiosk`: ocupa toda la ventana, con su propia
+    // Caja web (la misma pantalla que la caja de escritorio, dentro del CRM). Carga perezosa: es una pantalla aparte que la mayoría del CRM no usa. `kiosk`: ocupa toda la ventana, con su propia
     // cabecera, sin el armazón del CRM (menú, barra superior, asistente).
     {
       path: '/pos',
       name: 'pos',
       component: () => import('@/views/pos/PosView.vue'),
       meta: { requiresAuth: true, requiredPermission: 'invoice:create', requiredPlugin: 'pos.core', kiosk: true },
-    },
-    {
-      // En el dominio de la caja no hay a dónde mandar a quien no puede usarla (el CRM no existe allí): se le explica y puede salir.
-      path: '/pos/unavailable',
-      name: 'pos-unavailable',
-      component: () => import('@/views/pos/PosUnavailableView.vue'),
-      meta: { requiresAuth: true, kiosk: true },
     },
 
     {
@@ -311,8 +297,6 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to) => {
-  // En el dominio de la caja solo existen la caja y el acceso: cualquier otra ruta (el inicio incluido) lleva a la caja.
-  if (isPosHost() && !isAllowedOnPosHost(to.path)) return { path: '/pos' };
   const authenticated = !!getAccessToken();
   if (to.meta.requiresAuth && !authenticated) {
     disconnectRealtime();
@@ -336,7 +320,7 @@ router.beforeEach(async (to) => {
 
     const requiredPermission = to.meta.requiredPermission as string | undefined;
     if (requiredPermission && !auth.can(requiredPermission)) {
-      return isPosHost() ? { path: '/pos/unavailable', query: { reason: 'permission' } } : { name: 'home' };
+      return { name: 'home' };
     }
 
     // Los plugins son por organización: sin una todavía (usuario en pleno
@@ -354,7 +338,7 @@ router.beforeEach(async (to) => {
       // esto solo evita mostrar una vista que no podría cargar datos.
       const requiredPlugin = to.meta.requiredPlugin as string | undefined;
       if (requiredPlugin && !plugins.isActive(requiredPlugin)) {
-        return isPosHost() ? { path: '/pos/unavailable', query: { reason: 'plugin' } } : { name: 'plugins' };
+        return { name: 'plugins' };
       }
     }
   }

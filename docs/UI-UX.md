@@ -279,7 +279,7 @@ previa**, y por eso vive aislada.
   distribución que la caja tiene hoy (paleta gray/blue de Tailwind). Si se toca, hay
   que tocar también el tema integrado del POS.
 
-## La caja web no usa el sistema de UI del CRM (`/pos`, `pos.noahsolution.com`)
+## La caja web no usa el sistema de UI del CRM (`/pos`)
 
 La pantalla de caja es **la misma que la de escritorio** (`pos/frontend`) y su aspecto lo decide el **tema de la organización**
 (colores, radio, densidad, ancho del carrito, columnas, logo), no `vuetify.ts`. Por eso es la segunda excepción deliberada:

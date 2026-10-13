@@ -267,12 +267,6 @@
   color: rgb(var(--c-ink));
   margin-left: 0.28em;
 }
-.pk-brand__by {
-  margin-top: 0.25rem;
-  font-size: 0.75em;
-  font-style: italic;
-  color: rgb(var(--c-muted));
-}
 .pk-brand__img {
   object-fit: contain;
   max-width: 200px;
@@ -882,33 +876,6 @@
 }
 .pk-tone-bad {
   color: rgb(var(--c-danger));
-}
-
-/* ── Acceso ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
-.pk-login__card {
-  background: rgb(var(--c-surface));
-  box-shadow: var(--sh-sm);
-  border: var(--bw, 1px) solid rgb(var(--c-line));
-  border-radius: var(--r-xl);
-  padding: 2rem;
-  width: 100%;
-  max-width: 24rem;
-}
-.pk-login__logo {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 1.25rem;
-}
-.pk-login__title {
-  font-size: 1.25em;
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-.pk-login__field {
-  margin-bottom: 1rem;
-}
-.pk-login__card .pk-error {
-  margin-bottom: 1rem;
 }
 
 /* ── Pantallas anchas / angostas ─────────────────────────────────────────────────────────────────────────────────── */

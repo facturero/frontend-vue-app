@@ -15,9 +15,9 @@ import type { ProductSummary } from '@/types/products';
 import '@/styles/pos-kiosk.css';
 
 /**
- * Caja web (`/pos`, y única pantalla del dominio `pos.`): la misma pantalla que la caja de escritorio (cabecera, catálogo con
+ * Caja web (`/pos` dentro del CRM): la misma pantalla que la caja de escritorio (cabecera, catálogo con
  * categorías, carrito a un lado, barra de estado) pintada con el tema de la organización, para vender y facturar desde una laptop con
- * la sesión de quien vende. La organización la pone el JWT, así que el mismo dominio sirve a todas; nada se configura por
+ * la sesión de quien vende. La organización la pone el JWT, así que sirve a todas por igual; nada se configura por
  * organización. Sin modo sin conexión: si no hay internet no se factura. Ver docs/POS-WEB.md.
  */
 const { t } = useI18n();

@@ -1,4 +1,4 @@
-# Caja web (`pos.noahsolution.com`)
+# Caja web (`/pos` dentro del CRM)
 
 Vender y facturar desde el navegador de una laptop. **No es el POS de escritorio** (`pos/`, con base local, sincronización y
 emparejamiento): no lo reemplaza ni lo toca. Aquí hay internet siempre, así que no hay modo sin conexión.
@@ -6,7 +6,7 @@ emparejamiento): no lo reemplaza ni lo toca. Aquí hay internet siempre, así qu
 ## Cómo funciona con varias organizaciones
 
 No hay nada que configurar por organización. Cada cajero entra con su correo y contraseña; su JWT trae la organización y el gateway
-filtra todo por ella (catálogo, clientes, puntos de emisión, facturas). Un mismo dominio sirve a todas las empresas.
+filtra todo por ella (catálogo, clientes, puntos de emisión, facturas). La misma ruta sirve a todas las empresas.
 
 Hoy un usuario pertenece a **una** organización. Que una misma persona maneje varias (un contador) exigiría membresías y cambio de
 organización con un token nuevo: no existe y no se hizo aquí.
@@ -19,11 +19,11 @@ organización con un token nuevo: no existe y no se hizo aquí.
 | Aspecto | `src/styles/pos-kiosk.css`, `src/utils/pos-theme.ts`, `src/stores/posCashierTheme.ts` | Mismo diseño y mismo tema que la caja de escritorio (ver «Aspecto») |
 | Estado de la venta | `src/stores/pos.ts` | Carrito, id de venta, borrador, cobro |
 | Totales | `src/utils/pos-totals.ts` | Mismo cálculo que billing (ver abajo) |
-| Modo por dominio | `src/utils/host-mode.ts` + `router/index.ts` | En `pos.` solo existe la caja |
 | Facturar | `POST /invoices/from-pos` (billing-service) | Crea y emite la factura en una transacción |
 
-El mismo bundle se sirve en `crm.` y `pos.`. En `pos.` el router lleva cualquier ruta a `/pos` (el CRM no existe allí) y la caja se
-muestra sin menú lateral. En `crm.` la caja es la ruta `/pos`, con su ítem en el menú (módulo `pos.core`, permiso `invoice:create`).
+La caja es la ruta `/pos` del CRM (módulo `pos.core`, permiso `invoice:create`), con su ítem en el menú. Ocupa toda la ventana con su
+propia cabecera (`meta.kiosk`: sin menú lateral ni asistente) y un enlace «Ir al CRM» para volver. No hay un dominio aparte: se pensó
+`pos.noahsolution.com` y se descartó porque `crm.` ya lo cubre.
 
 ## Aspecto: igual que la caja de escritorio
 
@@ -66,8 +66,8 @@ La caja ofrece los códigos de la Tabla 24 del SRI: `01` efectivo, `16` débito,
 ## Permisos del cajero
 
 Para usarla, el rol necesita: `invoice:create` e `invoice:issue` (billing exige ambos en `from-pos`), `product:read`, `customer:read` y
-`establishment:read` (para elegir el punto de emisión) y, para ver el tema de su organización, `organization:read`. La organización necesita el módulo `pos.core` activo. Si falta algo, en `pos.` la
-persona ve una pantalla que lo explica (`/pos/unavailable`) en vez de rebotar entre rutas.
+`establishment:read` (para elegir el punto de emisión) y, para ver el tema de su organización, `organization:read`. La organización necesita el módulo `pos.core` activo. Si falta el permiso, el CRM
+lleva al inicio; si falta el módulo, a la pantalla de módulos para activarlo.
 
 ## Punto de emisión
 
@@ -75,14 +75,10 @@ Cada equipo elige al empezar un establecimiento y un punto de emisión **de tipo
 Cada punto tiene su propia numeración, así que lo ideal es uno por computador; dos equipos sobre el mismo punto funcionan pero se
 pelean por la secuencia. Se recuerda por usuario y organización.
 
-## Puesta en marcha del dominio (infraestructura)
+## Despliegue
 
-1. **Cloudflare**: en el túnel, añadir el hostname público `pos.noahsolution.com` → `http://localhost:80` (igual que `crm`).
-2. **Ingress** (`k8s/ingress.yaml`, cifrado con SOPS): añadir una regla para el host `pos.noahsolution.com` que apunte al mismo servicio del
-   frontend. Se edita con `sops` en el servidor (ahí está la clave age).
-3. **Gateway**: `CORS_ORIGIN` ya incluye `https://pos.noahsolution.com` en `api-gateway-node/k8s/deployment.yaml`.
-
-Orden de despliegue: `billing-service` (migración que añade una columna nula), `organization-service` (el tema para puntos web), `api-gateway-node` y por último `frontend`.
+Orden: `billing-service` (migración que añade una columna nula), `organization-service` (el tema para puntos web) y `frontend`. No hay
+infraestructura nueva: es una ruta del CRM.
 
 ## Lo que no hace (todavía)
 

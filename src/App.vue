@@ -23,7 +23,7 @@ const { startTour } = useAppTour();
 const { mobile } = useDisplay();
 const bareShell = useBareShell();
 
-/** La caja web (y su acceso en el dominio `pos.`) ocupa toda la ventana con su propia cabecera: sin el armazón del CRM. */
+/** La caja web (`/pos`) ocupa toda la ventana con su propia cabecera: sin el armazón del CRM. */
 const kiosk = computed(() => route.meta.kiosk === true);
 const showShell = computed(() => !!route.meta.requiresAuth);
 

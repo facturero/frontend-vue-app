@@ -9,7 +9,7 @@ import { POS_THEME_LOGO_HEIGHT_PX } from '@/types/posTheme';
  * igual que en la caja de escritorio. Se dibuja SIEMPRE con <img> (un SVG cargado así no ejecuta scripts); si la imagen aún no
  * baja o falla, se muestra el logotipo: el encabezado nunca queda vacío.
  */
-const props = withDefaults(defineProps<{ height?: number; byline?: boolean }>(), { height: undefined, byline: false });
+const props = withDefaults(defineProps<{ height?: number }>(), { height: undefined });
 
 const theme = usePosCashierThemeStore();
 const px = computed(() => props.height ?? POS_THEME_LOGO_HEIGHT_PX[theme.config.branding.logoSize]);
@@ -65,6 +65,5 @@ watch([px, showImage], () => void nextTick(measureInk));
       </span>
       <span ref="wordText" class="pk-brand__word" :style="{ transform: `translateY(${wordShiftEm}em)` }">KIOSKO</span>
     </span>
-    <span v-if="byline" class="pk-brand__by">{{ $t('pos.brand.byline') }}</span>
   </span>
 </template>

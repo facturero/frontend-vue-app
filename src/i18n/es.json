@@ -988,25 +988,9 @@
       "taxes": "No se pudieron cargar los impuestos de «{name}».",
       "error": "No se pudo agregar «{name}». Inténtalo de nuevo."
     },
-    "unavailable": {
-      "title": "Caja no disponible",
-      "plugin": "Tu organización no tiene activo el módulo de punto de venta. Pídele a un administrador que lo active desde el CRM.",
-      "permission": "Tu usuario no tiene permiso para facturar. Pídele a un administrador que te asigne un rol con ese permiso.",
-      "home": "Ir al CRM"
-    },
-    "brand": {
-      "byline": "un producto de noahsolutions"
-    },
     "header": {
       "crm": "Ir al CRM",
       "logout": "Salir"
-    },
-    "login": {
-      "title": "Iniciar sesión",
-      "email": "Correo",
-      "password": "Contraseña",
-      "submit": "Ingresar",
-      "submitting": "Ingresando..."
     },
     "status": {
       "web": "Caja web",

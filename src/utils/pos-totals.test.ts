@@ -1,22 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { isAllowedOnPosHost, isPosHost } from './host-mode';
 import { lineTotals, parseMoneyToCents, saleTotals, taxBreakdown } from './pos-totals';
-
-describe('dominio de la caja', () => {
-  it.each([
-    ['pos.noahsolution.com', true],
-    ['POS.noahsolution.com', true],
-    ['crm.noahsolution.com', false],
-    ['localhost', false],
-    ['posible.example.com', false],
-    ['', false],
-  ])('%s → %s', (host, esperado) => expect(isPosHost(host)).toBe(esperado));
-
-  it('en pos. solo existen la caja y las pantallas de acceso', () => {
-    for (const ruta of ['/pos', '/pos/', '/pos/unavailable', '/login', '/accept-invite', '/restablecer-contrasena', '/profile', '/organization/settings']) expect(isAllowedOnPosHost(ruta), ruta).toBe(true);
-    for (const ruta of ['/', '/invoices', '/customers/123', '/settings', '/posx', '/plugins']) expect(isAllowedOnPosHost(ruta), ruta).toBe(false);
-  });
-});
 
 // Mismos casos que billing-service: lo que se le dice al cliente tiene que ser la factura.
 describe('totales de la venta (igual que billing-service)', () => {

@@ -988,25 +988,9 @@
       "taxes": "The taxes of “{name}” could not be loaded.",
       "error": "“{name}” could not be added. Please try again."
     },
-    "unavailable": {
-      "title": "Register not available",
-      "plugin": "Your organization does not have the point-of-sale module active. Ask an administrator to activate it from the CRM.",
-      "permission": "Your user is not allowed to issue invoices. Ask an administrator to give you a role with that permission.",
-      "home": "Go to the CRM"
-    },
-    "brand": {
-      "byline": "a noahsolutions product"
-    },
     "header": {
       "crm": "Go to CRM",
       "logout": "Sign out"
-    },
-    "login": {
-      "title": "Sign in",
-      "email": "Email",
-      "password": "Password",
-      "submit": "Sign in",
-      "submitting": "Signing in..."
     },
     "status": {
       "web": "Web POS",
