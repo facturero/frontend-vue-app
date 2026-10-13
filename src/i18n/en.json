@@ -675,6 +675,7 @@
     "invoices": "Invoices",
     "menu": "Menu",
     "plugins": "Plugins",
+    "pos": "Point of sale",
     "products": "Products",
     "roles": "Roles",
     "settings": "Settings",
@@ -904,6 +905,81 @@
     "trialBanner": "Free trial: {days} days left (until {date}). While it lasts, activate any modules you like at no cost.",
     "trialEnded": "Your free trial ended on {date}. Active modules are billed at their monthly price.",
     "trialQuote": "You pay $0.00 today: you are on your free trial until {date} ({days} days). After that, the total above is charged every month."
+  },
+  "pos": {
+    "title": "Point of sale",
+    "subtitle": "Emission point {point} · device {terminal}",
+    "charge": "Charge",
+    "setup": {
+      "title": "Emission point for this register",
+      "intro": "Choose which establishment and emission point invoices are issued from on this device. Each point has its own numbering: ideally one per computer.",
+      "establishment": "Establishment",
+      "point": "Emission point",
+      "noPoints": "This establishment has no active web emission points. Ask an administrator to create one in Settings → Establishments.",
+      "save": "Use this point",
+      "change": "Change point",
+      "required": "Choose an emission point to be able to charge."
+    },
+    "search": {
+      "label": "Search product",
+      "placeholder": "Name or barcode",
+      "error": "The catalog could not be loaded.",
+      "empty": "No products match.",
+      "noPrice": "No price"
+    },
+    "customer": {
+      "label": "Customer",
+      "final": "Final consumer",
+      "hint": "Type at least 2 letters of the name or the ID number"
+    },
+    "cart": {
+      "title": "Sale",
+      "items": "{count} item | {count} items",
+      "clear": "Clear",
+      "empty": "Add products to start the sale.",
+      "remove": "Remove",
+      "less": "Less",
+      "more": "More",
+      "quantity": "Qty",
+      "discount": "Disc."
+    },
+    "totals": {
+      "subtotal": "Subtotal",
+      "tax": "Taxes",
+      "total": "Total"
+    },
+    "payment": {
+      "title": "Charge",
+      "cash": "Cash",
+      "debit": "Debit card",
+      "credit": "Credit card",
+      "transfer": "Transfer",
+      "received": "Received",
+      "insufficient": "The amount received is not enough",
+      "exact": "Exact",
+      "change": "Change",
+      "confirm": "Issue invoice",
+      "retry": "Retry",
+      "network": "There is no connection to the server. Check your internet and retry.",
+      "retryHint": "The invoice will not be duplicated: the sale keeps its identifier."
+    },
+    "done": {
+      "title": "Invoice {number} issued for {total}",
+      "change": "Change: {change}",
+      "sri": "The SRI authorizes it in a few moments; you will see it under Invoices in the CRM.",
+      "mismatch": "The invoiced total ({total}) differs from the one the register calculated ({expected}): a price changed in the catalog. The invoice stands at the invoiced total."
+    },
+    "addFailed": {
+      "no_price": "“{name}” has no price and cannot be sold.",
+      "taxes": "The taxes of “{name}” could not be loaded.",
+      "error": "“{name}” could not be added. Please try again."
+    },
+    "unavailable": {
+      "title": "Register not available",
+      "plugin": "Your organization does not have the point-of-sale module active. Ask an administrator to activate it from the CRM.",
+      "permission": "Your user is not allowed to issue invoices. Ask an administrator to give you a role with that permission.",
+      "home": "Go to the CRM"
+    }
   },
   "posThemes": {
     "tabTitle": "POS appearance",

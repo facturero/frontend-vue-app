@@ -22,6 +22,8 @@ const items: NavItem[] = [
   { titleKey: 'nav.employees', icon: 'mdi-account-multiple-outline', to: '/employees', permission: 'user:read' },
   { titleKey: 'nav.roles', icon: 'mdi-shield-account-outline', to: '/roles', permission: 'user:read' },
   { titleKey: 'nav.customers', icon: 'mdi-account-group-outline', to: '/customers', permission: 'customer:read', plugin: 'crm.contacts' },
+  // Caja web: vender y facturar desde el navegador. Va con el módulo del POS; el permiso es el de crear facturas (billing exige también emitir).
+  { titleKey: 'nav.pos', icon: 'mdi-point-of-sale', to: '/pos', permission: 'invoice:create', plugin: 'pos.core' },
   { titleKey: 'nav.invoices', icon: 'mdi-file-document-outline', to: '/invoices', permission: 'invoice:read', plugin: 'finance.electronic_invoicing' },
   { titleKey: 'nav.products', icon: 'mdi-package-variant-closed', to: '/products', permission: 'product:read', plugin: 'infra.catalog_products' },
   { titleKey: 'nav.stock', icon: 'mdi-warehouse', to: '/stock', activeFor: ['/stock', '/warehouses'], permission: 'inventory:read', plugin: 'inventory.kardex' },

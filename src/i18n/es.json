@@ -675,6 +675,7 @@
     "invoices": "Facturas",
     "menu": "Menú",
     "plugins": "Plugins",
+    "pos": "Punto de venta",
     "products": "Productos",
     "roles": "Roles",
     "settings": "Ajustes",
@@ -904,6 +905,81 @@
     "trialBanner": "Prueba gratis: te quedan {days} días (hasta el {date}). Mientras dure, activa los módulos que quieras sin pagar.",
     "trialEnded": "Tu prueba gratis terminó el {date}. Los módulos activos se cobran a su precio mensual.",
     "trialQuote": "Hoy pagas $0,00: estás en tu prueba gratis hasta el {date} ({days} días). Después se cobra el total de arriba cada mes."
+  },
+  "pos": {
+    "title": "Punto de venta",
+    "subtitle": "Punto de emisión {point} · equipo {terminal}",
+    "charge": "Cobrar",
+    "setup": {
+      "title": "Punto de emisión de esta caja",
+      "intro": "Elige con qué establecimiento y punto de emisión se factura desde este equipo. Cada punto tiene su propia numeración: lo ideal es uno por computador.",
+      "establishment": "Establecimiento",
+      "point": "Punto de emisión",
+      "noPoints": "Este establecimiento no tiene puntos de emisión web activos. Pide a un administrador que cree uno en Ajustes → Establecimientos.",
+      "save": "Usar este punto",
+      "change": "Cambiar punto",
+      "required": "Elige un punto de emisión para poder cobrar."
+    },
+    "search": {
+      "label": "Buscar producto",
+      "placeholder": "Nombre o código de barras",
+      "error": "No se pudo cargar el catálogo.",
+      "empty": "No hay productos que coincidan.",
+      "noPrice": "Sin precio"
+    },
+    "customer": {
+      "label": "Cliente",
+      "final": "Consumidor final",
+      "hint": "Escribe al menos 2 letras del nombre o de la identificación"
+    },
+    "cart": {
+      "title": "Venta",
+      "items": "{count} artículo | {count} artículos",
+      "clear": "Vaciar",
+      "empty": "Agrega productos para empezar la venta.",
+      "remove": "Quitar",
+      "less": "Menos",
+      "more": "Más",
+      "quantity": "Cant.",
+      "discount": "Desc."
+    },
+    "totals": {
+      "subtotal": "Subtotal",
+      "tax": "Impuestos",
+      "total": "Total"
+    },
+    "payment": {
+      "title": "Cobrar",
+      "cash": "Efectivo",
+      "debit": "Tarjeta de débito",
+      "credit": "Tarjeta de crédito",
+      "transfer": "Transferencia",
+      "received": "Recibido",
+      "insufficient": "El monto recibido no alcanza",
+      "exact": "Exacto",
+      "change": "Vuelto",
+      "confirm": "Facturar",
+      "retry": "Reintentar",
+      "network": "No hay conexión con el servidor. Revisa tu internet y reintenta.",
+      "retryHint": "No se duplicará la factura: la venta conserva su identificador."
+    },
+    "done": {
+      "title": "Factura {number} emitida por {total}",
+      "change": "Vuelto: {change}",
+      "sri": "El SRI la autoriza en unos instantes; la verás en Facturas del CRM.",
+      "mismatch": "El total facturado ({total}) difiere del que calculó la caja ({expected}): un precio cambió en el catálogo. La factura vale por el total facturado."
+    },
+    "addFailed": {
+      "no_price": "«{name}» no tiene precio y no se puede vender.",
+      "taxes": "No se pudieron cargar los impuestos de «{name}».",
+      "error": "No se pudo agregar «{name}». Inténtalo de nuevo."
+    },
+    "unavailable": {
+      "title": "Caja no disponible",
+      "plugin": "Tu organización no tiene activo el módulo de punto de venta. Pídele a un administrador que lo active desde el CRM.",
+      "permission": "Tu usuario no tiene permiso para facturar. Pídele a un administrador que te asigne un rol con ese permiso.",
+      "home": "Ir al CRM"
+    }
   },
   "posThemes": {
     "tabTitle": "Apariencia del POS",

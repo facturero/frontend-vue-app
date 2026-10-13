@@ -675,6 +675,7 @@
     "invoices": "Factures",
     "menu": "Menu",
     "plugins": "Plugins",
+    "pos": "Point de vente",
     "products": "Produits",
     "roles": "Rôles",
     "settings": "Paramètres",
@@ -904,6 +905,81 @@
     "trialBanner": "Essai gratuit : il vous reste {days} jours (jusqu'au {date}). Pendant cette période, activez les modules que vous voulez sans payer.",
     "trialEnded": "Votre essai gratuit s'est terminé le {date}. Les modules actifs sont facturés à leur prix mensuel.",
     "trialQuote": "Vous payez 0,00 $ aujourd'hui : vous êtes en essai gratuit jusqu'au {date} ({days} jours). Ensuite, le total ci-dessus est facturé chaque mois."
+  },
+  "pos": {
+    "title": "Point de vente",
+    "subtitle": "Point d'émission {point} · appareil {terminal}",
+    "charge": "Encaisser",
+    "setup": {
+      "title": "Point d'émission de cette caisse",
+      "intro": "Choisissez l'établissement et le point d'émission avec lesquels cet appareil facture. Chaque point a sa propre numérotation : idéalement un par ordinateur.",
+      "establishment": "Établissement",
+      "point": "Point d'émission",
+      "noPoints": "Cet établissement n'a aucun point d'émission web actif. Demandez à un administrateur d'en créer un dans Paramètres → Établissements.",
+      "save": "Utiliser ce point",
+      "change": "Changer de point",
+      "required": "Choisissez un point d'émission pour pouvoir encaisser."
+    },
+    "search": {
+      "label": "Rechercher un produit",
+      "placeholder": "Nom ou code-barres",
+      "error": "Le catalogue n'a pas pu être chargé.",
+      "empty": "Aucun produit ne correspond.",
+      "noPrice": "Sans prix"
+    },
+    "customer": {
+      "label": "Client",
+      "final": "Consommateur final",
+      "hint": "Saisissez au moins 2 lettres du nom ou de l'identification"
+    },
+    "cart": {
+      "title": "Vente",
+      "items": "{count} article | {count} articles",
+      "clear": "Vider",
+      "empty": "Ajoutez des produits pour commencer la vente.",
+      "remove": "Retirer",
+      "less": "Moins",
+      "more": "Plus",
+      "quantity": "Qté",
+      "discount": "Rem."
+    },
+    "totals": {
+      "subtotal": "Sous-total",
+      "tax": "Taxes",
+      "total": "Total"
+    },
+    "payment": {
+      "title": "Encaisser",
+      "cash": "Espèces",
+      "debit": "Carte de débit",
+      "credit": "Carte de crédit",
+      "transfer": "Virement",
+      "received": "Reçu",
+      "insufficient": "Le montant reçu ne suffit pas",
+      "exact": "Exact",
+      "change": "Monnaie à rendre",
+      "confirm": "Facturer",
+      "retry": "Réessayer",
+      "network": "Pas de connexion au serveur. Vérifiez votre internet et réessayez.",
+      "retryHint": "La facture ne sera pas dupliquée : la vente conserve son identifiant."
+    },
+    "done": {
+      "title": "Facture {number} émise pour {total}",
+      "change": "Monnaie à rendre : {change}",
+      "sri": "Le SRI l’autorise dans quelques instants ; vous la verrez dans Factures du CRM.",
+      "mismatch": "Le total facturé ({total}) diffère de celui calculé par la caisse ({expected}) : un prix a changé dans le catalogue. La facture vaut le total facturé."
+    },
+    "addFailed": {
+      "no_price": "« {name} » n’a pas de prix et ne peut pas être vendu.",
+      "taxes": "Les taxes de « {name} » n’ont pas pu être chargées.",
+      "error": "« {name} » n’a pas pu être ajouté. Veuillez réessayer."
+    },
+    "unavailable": {
+      "title": "Caisse indisponible",
+      "plugin": "Votre organisation n'a pas activé le module de point de vente. Demandez à un administrateur de l'activer depuis le CRM.",
+      "permission": "Votre utilisateur n'est pas autorisé à facturer. Demandez à un administrateur de vous attribuer un rôle avec cette permission.",
+      "home": "Aller au CRM"
+    }
   },
   "posThemes": {
     "tabTitle": "Apparence du POS",
