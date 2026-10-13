@@ -154,7 +154,7 @@ async function submit(): Promise<void> {
     <PageHeader v-if="!props.embedded" :title="$t('organization.settingsTitle')" />
 
     <v-row>
-      <v-col cols="12" md="8" lg="6">
+      <v-col cols="12">
         <v-card>
           <v-card-text>
             <p class="text-body-2 text-medium-emphasis mb-4">
@@ -305,7 +305,7 @@ async function submit(): Promise<void> {
          del router no deja entrar a ninguna de las dos hasta que la organización
          esté rellenada, así que solo distraen del formulario de arriba. -->
     <v-row v-if="!props.embedded && !isSetup">
-      <v-col cols="12" md="8" lg="6">
+      <v-col cols="12">
         <v-card class="mt-2">
           <v-card-text class="d-flex align-center justify-space-between">
             <div>
@@ -323,7 +323,7 @@ async function submit(): Promise<void> {
     </v-row>
 
     <v-row v-if="!props.embedded && !isSetup">
-      <v-col cols="12" md="8" lg="6">
+      <v-col cols="12">
         <v-card class="mt-2">
           <v-card-text class="d-flex align-center justify-space-between">
             <div>

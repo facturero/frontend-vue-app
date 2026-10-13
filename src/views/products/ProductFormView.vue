@@ -208,7 +208,7 @@ async function submit(): Promise<void> {
     </v-alert>
 
     <v-row>
-      <v-col cols="12" md="10" lg="8">
+      <v-col cols="12">
         <v-card>
           <v-card-text>
             <v-form @submit.prevent="submit">

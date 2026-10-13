@@ -124,7 +124,7 @@ function onAvatarSuccess(fileIds: string[]): void {
   <component :is="props.embedded ? 'div' : 'v-container'">
     <PageHeader v-if="!props.embedded" :title="isSetup ? $t('profile.completeTitle') : $t('common.myProfile')" />
 
-    <v-sheet :max-width="640" class="mx-auto" color="transparent">
+    <v-sheet color="transparent">
       <v-card class="overflow-hidden">
         <div
           style="height: 120px; background: linear-gradient(135deg, rgb(var(--v-theme-primary)) 0%, rgb(var(--v-theme-info)) 100%)"

@@ -160,7 +160,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <v-container class="invoice-workspace">
+  <v-container>
     <PageHeader
       :title="isEditMode ? $t('invoices.edit') : $t('invoices.new')"
       :subtitle="regime.authority ? $t('invoices.eyebrow', { authority: regime.authority }) : undefined"
@@ -248,14 +248,3 @@ onMounted(async () => {
   </v-container>
 </template>
 
-<style scoped>
-/*
- * Sólo lo que no se puede expresar con utilidades de Vuetify: el ancho máximo
- * del formulario. Las tablas de líneas, los totales y los diálogos de emisión
- * viven en sus propios componentes con su propio CSS. Todo lo demás
- * —tarjeta, tabla, avisos, chips— usa componentes y tokens del sistema.
- */
-.invoice-workspace {
-  max-width: 960px;
-}
-</style>

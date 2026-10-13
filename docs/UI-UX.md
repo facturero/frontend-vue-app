@@ -124,6 +124,11 @@ Reglas fijas:
 - El contenedor raíz es `<v-container>`, y **es fluido por defecto** (`VContainer: { fluid: true }` en `vuetify.ts`): la página ocupa el
   100 % del ancho en una laptop. No escribas `fluid` ni un `max-width` en las vistas. El único tope vive en `App.vue` (`APP_MAX_WIDTH`,
   1920 px): en monitores más grandes la página se centra con márgenes a los lados.
+  **Qué no se hace en una vista:** un `max-width` de 500 px o más, un `.invoice-workspace { max-width }` en un `<style>`, ni meter el contenido en
+  una columna `<v-col cols="12" md="8" lg="6">` (angosta en la laptop y deja franjas vacías). `npm run lint:ui` lo rechaza (kind `ancho`). Las
+  únicas pantallas angostas por diseño son las de acceso (`AuthView`, `AcceptInviteView`, `ResetPasswordView`: tarjeta centrada) y la caja web
+  (`/pos`, a pantalla completa con su propio diseño). Un párrafo con `max-width` como medida de lectura sí vale.
+  Las columnas que se reparten el ancho (8/4, 5/7, 6/6…) están bien: lo prohibido es dejar columnas vacías.
 - El título lo pone **siempre** `PageHeader`, nunca un `<h1>`/`<h2>` suelto.
   Así el nivel de encabezado y el margen inferior son idénticos en todas partes.
 - **El encabezado es fijo en todas las pantallas** (`PageHeader`, por defecto): se queda bajo la barra superior al hacer scroll para que

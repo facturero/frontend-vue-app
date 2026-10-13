@@ -57,7 +57,7 @@ function owningTag(lines, i) {
 const EXCEPTIONS = {
   // Las pantallas de autenticación no viven dentro del shell de la app: no
   // tienen encabezado de página, sino una portada con su propio título.
-  'src/views/AuthView.vue': ['titulo'],
+  'src/views/AuthView.vue': ['titulo', 'ancho'],
   'src/views/AcceptInviteView.vue': ['titulo'],
   'src/views/ResetPasswordView.vue': ['titulo'],
 
@@ -104,6 +104,18 @@ for (const file of files) {
     if (/(?:color|background|border)[^:\n]*:\s*#[0-9a-fA-F]{3,8}\b/.test(line)
       || /\b(?:color|bg-color)="#[0-9a-fA-F]{3,8}"/.test(line)) {
       add(file, n, 'color', 'color fijo: usa un token del tema en src/plugins/vuetify.ts');
+    }
+
+    // 5. Tope de ancho de página. La app ocupa el 100 % del ancho (el único tope, para monitores grandes, vive en App.vue):
+    //    una vista que se limita a 960 px, o que mete su contenido en una columna `md="8" lg="6"`, deja franjas vacías en una laptop.
+    //    Se miran valores de 500 px o más (los diálogos y campos sueltos son más angostos) y se salta `v-dialog`.
+    const cap = line.match(/max-width(?:="|=|:)\s*:?['"]?\s*(\d+)/);
+    // Un párrafo con tope es la medida de lectura del texto (no del ancho de la página): no cuenta.
+    if (isView && cap && Number(cap[1]) >= 500 && tag !== 'v-dialog' && !/<p[\s>]/.test(line)) {
+      add(file, n, 'ancho', `max-width de ${cap[1]} px en una vista: la página va al 100 % (el tope está en App.vue, APP_MAX_WIDTH)`);
+    }
+    if (isView && /<v-col[^>]*md="(?:7|8|9|10|11)"[^>]*(?:lg|xl)="\d+"/.test(line)) {
+      add(file, n, 'ancho', 'columna que se angosta en pantallas grandes (md + lg): usa cols="12" para que ocupe todo el ancho');
     }
 
     // 4. Media queries propias
