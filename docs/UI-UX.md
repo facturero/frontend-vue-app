@@ -121,8 +121,9 @@ Toda vista de nivel superior tiene la misma forma:
 
 Reglas fijas:
 
-- El contenedor raíz es `<v-container>`. `fluid` sólo si el contenido es una
-  tabla ancha que realmente lo necesita.
+- El contenedor raíz es `<v-container>`, y **es fluido por defecto** (`VContainer: { fluid: true }` en `vuetify.ts`): la página ocupa el
+  100 % del ancho en una laptop. No escribas `fluid` ni un `max-width` en las vistas. El único tope vive en `App.vue` (`APP_MAX_WIDTH`,
+  1920 px): en monitores más grandes la página se centra con márgenes a los lados.
 - El título lo pone **siempre** `PageHeader`, nunca un `<h1>`/`<h2>` suelto.
   Así el nivel de encabezado y el margen inferior son idénticos en todas partes.
 - **El encabezado es fijo en todas las pantallas** (`PageHeader`, por defecto): se queda bajo la barra superior al hacer scroll para que

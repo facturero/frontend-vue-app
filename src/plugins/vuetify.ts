@@ -20,6 +20,11 @@ export default createVuetify({
   // recurrente, cámbialo aquí, no en la vista. Ver docs/UI-UX.md.
   // ---------------------------------------------------------------------------
   defaults: {
+    // Ancho de página: TODO contenedor ocupa el 100 % del ancho útil. El tope para monitores grandes lo pone el armazón (App.vue,
+    // `APP_MAX_WIDTH`), una sola vez: así las vistas, que traen su propio `<v-container>` dentro del de App, no apilan topes distintos
+    // (con los máximos por breakpoint de Vuetify una laptop de 1366 px dejaba franjas vacías a los lados).
+    VContainer: { fluid: true },
+
     // Superficies. Sin elevación de Vuetify: el radio (7px) y la sombra suave
     // los aporta la clase `card-surface`, definida en index.html.
     VCard: { elevation: 0, class: 'card-surface' },

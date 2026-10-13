@@ -28,6 +28,13 @@ const kiosk = computed(() => route.meta.kiosk === true);
 const showShell = computed(() => !!route.meta.requiresAuth);
 
 /**
+ * Tope del ancho de página, en px. Por debajo la página ocupa todo el ancho: eso incluye las laptops de 1366 y las de 1920 px (Full HD
+ * es el tamaño de laptop más común). Por encima (monitores de 2560 px o más) se centra y quedan márgenes a los lados, porque una tabla
+ * de 2500 px de ancho no se lee.
+ */
+const APP_MAX_WIDTH = 1920;
+
+/**
  * El tour automático sale una sola vez por usuario, cuando la sesión ya tiene
  * los datos necesarios (usuario cargado, plugins de la organización cargados y
  * organizacion configurada). Se marca como visto al cerrarse: el menú del
@@ -85,7 +92,8 @@ watch(
       <v-main>
         <!-- En el teléfono el contenedor de aquí no lleva relleno: cada vista trae el suyo y, sumados, eran 32 px por lado. `pb-16` deja sitio
              al botón flotante del asistente, que si no tapa el final de cada pantalla. -->
-        <v-container :fluid="mobile" :class="mobile ? 'pa-0 pb-16' : undefined">
+        <!-- Laptops: 100 % del ancho. Monitores muy grandes: se centra con márgenes a los lados (ver APP_MAX_WIDTH). -->
+        <v-container :max-width="mobile ? undefined : APP_MAX_WIDTH" :class="mobile ? 'pa-0 pb-16' : undefined">
           <router-view />
         </v-container>
       </v-main>
