@@ -32,6 +32,9 @@ import InvoiceDetailView from '@/views/invoices/InvoiceDetailView.vue';
 import InvoiceFormView from '@/views/invoices/InvoiceFormView.vue';
 import PluginsView from '@/views/plugins/PluginsView.vue';
 import AuditLogView from '@/views/audit/AuditLogView.vue';
+import RestaurantTablesView from '@/views/restaurant/TablesView.vue';
+import RestaurantFloorPlanView from '@/views/restaurant/FloorPlanView.vue';
+import RestaurantScheduleView from '@/views/restaurant/ScheduleView.vue';
 import AccountSettingsView from '@/views/settings/AccountSettingsView.vue';
 import BusinessProfileView from '@/views/onboarding/BusinessProfileView.vue';
 import BusinessProfileRecommendationsView from '@/views/onboarding/BusinessProfileRecommendationsView.vue';
@@ -276,6 +279,31 @@ const router = createRouter({
     },
 
         {
+      // Plugin de restaurantes (entregable 1: mapa del local). Tres pantallas
+      // hermanas; el menú apunta a la primera y las pestañas mueven entre ellas.
+      path: '/restaurant',
+      redirect: { name: 'restaurant-tables' },
+    },
+    {
+      path: '/restaurant/tables',
+      name: 'restaurant-tables',
+      component: RestaurantTablesView,
+      meta: { requiresAuth: true, requiredPermission: 'restaurant:read', requiredPlugin: 'restaurant.floorplan' },
+    },
+    {
+      path: '/restaurant/plan',
+      name: 'restaurant-plan',
+      component: RestaurantFloorPlanView,
+      meta: { requiresAuth: true, requiredPermission: 'restaurant:read', requiredPlugin: 'restaurant.floorplan' },
+    },
+    {
+      path: '/restaurant/schedule',
+      name: 'restaurant-schedule',
+      component: RestaurantScheduleView,
+      meta: { requiresAuth: true, requiredPermission: 'restaurant:read', requiredPlugin: 'restaurant.floorplan' },
+    },
+
+    {
       path: '/plugins',
       name: 'plugins',
       component: PluginsView,

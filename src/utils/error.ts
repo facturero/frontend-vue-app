@@ -1,3 +1,15 @@
+/**
+ * Código de negocio del error (`code`), cuando el servicio lo devuelve. Sirve
+ * para reaccionar a un caso concreto —el 409 `PLAN_VERSION_CONFLICT` del
+ * editor del plano— sin mirar el texto, que cambia con el idioma.
+ */
+export function extractErrorCode(e: unknown): string | null {
+  const err = e as {
+    response?: { data?: { code?: string; error?: { code?: string } } };
+  };
+  return err?.response?.data?.code ?? err?.response?.data?.error?.code ?? null;
+}
+
 export function extractError(e: unknown): string {
   const err = e as {
     response?: { data?: { message?: string; error?: { message?: string } } };

@@ -295,3 +295,16 @@ La pantalla de caja es **la misma que la de escritorio** (`pos/frontend`) y su a
   escritorio); sin permiso (`organization:read`) o sin red se ve con el tema integrado «Clásico» y sigue funcionando.
 - **Ruta con `meta.kiosk`**: ocupa toda la ventana, sin menú, barra superior ni asistente del CRM, y no lanza el recorrido guiado.
 
+## El editor del plano del restaurante (`/restaurant/plan`)
+
+Es una excepción acotada: el lienzo es **SVG** hecho a mano (`components/restaurant/floorplan/`), porque un plano con medidas reales,
+imán a 10 cm y deshacer no se resuelve con componentes de Vuetify. El resto de la pantalla (`PageHeader`, pestañas, inspector, diálogos)
+sí sigue el sistema.
+
+- **Colores: tokens del tema por CSS variables**, nunca hexadecimales. Las variables de Vuetify son `R,G,B` separadas por **comas**, así que la
+  transparencia se escribe `rgba(var(--v-theme-x), 0.16)`. La forma moderna `rgb(var(--v-theme-x) / 0.16)` mezcla comas y barra, es **inválida**
+  y el navegador pinta el relleno de negro (paredes y zonas salieron negras así). Usa `token(color, alpha)` de `FloorPlanShapes.vue`.
+- **Un `v-alert` no va directo dentro de una columna flex** (`d-flex flex-column`): trae `flex: 1 1 0%`, así que se encoge a 0 o se estira a
+  todo el alto. Envuélvelo en un `<div>`.
+- **Unidades:** centímetros enteros en el estado y en la API; el metro solo se ve en la interfaz (`utils/restaurant-plan.ts`).
+- **Borrador en el navegador** (`localStorage`, por usuario y organización) y guardado atómico con `expectedVersion` (409 si otra persona guardó).
