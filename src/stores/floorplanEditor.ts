@@ -110,10 +110,26 @@ export const useFloorPlanEditorStore = defineStore('floorplanEditor', () => {
 
   const view = ref<ViewBox | null>(null);
 
+  /**
+   * Medidas del local que se usan de verdad. Si nadie las fijó (las paredes se dibujaron una a una con «Pared», sin el atajo «Salón»)
+   * salen de las paredes: el extremo más lejano de cada eje. Antes «Medidas» decía 0 m aunque el local ya tuviera paredes, y el aviso de
+   * «mesa fuera del salón» no podía avisar nada. El servidor exige entre 3 m y 1000 m: fuera de eso se deja sin fijar.
+   */
+  const wallBounds = computed(() => {
+    const walls = elements.value.filter((e) => e.type === 'wall');
+    if (walls.length === 0) return null;
+    const w = Math.max(...walls.flatMap((e) => (e.type === 'wall' ? [e.x1, e.x2] : [])));
+    const h = Math.max(...walls.flatMap((e) => (e.type === 'wall' ? [e.y1, e.y2] : [])));
+    const valid = (n: number) => n >= 300 && n <= 100_000;
+    return valid(w) && valid(h) ? { w, h } : null;
+  });
+  const effectiveWidthCm = computed(() => widthCm.value ?? wallBounds.value?.w ?? null);
+  const effectiveHeightCm = computed(() => heightCm.value ?? wallBounds.value?.h ?? null);
+
   const canUndo = computed(() => past.value.length > 0);
   const canRedo = computed(() => future.value.length > 0);
   const issues = computed<PlanIssues>(() =>
-    findPlanIssues(tables.value, { widthCm: widthCm.value, heightCm: heightCm.value }),
+    findPlanIssues(tables.value, { widthCm: effectiveWidthCm.value, heightCm: effectiveHeightCm.value }),
   );
   const placedTables = computed(() => tables.value.filter((t) => t.xCm !== null && t.yCm !== null));
   const issueIds = computed(() => {
@@ -595,8 +611,8 @@ export const useFloorPlanEditorStore = defineStore('floorplanEditor', () => {
   function toPayload(fixedVersion?: number): SaveFloorPlanInput {
     return buildSaveFloorPlanInput({
       expectedVersion: fixedVersion ?? serverVersion.value,
-      widthCm: widthCm.value,
-      heightCm: heightCm.value,
+      widthCm: effectiveWidthCm.value,
+      heightCm: effectiveHeightCm.value,
       zones: zones.value,
       tables: tables.value,
       elements: elements.value,
@@ -620,6 +636,8 @@ export const useFloorPlanEditorStore = defineStore('floorplanEditor', () => {
     floorName,
     widthCm,
     heightCm,
+    effectiveWidthCm,
+    effectiveHeightCm,
     zones,
     tables,
     elements,

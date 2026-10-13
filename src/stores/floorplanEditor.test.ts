@@ -184,6 +184,38 @@ describe('paredes', () => {
     expect(store.widthCm).toBe(800);
     expect(store.heightCm).toBe(600);
   });
+
+  it('paredes dibujadas a mano, sin «Salón»: las medidas del local salen de las paredes (no 0 m) y viajan al guardar', () => {
+    const store = editor();
+    store.setTool('wall');
+    store.commitWallPoint(0, 0);
+    store.moveWallCursor(1200, 0);
+    store.commitWallPoint();
+    store.moveWallCursor(1200, 700);
+    store.commitWallPoint();
+    expect(store.widthCm).toBeNull();
+    expect(store.effectiveWidthCm).toBe(1200);
+    expect(store.effectiveHeightCm).toBe(700);
+    expect(store.toPayload()).toMatchObject({ floor: { widthCm: 1200, heightCm: 700 } });
+  });
+
+  it('lo que el dueño fijó a mano manda sobre lo que miden las paredes', () => {
+    const store = editor();
+    store.createRoom(800, 600);
+    store.setFloorSize(1000, 900);
+    expect(store.effectiveWidthCm).toBe(1000);
+    expect(store.effectiveHeightCm).toBe(900);
+  });
+
+  it('sin paredes (o con paredes de menos de 3 m) no se inventa un tamaño', () => {
+    const store = editor();
+    expect(store.effectiveWidthCm).toBeNull();
+    store.setTool('wall');
+    store.commitWallPoint(0, 0);
+    store.moveWallCursor(100, 0);
+    store.commitWallPoint();
+    expect(store.effectiveWidthCm).toBeNull();
+  });
 });
 
 describe('zonas', () => {

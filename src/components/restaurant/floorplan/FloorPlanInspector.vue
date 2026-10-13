@@ -51,8 +51,8 @@ const form = ref({
 });
 
 function syncForm(): void {
-  form.value.floorWidthM = store.widthCm !== null ? store.widthCm / 100 : 0;
-  form.value.floorHeightM = store.heightCm !== null ? store.heightCm / 100 : 0;
+  form.value.floorWidthM = store.effectiveWidthCm !== null ? store.effectiveWidthCm / 100 : 0;
+  form.value.floorHeightM = store.effectiveHeightCm !== null ? store.effectiveHeightCm / 100 : 0;
   const table = store.selectedTable;
   if (table) {
     form.value.name = table.name;
@@ -79,10 +79,10 @@ watch(() => [store.selection?.kind, store.selection?.id], syncForm, { immediate:
 // Las medidas del local llegan cuando termina de cargar el plano, normalmente DESPUÉS de montarse el inspector (que solo miraba la
 // selección): los campos se quedaban en 0 m aunque el salón midiera 9 × 7 m. También cambian al dibujar un «Salón» o al deshacer.
 watch(
-  () => [store.widthCm, store.heightCm],
+  () => [store.effectiveWidthCm, store.effectiveHeightCm],
   () => {
-    form.value.floorWidthM = store.widthCm !== null ? store.widthCm / 100 : 0;
-    form.value.floorHeightM = store.heightCm !== null ? store.heightCm / 100 : 0;
+    form.value.floorWidthM = store.effectiveWidthCm !== null ? store.effectiveWidthCm / 100 : 0;
+    form.value.floorHeightM = store.effectiveHeightCm !== null ? store.effectiveHeightCm / 100 : 0;
   },
 );
 
