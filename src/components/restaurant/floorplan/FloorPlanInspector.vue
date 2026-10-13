@@ -14,7 +14,7 @@ import { useFloorPlanEditorStore } from '@/stores/floorplanEditor';
 import type { ObjectKind, TableShape, ZoneColor } from '@/types/restaurant';
 import { formatMeters, ZONE_COLORS } from '@/utils/restaurant-plan';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const store = useFloorPlanEditorStore();
 const auth = useAuthStore();
 
@@ -114,6 +114,8 @@ function commitName(): void {
 
 /** Superficie del local en m² (con un decimal), para que el dueño vea de un vistazo cuánto mide. */
 const floorAreaM2 = computed(() => Math.round(form.value.floorWidthM * form.value.floorHeightM * 10) / 10);
+/** Con la coma o el punto decimal del idioma («73,2» en español): el parámetro de i18n entra como texto, no se formatea solo. */
+const floorAreaText = computed(() => new Intl.NumberFormat(locale.value, { maximumFractionDigits: 1 }).format(floorAreaM2.value));
 
 const issues = computed(() => {
   const found = store.issues;
@@ -354,7 +356,7 @@ function confirmDuplicate(): void {
           @change="commitFloorSize"
         />
         <div v-if="floorAreaM2 > 0" class="text-subtitle-1 font-weight-medium">
-          {{ $t('restaurant.inspector.area', { area: floorAreaM2 }) }}
+          {{ $t('restaurant.inspector.area', { area: floorAreaText }) }}
         </div>
       </v-sheet>
     </template>
