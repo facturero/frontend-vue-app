@@ -1489,7 +1489,10 @@
       "duplicateDown": "Hacia abajo",
       "duplicateSpacing": "Separación",
       "duplicateConfirm": "Duplicar",
-      "wallDragHint": "Arrastra la pared para moverla: las paredes que le llegan la siguen y todo queda unido."
+      "wallDragHint": "Arrastra la pared para moverla: las paredes que le llegan la siguen y todo queda unido.",
+      "floorSize": "Medidas del local",
+      "floorSizeHint": "Ancho y largo del salón, en metros.",
+      "area": "Superficie: {area} m²"
     },
     "schedule": {
       "title": "Horarios",

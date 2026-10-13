@@ -1489,7 +1489,10 @@
       "duplicateDown": "Downwards",
       "duplicateSpacing": "Spacing",
       "duplicateConfirm": "Duplicate",
-      "wallDragHint": "Drag the wall to move it: walls that reach it follow, and everything stays joined."
+      "wallDragHint": "Drag the wall to move it: walls that reach it follow, and everything stays joined.",
+      "floorSize": "Venue size",
+      "floorSizeHint": "Width and length of the room, in meters.",
+      "area": "Area: {area} m²"
     },
     "schedule": {
       "title": "Opening hours",

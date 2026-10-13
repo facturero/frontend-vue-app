@@ -284,7 +284,7 @@ function leaveAnyway(): void {
         @fit="canvas?.fit()"
       />
 
-      <div class="position-relative flex-grow-1" style="height: 65vh; min-height: 420px">
+      <div class="position-relative flex-grow-1" style="min-height: max(65vh, 420px)">
         <v-sheet class="position-absolute w-100 h-100" style="inset: 0" border>
           <FloorPlanCanvas ref="canvas" :preset="preset" :object-kind="objectKind" />
         </v-sheet>

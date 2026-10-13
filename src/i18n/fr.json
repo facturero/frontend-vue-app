@@ -1489,7 +1489,10 @@
       "duplicateDown": "Vers le bas",
       "duplicateSpacing": "Espacement",
       "duplicateConfirm": "Dupliquer",
-      "wallDragHint": "Faites glisser le mur pour le déplacer : les murs qui le rejoignent le suivent et tout reste joint."
+      "wallDragHint": "Faites glisser le mur pour le déplacer : les murs qui le rejoignent le suivent et tout reste joint.",
+      "floorSize": "Dimensions du local",
+      "floorSizeHint": "Largeur et longueur de la salle, en mètres.",
+      "area": "Surface : {area} m²"
     },
     "schedule": {
       "title": "Horaires",

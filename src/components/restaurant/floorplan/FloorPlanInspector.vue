@@ -112,6 +112,9 @@ function commitName(): void {
   else if (store.selectedZone) store.updateZone(store.selectedZone.id, { name });
 }
 
+/** Superficie del local en m² (con un decimal), para que el dueño vea de un vistazo cuánto mide. */
+const floorAreaM2 = computed(() => Math.round(form.value.floorWidthM * form.value.floorHeightM * 10) / 10);
+
 const issues = computed(() => {
   const found = store.issues;
   return [
@@ -149,7 +152,7 @@ function confirmDuplicate(): void {
 </script>
 
 <template>
-  <v-sheet class="pa-4 d-flex flex-column ga-3" style="min-width: 260px">
+  <v-sheet class="pa-4 d-flex flex-column ga-3 flex-shrink-0" style="min-width: 320px">
     <!-- Mesa -->
     <template v-if="kind === 'table' && store.selectedTable">
       <div class="text-h6">{{ $t('restaurant.inspector.table') }}</div>
@@ -322,14 +325,18 @@ function confirmDuplicate(): void {
     <!-- Nada seleccionado: se ofrecen las medidas del local. -->
     <template v-else>
       <div class="text-body-2 text-medium-emphasis">{{ $t('restaurant.inspector.empty') }}</div>
-      <v-divider />
-      <div class="text-subtitle-2">{{ $t('restaurant.inspector.size') }}</div>
-      <div class="d-flex ga-2">
+      <!-- Las medidas del local: una tarjeta propia, con un campo debajo del otro (lado a lado quedaban apretados en 340 px). -->
+      <v-sheet border class="pa-4 d-flex flex-column ga-4">
+        <div>
+          <div class="text-h6">{{ $t('restaurant.inspector.floorSize') }}</div>
+          <div class="text-body-2 text-medium-emphasis">{{ $t('restaurant.inspector.floorSizeHint') }}</div>
+        </div>
         <v-text-field
           v-model.number="form.floorWidthM"
           type="number"
           min="1"
           step="0.5"
+          density="comfortable"
           :label="$t('restaurant.inspector.width')"
           suffix="m"
           :disabled="!canManage"
@@ -340,12 +347,16 @@ function confirmDuplicate(): void {
           type="number"
           min="1"
           step="0.5"
+          density="comfortable"
           :label="$t('restaurant.inspector.height')"
           suffix="m"
           :disabled="!canManage"
           @change="commitFloorSize"
         />
-      </div>
+        <div v-if="floorAreaM2 > 0" class="text-subtitle-1 font-weight-medium">
+          {{ $t('restaurant.inspector.area', { area: floorAreaM2 }) }}
+        </div>
+      </v-sheet>
     </template>
 
     <v-btn
