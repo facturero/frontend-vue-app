@@ -125,3 +125,17 @@ export interface CreditNoteInput {
   emissionPointId: string;
   reason: string;
 }
+
+export interface DebitNoteMotiveInput {
+  reason: string;
+  /** Importe sin IVA, con hasta dos decimales. */
+  amount: string;
+  taxRateId: string;
+}
+
+export interface DebitNoteInput {
+  establishmentId: string;
+  emissionPointId: string;
+  motives: DebitNoteMotiveInput[];
+  paymentMethodCode?: string | null;
+}

@@ -8,6 +8,7 @@ import type {
   IssueInvoiceInput,
   VoidInvoiceInput,
   CreditNoteInput,
+  DebitNoteInput,
 } from '@/types/invoices';
 
 export const invoiceApi = {
@@ -37,4 +38,7 @@ export const invoiceApi = {
 
   creditNote: (invoiceId: string, body: CreditNoteInput) =>
     http.post<InvoiceDetail>(`/invoices/${invoiceId}/credit-note`, body).then((r) => r.data),
+
+  debitNote: (invoiceId: string, body: DebitNoteInput) =>
+    http.post<InvoiceDetail>(`/invoices/${invoiceId}/debit-note`, body).then((r) => r.data),
 };

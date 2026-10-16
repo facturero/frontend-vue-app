@@ -25,8 +25,10 @@ const items: NavItem[] = [
   // Caja web: vender y facturar desde el navegador. Va con el módulo del POS; el permiso es el de crear facturas (billing exige también emitir).
   { titleKey: 'nav.pos', icon: 'mdi-point-of-sale', to: '/pos', permission: 'invoice:create', plugin: 'pos.core' },
   { titleKey: 'nav.invoices', icon: 'mdi-file-document-outline', to: '/invoices', permission: 'invoice:read', plugin: 'finance.electronic_invoicing' },
+  { titleKey: 'nav.taxDocuments', icon: 'mdi-file-sign', to: '/tax-documents/withholdings', activeFor: ['/tax-documents'], permission: 'fiscal:read', plugin: 'finance.electronic_invoicing' },
   { titleKey: 'nav.products', icon: 'mdi-package-variant-closed', to: '/products', permission: 'product:read', plugin: 'infra.catalog_products' },
   { titleKey: 'nav.restaurant', icon: 'mdi-silverware-fork-knife', to: '/restaurant/tables', activeFor: ['/restaurant'], permission: 'restaurant:read', plugin: 'restaurant.floorplan' },
+  { titleKey: 'nav.accounting', icon: 'mdi-calculator-variant-outline', to: '/accounting/accounts', activeFor: ['/accounting'], permission: 'account:read', plugin: 'finance.general_ledger' },
   { titleKey: 'nav.stock', icon: 'mdi-warehouse', to: '/stock', activeFor: ['/stock', '/warehouses'], permission: 'inventory:read', plugin: 'inventory.kardex' },
   // Arquetipo F: el menú ya no tiene 4 ítems de configuración sueltos; uno
   // solo (Ajustes) abre la vista de pestañas. Perfil, Organización,

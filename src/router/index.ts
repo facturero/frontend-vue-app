@@ -35,6 +35,17 @@ import AuditLogView from '@/views/audit/AuditLogView.vue';
 import RestaurantTablesView from '@/views/restaurant/TablesView.vue';
 import RestaurantFloorPlanView from '@/views/restaurant/FloorPlanView.vue';
 import RestaurantScheduleView from '@/views/restaurant/ScheduleView.vue';
+import AccountingAccountsView from '@/views/accounting/AccountsView.vue';
+import AccountingJournalView from '@/views/accounting/JournalEntriesView.vue';
+import AccountingEntryView from '@/views/accounting/JournalEntryView.vue';
+import AccountingPeriodsView from '@/views/accounting/PeriodsView.vue';
+import AccountingAutomaticView from '@/views/accounting/AutomaticPostingView.vue';
+import AccountingReportsView from '@/views/accounting/ReportsView.vue';
+import AccountingStatementsView from '@/views/accounting/StatementsView.vue';
+import TaxWithholdingsView from '@/views/taxDocuments/WithholdingsView.vue';
+import TaxWithholdingFormView from '@/views/taxDocuments/WithholdingFormView.vue';
+import TaxDeliveryGuidesView from '@/views/taxDocuments/DeliveryGuidesView.vue';
+import TaxDeliveryGuideFormView from '@/views/taxDocuments/DeliveryGuideFormView.vue';
 import AccountSettingsView from '@/views/settings/AccountSettingsView.vue';
 import BusinessProfileView from '@/views/onboarding/BusinessProfileView.vue';
 import BusinessProfileRecommendationsView from '@/views/onboarding/BusinessProfileRecommendationsView.vue';
@@ -301,6 +312,93 @@ const router = createRouter({
       name: 'restaurant-schedule',
       component: RestaurantScheduleView,
       meta: { requiresAuth: true, requiredPermission: 'restaurant:read', requiredPlugin: 'restaurant.floorplan' },
+    },
+
+    {
+      // Comprobantes que se emiten aparte de la factura: retenciones y guías de remisión. Salen de la misma facturación electrónica
+      // (mismo plugin y mismo certificado); ver el alta requiere `fiscal:read` y emitir, el permiso de cada comprobante.
+      path: '/tax-documents',
+      redirect: { name: 'tax-withholdings' },
+    },
+    {
+      path: '/tax-documents/withholdings',
+      name: 'tax-withholdings',
+      component: TaxWithholdingsView,
+      meta: { requiresAuth: true, requiredPermission: 'fiscal:read', requiredPlugin: 'finance.electronic_invoicing' },
+    },
+    {
+      path: '/tax-documents/withholdings/new',
+      name: 'tax-withholding-new',
+      component: TaxWithholdingFormView,
+      meta: { requiresAuth: true, requiredPermission: 'withholding:issue', requiredPlugin: 'finance.electronic_invoicing' },
+    },
+    {
+      path: '/tax-documents/guides',
+      name: 'tax-delivery-guides',
+      component: TaxDeliveryGuidesView,
+      meta: { requiresAuth: true, requiredPermission: 'fiscal:read', requiredPlugin: 'finance.electronic_invoicing' },
+    },
+    {
+      path: '/tax-documents/guides/new',
+      name: 'tax-delivery-guide-new',
+      component: TaxDeliveryGuideFormView,
+      meta: { requiresAuth: true, requiredPermission: 'delivery_guide:issue', requiredPlugin: 'finance.electronic_invoicing' },
+    },
+
+    {
+      // Contabilidad general (módulo `finance.general_ledger`): plan de cuentas, libro diario, periodos y balance. El menú apunta
+      // al plan y las pestañas mueven entre las demás. Cada pantalla pide su propio permiso (separación de funciones).
+      path: '/accounting',
+      redirect: { name: 'accounting-accounts' },
+    },
+    {
+      path: '/accounting/accounts',
+      name: 'accounting-accounts',
+      component: AccountingAccountsView,
+      meta: { requiresAuth: true, requiredPermission: 'account:read', requiredPlugin: 'finance.general_ledger' },
+    },
+    {
+      path: '/accounting/journal',
+      name: 'accounting-journal',
+      component: AccountingJournalView,
+      meta: { requiresAuth: true, requiredPermission: 'journal:read', requiredPlugin: 'finance.general_ledger' },
+    },
+    {
+      // Antes de `/accounting/journal/:id`: «new» no es un id.
+      path: '/accounting/journal/new',
+      name: 'accounting-entry-new',
+      component: AccountingEntryView,
+      meta: { requiresAuth: true, requiredPermission: 'journal:create', requiredPlugin: 'finance.general_ledger' },
+    },
+    {
+      path: '/accounting/journal/:id',
+      name: 'accounting-entry',
+      component: AccountingEntryView,
+      meta: { requiresAuth: true, requiredPermission: 'journal:read', requiredPlugin: 'finance.general_ledger' },
+    },
+    {
+      path: '/accounting/automatic',
+      name: 'accounting-automatic',
+      component: AccountingAutomaticView,
+      meta: { requiresAuth: true, requiredPermission: 'account:read', requiredPlugin: 'finance.general_ledger' },
+    },
+    {
+      path: '/accounting/periods',
+      name: 'accounting-periods',
+      component: AccountingPeriodsView,
+      meta: { requiresAuth: true, requiredPermission: 'account:read', requiredPlugin: 'finance.general_ledger' },
+    },
+    {
+      path: '/accounting/statements',
+      name: 'accounting-statements',
+      component: AccountingStatementsView,
+      meta: { requiresAuth: true, requiredPermission: 'ledger:read', requiredPlugin: 'finance.general_ledger' },
+    },
+    {
+      path: '/accounting/reports',
+      name: 'accounting-reports',
+      component: AccountingReportsView,
+      meta: { requiresAuth: true, requiredPermission: 'ledger:read', requiredPlugin: 'finance.general_ledger' },
     },
 
     {

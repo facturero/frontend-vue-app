@@ -1,0 +1,24 @@
+/*
+ * Impresión (y «Guardar como PDF») de los estados financieros: solo debe salir el informe. Se oculta lo que es del armazón de la
+ * aplicación (menú lateral, barra superior, pestañas, botones y el asistente) y se quita el sombreado de las tarjetas.
+ * Las partes de la página que no se imprimen llevan la clase `d-print-none` (utilidad de Vuetify); aquí solo lo del armazón, que
+ * no se puede marcar vista por vista.
+ */
+@media print {
+  .v-navigation-drawer,
+  .v-app-bar,
+  .v-bottom-navigation,
+  .v-snackbar,
+  .v-btn--fixed {
+    display: none !important;
+  }
+
+  .v-main {
+    padding: 0 !important;
+  }
+
+  .v-card {
+    box-shadow: none !important;
+    border: none !important;
+  }
+}

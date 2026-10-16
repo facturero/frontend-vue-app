@@ -7,6 +7,8 @@ import { useAuthStore } from '@/stores/auth';
 import { useOrganizationStore } from '@/stores/organization';
 import { fileApi } from '@/api/files';
 import { openFile } from '@/composable/useFileUrl';
+import { productApi } from '@/api/products';
+import type { TaxRate } from '@/types/products';
 import FiscalStatusCard from '@/components/invoices/FiscalStatusCard.vue';
 
 const props = defineProps<{ id: string }>();
@@ -27,6 +29,15 @@ const creditNoteEmissionPointId = ref('');
 const creditNoteError = ref('');
 const creditNoteSaving = ref(false);
 
+const debitNoteDialog = ref(false);
+const debitNoteEstablishmentId = ref('');
+const debitNoteEmissionPointId = ref('');
+const debitNoteError = ref('');
+const debitNoteSaving = ref(false);
+const vatRates = ref<TaxRate[]>([]);
+type DebitMotive = { reason: string; amount: string; taxRateId: string };
+const debitNoteMotives = ref<DebitMotive[]>([]);
+
 const invoiceId = computed(() => props.id || (route.params.id as string));
 
 const canVoid = computed(() => auth.can('invoice:void'));
@@ -39,6 +50,28 @@ const canCreditNote = computed(
     && store.current?.countryCode === 'EC'
     && (store.current?.status === 'issued' || store.current?.status === 'voided'),
 );
+// La nota de débito AMPLÍA el cobro de una factura vigente; sobre una anulada no tiene sentido.
+const canDebitNote = computed(
+  () => canIssue.value
+    && store.current?.countryCode === 'EC'
+    && store.current?.status === 'issued',
+);
+const moneyPattern = /^\d+(\.\d{1,2})?$/;
+const debitMotivesValid = computed(
+  () => debitNoteMotives.value.length > 0
+    && debitNoteMotives.value.every(m => m.reason.trim() !== '' && moneyPattern.test(m.amount) && Number(m.amount) > 0 && m.taxRateId !== ''),
+);
+// Vista previa del total, en centavos para no arrastrar errores de coma flotante.
+const debitNoteTotal = computed(() => {
+  let cents = 0;
+  for (const m of debitNoteMotives.value) {
+    if (!moneyPattern.test(m.amount)) continue;
+    const base = Math.round(Number(m.amount) * 100);
+    const pct = Number(vatRates.value.find(r => r.id === m.taxRateId)?.percentage ?? 0);
+    cents += base + Math.round((base * pct) / 100);
+  }
+  return (cents / 100).toFixed(2);
+});
 // El estado ante el SRI solo existe para facturas emitidas de Ecuador.
 const showFiscal = computed(
   () => auth.can('fiscal:read') && store.current?.status !== 'draft' && store.current?.countryCode === 'EC',
@@ -146,6 +179,55 @@ async function handleCreditNote() {
   }
 }
 
+function newDebitMotive(): DebitMotive {
+  const def = vatRates.value.find(r => r.isDefault) ?? vatRates.value[0];
+  return { reason: '', amount: '', taxRateId: def?.id ?? '' };
+}
+
+async function openDebitNoteDialog() {
+  debitNoteError.value = '';
+  debitNoteEstablishmentId.value = '';
+  debitNoteEmissionPointId.value = '';
+  orgStore.emissionPoints.splice(0);
+  debitNoteDialog.value = true;
+  try {
+    const rates = await productApi.listTaxRates();
+    vatRates.value = rates.filter(r => r.kind === 'vat' && r.countryCode === (store.current?.countryCode ?? 'EC'));
+  } catch {
+    vatRates.value = [];
+  }
+  debitNoteMotives.value = [newDebitMotive()];
+  await orgStore.fetchEstablishments();
+  const est = store.current?.establishmentId;
+  if (est) {
+    debitNoteEstablishmentId.value = est;
+    await orgStore.fetchEmissionPoints(est);
+    const point = store.current?.emissionPointId;
+    if (point && orgStore.emissionPoints.some(ep => ep.id === point)) {
+      debitNoteEmissionPointId.value = point;
+    }
+  }
+}
+
+async function handleDebitNote() {
+  if (!invoiceId.value || !debitMotivesValid.value || !debitNoteEstablishmentId.value || !debitNoteEmissionPointId.value) return;
+  debitNoteError.value = '';
+  debitNoteSaving.value = true;
+  try {
+    const note = await store.debitNote(invoiceId.value, {
+      establishmentId: debitNoteEstablishmentId.value,
+      emissionPointId: debitNoteEmissionPointId.value,
+      motives: debitNoteMotives.value.map(m => ({ reason: m.reason.trim(), amount: m.amount, taxRateId: m.taxRateId })),
+    });
+    debitNoteDialog.value = false;
+    router.push(`/invoices/${note.id}`);
+  } catch (e: any) {
+    debitNoteError.value = e.message || t('invoices.debitNoteError');
+  } finally {
+    debitNoteSaving.value = false;
+  }
+}
+
 onMounted(async () => {
   if (invoiceId.value) {
     await store.fetchById(invoiceId.value);
@@ -182,6 +264,15 @@ onMounted(async () => {
           @click="openCreditNoteDialog"
         >
           {{ $t('invoices.creditNote') }}
+        </v-btn>
+        <v-btn
+          v-if="canDebitNote"
+          color="primary"
+          variant="tonal"
+          prepend-icon="mdi-cash-plus"
+          @click="openDebitNoteDialog"
+        >
+          {{ $t('invoices.debitNote') }}
         </v-btn>
         <v-btn
           v-if="store.current?.status === 'issued' && canVoid"
@@ -370,6 +461,88 @@ onMounted(async () => {
             @click="handleCreditNote"
           >
             {{ $t('invoices.creditNoteSubmit') }}
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <v-dialog v-model="debitNoteDialog" max-width="720">
+      <v-card>
+        <v-card-title>{{ $t('invoices.debitNote') }}</v-card-title>
+        <v-card-text>
+          <v-alert v-if="debitNoteError" type="error" class="mb-4">
+            {{ debitNoteError }}
+          </v-alert>
+          <p class="text-body-2 text-medium-emphasis mb-4">
+            {{ $t('invoices.debitNoteHint') }}
+          </p>
+          <v-row v-for="(motive, i) in debitNoteMotives" :key="i" dense>
+            <v-col cols="12" sm="5">
+              <v-text-field v-model="motive.reason" :label="$t('invoices.debitNoteMotive')" maxlength="300" />
+            </v-col>
+            <v-col cols="6" sm="3">
+              <v-text-field
+                v-model="motive.amount"
+                :label="$t('invoices.debitNoteAmount')"
+                inputmode="decimal"
+                :error="motive.amount !== '' && !/^\d+(\.\d{1,2})?$/.test(motive.amount)"
+              />
+            </v-col>
+            <v-col cols="4" sm="3">
+              <v-select
+                v-model="motive.taxRateId"
+                :items="vatRates.map(r => ({ title: `${Number(r.percentage)}%`, value: r.id }))"
+                :label="$t('invoices.debitNoteTax')"
+              />
+            </v-col>
+            <v-col cols="2" sm="1" class="d-flex align-center">
+              <v-btn
+                icon="mdi-close"
+                variant="text"
+                :aria-label="$t('invoices.debitNoteRemoveMotive')"
+                :disabled="debitNoteMotives.length === 1"
+                @click="debitNoteMotives.splice(i, 1)"
+              />
+            </v-col>
+          </v-row>
+          <v-btn
+            variant="text"
+            color="primary"
+            prepend-icon="mdi-plus"
+            :disabled="debitNoteMotives.length >= 20"
+            class="mb-4"
+            @click="debitNoteMotives.push(newDebitMotive())"
+          >
+            {{ $t('invoices.debitNoteAddMotive') }}
+          </v-btn>
+          <v-sheet color="grey100" rounded="lg" class="d-flex ga-4 pa-4 mb-4">
+            <v-select
+              v-model="debitNoteEstablishmentId"
+              :items="orgStore.establishments.filter(e => e.status === 'active').map(e => ({ title: `${e.code} — ${e.name}`, value: e.id }))"
+              :label="$t('organization.establishment')"
+              disabled
+            />
+            <v-select
+              v-model="debitNoteEmissionPointId"
+              :items="orgStore.emissionPoints.filter(ep => ep.status === 'active').map(ep => ({ title: `${ep.code} — ${ep.name || $t('invoices.emissionPoint')}`, value: ep.id }))"
+              :label="$t('invoices.emissionPoint')"
+              :disabled="!debitNoteEstablishmentId"
+            />
+          </v-sheet>
+          <div class="text-h6 text-right">
+            {{ $t('invoices.debitNoteTotal') }}: {{ debitNoteTotal }}
+          </div>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer />
+          <v-btn variant="text" @click="debitNoteDialog = false">{{ $t('common.cancel') }}</v-btn>
+          <v-btn
+            color="primary"
+            :loading="debitNoteSaving"
+            :disabled="!debitMotivesValid || !debitNoteEstablishmentId || !debitNoteEmissionPointId"
+            @click="handleDebitNote"
+          >
+            {{ $t('invoices.debitNoteSubmit') }}
           </v-btn>
         </v-card-actions>
       </v-card>

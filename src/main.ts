@@ -5,6 +5,7 @@ import 'driver.js/dist/driver.css';
 import 'flag-icons/css/flag-icons.min.css';
 import '@/styles/tour.css';
 import '@/styles/mobile.css';
+import '@/styles/print.css';
 import router from '@/router';
 import i18n from '@/plugins/i18n';
 import { useAuthStore } from '@/stores/auth';

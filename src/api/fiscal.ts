@@ -1,5 +1,13 @@
 import { http } from '@/utils/http';
-import type { CertificateDTO, FiscalInvoiceDTO } from '@/types/fiscal';
+import type {
+  CertificateDTO,
+  DeliveryGuideInput,
+  FiscalCodeCatalog,
+  FiscalDocumentType,
+  FiscalInvoiceDTO,
+  FiscalInvoicePage,
+  WithholdingInput,
+} from '@/types/fiscal';
 
 export const fiscalApi = {
   getCertificates: () =>
@@ -31,6 +39,21 @@ export const fiscalApi = {
     http
       .post<{ message: string; invoice: FiscalInvoiceDTO | null }>(`/fiscal-invoices/${billingInvoiceId}/retry`)
       .then((r) => r.data),
+
+  /** Comprobantes de la organización, filtrables por tipo (`07` retenciones, `06` guías) y origen. */
+  listFiscalDocuments: (params: { documentType: FiscalDocumentType; source?: 'billing' | 'fiscal'; status?: string; page?: number; pageSize?: number }) =>
+    http
+      .get<FiscalInvoicePage>('/fiscal-invoices', {
+        params: { document_type: params.documentType, source: params.source, status: params.status, page: params.page, pageSize: params.pageSize },
+      })
+      .then((r) => r.data),
+
+  /** Catálogos de apoyo del formulario de retención: códigos de retención, de sustento y de IVA. */
+  getCodeCatalog: () => http.get<FiscalCodeCatalog>('/fiscal/withholding-codes').then((r) => r.data),
+
+  createWithholding: (body: WithholdingInput) => http.post<FiscalInvoiceDTO>('/fiscal/withholdings', body).then((r) => r.data),
+
+  createDeliveryGuide: (body: DeliveryGuideInput) => http.post<FiscalInvoiceDTO>('/fiscal/delivery-guides', body).then((r) => r.data),
 
   /** El XML autorizado por el SRI si existe; si no, el firmado. */
   downloadXml: async (fiscalInvoiceId: string): Promise<{ blob: Blob; filename: string }> => {
