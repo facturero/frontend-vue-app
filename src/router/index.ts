@@ -35,8 +35,6 @@ import AuditLogView from '@/views/audit/AuditLogView.vue';
 import RestaurantTablesView from '@/views/restaurant/TablesView.vue';
 import RestaurantFloorPlanView from '@/views/restaurant/FloorPlanView.vue';
 import RestaurantScheduleView from '@/views/restaurant/ScheduleView.vue';
-import RestaurantReservationsView from '@/views/restaurant/ReservationsView.vue';
-import RestaurantReservationSettingsView from '@/views/restaurant/ReservationSettingsView.vue';
 import AccountingAccountsView from '@/views/accounting/AccountsView.vue';
 import AccountingJournalView from '@/views/accounting/JournalEntriesView.vue';
 import AccountingEntryView from '@/views/accounting/JournalEntryView.vue';
@@ -319,20 +317,6 @@ const router = createRouter({
       component: RestaurantScheduleView,
       meta: { requiresAuth: true, requiredPermission: 'restaurant:read', requiredPlugin: 'restaurant.floorplan' },
     },
-    {
-      // Reservas del cliente (entregable 2): módulo y permiso aparte del mapa. Lista del día y ajustes de la página pública.
-      path: '/restaurant/reservations',
-      name: 'restaurant-reservations',
-      component: RestaurantReservationsView,
-      meta: { requiresAuth: true, requiredPermission: 'reservation:read', requiredPlugin: 'restaurant.reservations' },
-    },
-    {
-      path: '/restaurant/reservations/settings',
-      name: 'restaurant-reservation-settings',
-      component: RestaurantReservationSettingsView,
-      meta: { requiresAuth: true, requiredPermission: 'reservation:read', requiredPlugin: 'restaurant.reservations' },
-    },
-
     {
       // Compras (módulos `inventory.suppliers` y `purchasing.purchase_orders`): proveedores y órdenes de compra. El menú apunta a
       // las órdenes; las pestañas llevan a los proveedores. Cada pantalla pide su propio permiso (separación de funciones).
