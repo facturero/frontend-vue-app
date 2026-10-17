@@ -33,6 +33,8 @@ export interface ProductSummary {
   currencyCode: string;
   priceIncludesTax: boolean;
   imageFileId: string | null;
+  /** Los impuestos asignados (el listado ya los trae). */
+  taxes?: ProductTax[];
 }
 
 export interface ProductTax {

@@ -35,6 +35,8 @@ import AuditLogView from '@/views/audit/AuditLogView.vue';
 import RestaurantTablesView from '@/views/restaurant/TablesView.vue';
 import RestaurantFloorPlanView from '@/views/restaurant/FloorPlanView.vue';
 import RestaurantScheduleView from '@/views/restaurant/ScheduleView.vue';
+import RestaurantReservationsView from '@/views/restaurant/ReservationsView.vue';
+import RestaurantReservationSettingsView from '@/views/restaurant/ReservationSettingsView.vue';
 import AccountingAccountsView from '@/views/accounting/AccountsView.vue';
 import AccountingJournalView from '@/views/accounting/JournalEntriesView.vue';
 import AccountingEntryView from '@/views/accounting/JournalEntryView.vue';
@@ -42,6 +44,10 @@ import AccountingPeriodsView from '@/views/accounting/PeriodsView.vue';
 import AccountingAutomaticView from '@/views/accounting/AutomaticPostingView.vue';
 import AccountingReportsView from '@/views/accounting/ReportsView.vue';
 import AccountingStatementsView from '@/views/accounting/StatementsView.vue';
+import PurchasingSuppliersView from '@/views/purchasing/SuppliersView.vue';
+import PurchasingOrdersView from '@/views/purchasing/PurchaseOrdersView.vue';
+import PurchasingOrderFormView from '@/views/purchasing/PurchaseOrderFormView.vue';
+import PurchasingOrderView from '@/views/purchasing/PurchaseOrderView.vue';
 import TaxWithholdingsView from '@/views/taxDocuments/WithholdingsView.vue';
 import TaxWithholdingFormView from '@/views/taxDocuments/WithholdingFormView.vue';
 import TaxDeliveryGuidesView from '@/views/taxDocuments/DeliveryGuidesView.vue';
@@ -312,6 +318,57 @@ const router = createRouter({
       name: 'restaurant-schedule',
       component: RestaurantScheduleView,
       meta: { requiresAuth: true, requiredPermission: 'restaurant:read', requiredPlugin: 'restaurant.floorplan' },
+    },
+    {
+      // Reservas del cliente (entregable 2): módulo y permiso aparte del mapa. Lista del día y ajustes de la página pública.
+      path: '/restaurant/reservations',
+      name: 'restaurant-reservations',
+      component: RestaurantReservationsView,
+      meta: { requiresAuth: true, requiredPermission: 'reservation:read', requiredPlugin: 'restaurant.reservations' },
+    },
+    {
+      path: '/restaurant/reservations/settings',
+      name: 'restaurant-reservation-settings',
+      component: RestaurantReservationSettingsView,
+      meta: { requiresAuth: true, requiredPermission: 'reservation:read', requiredPlugin: 'restaurant.reservations' },
+    },
+
+    {
+      // Compras (módulos `inventory.suppliers` y `purchasing.purchase_orders`): proveedores y órdenes de compra. El menú apunta a
+      // las órdenes; las pestañas llevan a los proveedores. Cada pantalla pide su propio permiso (separación de funciones).
+      path: '/purchasing',
+      redirect: { name: 'purchasing-orders' },
+    },
+    {
+      path: '/purchasing/orders',
+      name: 'purchasing-orders',
+      component: PurchasingOrdersView,
+      meta: { requiresAuth: true, requiredPermission: 'purchase:read', requiredPlugin: 'purchasing.purchase_orders' },
+    },
+    {
+      // Antes de `/purchasing/orders/:id`: «new» no es un id.
+      path: '/purchasing/orders/new',
+      name: 'purchasing-order-new',
+      component: PurchasingOrderFormView,
+      meta: { requiresAuth: true, requiredPermission: 'purchase:create', requiredPlugin: 'purchasing.purchase_orders' },
+    },
+    {
+      path: '/purchasing/orders/:id/edit',
+      name: 'purchasing-order-edit',
+      component: PurchasingOrderFormView,
+      meta: { requiresAuth: true, requiredPermission: 'purchase:create', requiredPlugin: 'purchasing.purchase_orders' },
+    },
+    {
+      path: '/purchasing/orders/:id',
+      name: 'purchasing-order',
+      component: PurchasingOrderView,
+      meta: { requiresAuth: true, requiredPermission: 'purchase:read', requiredPlugin: 'purchasing.purchase_orders' },
+    },
+    {
+      path: '/purchasing/suppliers',
+      name: 'purchasing-suppliers',
+      component: PurchasingSuppliersView,
+      meta: { requiresAuth: true, requiredPermission: 'supplier:read', requiredPlugin: 'inventory.suppliers' },
     },
 
     {
