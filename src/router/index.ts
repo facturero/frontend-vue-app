@@ -46,6 +46,11 @@ import PurchasingSuppliersView from '@/views/purchasing/SuppliersView.vue';
 import PurchasingOrdersView from '@/views/purchasing/PurchaseOrdersView.vue';
 import PurchasingOrderFormView from '@/views/purchasing/PurchaseOrderFormView.vue';
 import PurchasingOrderView from '@/views/purchasing/PurchaseOrderView.vue';
+import PurchasingReceivingView from '@/views/purchasing/ReceivingView.vue';
+import PurchasingReceiptsView from '@/views/purchasing/ReceiptsListView.vue';
+import PurchasingBillsView from '@/views/purchasing/BillsListView.vue';
+import PurchasingBillFormView from '@/views/purchasing/BillFormView.vue';
+import PurchasingBillView from '@/views/purchasing/BillView.vue';
 import TaxWithholdingsView from '@/views/taxDocuments/WithholdingsView.vue';
 import TaxWithholdingFormView from '@/views/taxDocuments/WithholdingFormView.vue';
 import TaxDeliveryGuidesView from '@/views/taxDocuments/DeliveryGuidesView.vue';
@@ -318,8 +323,9 @@ const router = createRouter({
       meta: { requiresAuth: true, requiredPermission: 'restaurant:read', requiredPlugin: 'restaurant.floorplan' },
     },
     {
-      // Compras (módulos `inventory.suppliers` y `purchasing.purchase_orders`): proveedores y órdenes de compra. El menú apunta a
-      // las órdenes; las pestañas llevan a los proveedores. Cada pantalla pide su propio permiso (separación de funciones).
+      // Compras (módulos `inventory.suppliers` y `purchasing.purchase_orders`): órdenes, sus recepciones, las facturas de compra
+      // y los proveedores. El menú apunta a las órdenes; las pestañas llevan al resto. Cada pantalla pide su propio permiso
+      // (separación de funciones).
       path: '/purchasing',
       redirect: { name: 'purchasing-orders' },
     },
@@ -343,10 +349,48 @@ const router = createRouter({
       meta: { requiresAuth: true, requiredPermission: 'purchase:create', requiredPlugin: 'purchasing.purchase_orders' },
     },
     {
+      // Recepción de mercadería de una orden: subruta de la orden, con su propio nombre para que la pestaña «Órdenes» se marque.
+      path: '/purchasing/orders/:id/receiving',
+      name: 'purchasing-order-receiving',
+      component: PurchasingReceivingView,
+      meta: { requiresAuth: true, requiredPermission: 'purchase:read', requiredPlugin: 'purchasing.purchase_orders' },
+    },
+    {
       path: '/purchasing/orders/:id',
       name: 'purchasing-order',
       component: PurchasingOrderView,
       meta: { requiresAuth: true, requiredPermission: 'purchase:read', requiredPlugin: 'purchasing.purchase_orders' },
+    },
+    {
+      path: '/purchasing/receipts',
+      name: 'purchasing-receipts',
+      component: PurchasingReceiptsView,
+      meta: { requiresAuth: true, requiredPermission: 'purchase:read', requiredPlugin: 'purchasing.purchase_orders' },
+    },
+    {
+      path: '/purchasing/bills',
+      name: 'purchasing-bills',
+      component: PurchasingBillsView,
+      meta: { requiresAuth: true, requiredPermission: 'purchase_bill:read', requiredPlugin: 'purchasing.purchase_orders' },
+    },
+    {
+      // Antes de `/purchasing/bills/:id`: «new» no es un id.
+      path: '/purchasing/bills/new',
+      name: 'purchasing-bill-new',
+      component: PurchasingBillFormView,
+      meta: { requiresAuth: true, requiredPermission: 'purchase_bill:create', requiredPlugin: 'purchasing.purchase_orders' },
+    },
+    {
+      path: '/purchasing/bills/:id/edit',
+      name: 'purchasing-bill-edit',
+      component: PurchasingBillFormView,
+      meta: { requiresAuth: true, requiredPermission: 'purchase_bill:create', requiredPlugin: 'purchasing.purchase_orders' },
+    },
+    {
+      path: '/purchasing/bills/:id',
+      name: 'purchasing-bill',
+      component: PurchasingBillView,
+      meta: { requiresAuth: true, requiredPermission: 'purchase_bill:read', requiredPlugin: 'purchasing.purchase_orders' },
     },
     {
       path: '/purchasing/suppliers',

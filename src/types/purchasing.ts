@@ -121,7 +121,205 @@ export interface OrderInput {
 export interface PurchasingSettings {
   approvalThresholdCents: number | null;
   defaultWarehouseId: string | null;
+  /** Tolerancias en puntos básicos (0-5000 = 0 %-50 %). Las fija el administrador por la API, no van en el código. */
+  overReceiptToleranceBp: number;
+  priceToleranceBp: number;
+  qtyToleranceBp: number;
   updatedAt: string;
+}
+
+// ── Recepción de mercadería ───────────────────────────────────────────────────
+
+export interface ReceiptLine {
+  id: string;
+  orderLineId: string;
+  productId: string | null;
+  /** Hasta 6 decimales, como texto (un número perdería decimales). */
+  quantity: string;
+  unitCostCents: number;
+  currencyCode: string;
+}
+
+export interface GoodsReceipt {
+  id: string;
+  number: string;
+  purchaseOrderId: string | null;
+  supplierId: string;
+  warehouseId: string;
+  receiptDate: string;
+  supplierDeliveryRef: string | null;
+  notes: string | null;
+  lineCount: number;
+  /** Sin líneas en el listado. */
+  lines: ReceiptLine[];
+  createdBy: string;
+  createdAt: string;
+}
+
+export interface ReceiptInput {
+  receiptDate: string;
+  supplierDeliveryRef?: string | null;
+  notes?: string | null;
+  lines: Array<{ orderLineId: string; quantity: string }>;
+}
+
+export interface ReceiptFilters {
+  q?: string;
+  purchaseOrderId?: string;
+  supplierId?: string;
+  from?: string;
+  to?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+/** El POST de recepción devuelve la orden resultante con el número de recepción recién creado. */
+export type ReceivedOrder = PurchaseOrder & { receiptId: string; receiptNumber: string };
+
+/** Seguimiento de recepción/facturación por línea (`GET /purchasing/orders/:id/receiving`). */
+export interface OrderReceivingLine {
+  lineId: string;
+  ordered: string;
+  received: string;
+  pending: string;
+  /** Ya facturado contra esta línea (facturas posted + blocked): así se ve el cupo real por facturar. */
+  billed: string;
+}
+
+export interface OrderReceiving {
+  orderId: string;
+  orderNumber: string | null;
+  status: OrderStatus;
+  lines: OrderReceivingLine[];
+}
+
+// ── Factura de compra (conciliación a tres vías) ──────────────────────────────
+
+export type BillStatus = 'draft' | 'posted' | 'blocked' | 'voided';
+
+export const BILL_STATUSES: BillStatus[] = ['draft', 'posted', 'blocked', 'voided'];
+
+export type MatchStatus = 'matched' | 'blocked' | 'overridden' | 'not_applicable';
+
+export const MATCH_STATUSES: MatchStatus[] = ['matched', 'blocked', 'overridden', 'not_applicable'];
+
+export interface MatchReason {
+  code: string;
+  lineId: string | null;
+  detail: string;
+}
+
+export type BillDocType = '01' | '03' | '41';
+
+export interface BillLine {
+  id: string;
+  lineNumber: number;
+  orderLineId: string | null;
+  productId: string | null;
+  description: string;
+  quantity: string;
+  unitCostCents: number;
+  discountCents: number;
+  subtotalCents: number;
+  taxCode: string | null;
+  taxPercentageCode: string | null;
+  taxRatePct: string;
+  taxCents: number;
+  iceCents: number;
+  irbpnrCents: number;
+  totalCents: number;
+  expenseAccountHint: string | null;
+  /** Diferencia (centavos) entre lo facturado y el costo de la orden: contabilidad la lleva aparte. */
+  priceVarianceCents: number;
+}
+
+export interface PurchaseBill {
+  id: string;
+  internalNumber: string | null;
+  supplierId: string;
+  supplier: { identificationType?: string; identification: string; legalName: string } | null;
+  purchaseOrderId: string | null;
+  docType: BillDocType;
+  establishment: string;
+  emissionPoint: string;
+  sequential: string;
+  authorizationNumber: string | null;
+  issueDate: string;
+  dueDate: string;
+  currencyCode: string;
+  subtotalCents: number;
+  taxCents: number;
+  totalCents: number;
+  supplierTotalCents: number | null;
+  status: BillStatus;
+  matchStatus: MatchStatus;
+  matchReasons: MatchReason[];
+  overrideReason: string | null;
+  overrideBy: string | null;
+  withholdingStatus: 'none' | 'issued';
+  voidReason: string | null;
+  lineCount: number;
+  /** Sin líneas en el listado. */
+  lines: BillLine[];
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  version: number;
+}
+
+export interface BillLineInput {
+  orderLineId?: string | null;
+  productId?: string | null;
+  description: string;
+  /** Hasta 6 decimales, como texto. */
+  quantity: string;
+  unitCostCents: number;
+  discountCents?: number;
+  taxCode?: string | null;
+  taxPercentageCode?: string | null;
+  /** Porcentaje con hasta 2 decimales, como texto. */
+  taxRatePct: string;
+  /** Si no se manda, el servidor calcula el IVA desde `taxRatePct`. */
+  taxCents?: number;
+  iceCents?: number;
+  irbpnrCents?: number;
+  expenseAccountHint?: string | null;
+}
+
+export interface BillInput {
+  supplierId: string;
+  purchaseOrderId?: string | null;
+  docType: BillDocType;
+  /** `001-001-000000123` se guarda partido en tres campos. */
+  establishment: string;
+  emissionPoint: string;
+  sequential: string;
+  authorizationNumber?: string | null;
+  issueDate: string;
+  dueDate: string;
+  currencyCode: string;
+  notes?: string | null;
+  lines: BillLineInput[];
+  supplierTotalCents?: number;
+}
+
+export interface BillFilters {
+  q?: string;
+  supplierId?: string;
+  status?: BillStatus;
+  matchStatus?: MatchStatus;
+  purchaseOrderId?: string;
+  from?: string;
+  to?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface WithholdingLineInput {
+  taxCode: string;
+  taxPercentage: string;
+  baseCents: number;
+  taxCents: number;
 }
 
 export interface Page<T> {

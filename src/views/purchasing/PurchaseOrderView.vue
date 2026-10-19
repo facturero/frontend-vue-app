@@ -9,7 +9,7 @@ import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { usePurchasingStore } from '@/stores/purchasing';
 import { formatMoney } from '@/utils/accounting';
-import { ORDER_STATUS_COLOR, orderActions } from '@/utils/purchasing';
+import { ORDER_STATUS_COLOR, orderActions, RECEIVING_VISIBLE_STATUSES } from '@/utils/purchasing';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import PurchasingTabs from '@/components/purchasing/PurchasingTabs.vue';
 
@@ -26,6 +26,8 @@ const snackbar = ref<string | null>(null);
 
 const userId = computed(() => (auth.user as { id?: string } | null)?.id ?? null);
 const actions = computed(() => (order.value ? orderActions(order.value, (p) => auth.can(p), userId.value) : null));
+/** Aprobada en adelante ya hay (o puede haber) recepciones: se abre el seguimiento por línea. */
+const canSeeReceiving = computed(() => !!order.value && RECEIVING_VISIBLE_STATUSES.includes(order.value.status));
 const money = (cents: number) => formatMoney(cents, locale.value, order.value?.currencyCode ?? 'USD');
 const date = (iso: string | null) => (iso ? new Date(iso).toLocaleString(locale.value, { dateStyle: 'medium', timeStyle: 'short' }) : '—');
 
@@ -107,6 +109,7 @@ async function confirmReason(): Promise<void> {
           <v-chip :color="ORDER_STATUS_COLOR[order.status]" variant="flat" size="small">{{ $t(`purchasing.status.${order.status}`) }}</v-chip>
           <v-spacer />
           <div class="d-flex flex-wrap ga-2">
+            <v-btn v-if="canSeeReceiving" variant="tonal" prepend-icon="mdi-tray-arrow-down-outline" @click="router.push({ name: 'purchasing-order-receiving', params: { id } })">{{ $t('purchasing.receiving.track') }}</v-btn>
             <v-btn v-if="actions.edit" variant="tonal" prepend-icon="mdi-pencil" @click="router.push({ name: 'purchasing-order-edit', params: { id } })">{{ $t('common.edit') }}</v-btn>
             <v-btn v-if="actions.submit" color="primary" prepend-icon="mdi-send-outline" :loading="store.saving" @click="submit">{{ $t('purchasing.orders.submit') }}</v-btn>
             <v-btn v-if="actions.approve" color="success" prepend-icon="mdi-check" :loading="store.saving" @click="approve">{{ $t('purchasing.orders.approve') }}</v-btn>

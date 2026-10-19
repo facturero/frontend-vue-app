@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { grossCents, lineAmounts, orderActions, parseQuantityMicros, sumAmounts } from './purchasing';
+import { BILL_STATUS_COLOR, billActions, grossCents, lineAmounts, orderActions, parseQuantityMicros, receivingActions, sumAmounts, toBillQuantity } from './purchasing';
 
 describe('cantidades', () => {
   it('se leen con hasta 6 decimales y aceptan coma', () => {
@@ -64,5 +64,57 @@ describe('acciones según estado y permisos', () => {
   it('una rechazada se reabre; una cancelada no tiene acciones', () => {
     expect(orderActions(order('rejected'), all, 'maker')).toMatchObject({ reopen: true, cancel: true });
     expect(orderActions(order('cancelled'), all, 'maker')).toEqual({ edit: false, submit: false, approve: false, reject: false, reopen: false, cancel: false });
+  });
+});
+
+describe('recepción y cierre', () => {
+  const all = () => true;
+  const only = (...perms: string[]) => (p: string) => perms.includes(p);
+  it('se recibe y se cierra solo una orden aprobada o recibida en parte', () => {
+    expect(receivingActions({ status: 'approved' }, all)).toEqual({ receive: true, close: true });
+    expect(receivingActions({ status: 'partially_received' }, all)).toEqual({ receive: true, close: true });
+    for (const status of ['draft', 'pending_approval', 'received', 'closed', 'cancelled', 'rejected'] as const) {
+      expect(receivingActions({ status }, all)).toEqual({ receive: false, close: false });
+    }
+  });
+  it('cada acción pide su permiso', () => {
+    expect(receivingActions({ status: 'approved' }, only('receipt:create'))).toEqual({ receive: true, close: false });
+    expect(receivingActions({ status: 'approved' }, only('purchase:close'))).toEqual({ receive: false, close: true });
+  });
+});
+
+describe('cantidad que queda por facturar', () => {
+  it('recibido menos facturado, con decimales exactos', () => {
+    expect(toBillQuantity('40', '0')).toBe('40');
+    expect(toBillQuantity('40', '15.5')).toBe('24.5');
+    expect(toBillQuantity('0.3', '0.1')).toBe('0.2');
+  });
+  it('nunca sale negativa', () => {
+    expect(toBillQuantity('10', '10')).toBe('0');
+    expect(toBillQuantity('10', '12')).toBe('0');
+  });
+});
+
+describe('acciones sobre una factura de compra', () => {
+  const all = () => true;
+  const bill = (status: 'draft' | 'posted' | 'blocked' | 'voided', createdBy = 'maker') => ({ status, createdBy });
+  it('el borrador y la bloqueada se editan; solo el borrador se contabiliza', () => {
+    expect(billActions(bill('draft'), all, 'maker')).toMatchObject({ edit: true, post: true, override: false });
+    expect(billActions(bill('blocked'), all, 'maker')).toMatchObject({ edit: true, post: false });
+  });
+  it('quien registró la factura no la aprueba con excepción; otra persona sí', () => {
+    expect(billActions(bill('blocked'), all, 'maker').override).toBe(false);
+    expect(billActions(bill('blocked'), all, 'boss').override).toBe(true);
+  });
+  it('sin el permiso no hay excepción ni anulación', () => {
+    const only = (p: string) => p === 'purchase_bill:create';
+    expect(billActions(bill('blocked'), only, 'boss')).toMatchObject({ override: false, void: false });
+  });
+  it('se anula lo contabilizado o bloqueado; lo anulado no admite nada', () => {
+    expect(billActions(bill('posted'), all, 'x')).toMatchObject({ void: true, withhold: true, edit: false });
+    expect(billActions(bill('voided'), all, 'x')).toEqual({ edit: false, post: false, override: false, void: false, withhold: false });
+  });
+  it('una factura anulada no se pinta de verde', () => {
+    expect(BILL_STATUS_COLOR.voided).not.toBe(BILL_STATUS_COLOR.posted);
   });
 });

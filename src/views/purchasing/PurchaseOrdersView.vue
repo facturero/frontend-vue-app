@@ -1,7 +1,8 @@
 <script setup lang="ts">
 /**
  * Órdenes de compra: el compromiso con el proveedor. Aquí se ven, se filtran y se abren; quien tiene `purchase:approve` fija
- * además desde qué monto una orden pide la aprobación de OTRA persona (separación de funciones).
+ * además —desde el diálogo de ajustes— desde qué monto una orden pide la aprobación de OTRA persona (separación de funciones) y
+ * las tolerancias con las que se admite recibir o facturar de más sin bloquear la conciliación.
  */
 import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -67,12 +68,15 @@ onMounted(async () => {
 
 const open = (order: PurchaseOrder) => router.push({ name: 'purchasing-order', params: { id: order.id } });
 
-// ── Política de aprobación ──────────────────────────────────────────────────
+// ── Política de aprobación y tolerancias ────────────────────────────────────
 const settingsDialog = ref(false);
 const settingsError = ref<string | null>(null);
 const requireApproval = ref(false);
 const threshold = ref('0.00');
 const defaultWarehouseId = ref<string | null>(null);
+const overReceipt = ref('0');
+const priceTolerance = ref('0');
+const qtyTolerance = ref('0');
 
 async function openSettings(): Promise<void> {
   settingsError.value = null;
@@ -81,11 +85,20 @@ async function openSettings(): Promise<void> {
   requireApproval.value = s?.approvalThresholdCents != null;
   threshold.value = fromCents(s?.approvalThresholdCents ?? 0);
   defaultWarehouseId.value = s?.defaultWarehouseId ?? null;
+  overReceipt.value = String(s?.overReceiptToleranceBp ?? 0);
+  priceTolerance.value = String(s?.priceToleranceBp ?? 0);
+  qtyTolerance.value = String(s?.qtyToleranceBp ?? 0);
   settingsDialog.value = true;
 }
 
 const thresholdCents = computed(() => toCents(threshold.value.replace(',', '.')));
-const settingsValid = computed(() => !requireApproval.value || thresholdCents.value !== null);
+/** Puntos básicos: entero entre 0 (sin tolerancia) y 5000 (50 %). */
+function toBp(text: string): number | null {
+  const value = Number(text.trim().replace(',', '.'));
+  return Number.isInteger(value) && value >= 0 && value <= 5000 ? value : null;
+}
+const tolerancesValid = computed(() => toBp(overReceipt.value) !== null && toBp(priceTolerance.value) !== null && toBp(qtyTolerance.value) !== null);
+const settingsValid = computed(() => (!requireApproval.value || thresholdCents.value !== null) && tolerancesValid.value);
 
 async function saveSettings(): Promise<void> {
   if (!settingsValid.value) return;
@@ -94,6 +107,9 @@ async function saveSettings(): Promise<void> {
     await store.saveSettings({
       approvalThresholdCents: requireApproval.value ? thresholdCents.value : null,
       defaultWarehouseId: defaultWarehouseId.value,
+      overReceiptToleranceBp: toBp(overReceipt.value)!,
+      priceToleranceBp: toBp(priceTolerance.value)!,
+      qtyToleranceBp: toBp(qtyTolerance.value)!,
     });
     settingsDialog.value = false;
   } catch {
@@ -187,7 +203,28 @@ async function saveSettings(): Promise<void> {
             :items="inventory.activeWarehouses.map((w) => ({ value: w.id, title: w.name }))"
             :label="$t('purchasing.settings.defaultWarehouse')"
             clearable
+            class="mb-4"
           />
+
+          <div class="text-h6 mb-2">{{ $t('purchasing.settings.tolerances') }}</div>
+          <p class="text-body-2 text-medium-emphasis mb-4">{{ $t('purchasing.settings.toleranceHint') }}</p>
+          <v-row>
+            <v-col cols="12" sm="4">
+              <v-text-field
+                v-model="overReceipt"
+                :label="$t('purchasing.settings.overReceipt')"
+                :hint="$t('purchasing.settings.overReceiptHint')"
+                persistent-hint
+                inputmode="decimal"
+              />
+            </v-col>
+            <v-col cols="12" sm="4">
+              <v-text-field v-model="priceTolerance" :label="$t('purchasing.settings.priceTolerance')" inputmode="decimal" />
+            </v-col>
+            <v-col cols="12" sm="4">
+              <v-text-field v-model="qtyTolerance" :label="$t('purchasing.settings.qtyTolerance')" inputmode="decimal" />
+            </v-col>
+          </v-row>
         </v-card-text>
         <v-card-actions class="flex-wrap ga-2">
           <v-spacer />

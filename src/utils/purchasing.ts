@@ -1,4 +1,4 @@
-import type { OrderStatus } from '@/types/purchasing';
+import type { BillStatus, MatchStatus, OrderStatus, PurchaseBill } from '@/types/purchasing';
 
 /**
  * Cálculos de una orden de compra. Replican los del servidor (purchasing-service, `domain/money.ts`) para que la pantalla muestre
@@ -86,4 +86,59 @@ export function orderActions(
     cancel: (order.status === 'draft' || order.status === 'pending_approval' || order.status === 'rejected') && maker
       || (order.status === 'approved' && can('purchase:cancel')),
   };
+}
+
+/** Color de la etiqueta de estado de una factura de compra (misma familia tonal que la orden). */
+export const BILL_STATUS_COLOR: Record<BillStatus, string> = {
+  draft: 'lightwarning',
+  posted: 'lightsuccess',
+  blocked: 'lighterror',
+  voided: 'lightsecondary',
+};
+
+/** Color de la etiqueta del resultado de la conciliación a tres vías. */
+export const MATCH_STATUS_COLOR: Record<MatchStatus, string> = {
+  matched: 'lightsuccess',
+  blocked: 'lighterror',
+  overridden: 'lightwarning',
+  not_applicable: 'lightinfo',
+};
+
+/**
+ * Las acciones sobre una factura según su estado y permisos. Ocultar el botón no es seguridad: el servidor también comprueba.
+ * Quien registró la factura no la aprueba con excepción (separación de funciones): se le oculta en vez de dejarle toparse con el error.
+ */
+export function billActions(
+  bill: Pick<PurchaseBill, 'status'> & { createdBy?: string },
+  can: (permission: string) => boolean,
+  userId: string | null = null,
+): { edit: boolean; post: boolean; override: boolean; void: boolean; withhold: boolean } {
+  const drafter = can('purchase_bill:create');
+  const notMine = userId === null || bill.createdBy === undefined || bill.createdBy !== userId;
+  return {
+    edit: (bill.status === 'draft' || bill.status === 'blocked') && drafter,
+    post: bill.status === 'draft' && drafter,
+    override: bill.status === 'blocked' && can('purchase_bill:override') && notMine,
+    void: (bill.status === 'posted' || bill.status === 'blocked') && can('purchase_bill:void'),
+    withhold: bill.status === 'posted' && can('withholding:issue'),
+  };
+}
+
+/** Recibir y cerrar lo pendiente: solo una orden aprobada o recibida en parte, y cada acción con su propio permiso. */
+export function receivingActions(order: { status: OrderStatus }, can: (permission: string) => boolean): { receive: boolean; close: boolean } {
+  const open = order.status === 'approved' || order.status === 'partially_received';
+  return { receive: open && can('receipt:create'), close: open && can('purchase:close') };
+}
+
+/** Estados de una orden en los que ya tiene recepciones (o puede tenerlas): ahí se muestra el seguimiento por línea. */
+export const RECEIVING_VISIBLE_STATUSES: OrderStatus[] = ['approved', 'partially_received', 'received', 'closed'];
+
+/** Cantidad pendiente de facturar de una línea: lo recibido menos lo ya facturado (nunca negativo). Cantidades como texto de 6 decimales. */
+export function toBillQuantity(received: string, billed: string): string {
+  const r = parseQuantityMicros(received) ?? 0n;
+  const b = parseQuantityMicros(billed) ?? 0n;
+  const left = r > b ? r - b : 0n;
+  const whole = left / QTY_SCALE;
+  const frac = (left % QTY_SCALE).toString().padStart(6, '0').replace(/0+$/, '');
+  return frac ? `${whole}.${frac}` : `${whole}`;
 }
