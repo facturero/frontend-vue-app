@@ -257,7 +257,10 @@
           "invoice": "Facture / avoir",
           "withholding": "Retenue",
           "stock_movement": "Mouvement de stock",
-          "invoice_void": "Annulation de facture"
+          "invoice_void": "Annulation de facture",
+          "purchase_bill": "Facture d'achat",
+          "purchase_bill_void": "Annulation de facture d'achat",
+          "purchase_settlement": "Liquidation d'achat"
         },
         "reasons": {
           "MISSING_ROLE": "Il manque le compte d'un rôle",

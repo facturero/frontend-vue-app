@@ -257,7 +257,10 @@
           "invoice": "Factura / nota de crédito",
           "withholding": "Retención",
           "stock_movement": "Movimiento de inventario",
-          "invoice_void": "Anulación de factura"
+          "invoice_void": "Anulación de factura",
+          "purchase_bill": "Factura de compra",
+          "purchase_bill_void": "Anulación de factura de compra",
+          "purchase_settlement": "Liquidación de compra"
         },
         "reasons": {
           "MISSING_ROLE": "Falta la cuenta de un rol",

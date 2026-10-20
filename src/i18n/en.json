@@ -257,7 +257,10 @@
           "invoice": "Invoice / credit note",
           "withholding": "Withholding",
           "stock_movement": "Stock movement",
-          "invoice_void": "Invoice cancellation"
+          "invoice_void": "Invoice cancellation",
+          "purchase_bill": "Purchase invoice",
+          "purchase_bill_void": "Purchase invoice cancellation",
+          "purchase_settlement": "Purchase settlement"
         },
         "reasons": {
           "MISSING_ROLE": "An account role is missing",

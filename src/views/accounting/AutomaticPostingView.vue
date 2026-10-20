@@ -212,7 +212,8 @@ function openEntry(id: string | null): void {
           >
             <template #item.entryDate="{ item }">{{ item.entryDate ?? '' }}</template>
             <template #item.sourceType="{ item }">
-              {{ $t(`accounting.auto.pending.sources.${item.sourceType}`) }}
+              <!-- Un origen nuevo sin traducción se muestra tal cual en vez de dejar una clave técnica a la vista -->
+              {{ $te(`accounting.auto.pending.sources.${item.sourceType}`) ? $t(`accounting.auto.pending.sources.${item.sourceType}`) : item.sourceType }}
               <div v-if="showTechnical" class="text-caption text-medium-emphasis">{{ item.eventType }} · {{ item.sourceId }}</div>
             </template>
             <template #item.reasonCode="{ item }">
