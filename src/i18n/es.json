@@ -1917,7 +1917,9 @@
     "unit": "Unidad de medida",
     "uploadError": "Error al subir imágenes",
     "uploadImages": "Subir imágenes",
-    "vat": "IVA"
+    "vat": "IVA",
+    "trackStock": "Controlar inventario (stock)",
+    "trackStockHint": "El producto entra y sale de bodega y su compra se asienta como inventario. Un servicio o un suministro que no se almacena no lo necesita."
   },
   "profile": {
     "changePhoto": "Cambiar foto",

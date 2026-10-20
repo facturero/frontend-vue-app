@@ -1917,7 +1917,9 @@
     "unit": "Unité de mesure",
     "uploadError": "Erreur lors du téléversement des images",
     "uploadImages": "Téléverser les images",
-    "vat": "TVA"
+    "vat": "TVA",
+    "trackStock": "Suivre le stock",
+    "trackStockHint": "Le produit entre et sort d'un entrepôt et son achat est comptabilisé en stock. Un service ou une fourniture non stockée n'en a pas besoin."
   },
   "profile": {
     "changePhoto": "Changer la photo",

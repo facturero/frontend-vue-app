@@ -27,6 +27,8 @@ const description = ref('');
 const price = ref('');
 const currencyCode = ref('USD');
 const priceIncludesTax = ref(false);
+// Control de inventario: solo un bien lo lleva. Lo decide `inventory-service` (kardex) y, en compras, adónde va la factura (inventario o gasto).
+const trackStock = ref(false);
 const categoryId = ref<string | null>(null);
 const unitId = ref<string | null>(null);
 const establishmentIds = ref<string[]>([]);
@@ -103,6 +105,7 @@ onMounted(async () => {
         price.value = p.price;
         currencyCode.value = p.currencyCode;
         priceIncludesTax.value = p.priceIncludesTax;
+        trackStock.value = p.trackStock;
         categoryId.value = p.categoryId;
         unitId.value = p.unitId;
         establishmentIds.value = [...p.establishmentIds];
@@ -134,6 +137,7 @@ async function submit(): Promise<void> {
         price: String(price.value),
         currencyCode: currencyCode.value,
         priceIncludesTax: priceIncludesTax.value,
+        trackStock: type.value === 'good' && trackStock.value,
         categoryId: categoryId.value,
         unitId: unitId.value,
         establishmentIds: [...establishmentIds.value],
@@ -173,6 +177,7 @@ async function submit(): Promise<void> {
         establishmentIds: [...establishmentIds.value],
         taxRateIds: vatRateId.value ? [vatRateId.value] : undefined,
         priceIncludesTax: priceIncludesTax.value,
+        trackStock: type.value === 'good' && trackStock.value,
       };
       const product = await store.create(input);
 
@@ -283,7 +288,18 @@ async function submit(): Promise<void> {
                   />
                 </v-col>
               </v-row>
-              <div class="mb-4" />
+              <v-switch
+                v-model="trackStock"
+                :label="$t('products.trackStock')"
+                :hint="$t('products.trackStockHint')"
+                :disabled="type !== 'good'"
+                persistent-hint
+                density="compact"
+                inset
+                color="primary"
+                class="mb-4"
+                data-testid="product-track-stock"
+              />
 
               <v-row dense>
                 <v-col cols="12" md="6">

@@ -75,6 +75,8 @@ export interface CreateProductInput {
   establishmentIds: string[];
   taxRateIds?: string[];
   priceIncludesTax?: boolean;
+  /** Si el producto entra y sale de bodega. Solo un bien puede llevarlo; un servicio no. */
+  trackStock?: boolean;
   metadata?: Record<string, unknown>;
 }
 
@@ -89,6 +91,7 @@ export interface UpdateProductInput {
   price?: string;
   currencyCode?: string;
   priceIncludesTax?: boolean;
+  trackStock?: boolean;
   status?: ProductStatus;
   metadata?: Record<string, unknown> | null;
 }

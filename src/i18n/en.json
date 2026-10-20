@@ -1917,7 +1917,9 @@
     "unit": "Unit of measure",
     "uploadError": "Error uploading images",
     "uploadImages": "Upload images",
-    "vat": "VAT"
+    "vat": "VAT",
+    "trackStock": "Track inventory (stock)",
+    "trackStockHint": "The product moves in and out of a warehouse and its purchase is booked as inventory. A service or a supply that is not stored does not need it."
   },
   "profile": {
     "changePhoto": "Change photo",
