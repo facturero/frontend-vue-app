@@ -130,6 +130,7 @@ Reglas fijas:
   (`/pos`, a pantalla completa con su propio diseño). Un párrafo con `max-width` como medida de lectura sí vale.
   Las columnas que se reparten el ancho (8/4, 5/7, 6/6…) están bien: lo prohibido es dejar columnas vacías.
 - El título lo pone **siempre** `PageHeader`, nunca un `<h1>`/`<h2>` suelto.
+- Las acciones de `PageHeader` **se parten en varias líneas** (`flex-wrap`) en pantallas estrechas: con dos o más botones, en un teléfono el último se salía del ancho y la página tenía scroll lateral. No fuerces `flex-nowrap` ni anchos fijos en los botones de un encabezado.
   Así el nivel de encabezado y el margen inferior son idénticos en todas partes.
 - **El encabezado es fijo en todas las pantallas** (`PageHeader`, por defecto): se queda bajo la barra superior al hacer scroll para que
   sus acciones (el carrito de módulos, «Crear rol», etc.) no desaparezcan. Arriba del todo es el panel de siempre; al bajar crece de

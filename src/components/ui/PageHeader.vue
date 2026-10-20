@@ -58,7 +58,8 @@ const stickyStyle = useStickyHeader(sheetEl, () => props.sticky === true);
       </div>
     </div>
 
-    <div v-if="$slots.actions" class="d-flex align-center ga-2 ml-auto">
+    <!-- flex-wrap: con dos o más acciones, en un teléfono el segundo botón se salía de la pantalla (scroll lateral) -->
+    <div v-if="$slots.actions" class="d-flex flex-wrap align-center ga-2 ml-auto">
       <slot name="actions" />
     </div>
   </v-sheet>
