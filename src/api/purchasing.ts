@@ -15,7 +15,6 @@ import type {
   ReceiptInput,
   Supplier,
   SupplierInput,
-  WithholdingLineInput,
 } from '@/types/purchasing';
 
 export const purchasingApi = {
@@ -67,6 +66,4 @@ export const purchasingApi = {
   postBill: (id: string) => http.post<PurchaseBill>(`/purchasing/bills/${id}/post`).then((r) => r.data),
   overrideBill: (id: string, reason: string) => http.post<PurchaseBill>(`/purchasing/bills/${id}/override`, { reason }).then((r) => r.data),
   voidBill: (id: string, reason: string) => http.post<PurchaseBill>(`/purchasing/bills/${id}/void`, { reason }).then((r) => r.data),
-  issueBillWithholding: (id: string, withholdingLines: WithholdingLineInput[]) =>
-    http.post<PurchaseBill>(`/purchasing/bills/${id}/withholding`, { withholdingLines }).then((r) => r.data),
 };

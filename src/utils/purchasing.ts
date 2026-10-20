@@ -1,4 +1,5 @@
 import type { BillStatus, MatchStatus, OrderStatus, PurchaseBill } from '@/types/purchasing';
+import type { WithholdingPrefill } from '@/types/fiscal';
 
 /**
  * Cálculos de una orden de compra. Replican los del servidor (purchasing-service, `domain/money.ts`) para que la pantalla muestre
@@ -141,4 +142,38 @@ export function toBillQuantity(received: string, billed: string): string {
   const whole = left / QTY_SCALE;
   const frac = (left % QTY_SCALE).toString().padStart(6, '0').replace(/0+$/, '');
   return frac ? `${whole}.${frac}` : `${whole}`;
+}
+
+/**
+ * Los datos de una factura de compra con los que se abre el formulario de retención de fiscal. La persona revisa todo y elige los
+ * códigos y porcentajes de retención (dependen de la actividad del proveedor, no de la factura): aquí solo va lo que la factura ya sabe.
+ * Un proveedor del exterior no cabe en el formulario de retenciones (solo RUC, cédula y pasaporte): se deja el tipo sin fijar.
+ */
+export function withholdingPrefillFromBill(bill: Pick<PurchaseBill, 'supplier' | 'docType' | 'establishment' | 'emissionPoint' | 'sequential' | 'issueDate' | 'authorizationNumber' | 'subtotalCents' | 'lines'>): WithholdingPrefill {
+  const kind = bill.supplier?.identificationType;
+  const byRate = new Map<string, { percentageCode: string | null; ratePct: string; baseCents: number; amountCents: number }>();
+  for (const line of bill.lines) {
+    const key = `${line.taxPercentageCode ?? ''}|${Number(line.taxRatePct)}`;
+    const row = byRate.get(key) ?? { percentageCode: line.taxPercentageCode, ratePct: String(Number(line.taxRatePct)), baseCents: 0, amountCents: 0 };
+    row.baseCents += line.subtotalCents;
+    row.amountCents += line.taxCents;
+    byRate.set(key, row);
+  }
+  const authorization = bill.authorizationNumber?.trim() ?? '';
+  return {
+    subject: {
+      identificationType: kind === 'RUC' || kind === 'CEDULA' || kind === 'PASAPORTE' ? kind : null,
+      identification: bill.supplier?.identification ?? '',
+      businessName: bill.supplier?.legalName ?? '',
+    },
+    support: {
+      documentCode: bill.docType,
+      number: `${bill.establishment}-${bill.emissionPoint}-${bill.sequential}`,
+      issueDate: bill.issueDate,
+      // El formulario fiscal pide 10 a 49 dígitos; cualquier otra cosa se deja vacía para que la persona la escriba.
+      authorizationNumber: /^\d{10,49}$/.test(authorization) ? authorization : null,
+      subtotalCents: bill.subtotalCents,
+    },
+    taxes: [...byRate.values()],
+  };
 }

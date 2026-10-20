@@ -8,6 +8,7 @@ import type {
   FiscalDocumentType,
   FiscalInvoiceDTO,
   WithholdingInput,
+  WithholdingPrefill,
 } from '@/types/fiscal';
 
 /** Retenciones (07) y guías de remisión (06) que fiscal emite directamente. */
@@ -20,6 +21,8 @@ export const useTaxDocumentsStore = defineStore('taxDocuments', () => {
   const saving = ref(false);
   const error = ref<string | null>(null);
   const catalog = ref<FiscalCodeCatalog | null>(null);
+  /** Lo deja la factura de compra antes de abrir el formulario de retención; el formulario lo consume y lo borra. */
+  const withholdingPrefill = ref<WithholdingPrefill | null>(null);
 
   async function fetchList(documentType: FiscalDocumentType, requestedPage = 1, status?: string): Promise<void> {
     loading.value = true;
@@ -71,5 +74,5 @@ export const useTaxDocumentsStore = defineStore('taxDocuments', () => {
     }
   }
 
-  return { items, total, page, pageSize, loading, saving, error, catalog, fetchList, loadCatalog, createWithholding, createDeliveryGuide };
+  return { items, total, page, pageSize, loading, saving, error, catalog, withholdingPrefill, fetchList, loadCatalog, createWithholding, createDeliveryGuide };
 });

@@ -17,7 +17,6 @@ import type {
   ReceiptInput,
   Supplier,
   SupplierInput,
-  WithholdingLineInput,
 } from '@/types/purchasing';
 
 /** Proveedores, órdenes, recepciones y facturas de compra. Cada acción deja el mensaje del servidor en `error` y vuelve a lanzar, para que la vista decida. */
@@ -211,12 +210,6 @@ export const usePurchasingStore = defineStore('purchasing', () => {
     return bill!;
   }
 
-  async function issueBillWithholding(id: string, withholdingLines: WithholdingLineInput[]): Promise<PurchaseBill> {
-    const bill = await run(saving, () => purchasingApi.issueBillWithholding(id, withholdingLines), true);
-    currentBill.value = bill!;
-    return bill!;
-  }
-
   return {
     suppliers, suppliersTotal, orders, ordersTotal, ordersPage, pageSize, current, settings,
     receipts, receiptsTotal, receiptsPage, currentReceipt,
@@ -224,6 +217,6 @@ export const usePurchasingStore = defineStore('purchasing', () => {
     loading, saving, error,
     fetchSuppliers, saveSupplier, setSupplierActive, fetchOrders, fetchOrder, saveOrder, transition, transitionWithReason, fetchSettings, saveSettings,
     receiveOrder, closeOrder, fetchReceiving, fetchReceipts, fetchReceipt,
-    fetchBills, fetchBill, saveBill, postBill, overrideBill, voidBill, issueBillWithholding,
+    fetchBills, fetchBill, saveBill, postBill, overrideBill, voidBill,
   };
 });

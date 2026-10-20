@@ -1309,6 +1309,7 @@
       "order": "Commande d'achat",
       "noOrder": "Sans commande (dépense ou petit achat)",
       "noOrderHint": "Sans commande, la facture n'est pas rapprochée de la réception.",
+      "noOrderForbidden": "Facturer sans commande d'achat contourne le rapprochement à trois voies : seul un administrateur peut le faire. Choisissez la commande ou demandez l'autorisation.",
       "loadFromOrder": "On a chargé ce qui est reçu et pas encore facturé de la commande.",
       "nothingToBill": "Cette commande n'a plus de marchandise reçue à facturer.",
       "header": "Document du fournisseur",
@@ -1354,9 +1355,7 @@
       "viewOrder": "Voir la commande",
       "matchLabel": "Rapprochement",
       "withhold": "Émettre la retenue",
-      "withholdTitle": "Émettre le bulletin de retenue",
-      "withholdHint": "La retenue est enregistrée contre cette facture et signée avec le certificat de l'organisation.",
-      "withheld": "Retenue émise.",
+      "withholdHint": "Ouvre le formulaire de retenue avec les données de cette facture. Vous choisissez les codes et les pourcentages. La facture est marquée « avec retenue » toute seule quand le SRI autorise le document.",
       "onlyDraft": "Une facture ne peut être modifiée qu'en brouillon ou bloquée."
     }
   },

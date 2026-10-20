@@ -138,3 +138,14 @@ export interface DeliveryGuideInput {
     items: Array<{ internalCode?: string | null; description: string; quantity: number }>;
   }>;
 }
+
+/**
+ * Datos con los que otra pantalla (la factura de compra) abre el formulario de retención. Viajan por el store y no por la URL: el
+ * RUC y la razón social de un proveedor no deben quedar en el historial ni en los registros del servidor web.
+ */
+export interface WithholdingPrefill {
+  subject: { identificationType: 'RUC' | 'CEDULA' | 'PASAPORTE' | null; identification: string; businessName: string };
+  support: { documentCode: string; number: string; issueDate: string; authorizationNumber: string | null; subtotalCents: number };
+  /** Un renglón por tarifa de IVA de la factura. `percentageCode` es el código del SRI si la línea lo trae; si no, se deduce de `ratePct`. */
+  taxes: Array<{ percentageCode: string | null; ratePct: string; baseCents: number; amountCents: number }>;
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BILL_STATUS_COLOR, billActions, grossCents, lineAmounts, orderActions, parseQuantityMicros, receivingActions, sumAmounts, toBillQuantity } from './purchasing';
+import { BILL_STATUS_COLOR, billActions, grossCents, lineAmounts, orderActions, parseQuantityMicros, receivingActions, sumAmounts, toBillQuantity, withholdingPrefillFromBill } from './purchasing';
 
 describe('cantidades', () => {
   it('se leen con hasta 6 decimales y aceptan coma', () => {
@@ -116,5 +116,47 @@ describe('acciones sobre una factura de compra', () => {
   });
   it('una factura anulada no se pinta de verde', () => {
     expect(BILL_STATUS_COLOR.voided).not.toBe(BILL_STATUS_COLOR.posted);
+  });
+});
+
+describe('datos para abrir el formulario de retención desde una factura de compra', () => {
+  const line = (over: Record<string, unknown> = {}) => ({ subtotalCents: 10000, taxCents: 1500, taxRatePct: '15.00', taxPercentageCode: '4', ...over });
+  const bill = (over: Record<string, unknown> = {}) => ({
+    supplier: { identificationType: 'RUC', identification: '1790012345001', legalName: 'Proveedor Andino' },
+    docType: '01' as const,
+    establishment: '001',
+    emissionPoint: '002',
+    sequential: '000000123',
+    issueDate: '2026-10-20',
+    authorizationNumber: null,
+    subtotalCents: 10000,
+    lines: [line()],
+    ...over,
+  });
+  const prefill = (over: Record<string, unknown> = {}) => withholdingPrefillFromBill(bill(over) as never);
+
+  it('lleva el proveedor y el documento sustento con el formato que pide fiscal (000-000-000000000)', () => {
+    expect(prefill()).toMatchObject({
+      subject: { identificationType: 'RUC', identification: '1790012345001', businessName: 'Proveedor Andino' },
+      support: { documentCode: '01', number: '001-002-000000123', issueDate: '2026-10-20', subtotalCents: 10000 },
+    });
+  });
+  it('agrupa las líneas por tarifa de IVA y suma base e impuesto de cada una', () => {
+    const p = prefill({ lines: [line(), line({ subtotalCents: 2500, taxCents: 375 }), line({ subtotalCents: 4000, taxCents: 0, taxRatePct: '0.00', taxPercentageCode: '0' })], subtotalCents: 16500 });
+    expect(p.taxes).toEqual([
+      { percentageCode: '4', ratePct: '15', baseCents: 12500, amountCents: 1875 },
+      { percentageCode: '0', ratePct: '0', baseCents: 4000, amountCents: 0 },
+    ]);
+  });
+  it('una línea sin código del SRI conserva la tarifa para que el formulario la deduzca', () => {
+    expect(prefill({ lines: [line({ taxPercentageCode: null })] }).taxes[0]).toMatchObject({ percentageCode: null, ratePct: '15' });
+  });
+  it('un proveedor del exterior no cabe en el formulario de retenciones: el tipo queda sin fijar', () => {
+    expect(prefill({ supplier: { identificationType: 'EXTERIOR', identification: 'X1', legalName: 'Foreign Co' } }).subject.identificationType).toBeNull();
+  });
+  it('la autorización solo viaja si es una clave válida (10 a 49 dígitos)', () => {
+    expect(prefill({ authorizationNumber: '2110202607179001234500110010010000000071234567813' }).support.authorizationNumber).toBe('2110202607179001234500110010010000000071234567813');
+    expect(prefill({ authorizationNumber: 'ABC-123' }).support.authorizationNumber).toBeNull();
+    expect(prefill({ authorizationNumber: null }).support.authorizationNumber).toBeNull();
   });
 });

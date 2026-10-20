@@ -9,6 +9,7 @@ import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useProductStore } from '@/stores/products';
+import { useAuthStore } from '@/stores/auth';
 import { usePurchasingStore } from '@/stores/purchasing';
 import { formatMoney } from '@/utils/accounting';
 import { lineAmounts, parseQuantityMicros, toBillQuantity } from '@/utils/purchasing';
@@ -22,6 +23,7 @@ const { t, locale } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const store = usePurchasingStore();
+const auth = useAuthStore();
 const productStore = useProductStore();
 
 const billId = computed(() => (route.params.id as string | undefined) ?? null);
@@ -63,6 +65,7 @@ const authorization = ref('');
 const issueDate = ref(todayIso());
 const dueDate = ref(todayIso());
 const currencyCode = ref('USD');
+const notes = ref('');
 const orderId = ref<string | null>(null);
 const supplierTotal = ref('');
 const lines = ref<LineRow[]>([emptyLine()]);
@@ -132,6 +135,10 @@ const authValid = computed(() => authorization.value.trim() === '' || AUTH_PATTE
 const supplierTotalValid = computed(() => supplierTotal.value.trim() === '' || asCents(supplierTotal.value) !== null);
 const rowValid = (row: LineRow) => row.description.trim().length > 0 && rowAmounts(row) !== null && (row.taxCentsManual === null || asCents(row.taxCentsManual) !== null);
 
+/** Facturar sin orden salta la conciliación a tres vías: el servidor exige `purchase_bill:create_unmatched` (solo
+ *  Administrador) y aquí se refleja para no dejar guardar un borrador que va a volver con un 403. */
+const canBillWithoutOrder = computed(() => auth.can('purchase_bill:create_unmatched'));
+
 const canSave = computed(
   () =>
     supplierId.value !== null &&
@@ -140,6 +147,7 @@ const canSave = computed(
     supplierTotalValid.value &&
     issueDate.value !== '' &&
     dueDate.value !== '' &&
+    (orderId.value !== null || canBillWithoutOrder.value) &&
     lines.value.length > 0 &&
     lines.value.every(rowValid),
 );
@@ -210,6 +218,7 @@ function buildInput(): BillInput {
     issueDate: issueDate.value,
     dueDate: dueDate.value,
     currencyCode: currencyCode.value,
+    notes: notes.value.trim() || null,
     lines: lines.value.map((row) => ({
       orderLineId: row.orderLineId,
       productId: row.productId,
@@ -261,6 +270,7 @@ onMounted(async () => {
     issueDate.value = bill.issueDate;
     dueDate.value = bill.dueDate;
     currencyCode.value = bill.currencyCode;
+    notes.value = bill.notes ?? '';
     orderId.value = bill.purchaseOrderId;
     supplierTotal.value = bill.supplierTotalCents != null ? fromCents(bill.supplierTotalCents) : '';
     lines.value = bill.lines.map((l) => ({
@@ -344,12 +354,16 @@ onMounted(async () => {
                 inputmode="decimal"
               />
             </v-col>
+            <v-col cols="12">
+              <v-textarea v-model="notes" :label="$t('common.notes')" rows="2" auto-grow maxlength="1000" />
+            </v-col>
           </v-row>
         </v-card-text>
       </v-card>
 
       <v-alert v-if="nothingToBill" type="warning" class="mb-4">{{ $t('purchasing.bills.nothingToBill') }}</v-alert>
       <v-alert v-else-if="loadedFromOrder" type="info" class="mb-4">{{ $t('purchasing.bills.loadFromOrder') }}</v-alert>
+      <v-alert v-else-if="!orderId && !canBillWithoutOrder" type="warning" class="mb-4">{{ $t('purchasing.bills.noOrderForbidden') }}</v-alert>
       <v-alert v-else-if="!orderId" type="info" class="mb-4">{{ $t('purchasing.bills.noOrderHint') }}</v-alert>
 
       <v-card class="mb-4">

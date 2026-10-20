@@ -216,6 +216,8 @@ export interface BillLine {
   lineNumber: number;
   orderLineId: string | null;
   productId: string | null;
+  /** Inventario (el producto lleva stock) o gasto: lo decide el servidor. */
+  kind: 'stock' | 'expense';
   description: string;
   quantity: string;
   unitCostCents: number;
@@ -247,6 +249,7 @@ export interface PurchaseBill {
   issueDate: string;
   dueDate: string;
   currencyCode: string;
+  notes: string | null;
   subtotalCents: number;
   taxCents: number;
   totalCents: number;
@@ -313,13 +316,6 @@ export interface BillFilters {
   to?: string;
   page?: number;
   pageSize?: number;
-}
-
-export interface WithholdingLineInput {
-  taxCode: string;
-  taxPercentage: string;
-  baseCents: number;
-  taxCents: number;
 }
 
 export interface Page<T> {

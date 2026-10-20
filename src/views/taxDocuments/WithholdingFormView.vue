@@ -182,10 +182,34 @@ async function submit(): Promise<void> {
   await router.push({ name: 'tax-withholdings' });
 }
 
+/** La factura de compra abre este formulario con sus datos: se aplican una vez y se borran (no sobreviven a otra emisión). */
+function applyPrefill(): boolean {
+  const data = store.withholdingPrefill;
+  store.withholdingPrefill = null;
+  if (!data) return false;
+  if (data.subject.identificationType) subject.identificationType = data.subject.identificationType;
+  subject.identification = data.subject.identification;
+  subject.businessName = data.subject.businessName;
+  support.documentCode = data.support.documentCode;
+  support.number = data.support.number;
+  support.issueDate = data.support.issueDate;
+  support.authorizationNumber = data.support.authorizationNumber ?? '';
+  // Se fija la base de los impuestos a mano: el vigilante del subtotal solo acompaña a un renglón vacío.
+  support.subtotal = fromCents(data.support.subtotalCents);
+  taxes.value = data.taxes.length
+    ? data.taxes.map((tax) => {
+        const code = tax.percentageCode ?? vatOptions.value.find((o) => o.rate === Number(tax.ratePct))?.percentageCode ?? vatOptions.value[0]?.percentageCode ?? '4';
+        const row: TaxRow = { percentageCode: code, base: fromCents(tax.baseCents), amount: fromCents(tax.amountCents) };
+        return row;
+      })
+    : [newTax(support.subtotal)];
+  return true;
+}
+
 onMounted(async () => {
   store.error = null;
   await store.loadCatalog();
-  taxes.value = [newTax()];
+  if (!applyPrefill()) taxes.value = [newTax()];
   addRow('income');
 });
 </script>

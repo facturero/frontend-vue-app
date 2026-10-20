@@ -1309,6 +1309,7 @@
       "order": "Purchase order",
       "noOrder": "No order (expense or small purchase)",
       "noOrderHint": "Without an order the invoice is not matched against what was received.",
+      "noOrderForbidden": "Billing without a purchase order skips the three-way match: only an administrator can do it. Pick the order or ask for the permission.",
       "loadFromOrder": "Loaded what was received and not yet invoiced from the order.",
       "nothingToBill": "This order has no received goods left to invoice.",
       "header": "Supplier document",
@@ -1354,9 +1355,7 @@
       "viewOrder": "View order",
       "matchLabel": "Matching",
       "withhold": "Issue withholding",
-      "withholdTitle": "Issue withholding voucher",
-      "withholdHint": "The withholding is recorded against this bill and signed with the organization's certificate.",
-      "withheld": "Withholding issued.",
+      "withholdHint": "Opens the withholding form with this invoice's data. You choose the codes and percentages. The invoice is marked \"withheld\" on its own once the SRI authorizes the document.",
       "onlyDraft": "A bill can only be edited while it is a draft or blocked."
     }
   },

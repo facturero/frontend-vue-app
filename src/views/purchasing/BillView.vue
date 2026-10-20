@@ -1,16 +1,17 @@
 <script setup lang="ts">
 /**
  * Detalle de una factura de compra con la conciliación a tres vías: lo pedido, lo recibido y lo facturado. Desde aquí se
- * contabiliza, se aprueba con excepción y se anula. Qué botones aparecen depende del estado y de los
+ * contabiliza, se aprueba con excepción, se anula y se pasa a emitir la retención (que emite fiscal-ecuador desde su propia pantalla). Qué botones aparecen depende del estado y de los
  * permisos (`billActions`); el servidor vuelve a comprobarlo: ocultar un botón no es seguridad.
  */
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
+import { useTaxDocumentsStore } from '@/stores/taxDocuments';
 import { usePurchasingStore } from '@/stores/purchasing';
 import { formatMoney } from '@/utils/accounting';
-import { billActions, BILL_STATUS_COLOR, MATCH_STATUS_COLOR } from '@/utils/purchasing';
+import { billActions, BILL_STATUS_COLOR, MATCH_STATUS_COLOR, withholdingPrefillFromBill } from '@/utils/purchasing';
 import type { MatchReason, PurchaseBill } from '@/types/purchasing';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import PurchasingTabs from '@/components/purchasing/PurchasingTabs.vue';
@@ -20,6 +21,7 @@ const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
 const store = usePurchasingStore();
+const taxStore = useTaxDocumentsStore();
 
 const id = computed(() => route.params.id as string);
 const bill = computed(() => store.currentBill);
@@ -126,6 +128,17 @@ async function confirmVoid(): Promise<void> {
     actionError.value = store.error;
   }
 }
+
+// ── Retención ────────────────────────────────────────────────────────────────
+/**
+ * La retención la emite fiscal-ecuador desde su pantalla (la misma de la Fase 1.4, con su certificado y su numeración); aquí solo
+ * se la abre con los datos de esta factura. La factura queda «con retención» sola cuando el SRI la autoriza y fiscal lo publica.
+ */
+function openWithhold(): void {
+  if (!bill.value) return;
+  taxStore.withholdingPrefill = withholdingPrefillFromBill(bill.value);
+  void router.push({ name: 'tax-withholding-new' });
+}
 </script>
 
 <template>
@@ -147,6 +160,7 @@ async function confirmVoid(): Promise<void> {
           {{ bill.internalNumber ?? documentOf(bill) }}
           <v-chip :color="BILL_STATUS_COLOR[bill.status]" variant="flat" size="small">{{ $t(`purchasing.bills.status.${bill.status}`) }}</v-chip>
           <v-chip :color="MATCH_STATUS_COLOR[bill.matchStatus]" variant="flat" size="small">{{ $t(`purchasing.bills.match.${bill.matchStatus}`) }}</v-chip>
+          <v-chip v-if="bill.withholdingStatus === 'issued'" color="lightinfo" variant="flat" size="small">{{ $t('purchasing.bills.withholdingIssued') }}</v-chip>
           <v-spacer />
           <div class="d-flex flex-wrap ga-2">
             <v-btn
@@ -164,6 +178,7 @@ async function confirmVoid(): Promise<void> {
             <v-btn v-if="actions.override" variant="tonal" color="warning" prepend-icon="mdi-shield-check-outline" @click="askOverride">
               {{ $t('purchasing.bills.override') }}
             </v-btn>
+            <v-btn v-if="actions.withhold" variant="tonal" prepend-icon="mdi-percent-outline" :title="$t('purchasing.bills.withholdHint')" @click="openWithhold">{{ $t('purchasing.bills.withhold') }}</v-btn>
             <v-btn v-if="actions.void" variant="text" color="error" prepend-icon="mdi-cancel" @click="askVoid">{{ $t('purchasing.bills.void') }}</v-btn>
           </div>
         </v-card-title>
@@ -197,6 +212,10 @@ async function confirmVoid(): Promise<void> {
             <v-col cols="6" md="2">
               <div class="text-body-2 text-medium-emphasis">{{ $t('products.currency') }}</div>
               <div>{{ bill.currencyCode }}</div>
+            </v-col>
+            <v-col v-if="bill.notes" cols="12">
+              <div class="text-body-2 text-medium-emphasis">{{ $t('common.notes') }}</div>
+              <div>{{ bill.notes }}</div>
             </v-col>
           </v-row>
         </v-card-text>

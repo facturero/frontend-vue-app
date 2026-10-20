@@ -1309,6 +1309,7 @@
       "order": "Orden de compra",
       "noOrder": "Sin orden (gasto o compra menor)",
       "noOrderHint": "Sin orden la factura no se concilia con lo recibido.",
+      "noOrderForbidden": "Facturar sin orden de compra salta la conciliación a tres vías: solo un administrador puede hacerlo. Elige la orden o pide que te lo habilite.",
       "loadFromOrder": "Se cargó lo recibido y aún no facturado de la orden.",
       "nothingToBill": "Esta orden no tiene mercadería recibida por facturar.",
       "header": "Documento del proveedor",
@@ -1354,9 +1355,7 @@
       "viewOrder": "Ver orden",
       "matchLabel": "Conciliación",
       "withhold": "Emitir retención",
-      "withholdTitle": "Emitir comprobante de retención",
-      "withholdHint": "La retención se registra contra esta factura y se firma con el certificado de la organización.",
-      "withheld": "Retención emitida.",
+      "withholdHint": "Abre el formulario de retenciones con los datos de esta factura. Tú eliges los códigos y porcentajes. La factura queda «con retención» sola cuando el SRI autoriza el comprobante.",
       "onlyDraft": "Solo se puede editar una factura en borrador o bloqueada."
     }
   },
