@@ -110,7 +110,7 @@ export const MATCH_STATUS_COLOR: Record<MatchStatus, string> = {
  * Quien registró la factura no la aprueba con excepción (separación de funciones): se le oculta en vez de dejarle toparse con el error.
  */
 export function billActions(
-  bill: Pick<PurchaseBill, 'status'> & { createdBy?: string },
+  bill: Pick<PurchaseBill, 'status'> & { createdBy?: string; withholdingStatus?: PurchaseBill['withholdingStatus'] },
   can: (permission: string) => boolean,
   userId: string | null = null,
 ): { edit: boolean; post: boolean; override: boolean; void: boolean; withhold: boolean } {
@@ -121,7 +121,8 @@ export function billActions(
     post: bill.status === 'draft' && drafter,
     override: bill.status === 'blocked' && can('purchase_bill:override') && notMine,
     void: (bill.status === 'posted' || bill.status === 'blocked') && can('purchase_bill:void'),
-    withhold: bill.status === 'posted' && can('withholding:issue'),
+    // Una factura que ya tiene su retención autorizada no ofrece otra: el segundo comprobante duplicaría lo retenido al proveedor.
+    withhold: bill.status === 'posted' && bill.withholdingStatus !== 'issued' && can('withholding:issue'),
   };
 }
 

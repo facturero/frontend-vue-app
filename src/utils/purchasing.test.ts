@@ -114,6 +114,10 @@ describe('acciones sobre una factura de compra', () => {
     expect(billActions(bill('posted'), all, 'x')).toMatchObject({ void: true, withhold: true, edit: false });
     expect(billActions(bill('voided'), all, 'x')).toEqual({ edit: false, post: false, override: false, void: false, withhold: false });
   });
+  it('una factura que ya tiene su retención emitida no ofrece emitir otra', () => {
+    expect(billActions({ status: 'posted', createdBy: 'x', withholdingStatus: 'none' }, all, 'x').withhold).toBe(true);
+    expect(billActions({ status: 'posted', createdBy: 'x', withholdingStatus: 'issued' }, all, 'x').withhold).toBe(false);
+  });
   it('una factura anulada no se pinta de verde', () => {
     expect(BILL_STATUS_COLOR.voided).not.toBe(BILL_STATUS_COLOR.posted);
   });
