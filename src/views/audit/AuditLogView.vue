@@ -53,6 +53,7 @@ const domains = computed(() => [
   { title: t('audit.domain.pricing'), value: 'pricing.' },
   { title: t('audit.domain.accounting'), value: 'accounting.' },
   { title: t('audit.domain.purchasing'), value: 'purchasing.' },
+  { title: t('audit.domain.treasury'), value: 'treasury.' },
   { title: t('audit.domain.restaurant'), value: 'restaurant.' },
 ]);
 
@@ -86,19 +87,19 @@ function eventLabel(entry: AuditLogEntry): string {
 function iconFor(entry: AuditLogEntry): string {
   const a = entry.action;
   if (a.includes('deleted') || a.includes('removed')) return 'mdi-delete-outline';
-  if (a.includes('disabled') || a.includes('rejected') || a.includes('voided')) return 'mdi-cancel';
-  if (a.includes('created') || a.includes('added') || a.includes('invited')) return 'mdi-plus-circle-outline';
+  if (a.includes('disabled') || a.includes('rejected') || a.includes('voided') || a.includes('cancelled')) return 'mdi-cancel';
+  if (a.includes('created') || a.includes('added') || a.includes('invited') || a.includes('opened') || a.includes('loaded')) return 'mdi-plus-circle-outline';
   if (a.includes('updated') || a.includes('upserted')) return 'mdi-pencil-outline';
-  if (a.includes('issued') || a.includes('enabled') || a.includes('activated')) return 'mdi-check-circle-outline';
+  if (a.includes('issued') || a.includes('enabled') || a.includes('activated') || a.includes('posted') || a.includes('approved') || a.includes('credited')) return 'mdi-check-circle-outline';
   return 'mdi-circle-small';
 }
 
 function colorFor(entry: AuditLogEntry): string {
   const a = entry.action;
-  if (a.includes('deleted') || a.includes('removed') || a.includes('disabled') || a.includes('voided')) {
+  if (a.includes('deleted') || a.includes('removed') || a.includes('disabled') || a.includes('voided') || a.includes('cancelled')) {
     return 'error';
   }
-  if (a.includes('created') || a.includes('added')) return 'success';
+  if (a.includes('created') || a.includes('added') || a.includes('opened') || a.includes('loaded')) return 'success';
   return 'primary';
 }
 

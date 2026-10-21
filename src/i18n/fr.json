@@ -117,6 +117,8 @@
         "purchase_bill": "une facture d'achat",
         "purchase_bill_void": "l'annulation d'une facture d'achat",
         "purchase_settlement": "une liquidation d'achat",
+        "receipt": "un encaissement client",
+        "receipt_void": "l'annulation d'un encaissement client",
         "other": "un autre document"
       }
     },
@@ -263,7 +265,9 @@
           "invoice_void": "Annulation de facture",
           "purchase_bill": "Facture d'achat",
           "purchase_bill_void": "Annulation de facture d'achat",
-          "purchase_settlement": "Liquidation d'achat"
+          "purchase_settlement": "Liquidation d'achat",
+          "receipt": "Encaissement client",
+          "receipt_void": "Annulation d'encaissement client"
         },
         "reasons": {
           "MISSING_ROLE": "Il manque le compte d'un rôle",
@@ -368,6 +372,7 @@
       "pricing": "Prix et réductions",
       "accounting": "Comptabilité",
       "purchasing": "Achats",
+      "treasury": "Trésorerie",
       "restaurant": "Restaurant"
     },
     "empty": "Aucune activité enregistrée avec ces filtres",
@@ -498,6 +503,12 @@
       "purchasing_bill_blocked": "Facture d'achat bloquée par réconciliation",
       "purchasing_bill_overridden": "Facture d'achat validée avec exception",
       "purchasing_bill_voided": "Facture d'achat annulée",
+      "treasury_receivable_opened": "Créance client enregistrée",
+      "treasury_receivable_credited": "Avoir appliqué à une créance client",
+      "treasury_receivable_cancelled": "Créance client annulée",
+      "treasury_customer_advance_opened": "Solde créditeur client enregistré",
+      "treasury_customer_terms_updated": "Conditions de crédit du client modifiées",
+      "treasury_opening_balance_loaded": "Soldes d'ouverture des créances chargés",
       "purchasing_bill_withholding_issued": "Retenue émise sur facture d'achat",
       "purchasing_settings_updated": "Politique d'achats modifiée",
       "fiscal_ec_purchase_settlement_issued": "Liquidation de compra émise",
@@ -1127,6 +1138,119 @@
       "submit": "Émettre et envoyer au SRI"
     }
   },
+  "treasury": {
+    "title": "Trésorerie",
+    "tabs": {
+      "receivables": "Créances",
+      "aging": "Balance âgée",
+      "opening": "Soldes d'ouverture"
+    },
+    "receivables": {
+      "intro": "Ce que chaque client doit à l'entreprise. Une créance naît automatiquement d'une facture à crédit ; les ventes du point de vente et au comptant n'y figurent pas.",
+      "search": "Rechercher par client ou document",
+      "from": "Émise depuis",
+      "to": "Émise jusqu'au",
+      "overdueOnly": "Échues seulement",
+      "customer": "Client",
+      "document": "Document",
+      "issueDate": "Émission",
+      "dueDate": "Échéance",
+      "original": "Montant",
+      "balance": "Solde",
+      "applied": "Appliqué : {amount}",
+      "overdueDays": "Échue depuis {n} j",
+      "empty": "Aucune créance avec ces filtres.",
+      "status": {
+        "open": "Ouverte",
+        "partial": "Partielle",
+        "paid": "Payée",
+        "written_off": "Passée en perte",
+        "cancelled": "Annulée"
+      },
+      "source": {
+        "invoice": "Facture",
+        "credit_note": "Avoir",
+        "initial_balance": "Solde d'ouverture"
+      }
+    },
+    "aging": {
+      "intro": "Ce qui est à jour et ce qui est échu, par tranches de jours de retard.",
+      "current": "À jour",
+      "days1To30": "1 à 30 jours",
+      "days31To60": "31 à 60 jours",
+      "days61To90": "61 à 90 jours",
+      "daysOver90": "Plus de 90 jours",
+      "customer": "Client",
+      "total": "Total",
+      "byCustomer": "Par client",
+      "asOf": "au {date}",
+      "empty": "Aucune créance en cours."
+    },
+    "statement": {
+      "open": "Relevé de compte",
+        "intro": "Ses créances, ce qui lui a été appliqué et ce qu'il doit aujourd'hui.",
+      "owed": "Doit",
+      "credit": "Solde créditeur",
+      "net": "Net",
+      "asOf": "Au {date}",
+      "terms": "Conditions de crédit",
+      "editTerms": "Conditions de crédit",
+      "creditDays": "Jours de crédit",
+      "cash": "Au comptant",
+      "days": "{n} jours",
+      "creditLimit": "Plafond de crédit",
+      "noLimit": "Sans plafond",
+      "limitUsage": "Utilisation du plafond",
+      "available2": "Disponible : {amount}",
+      "creditDaysHint": "0 = au comptant. De 0 à 365.",
+      "creditLimitHint": "Vide = sans plafond. Indicatif : ne bloque pas la facturation.",
+      "termsHint": "Les jours valent pour les factures émises à partir de maintenant ; les créances déjà ouvertes gardent leur échéance.",
+      "termsSaved": "Conditions enregistrées.",
+      "receivables": "Créances",
+      "advances": "Soldes créditeurs",
+      "applied": "{doc} : −{amount}",
+      "creditNote": "Avoir",
+      "origin": "Origine",
+      "available": "Disponible",
+      "empty": "Ce client n'a aucune créance.",
+      "origins": {
+        "credit_note": "Avoir",
+        "receipt": "Encaissement"
+      }
+    },
+    "opening": {
+      "intro": "Chargez ce que chaque client devait déjà avant d'utiliser les créances.",
+      "noEntryTitle": "Cela ne génère pas d'écriture comptable",
+      "noEntry": "Les soldes d'ouverture entrent dans les créances, pas dans le grand livre. Pour que les créances concordent avec la comptabilité, enregistrez en comptabilité l'écriture d'ouverture pour le même total.",
+      "cutoff": "Date de clôture",
+      "cutoffHint": "Un seul chargement par date de clôture.",
+      "reason": "Motif",
+      "lines": "Créances",
+      "customer": "Client",
+      "amount": "Montant",
+      "dueHint": "Vide = selon les jours de crédit",
+      "addLine": "Ajouter une ligne",
+      "total": "Total : {amount}",
+      "load": "Charger les soldes",
+      "confirmTitle": "Charger les soldes d'ouverture ?",
+      "confirmText": "{n} créance(s) pour {total} seront chargées avec la date de clôture {date}. Ce chargement ne peut pas être répété pour cette date.",
+      "confirmLoad": "Charger",
+      "done": "{total} chargés avec la date de clôture {date}.",
+      "seeReceivables": "Voir les créances",
+      "another": "Faire un autre chargement",
+      "errors": {
+        "cutoff": "Indiquez la date de clôture.",
+        "reason": "Indiquez le motif (3 caractères minimum).",
+        "noRows": "Ajoutez au moins une ligne.",
+        "tooMany": "500 lignes maximum par chargement.",
+        "customer": "Choisissez le client.",
+        "issueDate": "Indiquez la date d'émission.",
+        "dueDate": "La date d'échéance n'est pas valide.",
+        "dueBeforeIssue": "L'échéance ne peut pas précéder l'émission.",
+        "amount": "Indiquez un montant supérieur à zéro."
+      }
+    }
+  },
   "purchasing": {
     "title": "Achats",
     "tabs": {
@@ -1367,6 +1491,7 @@
   },
   "nav": {
     "accounting": "Comptabilité",
+    "treasury": "Trésorerie",
     "audit": "Journal d'audit",
     "brand": "CRM",
     "brandSubtitle": "Panneau d'admin.",

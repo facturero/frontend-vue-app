@@ -43,6 +43,10 @@ import AccountingAutomaticView from '@/views/accounting/AutomaticPostingView.vue
 import AccountingReportsView from '@/views/accounting/ReportsView.vue';
 import AccountingStatementsView from '@/views/accounting/StatementsView.vue';
 import PurchasingSuppliersView from '@/views/purchasing/SuppliersView.vue';
+import TreasuryReceivablesView from '@/views/treasury/ReceivablesView.vue';
+import TreasuryAgingView from '@/views/treasury/AgingView.vue';
+import TreasuryOpeningBalancesView from '@/views/treasury/OpeningBalancesView.vue';
+import TreasuryCustomerStatementView from '@/views/treasury/CustomerStatementView.vue';
 import PurchasingOrdersView from '@/views/purchasing/PurchaseOrdersView.vue';
 import PurchasingOrderFormView from '@/views/purchasing/PurchaseOrderFormView.vue';
 import PurchasingOrderView from '@/views/purchasing/PurchaseOrderView.vue';
@@ -397,6 +401,32 @@ const router = createRouter({
       name: 'purchasing-suppliers',
       component: PurchasingSuppliersView,
       meta: { requiresAuth: true, requiredPermission: 'supplier:read', requiredPlugin: 'inventory.suppliers' },
+    },
+
+    // Tesorería (Fase 3): cartera de cuentas por cobrar. Todas detrás del módulo y de su permiso; lo que escribe pide el suyo.
+    {
+      path: '/treasury/receivables',
+      name: 'treasury-receivables',
+      component: TreasuryReceivablesView,
+      meta: { requiresAuth: true, requiredPermission: 'receivable:read', requiredPlugin: 'finance.accounts_receivable_payable' },
+    },
+    {
+      path: '/treasury/aging',
+      name: 'treasury-aging',
+      component: TreasuryAgingView,
+      meta: { requiresAuth: true, requiredPermission: 'receivable:read', requiredPlugin: 'finance.accounts_receivable_payable' },
+    },
+    {
+      path: '/treasury/opening-balances',
+      name: 'treasury-opening-balances',
+      component: TreasuryOpeningBalancesView,
+      meta: { requiresAuth: true, requiredPermission: 'opening_balance:load', requiredPlugin: 'finance.accounts_receivable_payable' },
+    },
+    {
+      path: '/treasury/customers/:id/statement',
+      name: 'treasury-customer-statement',
+      component: TreasuryCustomerStatementView,
+      meta: { requiresAuth: true, requiredPermission: 'receivable:read', requiredPlugin: 'finance.accounts_receivable_payable' },
     },
 
     {

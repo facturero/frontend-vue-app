@@ -117,6 +117,8 @@
         "purchase_bill": "una factura de compra",
         "purchase_bill_void": "la anulación de una factura de compra",
         "purchase_settlement": "una liquidación de compra",
+        "receipt": "un cobro de cliente",
+        "receipt_void": "la anulación de un cobro de cliente",
         "other": "otro documento"
       }
     },
@@ -263,7 +265,9 @@
           "invoice_void": "Anulación de factura",
           "purchase_bill": "Factura de compra",
           "purchase_bill_void": "Anulación de factura de compra",
-          "purchase_settlement": "Liquidación de compra"
+          "purchase_settlement": "Liquidación de compra",
+          "receipt": "Cobro de cliente",
+          "receipt_void": "Anulación de cobro de cliente"
         },
         "reasons": {
           "MISSING_ROLE": "Falta la cuenta de un rol",
@@ -368,6 +372,7 @@
       "pricing": "Precios y descuentos",
       "accounting": "Contabilidad",
       "purchasing": "Compras",
+      "treasury": "Tesorería",
       "restaurant": "Restaurante"
     },
     "empty": "No hay actividad registrada con estos filtros",
@@ -498,6 +503,12 @@
       "purchasing_bill_blocked": "Factura de compra bloqueada por conciliación",
       "purchasing_bill_overridden": "Factura de compra aprobada con excepción",
       "purchasing_bill_voided": "Factura de compra anulada",
+      "treasury_receivable_opened": "Deuda de cliente registrada en la cartera",
+      "treasury_receivable_credited": "Nota de crédito aplicada a una deuda de cliente",
+      "treasury_receivable_cancelled": "Deuda de cliente anulada",
+      "treasury_customer_advance_opened": "Saldo a favor de un cliente registrado",
+      "treasury_customer_terms_updated": "Condiciones de crédito de un cliente cambiadas",
+      "treasury_opening_balance_loaded": "Saldos iniciales de cartera cargados",
       "purchasing_bill_withholding_issued": "Retención emitida sobre factura de compra",
       "purchasing_settings_updated": "Política de compras modificada",
       "fiscal_ec_purchase_settlement_issued": "Liquidación de compra emitida",
@@ -1127,6 +1138,119 @@
       "submit": "Emitir y enviar al SRI"
     }
   },
+  "treasury": {
+    "title": "Tesorería",
+    "tabs": {
+      "receivables": "Cartera",
+      "aging": "Antigüedad",
+      "opening": "Saldos iniciales"
+    },
+    "receivables": {
+      "intro": "Lo que cada cliente le debe a la empresa. Una deuda nace sola de una factura a crédito; las ventas del punto de venta y las cobradas al contado no entran.",
+      "search": "Buscar por cliente o documento",
+      "from": "Emitida desde",
+      "to": "Emitida hasta",
+      "overdueOnly": "Solo vencidas",
+      "customer": "Cliente",
+      "document": "Documento",
+      "issueDate": "Emisión",
+      "dueDate": "Vencimiento",
+      "original": "Importe",
+      "balance": "Saldo",
+      "applied": "Aplicado: {amount}",
+      "overdueDays": "Vencida hace {n} d",
+      "empty": "No hay deudas con esos filtros.",
+      "status": {
+        "open": "Abierta",
+        "partial": "Parcial",
+        "paid": "Pagada",
+        "written_off": "Castigada",
+        "cancelled": "Anulada"
+      },
+      "source": {
+        "invoice": "Factura",
+        "credit_note": "Nota de crédito",
+        "initial_balance": "Saldo inicial"
+      }
+    },
+    "aging": {
+      "intro": "Lo que está corriente y lo que está vencido, por tramos de días de atraso.",
+      "current": "Corriente",
+      "days1To30": "1 a 30 días",
+      "days31To60": "31 a 60 días",
+      "days61To90": "61 a 90 días",
+      "daysOver90": "Más de 90 días",
+      "customer": "Cliente",
+      "total": "Total",
+      "byCustomer": "Por cliente",
+      "asOf": "al {date}",
+      "empty": "No hay deuda pendiente."
+    },
+    "statement": {
+      "open": "Estado de cuenta",
+        "intro": "Sus deudas, lo que se le ha aplicado y lo que debe hoy.",
+      "owed": "Debe",
+      "credit": "Saldo a favor",
+      "net": "Neto",
+      "asOf": "Al {date}",
+      "terms": "Condiciones de crédito",
+      "editTerms": "Condiciones de crédito",
+      "creditDays": "Días de crédito",
+      "cash": "Al contado",
+      "days": "{n} días",
+      "creditLimit": "Cupo de crédito",
+      "noLimit": "Sin cupo",
+      "limitUsage": "Uso del cupo",
+      "available2": "Disponible: {amount}",
+      "creditDaysHint": "0 = al contado. De 0 a 365.",
+      "creditLimitHint": "Vacío = sin cupo. Es informativo: no bloquea la facturación.",
+      "termsHint": "Los días valen para las facturas que se emitan desde ahora; las deudas ya abiertas conservan su vencimiento.",
+      "termsSaved": "Condiciones guardadas.",
+      "receivables": "Deudas",
+      "advances": "Saldos a favor",
+      "applied": "{doc}: −{amount}",
+      "creditNote": "Nota de crédito",
+      "origin": "Origen",
+      "available": "Disponible",
+      "empty": "Este cliente no tiene deudas en la cartera.",
+      "origins": {
+        "credit_note": "Nota de crédito",
+        "receipt": "Cobro"
+      }
+    },
+    "opening": {
+      "intro": "Carga lo que cada cliente ya debía antes de empezar a usar la cartera.",
+      "noEntryTitle": "Esto no genera asiento contable",
+      "noEntry": "Los saldos iniciales entran a la cartera, no al libro mayor. Para que la cartera cuadre con contabilidad, registra en contabilidad el asiento de apertura por el mismo total.",
+      "cutoff": "Fecha de corte",
+      "cutoffHint": "Una sola carga por fecha de corte.",
+      "reason": "Motivo",
+      "lines": "Deudas",
+      "customer": "Cliente",
+      "amount": "Importe",
+      "dueHint": "Vacío = según los días de crédito",
+      "addLine": "Añadir línea",
+      "total": "Total: {amount}",
+      "load": "Cargar saldos",
+      "confirmTitle": "¿Cargar los saldos iniciales?",
+      "confirmText": "Se cargarán {n} deuda(s) por {total} con fecha de corte {date}. Esta carga no se puede repetir para esa fecha.",
+      "confirmLoad": "Cargar",
+      "done": "Se cargaron {total} con fecha de corte {date}.",
+      "seeReceivables": "Ver la cartera",
+      "another": "Hacer otra carga",
+      "errors": {
+        "cutoff": "Indica la fecha de corte.",
+        "reason": "Indica el motivo (mínimo 3 caracteres).",
+        "noRows": "Añade al menos una línea.",
+        "tooMany": "Como máximo 500 líneas por carga.",
+        "customer": "Elige el cliente.",
+        "issueDate": "Indica la fecha de emisión.",
+        "dueDate": "La fecha de vencimiento no es válida.",
+        "dueBeforeIssue": "El vencimiento no puede ser anterior a la emisión.",
+        "amount": "Indica un importe mayor que cero."
+      }
+    }
+  },
   "purchasing": {
     "title": "Compras",
     "tabs": {
@@ -1367,6 +1491,7 @@
   },
   "nav": {
     "accounting": "Contabilidad",
+    "treasury": "Tesorería",
     "audit": "Auditoría",
     "brand": "CRM",
     "brandSubtitle": "Panel de adm.",

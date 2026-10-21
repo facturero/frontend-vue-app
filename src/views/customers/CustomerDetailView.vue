@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { useCustomerStore } from '@/stores/customers';
+import { usePluginsStore } from '@/stores/plugins';
 import { customerApi } from '@/api/customers';
 import type { ContactInput, AddressInput, AddressType } from '@/types/customers';
 import PageHeader from '@/components/ui/PageHeader.vue';
@@ -18,6 +19,8 @@ const store = useCustomerStore();
 
 const customerId = computed(() => route.params.id as string);
 const canUpdate = computed(() => auth.can('customer:update'));
+/** El estado de cuenta es de tesorería: solo si la organización tiene el módulo y la persona puede ver la cartera. */
+const canSeeStatement = computed(() => auth.can('receivable:read') && usePluginsStore().isActive('finance.accounts_receivable_payable'));
 const disabling = ref(false);
 
 const customer = computed(() => store.current);
@@ -183,6 +186,9 @@ onMounted(async () => {
       :title="customer?.businessName || $t('customers.singular')"
     >
       <template #actions>
+        <v-btn v-if="canSeeStatement" variant="tonal" size="small" prepend-icon="mdi-cash-multiple" :to="{ name: 'treasury-customer-statement', params: { id: customerId } }">
+          {{ $t('treasury.statement.open') }}
+        </v-btn>
         <v-btn v-if="canUpdate && customer?.status === 'active'" color="error" variant="tonal" size="small"
           prepend-icon="mdi-archive" :loading="disabling" @click="disable">
           {{ $t('common.deactivate') }}

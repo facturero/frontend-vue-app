@@ -117,6 +117,8 @@
         "purchase_bill": "a purchase bill",
         "purchase_bill_void": "the cancellation of a purchase bill",
         "purchase_settlement": "a purchase settlement",
+        "receipt": "a customer receipt",
+        "receipt_void": "the cancellation of a customer receipt",
         "other": "another document"
       }
     },
@@ -263,7 +265,9 @@
           "invoice_void": "Invoice cancellation",
           "purchase_bill": "Purchase invoice",
           "purchase_bill_void": "Purchase invoice cancellation",
-          "purchase_settlement": "Purchase settlement"
+          "purchase_settlement": "Purchase settlement",
+          "receipt": "Customer receipt",
+          "receipt_void": "Customer receipt cancellation"
         },
         "reasons": {
           "MISSING_ROLE": "An account role is missing",
@@ -368,6 +372,7 @@
       "pricing": "Pricing and discounts",
       "accounting": "Accounting",
       "purchasing": "Purchasing",
+      "treasury": "Treasury",
       "restaurant": "Restaurant"
     },
     "empty": "No activity recorded with these filters",
@@ -498,6 +503,12 @@
       "purchasing_bill_blocked": "Purchase bill blocked by reconciliation",
       "purchasing_bill_overridden": "Purchase bill overridden",
       "purchasing_bill_voided": "Purchase bill voided",
+      "treasury_receivable_opened": "Customer debt recorded in receivables",
+      "treasury_receivable_credited": "Credit note applied to a customer debt",
+      "treasury_receivable_cancelled": "Customer debt cancelled",
+      "treasury_customer_advance_opened": "Customer credit balance recorded",
+      "treasury_customer_terms_updated": "Customer credit terms changed",
+      "treasury_opening_balance_loaded": "Opening receivable balances loaded",
       "purchasing_bill_withholding_issued": "Withholding issued on purchase bill",
       "purchasing_settings_updated": "Purchasing policy updated",
       "fiscal_ec_purchase_settlement_issued": "Purchase settlement issued",
@@ -1127,6 +1138,119 @@
       "submit": "Issue and send to the SRI"
     }
   },
+  "treasury": {
+    "title": "Treasury",
+    "tabs": {
+      "receivables": "Receivables",
+      "aging": "Aging",
+      "opening": "Opening balances"
+    },
+    "receivables": {
+      "intro": "What each customer owes the company. A debt is created automatically from an invoice on credit; point-of-sale and cash sales are not included.",
+      "search": "Search by customer or document",
+      "from": "Issued from",
+      "to": "Issued to",
+      "overdueOnly": "Overdue only",
+      "customer": "Customer",
+      "document": "Document",
+      "issueDate": "Issued",
+      "dueDate": "Due",
+      "original": "Amount",
+      "balance": "Balance",
+      "applied": "Applied: {amount}",
+      "overdueDays": "Overdue {n} d",
+      "empty": "No debts match those filters.",
+      "status": {
+        "open": "Open",
+        "partial": "Partial",
+        "paid": "Paid",
+        "written_off": "Written off",
+        "cancelled": "Cancelled"
+      },
+      "source": {
+        "invoice": "Invoice",
+        "credit_note": "Credit note",
+        "initial_balance": "Opening balance"
+      }
+    },
+    "aging": {
+      "intro": "What is current and what is overdue, by days past due.",
+      "current": "Current",
+      "days1To30": "1 to 30 days",
+      "days31To60": "31 to 60 days",
+      "days61To90": "61 to 90 days",
+      "daysOver90": "Over 90 days",
+      "customer": "Customer",
+      "total": "Total",
+      "byCustomer": "By customer",
+      "asOf": "as of {date}",
+      "empty": "No outstanding debt."
+    },
+    "statement": {
+      "open": "Account statement",
+        "intro": "Their debts, what has been applied to them and what they owe today.",
+      "owed": "Owes",
+      "credit": "Credit balance",
+      "net": "Net",
+      "asOf": "As of {date}",
+      "terms": "Credit terms",
+      "editTerms": "Credit terms",
+      "creditDays": "Credit days",
+      "cash": "Cash",
+      "days": "{n} days",
+      "creditLimit": "Credit limit",
+      "noLimit": "No limit",
+      "limitUsage": "Limit usage",
+      "available2": "Available: {amount}",
+      "creditDaysHint": "0 = cash. From 0 to 365.",
+      "creditLimitHint": "Empty = no limit. Informational: it does not block invoicing.",
+      "termsHint": "The days apply to invoices issued from now on; debts already open keep their due date.",
+      "termsSaved": "Terms saved.",
+      "receivables": "Debts",
+      "advances": "Credit balances",
+      "applied": "{doc}: −{amount}",
+      "creditNote": "Credit note",
+      "origin": "Origin",
+      "available": "Available",
+      "empty": "This customer has no debts in receivables.",
+      "origins": {
+        "credit_note": "Credit note",
+        "receipt": "Receipt"
+      }
+    },
+    "opening": {
+      "intro": "Load what each customer already owed before you started using receivables.",
+      "noEntryTitle": "This does not create a journal entry",
+      "noEntry": "Opening balances go into receivables, not the general ledger. For receivables to match accounting, record the opening journal entry in accounting for the same total.",
+      "cutoff": "Cut-off date",
+      "cutoffHint": "One load per cut-off date.",
+      "reason": "Reason",
+      "lines": "Debts",
+      "customer": "Customer",
+      "amount": "Amount",
+      "dueHint": "Empty = per credit days",
+      "addLine": "Add line",
+      "total": "Total: {amount}",
+      "load": "Load balances",
+      "confirmTitle": "Load the opening balances?",
+      "confirmText": "{n} debt(s) totalling {total} will be loaded with cut-off date {date}. This load cannot be repeated for that date.",
+      "confirmLoad": "Load",
+      "done": "{total} loaded with cut-off date {date}.",
+      "seeReceivables": "View receivables",
+      "another": "Make another load",
+      "errors": {
+        "cutoff": "Enter the cut-off date.",
+        "reason": "Enter the reason (at least 3 characters).",
+        "noRows": "Add at least one line.",
+        "tooMany": "At most 500 lines per load.",
+        "customer": "Choose the customer.",
+        "issueDate": "Enter the issue date.",
+        "dueDate": "The due date is not valid.",
+        "dueBeforeIssue": "The due date cannot be before the issue date.",
+        "amount": "Enter an amount greater than zero."
+      }
+    }
+  },
   "purchasing": {
     "title": "Purchasing",
     "tabs": {
@@ -1367,6 +1491,7 @@
   },
   "nav": {
     "accounting": "Accounting",
+    "treasury": "Treasury",
     "audit": "Audit log",
     "brand": "CRM",
     "brandSubtitle": "Admin panel",
