@@ -12,7 +12,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useTreasuryStore } from '@/stores/treasury';
 import { customerApi } from '@/api/customers';
 import { centsToInput, formatMoney } from '@/utils/accounting';
-import { creditUsage, daysOverdue, isOverdue, parseCreditDays, parseCreditLimit, RECEIVABLE_STATUS_COLOR } from '@/utils/treasury';
+import { creditUsage, daysOverdue, downloadBlob, isOverdue, parseCreditDays, parseCreditLimit, RECEIVABLE_STATUS_COLOR, reportLang } from '@/utils/treasury';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import TreasuryTabs from '@/components/treasury/TreasuryTabs.vue';
 
@@ -24,6 +24,12 @@ const store = useTreasuryStore();
 const customerId = computed(() => route.params.id as string);
 const canEditTerms = computed(() => auth.can('customer_terms:manage'));
 const canCollect = computed(() => auth.can('receipt:create'));
+const canExport = computed(() => auth.can('receivable:export'));
+const print = (): void => window.print();
+async function exportCsv(): Promise<void> {
+  const blob = await store.exportStatement(customerId.value, reportLang(locale.value));
+  if (blob) downloadBlob(`${t('treasury.export.fileStatement')}-${statement.value?.asOf ?? ''}.csv`, blob);
+}
 const customerName = ref('');
 const snackbar = ref<string | null>(null);
 
@@ -96,10 +102,12 @@ async function saveTerms(): Promise<void> {
   <v-container>
     <PageHeader :title="customerName || $t('treasury.title')" :subtitle="$t('treasury.statement.intro')">
       <template #actions>
-        <v-btn v-if="canCollect" color="primary" prepend-icon="mdi-cash-plus" :to="{ name: 'treasury-receipt-new', query: { customerId } }">{{ $t('treasury.statement.newReceipt') }}</v-btn>
+        <v-btn v-if="canCollect" class="d-print-none" color="primary" prepend-icon="mdi-cash-plus" :to="{ name: 'treasury-receipt-new', query: { customerId } }">{{ $t('treasury.statement.newReceipt') }}</v-btn>
+        <v-btn v-if="canExport" class="d-print-none" variant="tonal" prepend-icon="mdi-download-outline" :loading="store.loading" @click="exportCsv">{{ $t('treasury.export.csv') }}</v-btn>
+        <v-btn class="d-print-none" variant="tonal" prepend-icon="mdi-printer-outline" @click="print">{{ $t('treasury.export.print') }}</v-btn>
       </template>
     </PageHeader>
-    <TreasuryTabs />
+    <div class="d-print-none"><TreasuryTabs /></div>
 
     <v-alert v-if="store.error && !dialog" type="error" closable class="mb-4">{{ store.error }}</v-alert>
 

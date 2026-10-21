@@ -513,6 +513,9 @@
       "treasury_receipt_updated": "Receipt draft changed",
       "treasury_receipt_posted": "Customer receipt posted",
       "treasury_receipt_voided": "Customer receipt voided",
+      "treasury_receivable_overdue": "Payment reminder sent to a customer",
+      "treasury_reminder_settings_updated": "Payment reminders configured",
+      "treasury_report_exported": "Receivables report exported",
       "purchasing_bill_withholding_issued": "Withholding issued on purchase bill",
       "purchasing_settings_updated": "Purchasing policy updated",
       "fiscal_ec_purchase_settlement_issued": "Purchase settlement issued",
@@ -1147,6 +1150,7 @@
     "tabs": {
       "receivables": "Receivables",
       "receipts": "Receipts",
+      "reminders": "Reminders",
       "aging": "Aging",
       "opening": "Opening balances"
     },
@@ -1261,6 +1265,54 @@
         "applyTooMuch": "What is applied to the debts is more than what was collected plus the advances.",
         "nothing": "Enter the amount received or an advance to use."
       }
+    },
+    "export": {
+      "csv": "Export CSV",
+      "print": "Print",
+      "fileReceivables": "receivables",
+      "fileAging": "aging",
+      "fileStatement": "statement"
+    },
+    "reminders": {
+      "intro": "Email your customers when they have overdue documents. One email per customer, with the list, and at most one per document per week.",
+      "settings": "Settings",
+      "on": "On",
+      "off": "Off",
+      "externalNotice": "This is an email that reaches YOUR CUSTOMER, signed with your company name. That is why it starts off: it is only sent if you turn it on here, and every change is recorded in the audit log.",
+      "enable": "Send payment reminders to my customers",
+      "enableHint": "Sent once a day, from 09:00 in your time zone.",
+      "firstAfterDays": "Remind from (days overdue)",
+      "firstAfterDaysHint": "A document is reminded once it has been overdue at least this many days.",
+      "repeatEveryDays": "Repeat every (days)",
+      "repeatEveryDaysHint": "Minimum 7: a document is not reminded more than once a week.",
+      "lastRun": "Last automatic run: {date}.",
+      "errors": {
+        "firstAfterDays": "Enter a whole number from {min} to {max}.",
+        "repeatEveryDays": "Enter a whole number from {min} to {max} (at least a week)."
+      },
+      "savedOn": "Reminders turned on.",
+      "savedOff": "Settings saved.",
+      "todayTitle": "Who would be reminded today",
+      "asOf": "As of {date}",
+      "refresh": "Refresh",
+      "sendNow": "Send now",
+      "todayHint": "This list sends nothing: it shows what would go out if the process ran now. It works even when reminders are off, so you can decide before turning them on.",
+      "runResult": "{customers} customer(s) were reminded about {documents} document(s).",
+      "runWithoutEmail": "{n} customer(s) without an email received nothing.",
+      "runAlready": "{n} customer(s) had already been reminded today.",
+      "withoutEmail": "{n} customer(s) have no email on file: they would receive nothing. Add their email in the customer record.",
+      "customer": "Customer",
+      "email": "Email",
+      "documents": "Documents",
+      "total": "Total overdue",
+      "noEmail": "No email",
+      "empty": "No customer has documents due for a reminder today.",
+      "confirmEnableTitle": "Turn reminders on?",
+      "confirmEnableText": "From now on, customers with overdue debt will receive an email on behalf of your company: the first one after {first} days overdue and then every {repeat} days until they pay. You can turn it off any time.",
+      "confirmEnable": "Yes, turn on",
+      "confirmRunTitle": "Send reminders now?",
+      "confirmRunText": "An email will be sent to {customers} customer(s) for {documents} overdue document(s). This cannot be undone.",
+      "sent": "Reminders sent: {n} customer(s)."
     },
     "aging": {
       "intro": "What is current and what is overdue, by days past due.",

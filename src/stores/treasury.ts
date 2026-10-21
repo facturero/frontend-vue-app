@@ -15,6 +15,10 @@ import type {
   ReceiptInput,
   Receivable,
   ReceivableFilters,
+  ReminderPreview,
+  ReminderRun,
+  ReminderSettings,
+  ReminderSettingsInput,
 } from '@/types/treasury';
 
 /** Cartera, antigüedad, estado de cuenta y condiciones de crédito. Cada acción deja el mensaje del servidor en `error` y vuelve a lanzar, para que la vista decida. */
@@ -32,6 +36,8 @@ export const useTreasuryStore = defineStore('treasury', () => {
   const receiptsTotal = ref(0);
   const receiptsPage = ref(1);
   const currentReceipt = ref<Receipt | null>(null);
+  const reminderSettings = ref<ReminderSettings | null>(null);
+  const reminderPreview = ref<ReminderPreview | null>(null);
   const loading = ref(false);
   const saving = ref(false);
   const error = ref<string | null>(null);
@@ -118,5 +124,35 @@ export const useTreasuryStore = defineStore('treasury', () => {
     return receipt!;
   }
 
-  return { receipts, receiptsTotal, receiptsPage, currentReceipt, fetchReceipts, fetchReceipt, saveReceipt, postReceipt, voidReceipt, receivables, total, page, pageSize, asOf, aging, statement, terms, loading, saving, error, fetchReceivables, fetchAging, fetchCustomer, saveTerms, loadOpeningBalances };
+  // ── Exportar y recordatorios ──
+  /** Devuelve el archivo CSV; la vista lo descarga. El servidor deja el evento en la bitácora. */
+  async function exportReceivables(filters: ReceivableFilters, lang: string): Promise<Blob | undefined> {
+    return run(loading, () => treasuryApi.exportReceivables(filters, lang), false);
+  }
+  async function exportAging(lang: string): Promise<Blob | undefined> {
+    return run(loading, () => treasuryApi.exportAging(lang), false);
+  }
+  async function exportStatement(customerId: string, lang: string): Promise<Blob | undefined> {
+    return run(loading, () => treasuryApi.exportStatement(customerId, lang), false);
+  }
+
+  async function fetchReminders(): Promise<void> {
+    const result = await run(loading, () => Promise.all([treasuryApi.getReminderSettings(), treasuryApi.getReminderPreview()]), false);
+    if (!result) return;
+    reminderSettings.value = result[0];
+    reminderPreview.value = result[1];
+  }
+  async function saveReminderSettings(input: ReminderSettingsInput): Promise<ReminderSettings> {
+    const saved = await run(saving, () => treasuryApi.setReminderSettings(input), true);
+    reminderSettings.value = saved!;
+    return saved!;
+  }
+  /** Envía los recordatorios de hoy y vuelve a pedir la vista previa (lo avisado ya no vuelve a aparecer). */
+  async function runReminders(): Promise<ReminderRun> {
+    const result = await run(saving, () => treasuryApi.runReminders(), true);
+    reminderPreview.value = (await run(loading, () => treasuryApi.getReminderPreview(), false)) ?? reminderPreview.value;
+    return result!;
+  }
+
+  return { reminderSettings, reminderPreview, exportReceivables, exportAging, exportStatement, fetchReminders, saveReminderSettings, runReminders, receipts, receiptsTotal, receiptsPage, currentReceipt, fetchReceipts, fetchReceipt, saveReceipt, postReceipt, voidReceipt, receivables, total, page, pageSize, asOf, aging, statement, terms, loading, saving, error, fetchReceivables, fetchAging, fetchCustomer, saveTerms, loadOpeningBalances };
 });

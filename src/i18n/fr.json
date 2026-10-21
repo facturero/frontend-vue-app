@@ -513,6 +513,9 @@
       "treasury_receipt_updated": "Brouillon d'encaissement modifié",
       "treasury_receipt_posted": "Encaissement client comptabilisé",
       "treasury_receipt_voided": "Encaissement client annulé",
+      "treasury_receivable_overdue": "Relance de paiement envoyée à un client",
+      "treasury_reminder_settings_updated": "Relances de paiement configurées",
+      "treasury_report_exported": "Rapport des créances exporté",
       "purchasing_bill_withholding_issued": "Retenue émise sur facture d'achat",
       "purchasing_settings_updated": "Politique d'achats modifiée",
       "fiscal_ec_purchase_settlement_issued": "Liquidation de compra émise",
@@ -1147,6 +1150,7 @@
     "tabs": {
       "receivables": "Créances",
       "receipts": "Encaissements",
+      "reminders": "Relances",
       "aging": "Balance âgée",
       "opening": "Soldes d'ouverture"
     },
@@ -1261,6 +1265,54 @@
         "applyTooMuch": "Ce qui est appliqué aux créances dépasse ce qui est encaissé plus les avances.",
         "nothing": "Indiquez le montant encaissé ou une avance à utiliser."
       }
+    },
+    "export": {
+      "csv": "Exporter en CSV",
+      "print": "Imprimer",
+      "fileReceivables": "creances",
+      "fileAging": "anciennete",
+      "fileStatement": "releve-de-compte"
+    },
+    "reminders": {
+      "intro": "Prévenez vos clients par e-mail lorsqu'ils ont des documents échus. Un seul e-mail par client, avec la liste, et au plus un par document et par semaine.",
+      "settings": "Configuration",
+      "on": "Activées",
+      "off": "Désactivées",
+      "externalNotice": "C'est un e-mail qui arrive chez VOTRE CLIENT, signé du nom de votre entreprise. C'est pourquoi les relances sont désactivées au départ : elles ne partent que si vous les activez ici, et chaque changement est enregistré dans le journal.",
+      "enable": "Envoyer des relances de paiement à mes clients",
+      "enableHint": "Envoi une fois par jour, à partir de 09 h 00 dans votre fuseau horaire.",
+      "firstAfterDays": "Relancer à partir de (jours de retard)",
+      "firstAfterDaysHint": "Un document est relancé dès qu'il est échu depuis au moins ce nombre de jours.",
+      "repeatEveryDays": "Répéter tous les (jours)",
+      "repeatEveryDaysHint": "Minimum 7 : un document n'est pas relancé plus d'une fois par semaine.",
+      "lastRun": "Dernier envoi automatique : {date}.",
+      "errors": {
+        "firstAfterDays": "Indiquez un nombre entier de {min} à {max}.",
+        "repeatEveryDays": "Indiquez un nombre entier de {min} à {max} (au moins une semaine)."
+      },
+      "savedOn": "Relances activées.",
+      "savedOff": "Configuration enregistrée.",
+      "todayTitle": "Qui serait relancé aujourd'hui",
+      "asOf": "Arrêté au {date}",
+      "refresh": "Actualiser",
+      "sendNow": "Envoyer maintenant",
+      "todayHint": "Cette liste n'envoie rien : elle montre ce qui partirait si le processus tournait maintenant. Elle fonctionne même quand les relances sont désactivées, pour décider avant de les activer.",
+      "runResult": "{customers} client(s) relancé(s) pour {documents} document(s).",
+      "runWithoutEmail": "{n} client(s) sans e-mail n'ont rien reçu.",
+      "runAlready": "{n} client(s) avaient déjà été relancés aujourd'hui.",
+      "withoutEmail": "{n} client(s) n'ont pas d'e-mail enregistré : ils ne recevraient rien. Ajoutez leur e-mail dans la fiche client.",
+      "customer": "Client",
+      "email": "E-mail",
+      "documents": "Documents",
+      "total": "Total échu",
+      "noEmail": "Sans e-mail",
+      "empty": "Aucun client n'a de document à relancer aujourd'hui.",
+      "confirmEnableTitle": "Activer les relances ?",
+      "confirmEnableText": "Dès maintenant, les clients ayant une dette échue recevront un e-mail au nom de votre entreprise : le premier après {first} jours de retard, puis tous les {repeat} jours tant qu'ils ne paient pas. Vous pouvez les désactiver à tout moment.",
+      "confirmEnable": "Oui, activer",
+      "confirmRunTitle": "Envoyer les relances maintenant ?",
+      "confirmRunText": "Un e-mail sera envoyé à {customers} client(s) pour {documents} document(s) échu(s). Cette action est irréversible.",
+      "sent": "Relances envoyées : {n} client(s)."
     },
     "aging": {
       "intro": "Ce qui est à jour et ce qui est échu, par tranches de jours de retard.",

@@ -7,15 +7,17 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 import { useTreasuryStore } from '@/stores/treasury';
 import { formatMoney } from '@/utils/accounting';
-import { daysOverdue, isOverdue, RECEIVABLE_STATUS_COLOR } from '@/utils/treasury';
+import { daysOverdue, downloadBlob, isOverdue, RECEIVABLE_STATUS_COLOR, reportLang } from '@/utils/treasury';
 import { RECEIVABLE_STATUSES, type Receivable, type ReceivableStatus } from '@/types/treasury';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import TreasuryTabs from '@/components/treasury/TreasuryTabs.vue';
 
 const { t, locale } = useI18n();
 const router = useRouter();
+const auth = useAuthStore();
 const store = useTreasuryStore();
 
 const search = ref('');
@@ -54,6 +56,23 @@ watch([search, status, overdueOnly, from, to], () => {
 });
 onMounted(() => void load(1));
 
+const canExport = computed(() => auth.can('receivable:export'));
+
+/** Exporta lo que se está viendo: los MISMOS filtros que la lista, pero todas las filas (no solo la página). El servidor deja constancia en la bitácora. */
+async function exportCsv(): Promise<void> {
+  const blob = await store.exportReceivables(
+    {
+      q: search.value || undefined,
+      status: status.value ? [status.value] : undefined,
+      overdueOnly: overdueOnly.value || undefined,
+      from: from.value || undefined,
+      to: to.value || undefined,
+    },
+    reportLang(locale.value),
+  );
+  if (blob) downloadBlob(`${t('treasury.export.fileReceivables')}-${store.asOf ?? ''}.csv`, blob);
+}
+
 const openCustomer = (item: Receivable) => router.push({ name: 'treasury-customer-statement', params: { id: item.customerId } });
 /** Días de atraso de una partida viva, o 0 si no está vencida. La fecha de corte es la del servidor. */
 const overdueDays = (item: Receivable) => (store.asOf && isOverdue(item, store.asOf) ? daysOverdue(item.dueDate, store.asOf) : 0);
@@ -62,7 +81,11 @@ const sourceLabel = (item: Receivable) => (item.documentNumber ? item.documentNu
 
 <template>
   <v-container>
-    <PageHeader :title="$t('treasury.title')" :subtitle="$t('treasury.receivables.intro')" />
+    <PageHeader :title="$t('treasury.title')" :subtitle="$t('treasury.receivables.intro')">
+      <template #actions>
+        <v-btn v-if="canExport" class="d-print-none" variant="tonal" prepend-icon="mdi-download-outline" :loading="store.loading" @click="exportCsv">{{ $t('treasury.export.csv') }}</v-btn>
+      </template>
+    </PageHeader>
     <TreasuryTabs />
 
     <v-alert v-if="store.error" type="error" closable class="mb-4">{{ store.error }}</v-alert>

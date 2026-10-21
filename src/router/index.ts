@@ -50,6 +50,7 @@ import TreasuryCustomerStatementView from '@/views/treasury/CustomerStatementVie
 import TreasuryReceiptsView from '@/views/treasury/ReceiptsView.vue';
 import TreasuryReceiptFormView from '@/views/treasury/ReceiptFormView.vue';
 import TreasuryReceiptDetailView from '@/views/treasury/ReceiptDetailView.vue';
+import TreasuryRemindersView from '@/views/treasury/RemindersView.vue';
 import PurchasingOrdersView from '@/views/purchasing/PurchaseOrdersView.vue';
 import PurchasingOrderFormView from '@/views/purchasing/PurchaseOrderFormView.vue';
 import PurchasingOrderView from '@/views/purchasing/PurchaseOrderView.vue';
@@ -454,6 +455,12 @@ const router = createRouter({
       name: 'treasury-receipt-edit',
       component: TreasuryReceiptFormView,
       meta: { requiresAuth: true, requiredPermission: 'receipt:create', requiredPlugin: 'finance.accounts_receivable_payable' },
+    },
+    {
+      path: '/treasury/reminders',
+      name: 'treasury-reminders',
+      component: TreasuryRemindersView,
+      meta: { requiresAuth: true, requiredPermission: 'reminder:manage', requiredPlugin: 'finance.accounts_receivable_payable' },
     },
 
     {

@@ -10,6 +10,7 @@ import type {
   Receivable,
   ReceivableStatus,
 } from '@/types/treasury';
+import { MAX_FIRST_AFTER_DAYS, MAX_REPEAT_DAYS, MIN_FIRST_AFTER_DAYS, MIN_REPEAT_DAYS } from '@/types/treasury';
 
 export const RECEIVABLE_STATUS_COLOR: Record<ReceivableStatus, string> = {
   open: 'lightinfo',
@@ -295,4 +296,37 @@ export function buildReceiptInput(
     },
     errors,
   };
+}
+
+// ── Recordatorios y exportación (bloque C) ──
+
+/** Valida la configuración como el servidor (mismos rangos): devuelve la clave de traducción del error de cada campo. */
+export function validateReminderSettings(form: { firstAfterDays: string; repeatEveryDays: string }): {
+  input: { firstAfterDays: number; repeatEveryDays: number } | null;
+  errors: Record<string, string>;
+} {
+  const errors: Record<string, string> = {};
+  const parse = (text: string): number | null => (/^\d+$/.test(text.trim()) ? Number(text.trim()) : null);
+  const first = parse(form.firstAfterDays);
+  const repeat = parse(form.repeatEveryDays);
+  if (first === null || first < MIN_FIRST_AFTER_DAYS || first > MAX_FIRST_AFTER_DAYS) errors.firstAfterDays = 'treasury.reminders.errors.firstAfterDays';
+  if (repeat === null || repeat < MIN_REPEAT_DAYS || repeat > MAX_REPEAT_DAYS) errors.repeatEveryDays = 'treasury.reminders.errors.repeatEveryDays';
+  if (Object.keys(errors).length > 0) return { input: null, errors };
+  return { input: { firstAfterDays: first!, repeatEveryDays: repeat! }, errors };
+}
+
+/** Idioma de los encabezados del CSV: el de la interfaz, si el servidor lo conoce (si no, español). */
+export function reportLang(locale: string): 'es' | 'en' | 'fr' {
+  const base = locale.slice(0, 2).toLowerCase();
+  return base === 'en' || base === 'fr' ? base : 'es';
+}
+
+/** Descarga un archivo que ya llegó del servidor (el BOM ya viene dentro: no se le añade otro). */
+export function downloadBlob(filename: string, blob: Blob): void {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
 }

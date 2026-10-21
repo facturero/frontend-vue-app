@@ -90,6 +90,8 @@ function iconFor(entry: AuditLogEntry): string {
   if (a.includes('disabled') || a.includes('rejected') || a.includes('voided') || a.includes('cancelled')) return 'mdi-cancel';
   if (a.includes('created') || a.includes('added') || a.includes('invited') || a.includes('opened') || a.includes('loaded')) return 'mdi-plus-circle-outline';
   if (a.includes('updated') || a.includes('upserted')) return 'mdi-pencil-outline';
+  if (a.includes('overdue')) return 'mdi-bell-ring-outline';
+  if (a.includes('exported')) return 'mdi-download-outline';
   if (a.includes('issued') || a.includes('enabled') || a.includes('activated') || a.includes('posted') || a.includes('approved') || a.includes('credited')) return 'mdi-check-circle-outline';
   return 'mdi-circle-small';
 }
@@ -100,6 +102,7 @@ function colorFor(entry: AuditLogEntry): string {
     return 'error';
   }
   if (a.includes('created') || a.includes('added') || a.includes('opened') || a.includes('loaded')) return 'success';
+  if (a.includes('overdue')) return 'warning';
   return 'primary';
 }
 

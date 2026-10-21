@@ -6,15 +6,17 @@
 import { computed, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 import { useTreasuryStore } from '@/stores/treasury';
 import { formatMoney } from '@/utils/accounting';
-import { agingShares, AGING_BUCKETS } from '@/utils/treasury';
+import { agingShares, AGING_BUCKETS, downloadBlob, reportLang } from '@/utils/treasury';
 import type { AgingCustomer } from '@/types/treasury';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import TreasuryTabs from '@/components/treasury/TreasuryTabs.vue';
 
 const { t, locale } = useI18n();
 const router = useRouter();
+const auth = useAuthStore();
 const store = useTreasuryStore();
 
 onMounted(() => void store.fetchAging());
@@ -27,15 +29,27 @@ const headers = computed(() => [
   { title: t('treasury.aging.total'), key: 'totalCents', sortable: false, align: 'end' as const },
 ]);
 const money = (cents: number) => formatMoney(cents, locale.value);
+const canExport = computed(() => auth.can('receivable:export'));
+async function exportCsv(): Promise<void> {
+  const blob = await store.exportAging(reportLang(locale.value));
+  if (blob) downloadBlob(`${t('treasury.export.fileAging')}-${aging.value?.asOf ?? ''}.csv`, blob);
+}
+const print = (): void => window.print();
+
 const openCustomer = (item: AgingCustomer) => router.push({ name: 'treasury-customer-statement', params: { id: item.customerId } });
 </script>
 
 <template>
   <v-container>
-    <PageHeader :title="$t('treasury.title')" :subtitle="$t('treasury.aging.intro')" />
-    <TreasuryTabs />
+    <PageHeader :title="$t('treasury.title')" :subtitle="$t('treasury.aging.intro')">
+      <template #actions>
+        <v-btn v-if="canExport" class="d-print-none" variant="tonal" prepend-icon="mdi-download-outline" :loading="store.loading" @click="exportCsv">{{ $t('treasury.export.csv') }}</v-btn>
+        <v-btn class="d-print-none" variant="tonal" prepend-icon="mdi-printer-outline" @click="print">{{ $t('treasury.export.print') }}</v-btn>
+      </template>
+    </PageHeader>
+    <div class="d-print-none"><TreasuryTabs /></div>
 
-    <v-alert v-if="store.error" type="error" closable class="mb-4">{{ store.error }}</v-alert>
+    <v-alert v-if="store.error" type="error" closable class="mb-4 d-print-none">{{ store.error }}</v-alert>
 
     <v-row v-if="aging" class="mb-2">
       <v-col v-for="bucket in AGING_BUCKETS" :key="bucket.key" cols="12" sm="6" md>

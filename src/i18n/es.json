@@ -513,6 +513,9 @@
       "treasury_receipt_updated": "Borrador de cobro modificado",
       "treasury_receipt_posted": "Cobro a un cliente contabilizado",
       "treasury_receipt_voided": "Cobro a un cliente anulado",
+      "treasury_receivable_overdue": "Recordatorio de cobro enviado a un cliente",
+      "treasury_reminder_settings_updated": "Recordatorios de cobro configurados",
+      "treasury_report_exported": "Reporte de cartera exportado",
       "purchasing_bill_withholding_issued": "Retención emitida sobre factura de compra",
       "purchasing_settings_updated": "Política de compras modificada",
       "fiscal_ec_purchase_settlement_issued": "Liquidación de compra emitida",
@@ -1147,6 +1150,7 @@
     "tabs": {
       "receivables": "Cartera",
       "receipts": "Cobros",
+      "reminders": "Recordatorios",
       "aging": "Antigüedad",
       "opening": "Saldos iniciales"
     },
@@ -1261,6 +1265,54 @@
         "applyTooMuch": "Lo aplicado a las deudas es mayor que lo cobrado más los anticipos.",
         "nothing": "Indica lo cobrado o un anticipo que se consuma."
       }
+    },
+    "export": {
+      "csv": "Exportar CSV",
+      "print": "Imprimir",
+      "fileReceivables": "cartera",
+      "fileAging": "antiguedad",
+      "fileStatement": "estado-de-cuenta"
+    },
+    "reminders": {
+      "intro": "Avisa por correo a tus clientes cuando tienen documentos vencidos. Un solo correo por cliente, con la lista, y como máximo uno por documento y semana.",
+      "settings": "Configuración",
+      "on": "Encendidos",
+      "off": "Apagados",
+      "externalNotice": "Es un correo que le llega a TU CLIENTE, firmado con el nombre de tu empresa. Por eso nacen apagados: solo se envían si tú los enciendes aquí, y cada cambio queda en la bitácora.",
+      "enable": "Enviar recordatorios de cobro a mis clientes",
+      "enableHint": "Se envían una vez al día, a partir de las 09:00 de tu zona horaria.",
+      "firstAfterDays": "Avisar desde (días de atraso)",
+      "firstAfterDaysHint": "Un documento se avisa cuando lleva al menos estos días vencido.",
+      "repeatEveryDays": "Repetir cada (días)",
+      "repeatEveryDaysHint": "Mínimo 7: un documento no se avisa más de una vez por semana.",
+      "lastRun": "Último envío automático: {date}.",
+      "errors": {
+        "firstAfterDays": "Indica un número entero de {min} a {max}.",
+        "repeatEveryDays": "Indica un número entero de {min} a {max} (mínimo una semana)."
+      },
+      "savedOn": "Recordatorios encendidos.",
+      "savedOff": "Configuración guardada.",
+      "todayTitle": "A quién se avisaría hoy",
+      "asOf": "Corte {date}",
+      "refresh": "Actualizar",
+      "sendNow": "Enviar ahora",
+      "todayHint": "Esta lista no envía nada: muestra lo que saldría si el proceso corriera ahora. Funciona aunque los recordatorios estén apagados, para que decidas antes de encenderlos.",
+      "runResult": "Se avisó a {customers} cliente(s) por {documents} documento(s).",
+      "runWithoutEmail": "{n} cliente(s) sin correo no recibieron nada.",
+      "runAlready": "{n} cliente(s) ya habían sido avisados hoy.",
+      "withoutEmail": "{n} cliente(s) no tienen correo registrado: no recibirían nada. Agrega su correo en la ficha del cliente.",
+      "customer": "Cliente",
+      "email": "Correo",
+      "documents": "Documentos",
+      "total": "Total vencido",
+      "noEmail": "Sin correo",
+      "empty": "Ningún cliente tiene documentos que toque avisar hoy.",
+      "confirmEnableTitle": "¿Encender los recordatorios?",
+      "confirmEnableText": "A partir de ahora tus clientes con deuda vencida recibirán un correo en nombre de tu empresa: la primera vez a los {first} días de atraso y luego cada {repeat} días mientras no paguen. Puedes apagarlos cuando quieras.",
+      "confirmEnable": "Sí, encender",
+      "confirmRunTitle": "¿Enviar los recordatorios ahora?",
+      "confirmRunText": "Se enviará un correo a {customers} cliente(s) por {documents} documento(s) vencido(s). No se puede deshacer.",
+      "sent": "Recordatorios enviados: {n} cliente(s)."
     },
     "aging": {
       "intro": "Lo que está corriente y lo que está vencido, por tramos de días de atraso.",

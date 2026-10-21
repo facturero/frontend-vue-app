@@ -238,3 +238,65 @@ export interface ReceiptInput {
 export interface ReceiptCreateInput extends ReceiptInput {
   customerId: string;
 }
+
+// ── Recordatorios de cobro (bloque C) ──
+
+/** Los recordatorios son un correo al CLIENTE de la organización: nacen apagados y solo el Administrador los enciende. */
+export interface ReminderSettings {
+  enabled: boolean;
+  /** Días de atraso desde los que se avisa por primera vez (1 a 90). */
+  firstAfterDays: number;
+  /** Cada cuántos días se repite el aviso de una misma partida (7 a 60: un recordatorio por semana como máximo). */
+  repeatEveryDays: number;
+  lastRunOn: string | null;
+  updatedBy: string | null;
+  updatedAt: string | null;
+}
+
+export interface ReminderSettingsInput {
+  enabled: boolean;
+  firstAfterDays: number;
+  repeatEveryDays: number;
+}
+
+export interface ReminderPreviewItem {
+  receivableId: string;
+  documentNumber: string | null;
+  dueDate: string;
+  daysOverdue: number;
+  balanceCents: number;
+}
+
+export interface ReminderPreviewCustomer {
+  customerId: string;
+  customerName: string;
+  currencyCode: string;
+  hasEmail: boolean;
+  /** Pista para reconocer el correo (`ma***@dominio`); el correo completo no viaja. */
+  emailHint: string | null;
+  totalCents: number;
+  receivableCount: number;
+  items: ReminderPreviewItem[];
+  extraItems: number;
+}
+
+export interface ReminderPreview {
+  asOf: string;
+  enabled: boolean;
+  receivableCount: number;
+  withoutEmailCount: number;
+  customers: ReminderPreviewCustomer[];
+}
+
+export interface ReminderRun {
+  runDate: string;
+  customersReminded: number;
+  receivablesReminded: number;
+  customersWithoutEmail: number;
+  customersAlreadyReminded: number;
+}
+
+export const MIN_REPEAT_DAYS = 7;
+export const MAX_REPEAT_DAYS = 60;
+export const MIN_FIRST_AFTER_DAYS = 1;
+export const MAX_FIRST_AFTER_DAYS = 90;

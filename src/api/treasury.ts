@@ -14,7 +14,14 @@ import type {
   ReceivableDetail,
   ReceivableFilters,
   ReceivablePage,
+  ReminderPreview,
+  ReminderRun,
+  ReminderSettings,
+  ReminderSettingsInput,
 } from '@/types/treasury';
+
+/** Un CSV llega como archivo (`blob`): el servidor lo arma y deja constancia de la exportación en la bitácora. */
+const csv = (url: string, params: Record<string, unknown>) => http.get<Blob>(url, { params, responseType: 'blob' }).then((r) => r.data);
 
 export const treasuryApi = {
   /** `status` viaja como lista separada por comas (`?status=open,partial`): es lo que entiende el servidor. */
@@ -45,4 +52,18 @@ export const treasuryApi = {
   updateReceipt: (id: string, body: ReceiptInput & { expectedVersion?: number }) => http.put<Receipt>(`/treasury/receipts/${id}`, body).then((r) => r.data),
   postReceipt: (id: string) => http.post<Receipt>(`/treasury/receipts/${id}/post`).then((r) => r.data),
   voidReceipt: (id: string, reason: string) => http.post<Receipt>(`/treasury/receipts/${id}/void`, { reason }).then((r) => r.data),
+
+  // ── Exportar (CSV) ──
+  exportReceivables: (filters: ReceivableFilters = {}, lang = 'es') => {
+    const { status, page: _page, pageSize: _pageSize, ...rest } = filters;
+    return csv('/treasury/receivables/export', { ...rest, ...(status?.length ? { status: status.join(',') } : {}), lang });
+  },
+  exportAging: (lang = 'es', asOf?: string) => csv('/treasury/receivables/aging/export', { lang, ...(asOf ? { asOf } : {}) }),
+  exportStatement: (customerId: string, lang = 'es', asOf?: string) => csv(`/treasury/customers/${customerId}/statement/export`, { lang, ...(asOf ? { asOf } : {}) }),
+
+  // ── Recordatorios de cobro ──
+  getReminderSettings: () => http.get<ReminderSettings>('/treasury/reminders/settings').then((r) => r.data),
+  setReminderSettings: (body: ReminderSettingsInput) => http.put<ReminderSettings>('/treasury/reminders/settings', body).then((r) => r.data),
+  getReminderPreview: () => http.get<ReminderPreview>('/treasury/reminders/preview').then((r) => r.data),
+  runReminders: () => http.post<ReminderRun>('/treasury/reminders/run').then((r) => r.data),
 };

@@ -14,6 +14,7 @@ const tabs = computed(() =>
   [
     { to: { name: 'treasury-receivables' }, labelKey: 'treasury.tabs.receivables', icon: 'mdi-cash-multiple', permission: 'receivable:read' },
     { to: { name: 'treasury-receipts' }, labelKey: 'treasury.tabs.receipts', icon: 'mdi-receipt-text-outline', permission: 'receipt:read' },
+    { to: { name: 'treasury-reminders' }, labelKey: 'treasury.tabs.reminders', icon: 'mdi-bell-ring-outline', permission: 'reminder:manage' },
     { to: { name: 'treasury-aging' }, labelKey: 'treasury.tabs.aging', icon: 'mdi-timeline-clock-outline', permission: 'receivable:read' },
     { to: { name: 'treasury-opening-balances' }, labelKey: 'treasury.tabs.opening', icon: 'mdi-database-import-outline', permission: 'opening_balance:load' },
   ].filter((tab) => auth.can(tab.permission)),
