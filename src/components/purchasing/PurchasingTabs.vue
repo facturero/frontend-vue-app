@@ -14,7 +14,7 @@ const route = useRoute();
 const tabs = computed(() =>
   [
     { to: { name: 'purchasing-orders' }, labelKey: 'purchasing.tabs.orders', icon: 'mdi-clipboard-list-outline', permission: 'purchase:read' },
-    { to: { name: 'purchasing-receipts' }, labelKey: 'purchasing.tabs.receipts', icon: 'mdi-tray-arrow-down-outline', permission: 'purchase:read' },
+    { to: { name: 'purchasing-receipts' }, labelKey: 'purchasing.tabs.receipts', icon: 'mdi-tray-arrow-down', permission: 'purchase:read' },
     { to: { name: 'purchasing-bills' }, labelKey: 'purchasing.tabs.bills', icon: 'mdi-file-document-outline', permission: 'purchase_bill:read' },
     { to: { name: 'purchasing-suppliers' }, labelKey: 'purchasing.tabs.suppliers', icon: 'mdi-truck-outline', permission: 'supplier:read' },
   ].filter((tab) => auth.can(tab.permission)),

@@ -238,7 +238,7 @@ const money = (c: number): string => formatMoney(c, locale.value, store.currency
     <v-alert v-if="actionError" type="error" closable class="mb-4" @click:close="actionError = null">{{ actionError }}</v-alert>
 
     <v-alert v-if="entry?.kind === 'automatic'" type="info" class="mb-4">
-      {{ $t('accounting.entry.autoOrigin', { source: $t(`accounting.entry.sourceTypes.${entry.sourceType ?? 'other'}`) }) }}
+      {{ $t('accounting.entry.autoOrigin', { source: $t($te(`accounting.entry.sourceTypes.${entry.sourceType}`) ? `accounting.entry.sourceTypes.${entry.sourceType}` : 'accounting.entry.sourceTypes.other') }) }}
     </v-alert>
     <v-alert v-if="entry?.kind === 'reversal'" type="info" class="mb-4">
       {{ $t('accounting.entry.isReversal') }}

@@ -114,6 +114,9 @@
         "withholding": "a withholding issued to a supplier",
         "stock_movement": "a stock movement",
         "invoice_void": "an invoice cancellation",
+        "purchase_bill": "a purchase bill",
+        "purchase_bill_void": "the cancellation of a purchase bill",
+        "purchase_settlement": "a purchase settlement",
         "other": "another document"
       }
     },

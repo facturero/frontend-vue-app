@@ -228,7 +228,8 @@ márgenes en un `v-sheet` interior.
 2. ¿Repite una prop que ya es default? Bórrala.
 3. ¿Tiene un color escrito a mano? Conviértelo en token del tema.
 4. ¿El título sale de `PageHeader`?
-5. `npm run lint:ui` en verde.
+5. `npm run lint:ui` en verde. Incluye `scripts/check-icons.mjs`: todo `mdi-*` escrito en el código debe existir en `@mdi/font`
+   (un nombre inventado no da error, solo no se pinta). Una pestaña o botón de la misma fila no debe quedarse sin icono.
 6. Míralas en claro **y** en oscuro: usar tokens (`text-medium-emphasis`,
    `bg-surface`) en vez de colores fijos es lo que hace que el modo oscuro
    funcione solo.

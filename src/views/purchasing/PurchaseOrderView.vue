@@ -109,7 +109,7 @@ async function confirmReason(): Promise<void> {
           <v-chip :color="ORDER_STATUS_COLOR[order.status]" variant="flat" size="small">{{ $t(`purchasing.status.${order.status}`) }}</v-chip>
           <v-spacer />
           <div class="d-flex flex-wrap ga-2">
-            <v-btn v-if="canSeeReceiving" variant="tonal" prepend-icon="mdi-tray-arrow-down-outline" @click="router.push({ name: 'purchasing-order-receiving', params: { id } })">{{ $t('purchasing.receiving.track') }}</v-btn>
+            <v-btn v-if="canSeeReceiving" variant="tonal" prepend-icon="mdi-tray-arrow-down" @click="router.push({ name: 'purchasing-order-receiving', params: { id } })">{{ $t('purchasing.receiving.track') }}</v-btn>
             <v-btn v-if="actions.edit" variant="tonal" prepend-icon="mdi-pencil" @click="router.push({ name: 'purchasing-order-edit', params: { id } })">{{ $t('common.edit') }}</v-btn>
             <v-btn v-if="actions.submit" color="primary" prepend-icon="mdi-send-outline" :loading="store.saving" @click="submit">{{ $t('purchasing.orders.submit') }}</v-btn>
             <v-btn v-if="actions.approve" color="success" prepend-icon="mdi-check" :loading="store.saving" @click="approve">{{ $t('purchasing.orders.approve') }}</v-btn>

@@ -190,8 +190,8 @@ async function toggleCostCenter(cc: CostCenter): Promise<void> {
 
     <v-card v-else-if="store.configured">
       <v-tabs v-model="tab" density="comfortable">
-        <v-tab value="accounts">{{ $t('accounting.accounts.title') }}</v-tab>
-        <v-tab value="costCenters">{{ $t('accounting.costCenters.title') }}</v-tab>
+        <v-tab value="accounts" prepend-icon="mdi-format-list-bulleted-square">{{ $t('accounting.accounts.title') }}</v-tab>
+        <v-tab value="costCenters" prepend-icon="mdi-sitemap-outline">{{ $t('accounting.costCenters.title') }}</v-tab>
       </v-tabs>
       <v-divider />
 

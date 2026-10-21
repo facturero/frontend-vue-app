@@ -14,7 +14,7 @@
     "test:e2e:sri": "npx playwright test e2e/specs/sri-emision.spec.ts e2e/specs/seguridad-documentos.spec.ts --retries=0",
     "typecheck": "vue-tsc --noEmit",
     "test": "vitest run",
-    "lint:ui": "node scripts/check-ui.mjs"
+    "lint:ui": "node scripts/check-ui.mjs && node scripts/check-icons.mjs"
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",

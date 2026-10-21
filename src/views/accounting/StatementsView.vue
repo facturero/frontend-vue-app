@@ -158,8 +158,8 @@ const isCurrentBalanced = computed(() => (store.balanceSheet?.totals.differenceC
     <template v-else-if="store.configured">
       <v-card class="mb-4 d-print-none">
         <v-tabs v-model="tab" density="comfortable">
-          <v-tab value="balance">{{ $t('accounting.statements.balanceSheet') }}</v-tab>
-          <v-tab value="income">{{ $t('accounting.statements.incomeStatement') }}</v-tab>
+          <v-tab value="balance" prepend-icon="mdi-chart-box-outline">{{ $t('accounting.statements.balanceSheet') }}</v-tab>
+          <v-tab value="income" prepend-icon="mdi-finance">{{ $t('accounting.statements.incomeStatement') }}</v-tab>
         </v-tabs>
         <v-divider />
         <v-card-text>

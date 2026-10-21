@@ -114,6 +114,9 @@
         "withholding": "una retención emitida a un proveedor",
         "stock_movement": "un movimiento de inventario",
         "invoice_void": "la anulación de una factura",
+        "purchase_bill": "una factura de compra",
+        "purchase_bill_void": "la anulación de una factura de compra",
+        "purchase_settlement": "una liquidación de compra",
         "other": "otro documento"
       }
     },
