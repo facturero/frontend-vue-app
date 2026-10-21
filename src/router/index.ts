@@ -47,6 +47,9 @@ import TreasuryReceivablesView from '@/views/treasury/ReceivablesView.vue';
 import TreasuryAgingView from '@/views/treasury/AgingView.vue';
 import TreasuryOpeningBalancesView from '@/views/treasury/OpeningBalancesView.vue';
 import TreasuryCustomerStatementView from '@/views/treasury/CustomerStatementView.vue';
+import TreasuryReceiptsView from '@/views/treasury/ReceiptsView.vue';
+import TreasuryReceiptFormView from '@/views/treasury/ReceiptFormView.vue';
+import TreasuryReceiptDetailView from '@/views/treasury/ReceiptDetailView.vue';
 import PurchasingOrdersView from '@/views/purchasing/PurchaseOrdersView.vue';
 import PurchasingOrderFormView from '@/views/purchasing/PurchaseOrderFormView.vue';
 import PurchasingOrderView from '@/views/purchasing/PurchaseOrderView.vue';
@@ -427,6 +430,30 @@ const router = createRouter({
       name: 'treasury-customer-statement',
       component: TreasuryCustomerStatementView,
       meta: { requiresAuth: true, requiredPermission: 'receivable:read', requiredPlugin: 'finance.accounts_receivable_payable' },
+    },
+    {
+      path: '/treasury/receipts',
+      name: 'treasury-receipts',
+      component: TreasuryReceiptsView,
+      meta: { requiresAuth: true, requiredPermission: 'receipt:read', requiredPlugin: 'finance.accounts_receivable_payable' },
+    },
+    {
+      path: '/treasury/receipts/new',
+      name: 'treasury-receipt-new',
+      component: TreasuryReceiptFormView,
+      meta: { requiresAuth: true, requiredPermission: 'receipt:create', requiredPlugin: 'finance.accounts_receivable_payable' },
+    },
+    {
+      path: '/treasury/receipts/:id',
+      name: 'treasury-receipt',
+      component: TreasuryReceiptDetailView,
+      meta: { requiresAuth: true, requiredPermission: 'receipt:read', requiredPlugin: 'finance.accounts_receivable_payable' },
+    },
+    {
+      path: '/treasury/receipts/:id/edit',
+      name: 'treasury-receipt-edit',
+      component: TreasuryReceiptFormView,
+      meta: { requiresAuth: true, requiredPermission: 'receipt:create', requiredPlugin: 'finance.accounts_receivable_payable' },
     },
 
     {

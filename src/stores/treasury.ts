@@ -9,6 +9,10 @@ import type {
   CustomerTermsInput,
   OpeningBalanceInput,
   OpeningBalanceLoad,
+  Receipt,
+  ReceiptCreateInput,
+  ReceiptFilters,
+  ReceiptInput,
   Receivable,
   ReceivableFilters,
 } from '@/types/treasury';
@@ -24,6 +28,10 @@ export const useTreasuryStore = defineStore('treasury', () => {
   const aging = ref<AgingReport | null>(null);
   const statement = ref<CustomerStatement | null>(null);
   const terms = ref<CustomerTerms | null>(null);
+  const receipts = ref<Receipt[]>([]);
+  const receiptsTotal = ref(0);
+  const receiptsPage = ref(1);
+  const currentReceipt = ref<Receipt | null>(null);
   const loading = ref(false);
   const saving = ref(false);
   const error = ref<string | null>(null);
@@ -76,5 +84,39 @@ export const useTreasuryStore = defineStore('treasury', () => {
     return (await run(saving, () => treasuryApi.loadOpeningBalances(input), true))!;
   }
 
-  return { receivables, total, page, pageSize, asOf, aging, statement, terms, loading, saving, error, fetchReceivables, fetchAging, fetchCustomer, saveTerms, loadOpeningBalances };
+  // ── Cobros ──
+  async function fetchReceipts(filters: ReceiptFilters = {}): Promise<void> {
+    const result = await run(loading, () => treasuryApi.listReceipts({ page: receiptsPage.value, pageSize: pageSize.value, ...filters }), false);
+    if (!result) return;
+    receipts.value = result.items;
+    receiptsTotal.value = result.total;
+    receiptsPage.value = result.page;
+  }
+
+  async function fetchReceipt(id: string): Promise<void> {
+    currentReceipt.value = null;
+    const receipt = await run(loading, () => treasuryApi.getReceipt(id), false);
+    if (receipt) currentReceipt.value = receipt;
+  }
+
+  /** Crea (sin id) o edita un borrador, y lo deja como el cobro actual. */
+  async function saveReceipt(id: string | null, input: ReceiptCreateInput | (ReceiptInput & { expectedVersion?: number })): Promise<Receipt> {
+    const receipt = await run(saving, () => (id ? treasuryApi.updateReceipt(id, input as ReceiptInput) : treasuryApi.createReceipt(input as ReceiptCreateInput)), true);
+    currentReceipt.value = receipt!;
+    return receipt!;
+  }
+
+  async function postReceipt(id: string): Promise<Receipt> {
+    const receipt = await run(saving, () => treasuryApi.postReceipt(id), true);
+    currentReceipt.value = receipt!;
+    return receipt!;
+  }
+
+  async function voidReceipt(id: string, reason: string): Promise<Receipt> {
+    const receipt = await run(saving, () => treasuryApi.voidReceipt(id, reason), true);
+    currentReceipt.value = receipt!;
+    return receipt!;
+  }
+
+  return { receipts, receiptsTotal, receiptsPage, currentReceipt, fetchReceipts, fetchReceipt, saveReceipt, postReceipt, voidReceipt, receivables, total, page, pageSize, asOf, aging, statement, terms, loading, saving, error, fetchReceivables, fetchAging, fetchCustomer, saveTerms, loadOpeningBalances };
 });

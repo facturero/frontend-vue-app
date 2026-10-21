@@ -1,5 +1,15 @@
 import { parseMoneyToCents } from '@/utils/accounting';
-import type { AgingBucket, OpeningBalanceInput, Receivable, ReceivableStatus } from '@/types/treasury';
+import type {
+  AgingBucket,
+  OpeningBalanceInput,
+  Receipt,
+  ReceiptAccountRole,
+  ReceiptCreateInput,
+  ReceiptMethod,
+  ReceiptStatus,
+  Receivable,
+  ReceivableStatus,
+} from '@/types/treasury';
 
 export const RECEIVABLE_STATUS_COLOR: Record<ReceivableStatus, string> = {
   open: 'lightinfo',
@@ -137,4 +147,152 @@ export function openingTotalCents(rows: Pick<OpeningRow, 'amount'>[]): number {
     const cents = parseMoneyToCents(row.amount);
     return acc + (cents !== null && cents > 0 ? cents : 0);
   }, 0);
+}
+
+// ── Cobros ───────────────────────────────────────────────────────────────────
+
+export const RECEIPT_STATUS_COLOR: Record<ReceiptStatus, string> = {
+  draft: 'lightwarning',
+  posted: 'lightsuccess',
+  voided: 'lightsecondary',
+};
+
+/** Efectivo → caja; todo lo demás → bancos. La persona puede cambiarlo (p. ej. un cheque que se guarda en caja). */
+export function defaultAccountRole(method: ReceiptMethod): ReceiptAccountRole {
+  return method === 'cash' ? 'cash' : 'bank';
+}
+
+/** En cheque y transferencia la referencia (n.º de cheque u operación) es obligatoria: sin ella el cobro no se puede conciliar con el banco. */
+export const methodNeedsReference = (method: ReceiptMethod): boolean => method === 'check' || method === 'transfer';
+
+/** Qué botones ve cada persona en un cobro. El servidor vuelve a comprobarlo: aquí solo se evita ofrecer lo que va a fallar. */
+export function receiptActions(receipt: Pick<Receipt, 'status'>, can: (permission: string) => boolean): { edit: boolean; post: boolean; void: boolean } {
+  const drafter = can('receipt:create');
+  return {
+    edit: receipt.status === 'draft' && drafter,
+    post: receipt.status === 'draft' && drafter,
+    // Anular es un permiso aparte (solo el Administrador): quien cobra no anula lo suyo sin rastro.
+    void: receipt.status === 'posted' && can('receipt:void'),
+  };
+}
+
+/**
+ * Reparte un importe entre las deudas, la más antigua primero (por vencimiento), cada una hasta su saldo. Es la sugerencia con la que
+ * arranca el formulario: la persona la cambia. Lo que sobra no se asigna (queda como excedente/anticipo). Devuelve centavos por deuda.
+ */
+export function allocateOldestFirst(
+  receivables: Pick<Receivable, 'id' | 'dueDate' | 'issueDate' | 'balanceCents' | 'status'>[],
+  cents: number,
+): Record<string, number> {
+  const out: Record<string, number> = {};
+  let left = Math.max(0, cents);
+  const live = receivables
+    .filter((r) => (r.status === 'open' || r.status === 'partial') && r.balanceCents > 0)
+    .sort((a, b) => (a.dueDate === b.dueDate ? (a.issueDate < b.issueDate ? -1 : 1) : a.dueDate < b.dueDate ? -1 : 1));
+  for (const r of live) {
+    if (left <= 0) break;
+    const apply = Math.min(left, r.balanceCents);
+    out[r.id] = apply;
+    left -= apply;
+  }
+  return out;
+}
+
+export interface ReceiptFormRow {
+  receivableId: string;
+  /** Lo que se aplica a esta deuda, como lo escribe la persona. Vacío = no se cobra. */
+  apply: string;
+}
+
+export interface ReceiptFormAdvance {
+  advanceId: string;
+  /** Lo que se consume de este anticipo, como lo escribe la persona. Vacío = no se usa. */
+  use: string;
+}
+
+export interface ReceiptForm {
+  customerId: string | null;
+  receiptDate: string;
+  method: ReceiptMethod;
+  /** `null` = el rol por defecto del medio de cobro. */
+  accountRole: ReceiptAccountRole | null;
+  reference: string;
+  notes: string;
+  /** Lo que entró a caja o banco, como lo escribe la persona. */
+  cash: string;
+  rows: ReceiptFormRow[];
+  advances: ReceiptFormAdvance[];
+}
+
+const cents = (text: string): number => {
+  const n = parseMoneyToCents(text);
+  return n !== null && n > 0 ? n : 0;
+};
+
+/**
+ * Los cuatro importes de un cobro, con la igualdad
+ *     entró + anticipos usados = aplicado + excedente
+ * `excess` negativo significa que se está aplicando más de lo que hay: el formulario lo marca como error.
+ */
+export function receiptPreview(form: Pick<ReceiptForm, 'cash' | 'rows' | 'advances'>): { cash: number; applied: number; advanceUsed: number; excess: number } {
+  const cash = cents(form.cash);
+  const applied = form.rows.reduce((acc, r) => acc + cents(r.apply), 0);
+  const advanceUsed = form.advances.reduce((acc, a) => acc + cents(a.use), 0);
+  return { cash, applied, advanceUsed, excess: cash + advanceUsed - applied };
+}
+
+/**
+ * Valida el formulario de cobro y arma lo que se envía. Los errores son claves i18n por campo (`rows[0].apply`). `balances` y
+ * `available` (saldo de cada deuda y de cada anticipo) permiten avisar antes de enviar; el servidor vuelve a validar todo con las filas
+ * bloqueadas, que es la comprobación que vale.
+ */
+export function buildReceiptInput(
+  form: ReceiptForm,
+  limits: { balances?: Record<string, number>; available?: Record<string, number> } = {},
+): { input: ReceiptCreateInput | null; errors: Record<string, string> } {
+  const errors: Record<string, string> = {};
+  if (!form.customerId) errors.customerId = 'treasury.receipts.errors.customer';
+  if (!isLocalDate(form.receiptDate)) errors.receiptDate = 'treasury.receipts.errors.date';
+  if (methodNeedsReference(form.method) && form.reference.trim() === '') errors.reference = 'treasury.receipts.errors.reference';
+  if (form.cash.trim() !== '' && parseMoneyToCents(form.cash) === null) errors.cash = 'treasury.receipts.errors.cash';
+
+  const lines: ReceiptCreateInput['lines'] = [];
+  form.rows.forEach((row, i) => {
+    if (row.apply.trim() === '') return;
+    const n = parseMoneyToCents(row.apply);
+    if (n === null || n <= 0) return void (errors[`rows[${i}].apply`] = 'treasury.receipts.errors.amount');
+    const balance = limits.balances?.[row.receivableId];
+    if (balance !== undefined && n > balance) return void (errors[`rows[${i}].apply`] = 'treasury.receipts.errors.overBalance');
+    lines.push({ receivableId: row.receivableId, appliedCents: n });
+  });
+
+  const advanceUses: NonNullable<ReceiptCreateInput['advanceUses']> = [];
+  form.advances.forEach((adv, i) => {
+    if (adv.use.trim() === '') return;
+    const n = parseMoneyToCents(adv.use);
+    if (n === null || n <= 0) return void (errors[`advances[${i}].use`] = 'treasury.receipts.errors.amount');
+    const available = limits.available?.[adv.advanceId];
+    if (available !== undefined && n > available) return void (errors[`advances[${i}].use`] = 'treasury.receipts.errors.overAdvance');
+    advanceUses.push({ advanceId: adv.advanceId, usedCents: n });
+  });
+
+  const preview = receiptPreview(form);
+  if (preview.excess < 0) errors.lines = 'treasury.receipts.errors.applyTooMuch';
+  else if (preview.cash + preview.advanceUsed <= 0) errors.cash = 'treasury.receipts.errors.nothing';
+
+  if (Object.keys(errors).length > 0) return { input: null, errors };
+  return {
+    input: {
+      customerId: form.customerId!,
+      receiptDate: form.receiptDate,
+      method: form.method,
+      accountRole: form.accountRole ?? defaultAccountRole(form.method),
+      reference: form.reference.trim() || null,
+      totalCents: preview.cash,
+      lines,
+      advanceUses,
+      notes: form.notes.trim() || null,
+    },
+    errors,
+  };
 }

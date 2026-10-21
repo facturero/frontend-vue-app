@@ -23,6 +23,7 @@ const store = useTreasuryStore();
 
 const customerId = computed(() => route.params.id as string);
 const canEditTerms = computed(() => auth.can('customer_terms:manage'));
+const canCollect = computed(() => auth.can('receipt:create'));
 const customerName = ref('');
 const snackbar = ref<string | null>(null);
 
@@ -93,7 +94,11 @@ async function saveTerms(): Promise<void> {
 
 <template>
   <v-container>
-    <PageHeader :title="customerName || $t('treasury.title')" :subtitle="$t('treasury.statement.intro')" />
+    <PageHeader :title="customerName || $t('treasury.title')" :subtitle="$t('treasury.statement.intro')">
+      <template #actions>
+        <v-btn v-if="canCollect" color="primary" prepend-icon="mdi-cash-plus" :to="{ name: 'treasury-receipt-new', query: { customerId } }">{{ $t('treasury.statement.newReceipt') }}</v-btn>
+      </template>
+    </PageHeader>
     <TreasuryTabs />
 
     <v-alert v-if="store.error && !dialog" type="error" closable class="mb-4">{{ store.error }}</v-alert>
@@ -112,6 +117,9 @@ async function saveTerms(): Promise<void> {
           <v-card-text>
             <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.statement.credit') }}</div>
             <div class="text-h6">{{ money(statement.advanceCents) }}</div>
+            <div v-if="statement.customerAdvanceCents > 0" class="text-body-2 text-medium-emphasis">
+              {{ $t('treasury.statement.customerAdvances') }}: {{ money(statement.customerAdvanceCents) }}
+            </div>
           </v-card-text>
         </v-card>
       </v-col>

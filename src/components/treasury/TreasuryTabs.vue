@@ -13,6 +13,7 @@ const route = useRoute();
 const tabs = computed(() =>
   [
     { to: { name: 'treasury-receivables' }, labelKey: 'treasury.tabs.receivables', icon: 'mdi-cash-multiple', permission: 'receivable:read' },
+    { to: { name: 'treasury-receipts' }, labelKey: 'treasury.tabs.receipts', icon: 'mdi-receipt-text-outline', permission: 'receipt:read' },
     { to: { name: 'treasury-aging' }, labelKey: 'treasury.tabs.aging', icon: 'mdi-timeline-clock-outline', permission: 'receivable:read' },
     { to: { name: 'treasury-opening-balances' }, labelKey: 'treasury.tabs.opening', icon: 'mdi-database-import-outline', permission: 'opening_balance:load' },
   ].filter((tab) => auth.can(tab.permission)),
@@ -20,7 +21,10 @@ const tabs = computed(() =>
 
 const activeTab = computed(() => {
   const name = String(route.name ?? '');
-  return name === 'treasury-customer-statement' ? 'treasury-receivables' : name;
+  if (name === 'treasury-customer-statement') return 'treasury-receivables';
+  // El alta, la edición y el detalle de un cobro cuelgan de la pestaña «Cobros».
+  if (['treasury-receipt', 'treasury-receipt-new', 'treasury-receipt-edit'].includes(name)) return 'treasury-receipts';
+  return name;
 });
 </script>
 

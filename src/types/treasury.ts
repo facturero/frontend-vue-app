@@ -36,6 +36,8 @@ export interface CreditApplication {
   appliedCents: number;
   appliedAt: string;
   createdAt: string;
+  /** Un cobro anulado deja su aplicación en la historia con la fecha de anulación; no cuenta en el saldo. */
+  reversedAt: string | null;
 }
 
 export interface ReceivableDetail extends Receivable {
@@ -101,8 +103,11 @@ export interface CustomerStatement {
   customerId: string;
   asOf: string;
   receivableCents: number;
+  /** Saldo a favor de NOTAS DE CRÉDITO: vive en cuentas por cobrar y resta de la deuda en `netCents`. */
   advanceCents: number;
-  /** Deuda menos saldo a favor: el número que tiene que cuadrar con `receivables` del libro mayor. */
+  /** Anticipos de COBROS sin consumir: un pasivo aparte («anticipos de clientes»), NO entra en `netCents`. */
+  customerAdvanceCents: number;
+  /** Deuda menos el saldo a favor de notas de crédito: el número que tiene que cuadrar con `receivables` del libro mayor. */
   netCents: number;
   receivables: Receivable[];
   applications: CreditApplication[];
@@ -146,4 +151,90 @@ export interface OpeningBalanceLoad {
   loadedBy: string;
   reason: string;
   createdAt: string;
+}
+
+// ── Cobros (recibos) ─────────────────────────────────────────────────────────
+
+export type ReceiptStatus = 'draft' | 'posted' | 'voided';
+export type ReceiptMethod = 'cash' | 'transfer' | 'check' | 'card' | 'other';
+/** Rol contable que recibe el dinero: caja o bancos. */
+export type ReceiptAccountRole = 'cash' | 'bank';
+
+export const RECEIPT_STATUSES: ReceiptStatus[] = ['draft', 'posted', 'voided'];
+export const RECEIPT_METHODS: ReceiptMethod[] = ['cash', 'transfer', 'check', 'card', 'other'];
+
+export interface ReceiptLine {
+  receivableId: string;
+  appliedCents: number;
+}
+
+export interface ReceiptAdvanceUse {
+  advanceId: string;
+  usedCents: number;
+}
+
+export interface Receipt {
+  id: string;
+  /** `RC-AAAA-NNNNNN`; `null` mientras es borrador (el número se asigna al contabilizar). */
+  number: string | null;
+  status: ReceiptStatus;
+  customerId: string;
+  customerName: string;
+  customerIdentification: string | null;
+  receiptDate: string;
+  method: ReceiptMethod;
+  accountRole: ReceiptAccountRole;
+  reference: string | null;
+  currencyCode: string;
+  /** Lo que entró de verdad a caja o banco. */
+  totalCents: number;
+  advanceUsedCents: number;
+  appliedCents: number;
+  /** Excedente: queda como anticipo del cliente. */
+  advanceCents: number;
+  lineCount: number;
+  lines: ReceiptLine[];
+  advanceUses: ReceiptAdvanceUse[];
+  notes: string | null;
+  voidReason: string | null;
+  createdBy: string;
+  postedBy: string | null;
+  voidedBy: string | null;
+  postedAt: string | null;
+  voidedAt: string | null;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReceiptPage {
+  items: Receipt[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface ReceiptFilters {
+  q?: string;
+  customerId?: string;
+  status?: ReceiptStatus[];
+  from?: string;
+  to?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface ReceiptInput {
+  receiptDate: string;
+  method: ReceiptMethod;
+  accountRole?: ReceiptAccountRole | null;
+  reference?: string | null;
+  totalCents: number;
+  lines: ReceiptLine[];
+  advanceUses?: ReceiptAdvanceUse[];
+  notes?: string | null;
+}
+
+export interface ReceiptCreateInput extends ReceiptInput {
+  customerId: string;
 }
