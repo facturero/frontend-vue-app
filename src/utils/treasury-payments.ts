@@ -100,6 +100,8 @@ export interface PaymentForm {
   method: PaymentMethod;
   /** `null` = el rol por defecto del medio de pago. */
   accountRole: PaymentAccountRole | null;
+  /** Cuenta bancaria de tesorería; solo aplica si el dinero sale por bancos. */
+  bankAccountId?: string | null;
   reference: string;
   notes: string;
   /** Lo que sale de caja o banco, como lo escribe la persona. */
@@ -171,6 +173,7 @@ export function buildPaymentInput(
       paymentDate: form.paymentDate,
       method: form.method,
       accountRole: form.accountRole ?? defaultPaymentAccountRole(form.method),
+      bankAccountId: (form.accountRole ?? defaultPaymentAccountRole(form.method)) === 'bank' ? (form.bankAccountId ?? null) : null,
       reference: form.reference.trim() || null,
       totalCents: preview.cash,
       lines,

@@ -17,6 +17,8 @@ const tabs = computed(() =>
     { to: { name: 'treasury-reminders' }, labelKey: 'treasury.tabs.reminders', icon: 'mdi-bell-ring-outline', permission: 'reminder:manage' },
     { to: { name: 'treasury-payables' }, labelKey: 'treasury.tabs.payables', icon: 'mdi-cash-minus', permission: 'payable:read' },
     { to: { name: 'treasury-payments' }, labelKey: 'treasury.tabs.payments', icon: 'mdi-receipt-text-minus-outline', permission: 'payment:read' },
+    { to: { name: 'treasury-bank-accounts' }, labelKey: 'treasury.tabs.banks', icon: 'mdi-bank-outline', permission: 'bank_account:read' },
+    { to: { name: 'treasury-cash-flow' }, labelKey: 'treasury.tabs.cashFlow', icon: 'mdi-chart-timeline-variant', permission: 'bank_account:read' },
     { to: { name: 'treasury-aging' }, labelKey: 'treasury.tabs.aging', icon: 'mdi-timeline-clock-outline', permission: 'receivable:read' },
     { to: { name: 'treasury-opening-balances' }, labelKey: 'treasury.tabs.opening', icon: 'mdi-database-import-outline', permission: 'opening_balance:load' },
     { to: { name: 'treasury-payable-opening' }, labelKey: 'treasury.tabs.payableOpening', icon: 'mdi-database-arrow-down-outline', permission: 'opening_balance:load' },
@@ -31,6 +33,8 @@ const activeTab = computed(() => {
   // El estado de cuenta de un proveedor cuelga de «Por pagar»; el alta, la edición y el detalle de un pago, de «Pagos».
   if (name === 'treasury-supplier-statement') return 'treasury-payables';
   if (['treasury-payment', 'treasury-payment-new', 'treasury-payment-edit'].includes(name)) return 'treasury-payments';
+  // Importar un extracto y conciliar cuelgan de «Bancos».
+  if (['treasury-bank-import', 'treasury-bank-reconcile'].includes(name)) return 'treasury-bank-accounts';
   return name;
 });
 </script>

@@ -184,6 +184,8 @@ export interface Receipt {
   receiptDate: string;
   method: ReceiptMethod;
   accountRole: ReceiptAccountRole;
+  /** Cuenta bancaria de tesorería (solo con rol banco). `null` = efectivo o sin elegir. */
+  bankAccountId: string | null;
   reference: string | null;
   currencyCode: string;
   /** Lo que entró de verdad a caja o banco. */
@@ -228,6 +230,7 @@ export interface ReceiptInput {
   receiptDate: string;
   method: ReceiptMethod;
   accountRole?: ReceiptAccountRole | null;
+  bankAccountId?: string | null;
   reference?: string | null;
   totalCents: number;
   lines: ReceiptLine[];
@@ -441,6 +444,7 @@ export interface Payment {
   paymentDate: string;
   method: PaymentMethod;
   accountRole: PaymentAccountRole;
+  bankAccountId: string | null;
   reference: string | null;
   currencyCode: string;
   /** Lo que salió de caja o banco. */
@@ -472,6 +476,7 @@ export interface PaymentInput {
   paymentDate: string;
   method: PaymentMethod;
   accountRole?: PaymentAccountRole | null;
+  bankAccountId?: string | null;
   reference?: string | null;
   totalCents: number;
   lines: PaymentLine[];
@@ -520,4 +525,284 @@ export interface PayableOpeningBalanceLoad {
   reason: string;
   totalCents: number;
   createdAt: string;
+}
+
+// ── Bancos, extractos y conciliación (bloque E) ──────────────────────────────
+
+export type BankAccountType = 'checking' | 'savings';
+export const BANK_ACCOUNT_TYPES: readonly BankAccountType[] = ['checking', 'savings'];
+export type CsvDelimiter = ',' | ';' | '\t';
+export type CsvDateFormat = 'DD/MM/YYYY' | 'YYYY-MM-DD' | 'MM/DD/YYYY' | 'DD-MM-YYYY';
+export const CSV_DELIMITERS: readonly CsvDelimiter[] = [',', ';', '\t'];
+export const CSV_DATE_FORMATS: readonly CsvDateFormat[] = ['DD/MM/YYYY', 'YYYY-MM-DD', 'MM/DD/YYYY', 'DD-MM-YYYY'];
+export type AmountMode = 'signed' | 'debit_credit';
+
+/** Cómo leer el CSV de un banco (las columnas se numeran desde 1). No se inventa el formato de ningún banco: la persona lo dice y la vista previa lo comprueba. */
+export interface ImportProfile {
+  delimiter: CsvDelimiter;
+  skipRows: number;
+  dateColumn: number;
+  dateFormat: CsvDateFormat;
+  descriptionColumn: number;
+  referenceColumn: number | null;
+  amountMode: AmountMode;
+  amountColumn: number | null;
+  debitColumn: number | null;
+  creditColumn: number | null;
+  invertSign: boolean;
+  decimalSeparator: '.' | ',';
+  balanceColumn: number | null;
+}
+
+export interface BankAccount {
+  id: string;
+  name: string;
+  bankName: string;
+  accountType: BankAccountType;
+  /** Últimos dígitos: el número completo nunca se guarda. */
+  accountLast4: string | null;
+  currencyCode: string;
+  /** Saldo del registro a `openingDate`; solo cuenta lo posterior. Puede ser negativo (sobregiro). */
+  openingBalanceCents: number;
+  openingDate: string;
+  isActive: boolean;
+  importProfile: ImportProfile | null;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface BankAccountSummary extends BankAccount {
+  registerBalanceCents: number;
+  unmatchedLines: number;
+  unmatchedMovements: number;
+  lastReconciledOn: string | null;
+  lastStatementDate: string | null;
+}
+
+export interface BankAccountList {
+  items: BankAccountSummary[];
+  /** Cobros y pagos por banco que todavía no tienen cuenta asignada. */
+  unassignedMovements: number;
+}
+
+export interface BankAccountInput {
+  name: string;
+  bankName: string;
+  accountType: BankAccountType;
+  accountLast4?: string | null;
+  openingBalanceCents: number;
+  openingDate: string;
+  importProfile?: ImportProfile | null;
+}
+
+export interface BankStatement {
+  id: string;
+  bankAccountId: string;
+  fileName: string | null;
+  periodStart: string;
+  periodEnd: string;
+  lineCount: number;
+  closingBalanceCents: number | null;
+  closingDate: string | null;
+  importedBy: string;
+  importedAt: string;
+}
+
+export interface BankAccountDetail extends BankAccountSummary {
+  statements: BankStatement[];
+}
+
+export type BankMovementSource = 'receipt' | 'payment' | 'adjustment';
+export type AdjustmentKind = 'bank_fee' | 'interest' | 'other_in' | 'other_out';
+export const ADJUSTMENT_KINDS: readonly AdjustmentKind[] = ['bank_fee', 'interest', 'other_in', 'other_out'];
+
+export interface BankMovement {
+  id: string;
+  bankAccountId: string | null;
+  sourceType: BankMovementSource;
+  sourceId: string;
+  movementDate: string;
+  /** Con signo: + entra, − sale. */
+  amountCents: number;
+  reference: string | null;
+  description: string;
+  kind: AdjustmentKind | null;
+  status: 'active' | 'reversed';
+  createdBy: string | null;
+  version: number;
+  createdAt: string;
+}
+
+export interface BankMovementView extends BankMovement {
+  lineId: string | null;
+  reconciled: boolean;
+}
+
+export type BankLineStatus = 'unmatched' | 'matched' | 'external';
+
+export interface BankLine {
+  id: string;
+  bankAccountId: string;
+  statementId: string;
+  lineDate: string;
+  description: string;
+  reference: string | null;
+  /** Con signo: + entra, − sale. */
+  amountCents: number;
+  balanceCents: number | null;
+  status: BankLineStatus;
+  externalReason: string | null;
+  reconciled: boolean;
+}
+
+export interface BankLineView extends BankLine {
+  movements: BankMovement[];
+}
+
+export interface BankSuggestion {
+  reason: 'reference' | 'date';
+  dayDiff: number;
+  line: BankLine;
+  movement: BankMovement;
+}
+
+export interface StatementPreview {
+  profile: ImportProfile;
+  rowCount: number;
+  errors: { row: number; field: string; message: string }[];
+  errorCount: number;
+  lines: { row: number; lineDate: string; description: string; reference: string | null; amountCents: number; balanceCents: number | null; isDuplicate: boolean }[];
+  newLines: number;
+  duplicates: number;
+  skippedBeforeOpening: number;
+  periodStart: string | null;
+  periodEnd: string | null;
+  closingBalanceCents: number | null;
+  closingDate: string | null;
+  inCents: number;
+  outCents: number;
+  alreadyImported: boolean;
+  lockedPeriodLines: number;
+  lockedUntil: string | null;
+  canImport: boolean;
+}
+
+export interface StatementImportResult {
+  statement: BankStatement;
+  importedLines: number;
+  skippedDuplicates: number;
+  skippedBeforeOpening: number;
+}
+
+export interface StatementBody {
+  csv: string;
+  fileName?: string | null;
+  profile?: ImportProfile | null;
+  saveProfile?: boolean;
+}
+
+export interface ReconciliationResult {
+  registerBalanceCents: number;
+  pendingCents: number;
+  pendingCount: number;
+  unresolvedLines: number;
+  unresolvedCents: number;
+  differenceCents: number;
+  canClose: boolean;
+}
+
+export interface BankReconciliation {
+  id: string;
+  bankAccountId: string;
+  cutoffDate: string;
+  statementBalanceCents: number;
+  registerBalanceCents: number;
+  pendingCents: number;
+  differenceCents: number;
+  status: 'closed' | 'reopened';
+  closedBy: string | null;
+  closedAt: string | null;
+  reopenedBy: string | null;
+  reopenedAt: string | null;
+  notes: string | null;
+  version: number;
+  createdAt: string;
+}
+
+export interface ReconciliationPreview {
+  bankAccountId: string;
+  cutoffDate: string;
+  statementBalanceCents: number | null;
+  suggestedStatementBalance: { cents: number; date: string } | null;
+  result: ReconciliationResult | null;
+  pendingMovements: BankMovement[];
+  unresolvedLines: BankLine[];
+  latestClosed: BankReconciliation | null;
+}
+
+export interface BankAdjustmentInput {
+  bankAccountId: string;
+  kind: AdjustmentKind;
+  date: string;
+  amountCents: number;
+  description: string;
+  reference?: string | null;
+  /** Nace emparejado con este renglón del extracto. */
+  lineId?: string | null;
+}
+
+export interface BatchMatchResult {
+  matched: string[];
+  failed: { lineId: string; code: string; message: string }[];
+}
+
+export interface CashFlowBucket {
+  /** `overdue`, `w1`…`wN`, `later`. */
+  key: string;
+  from: string | null;
+  to: string | null;
+  inflowCents: number;
+  outflowCents: number;
+  netCents: number;
+  closingCents: number;
+}
+
+export interface CashFlow {
+  asOf: string;
+  weeks: number;
+  openingCents: number;
+  buckets: CashFlowBucket[];
+  totals: { inflowCents: number; outflowCents: number; overdueInflowCents: number; overdueOutflowCents: number; endingCents: number };
+  firstNegativeKey: string | null;
+  accounts: { id: string; name: string; balanceCents: number }[];
+  unassignedCents: number;
+}
+
+export interface BankLineFilters {
+  status?: BankLineStatus[];
+  from?: string;
+  to?: string;
+  q?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface BankMovementFilters {
+  /** `'none'` = sin cuenta asignada. */
+  bankAccountId?: string;
+  status?: ('active' | 'reversed')[];
+  matched?: boolean;
+  from?: string;
+  to?: string;
+  q?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface Paged<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
 }

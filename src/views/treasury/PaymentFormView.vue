@@ -11,6 +11,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import { useTreasuryBankingStore } from '@/stores/treasuryBanking';
 import { useTreasuryPayablesStore } from '@/stores/treasuryPayables';
 import { purchasingApi } from '@/api/purchasing';
 import { centsToInput, formatMoney } from '@/utils/accounting';
@@ -33,6 +34,7 @@ const { t, locale } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
+const bank = useTreasuryBankingStore();
 const store = useTreasuryPayablesStore();
 
 const paymentId = computed(() => (route.params.id as string | undefined) ?? null);
@@ -43,6 +45,7 @@ const form = ref<PaymentForm>({
   paymentDate: today(),
   method: 'transfer',
   accountRole: null,
+  bankAccountId: null,
   reference: '',
   notes: '',
   cash: '',
@@ -77,6 +80,12 @@ const isEditing = computed(() => paymentId.value !== null);
 const overdue = (p: Payable) => (statement.value && isPayableOverdue(p, statement.value.asOf) ? payableDaysOverdue(p.dueDate, statement.value.asOf) : 0);
 
 onMounted(async () => {
+  if (auth.can('bank_account:read')) {
+    await bank.fetchAccounts(true);
+    // Con una sola cuenta activa y un documento nuevo, se elige sola: lo normal es que sea esa.
+    const active = bank.accounts.filter((a) => a.isActive);
+    if (active.length === 1 && !form.value.bankAccountId) form.value.bankAccountId = active[0]!.id;
+  }
   suppliers.value = (await purchasingApi.listSuppliers({ status: 'active', pageSize: 100 }).then((r) => r.items).catch(() => [])) as Supplier[];
   if (suppliers.value.length === 0 && auth.can('payable:read')) await store.fetchAging();
   if (paymentId.value) {
@@ -90,6 +99,7 @@ onMounted(async () => {
       paymentDate: p.paymentDate,
       method: p.method,
       accountRole: p.accountRole === defaultPaymentAccountRole(p.method) ? null : p.accountRole,
+      bankAccountId: p.bankAccountId,
       reference: p.reference ?? '',
       notes: p.notes ?? '',
       cash: centsToInput(p.totalCents),
@@ -153,11 +163,16 @@ function onMethod(): void {
   if (form.value.accountRole === defaultPaymentAccountRole(form.value.method)) form.value.accountRole = null;
 }
 
+/** Solo quien puede ver bancos ofrece la cuenta; sin cuentas activas el movimiento queda «sin asignar» y se asigna después. */
+const bankItems = computed(() => bank.accounts.filter((a) => a.isActive).map((a) => ({ value: a.id, title: a.accountLast4 ? `${a.name} · ••${a.accountLast4}` : a.name })));
+
 const defaultRole = computed(() => defaultPaymentAccountRole(form.value.method));
 const roleModel = computed({
   get: () => form.value.accountRole ?? defaultRole.value,
   set: (v) => { form.value.accountRole = v === defaultRole.value ? null : v; },
 });
+// Si el dinero deja de pasar por bancos, la cuenta bancaria elegida ya no aplica.
+watch(() => roleModel.value, (role) => { if (role !== 'bank') form.value.bankAccountId = null; });
 
 watch(form, () => { if (tried.value) errors.value = buildPaymentInput(form.value, { balances: balances.value, available: available.value }).errors; }, { deep: true });
 
@@ -212,6 +227,9 @@ async function submit(andPost: boolean): Promise<void> {
           </v-col>
           <v-col cols="6" md="3">
             <v-select v-model="roleModel" :items="accountItems" :label="$t('treasury.payments.account')" :hint="$t('treasury.payments.accountHint')" persistent-hint />
+          </v-col>
+          <v-col v-if="roleModel === 'bank' && bankItems.length > 0" cols="12" md="6">
+            <v-select v-model="form.bankAccountId" :items="bankItems" :label="$t('treasury.banking.accountField')" :hint="$t('treasury.banking.accountFieldHint')" persistent-hint clearable />
           </v-col>
           <v-col cols="12" md="6">
             <v-text-field

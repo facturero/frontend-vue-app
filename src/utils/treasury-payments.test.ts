@@ -60,6 +60,13 @@ describe('pago: importes y validación', () => {
     expect(buildPaymentInput(form({ method: 'cash', reference: '', accountRole: 'bank' })).input!.accountRole).toBe('bank');
   });
 
+  it('la cuenta bancaria solo viaja si el dinero sale por bancos', () => {
+    expect(buildPaymentInput(form({ bankAccountId: 'b-1' })).input!.bankAccountId).toBe('b-1');
+    expect(buildPaymentInput(form({ method: 'cash', reference: '', bankAccountId: 'b-1' })).input!.bankAccountId).toBeNull();
+    expect(buildPaymentInput(form({ accountRole: 'cash', bankAccountId: 'b-1' })).input!.bankAccountId).toBeNull();
+    expect(buildPaymentInput(form()).input!.bankAccountId).toBeNull();
+  });
+
   it('cheque y transferencia exigen referencia; el efectivo no', () => {
     expect(paymentMethodNeedsReference('check')).toBe(true);
     expect(paymentMethodNeedsReference('transfer')).toBe(true);

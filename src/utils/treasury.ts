@@ -217,6 +217,8 @@ export interface ReceiptForm {
   method: ReceiptMethod;
   /** `null` = el rol por defecto del medio de cobro. */
   accountRole: ReceiptAccountRole | null;
+  /** Cuenta bancaria de tesorería; solo aplica si el dinero entra por bancos. */
+  bankAccountId?: string | null;
   reference: string;
   notes: string;
   /** Lo que entró a caja o banco, como lo escribe la persona. */
@@ -288,6 +290,7 @@ export function buildReceiptInput(
       receiptDate: form.receiptDate,
       method: form.method,
       accountRole: form.accountRole ?? defaultAccountRole(form.method),
+      bankAccountId: (form.accountRole ?? defaultAccountRole(form.method)) === 'bank' ? (form.bankAccountId ?? null) : null,
       reference: form.reference.trim() || null,
       totalCents: preview.cash,
       lines,

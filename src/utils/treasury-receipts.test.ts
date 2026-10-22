@@ -97,12 +97,19 @@ describe('cobros: formulario', () => {
       receiptDate: '2026-10-21',
       method: 'transfer',
       accountRole: 'bank',
+      bankAccountId: null,
       reference: 'TRX-1',
       totalCents: 11500,
       lines: [{ receivableId: 'r-1', appliedCents: 11500 }],
       advanceUses: [],
       notes: 'pago',
     });
+  });
+
+  it('la cuenta bancaria solo viaja si el dinero entra por bancos: por caja se descarta aunque quedara elegida', () => {
+    expect(buildReceiptInput(form({ bankAccountId: 'b-1' })).input!.bankAccountId).toBe('b-1');
+    expect(buildReceiptInput(form({ method: 'cash', reference: '', bankAccountId: 'b-1' })).input!.bankAccountId).toBeNull();
+    expect(buildReceiptInput(form({ accountRole: 'cash', bankAccountId: 'b-1' })).input!.bankAccountId).toBeNull();
   });
 
   it('el rol elegido manda sobre el del medio', () => {

@@ -1,6 +1,26 @@
 import { http } from '@/utils/http';
 import type {
   AgingReport,
+  BankAccountDetail,
+  BankAccountInput,
+  BankAccountList,
+  BankAdjustmentInput,
+  BankLine,
+  BankLineFilters,
+  BankLineView,
+  BankMovement,
+  BankMovementFilters,
+  BankMovementView,
+  BankReconciliation,
+  BankSuggestion,
+  BatchMatchResult,
+  CashFlow,
+  Paged,
+  ReconciliationPreview,
+  StatementBody,
+  StatementImportResult,
+  StatementPreview,
+  BankAccount,
   CustomerStatement,
   CustomerTerms,
   CustomerTermsInput,
@@ -110,4 +130,40 @@ export const treasuryApi = {
   voidPayment: (id: string, reason: string) => http.post<Payment>(`/treasury/payments/${id}/void`, { reason }).then((r) => r.data),
   getPaymentSettings: () => http.get<PaymentSettings>('/treasury/payments/settings').then((r) => r.data),
   setPaymentSettings: (approvalThresholdCents: number | null) => http.put<PaymentSettings>('/treasury/payments/settings', { approvalThresholdCents }).then((r) => r.data),
+
+  // ── Bancos, extractos y conciliación ──
+  listBankAccounts: (activeOnly = false) => http.get<BankAccountList>('/treasury/bank-accounts', { params: activeOnly ? { activeOnly: true } : {} }).then((r) => r.data),
+  getBankAccount: (id: string) => http.get<BankAccountDetail>(`/treasury/bank-accounts/${id}`).then((r) => r.data),
+  createBankAccount: (body: BankAccountInput) => http.post<BankAccount>('/treasury/bank-accounts', body).then((r) => r.data),
+  updateBankAccount: (id: string, body: Partial<BankAccountInput> & { isActive?: boolean; expectedVersion?: number }) =>
+    http.put<BankAccount>(`/treasury/bank-accounts/${id}`, body).then((r) => r.data),
+  previewStatement: (id: string, body: StatementBody) => http.post<StatementPreview>(`/treasury/bank-accounts/${id}/statements/preview`, body).then((r) => r.data),
+  importStatement: (id: string, body: StatementBody) => http.post<StatementImportResult>(`/treasury/bank-accounts/${id}/statements`, body).then((r) => r.data),
+  listBankLines: (id: string, filters: BankLineFilters = {}) => {
+    const { status, ...rest } = filters;
+    const params = { ...rest, ...(status?.length ? { status: status.join(',') } : {}) };
+    return http.get<Paged<BankLineView>>(`/treasury/bank-accounts/${id}/lines`, { params }).then((r) => r.data);
+  },
+  listBankSuggestions: (id: string) => http.get<{ suggestions: BankSuggestion[] }>(`/treasury/bank-accounts/${id}/suggestions`).then((r) => r.data.suggestions),
+  listBankMovements: (filters: BankMovementFilters = {}) => {
+    const { status, ...rest } = filters;
+    const params = { ...rest, ...(status?.length ? { status: status.join(',') } : {}) };
+    return http.get<Paged<BankMovementView>>('/treasury/bank-movements', { params }).then((r) => r.data);
+  },
+  assignMovementAccount: (movementId: string, bankAccountId: string) => http.post<BankMovement>(`/treasury/bank-movements/${movementId}/account`, { bankAccountId }).then((r) => r.data),
+  matchLine: (lineId: string, movementIds: string[]) => http.post<BankLineView>(`/treasury/bank-lines/${lineId}/match`, { movementIds, method: 'manual' }).then((r) => r.data),
+  matchMany: (pairs: { lineId: string; movementIds: string[] }[]) => http.post<BatchMatchResult>('/treasury/bank-lines/match', { pairs, method: 'suggested' }).then((r) => r.data),
+  unmatchLine: (lineId: string) => http.post<BankLine>(`/treasury/bank-lines/${lineId}/unmatch`).then((r) => r.data),
+  markLineExternal: (lineId: string, reason: string) => http.post<BankLine>(`/treasury/bank-lines/${lineId}/external`, { reason }).then((r) => r.data),
+  unmarkLineExternal: (lineId: string) => http.post<BankLine>(`/treasury/bank-lines/${lineId}/unexternal`).then((r) => r.data),
+  postBankAdjustment: (body: BankAdjustmentInput) => http.post<BankMovement>('/treasury/bank-adjustments', body).then((r) => r.data),
+  voidBankAdjustment: (id: string, reason: string) => http.post<BankMovement>(`/treasury/bank-adjustments/${id}/void`, { reason }).then((r) => r.data),
+  previewReconciliation: (id: string, cutoffDate: string, statementBalanceCents?: number) =>
+    http.get<ReconciliationPreview>(`/treasury/bank-accounts/${id}/reconciliation`, { params: { cutoffDate, ...(statementBalanceCents !== undefined ? { statementBalanceCents } : {}) } }).then((r) => r.data),
+  listReconciliations: (id: string) => http.get<{ items: BankReconciliation[] }>(`/treasury/bank-accounts/${id}/reconciliations`).then((r) => r.data.items),
+  closeReconciliation: (id: string, body: { cutoffDate: string; statementBalanceCents: number; notes?: string | null }) =>
+    http.post<BankReconciliation>(`/treasury/bank-accounts/${id}/reconciliations`, body).then((r) => r.data),
+  reopenReconciliation: (reconciliationId: string, reason: string) => http.post<BankReconciliation>(`/treasury/bank-reconciliations/${reconciliationId}/reopen`, { reason }).then((r) => r.data),
+  getCashFlow: (weeks?: number) => http.get<CashFlow>('/treasury/cash-flow', { params: weeks ? { weeks } : {} }).then((r) => r.data),
+  exportCashFlow: (weeks: number | undefined, lang: string) => csv('/treasury/cash-flow/export', { ...(weeks ? { weeks } : {}), lang }),
 };

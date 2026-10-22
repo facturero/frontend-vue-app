@@ -57,6 +57,10 @@ import TreasuryPaymentsView from '@/views/treasury/PaymentsView.vue';
 import TreasuryPaymentFormView from '@/views/treasury/PaymentFormView.vue';
 import TreasuryPaymentDetailView from '@/views/treasury/PaymentDetailView.vue';
 import TreasuryPayableOpeningView from '@/views/treasury/PayableOpeningBalancesView.vue';
+import TreasuryBankAccountsView from '@/views/treasury/BankAccountsView.vue';
+import TreasuryBankImportView from '@/views/treasury/BankStatementImportView.vue';
+import TreasuryBankReconcileView from '@/views/treasury/BankReconciliationView.vue';
+import TreasuryCashFlowView from '@/views/treasury/CashFlowView.vue';
 import PurchasingOrdersView from '@/views/purchasing/PurchaseOrdersView.vue';
 import PurchasingOrderFormView from '@/views/purchasing/PurchaseOrderFormView.vue';
 import PurchasingOrderView from '@/views/purchasing/PurchaseOrderView.vue';
@@ -510,6 +514,30 @@ const router = createRouter({
       name: 'treasury-payable-opening',
       component: TreasuryPayableOpeningView,
       meta: { requiresAuth: true, requiredPermission: 'opening_balance:load', requiredPlugin: 'finance.accounts_receivable_payable' },
+    },
+    {
+      path: '/treasury/bank-accounts',
+      name: 'treasury-bank-accounts',
+      component: TreasuryBankAccountsView,
+      meta: { requiresAuth: true, requiredPermission: 'bank_account:read', requiredPlugin: 'finance.accounts_receivable_payable' },
+    },
+    {
+      path: '/treasury/bank-accounts/:id/import',
+      name: 'treasury-bank-import',
+      component: TreasuryBankImportView,
+      meta: { requiresAuth: true, requiredPermission: 'bank_account:manage', requiredPlugin: 'finance.accounts_receivable_payable' },
+    },
+    {
+      path: '/treasury/bank-accounts/:id/reconcile',
+      name: 'treasury-bank-reconcile',
+      component: TreasuryBankReconcileView,
+      meta: { requiresAuth: true, requiredPermission: 'bank_account:read', requiredPlugin: 'finance.accounts_receivable_payable' },
+    },
+    {
+      path: '/treasury/cash-flow',
+      name: 'treasury-cash-flow',
+      component: TreasuryCashFlowView,
+      meta: { requiresAuth: true, requiredPermission: 'bank_account:read', requiredPlugin: 'finance.accounts_receivable_payable' },
     },
 
     {
