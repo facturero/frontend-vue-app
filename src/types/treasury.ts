@@ -300,3 +300,224 @@ export const MIN_REPEAT_DAYS = 7;
 export const MAX_REPEAT_DAYS = 60;
 export const MIN_FIRST_AFTER_DAYS = 1;
 export const MAX_FIRST_AFTER_DAYS = 90;
+
+// ── Cuentas por pagar y pagos a proveedores (bloque D) ──
+
+export type PayableStatus = 'open' | 'partial' | 'paid' | 'cancelled';
+export const PAYABLE_STATUSES: PayableStatus[] = ['open', 'partial', 'paid', 'cancelled'];
+export type PayableSourceType = 'purchase_bill' | 'initial_balance';
+
+export interface Payable {
+  id: string;
+  supplierId: string;
+  supplierName: string;
+  supplierIdentification: string | null;
+  sourceType: PayableSourceType;
+  sourceId: string;
+  /** Número de la factura del PROVEEDOR. */
+  documentNumber: string | null;
+  /** Número interno de la factura de compra (FC-AAAA-NNNNNN). */
+  internalNumber: string | null;
+  issueDate: string;
+  dueDate: string;
+  currencyCode: string;
+  originalCents: number;
+  /** Pagos y retenciones vigentes. */
+  appliedCents: number;
+  /** Lo que se debe, neto de pagos y retenciones. Negativo en una factura anulada que ya tenía pagos. */
+  balanceCents: number;
+  status: PayableStatus;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PayableApplication {
+  id: string;
+  payableId: string;
+  sourceType: 'payment' | 'withholding';
+  sourceId: string;
+  documentNumber: string | null;
+  appliedCents: number;
+  appliedAt: string;
+  reversedAt: string | null;
+}
+
+export interface PayableDetail extends Payable {
+  applications: PayableApplication[];
+}
+
+export interface SupplierAdvance {
+  id: string;
+  supplierId: string;
+  originId: string;
+  documentNumber: string | null;
+  currencyCode: string;
+  originalCents: number;
+  appliedCents: number;
+  balanceCents: number;
+  createdAt: string;
+}
+
+export interface PayablePage {
+  items: Payable[];
+  total: number;
+  page: number;
+  pageSize: number;
+  asOf: string;
+}
+
+export interface PayableFilters {
+  q?: string;
+  supplierId?: string;
+  status?: PayableStatus[];
+  overdueOnly?: boolean;
+  /** Solo lo que vence en los próximos 7 días. */
+  dueSoon?: boolean;
+  from?: string;
+  to?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface PayablesAgingBucket {
+  dueSoonCents: number;
+  currentCents: number;
+  days1To30Cents: number;
+  days31To60Cents: number;
+  days61To90Cents: number;
+  daysOver90Cents: number;
+  totalCents: number;
+}
+
+export interface PayablesAgingSupplier extends PayablesAgingBucket {
+  supplierId: string;
+  supplierName: string;
+}
+
+export interface PayablesAgingReport {
+  asOf: string;
+  totals: PayablesAgingBucket;
+  suppliers: PayablesAgingSupplier[];
+}
+
+export interface SupplierStatement {
+  supplierId: string;
+  asOf: string;
+  /** Lo que se le debe: deuda − pagos − retenciones. */
+  payableCents: number;
+  /** Anticipos a proveedores sin consumir. NO entran en `netCents`: viven en «anticipos a proveedores». */
+  advanceCents: number;
+  netCents: number;
+  payables: Payable[];
+  applications: PayableApplication[];
+  advances: SupplierAdvance[];
+}
+
+export type PaymentStatus = 'draft' | 'approved' | 'posted' | 'voided';
+export type PaymentMethod = 'cash' | 'transfer' | 'check' | 'other';
+export type PaymentAccountRole = 'cash' | 'bank';
+export const PAYMENT_STATUSES: PaymentStatus[] = ['draft', 'approved', 'posted', 'voided'];
+export const PAYMENT_METHODS: PaymentMethod[] = ['cash', 'transfer', 'check', 'other'];
+
+export interface PaymentLine {
+  payableId: string;
+  appliedCents: number;
+}
+
+export interface PaymentAdvanceUse {
+  advanceId: string;
+  usedCents: number;
+}
+
+export interface Payment {
+  id: string;
+  /** `PG-AAAA-NNNNNN`; `null` mientras es borrador. */
+  number: string | null;
+  status: PaymentStatus;
+  supplierId: string;
+  supplierName: string;
+  supplierIdentification: string | null;
+  paymentDate: string;
+  method: PaymentMethod;
+  accountRole: PaymentAccountRole;
+  reference: string | null;
+  currencyCode: string;
+  /** Lo que salió de caja o banco. */
+  totalCents: number;
+  advanceUsedCents: number;
+  appliedCents: number;
+  /** Excedente: queda como anticipo a proveedores. */
+  advanceCents: number;
+  lineCount: number;
+  lines: PaymentLine[];
+  advanceUses: PaymentAdvanceUse[];
+  notes: string | null;
+  voidReason: string | null;
+  createdBy: string;
+  approvedBy: string | null;
+  postedBy: string | null;
+  voidedBy: string | null;
+  approvedAt: string | null;
+  postedAt: string | null;
+  voidedAt: string | null;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+  /** Un borrador que llega al umbral de aprobación y todavía no lo aprobó otra persona. Lo dice el servidor: quien no gestiona el umbral no puede calcularlo. */
+  requiresApproval?: boolean;
+}
+
+export interface PaymentInput {
+  paymentDate: string;
+  method: PaymentMethod;
+  accountRole?: PaymentAccountRole | null;
+  reference?: string | null;
+  totalCents: number;
+  lines: PaymentLine[];
+  advanceUses?: PaymentAdvanceUse[];
+  notes?: string | null;
+}
+
+export interface PaymentCreateInput extends PaymentInput {
+  supplierId: string;
+}
+
+export interface PaymentFilters {
+  q?: string;
+  supplierId?: string;
+  status?: PaymentStatus[];
+  from?: string;
+  to?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+export interface PaymentPage {
+  items: Payment[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+/** Desde qué importe un pago exige que OTRA persona lo apruebe. `null` = sin aprobación (nace así). */
+export interface PaymentSettings {
+  approvalThresholdCents: number | null;
+  updatedBy: string | null;
+  updatedAt: string | null;
+}
+
+export interface PayableOpeningBalanceInput {
+  cutoffDate: string;
+  reason: string;
+  lines: { supplierId: string; documentNumber?: string | null; issueDate: string; dueDate?: string | null; amountCents: number }[];
+}
+
+export interface PayableOpeningBalanceLoad {
+  id: string;
+  cutoffDate: string;
+  loadedBy: string;
+  reason: string;
+  totalCents: number;
+  createdAt: string;
+}

@@ -6,6 +6,18 @@ import type {
   CustomerTermsInput,
   OpeningBalanceInput,
   OpeningBalanceLoad,
+  PayableDetail,
+  PayableFilters,
+  PayableOpeningBalanceInput,
+  PayableOpeningBalanceLoad,
+  PayablePage,
+  PayablesAgingReport,
+  Payment,
+  PaymentCreateInput,
+  PaymentFilters,
+  PaymentInput,
+  PaymentPage,
+  PaymentSettings,
   Receipt,
   ReceiptCreateInput,
   ReceiptFilters,
@@ -18,6 +30,7 @@ import type {
   ReminderRun,
   ReminderSettings,
   ReminderSettingsInput,
+  SupplierStatement,
 } from '@/types/treasury';
 
 /** Un CSV llega como archivo (`blob`): el servidor lo arma y deja constancia de la exportación en la bitácora. */
@@ -66,4 +79,35 @@ export const treasuryApi = {
   setReminderSettings: (body: ReminderSettingsInput) => http.put<ReminderSettings>('/treasury/reminders/settings', body).then((r) => r.data),
   getReminderPreview: () => http.get<ReminderPreview>('/treasury/reminders/preview').then((r) => r.data),
   runReminders: () => http.post<ReminderRun>('/treasury/reminders/run').then((r) => r.data),
+
+  // ── Cuentas por pagar y pagos ──
+  listPayables: (filters: PayableFilters = {}) => {
+    const { status, ...rest } = filters;
+    return http.get<PayablePage>('/treasury/payables', { params: { ...rest, ...(status?.length ? { status: status.join(',') } : {}) } }).then((r) => r.data);
+  },
+  getPayable: (id: string) => http.get<PayableDetail>(`/treasury/payables/${id}`).then((r) => r.data),
+  getPayablesAging: (asOf?: string) => http.get<PayablesAgingReport>('/treasury/payables/aging', { params: asOf ? { asOf } : {} }).then((r) => r.data),
+  getSupplierStatement: (supplierId: string) => http.get<SupplierStatement>(`/treasury/suppliers/${supplierId}/statement`).then((r) => r.data),
+  loadPayableOpeningBalances: (body: PayableOpeningBalanceInput) => http.post<PayableOpeningBalanceLoad>('/treasury/payable-opening-balances', body).then((r) => r.data),
+
+  exportPayables: (filters: PayableFilters = {}, lang = 'es') => {
+    const { status, page: _page, pageSize: _pageSize, ...rest } = filters;
+    return csv('/treasury/payables/export', { ...rest, ...(status?.length ? { status: status.join(',') } : {}), lang });
+  },
+  exportPayablesAging: (lang = 'es', asOf?: string) => csv('/treasury/payables/aging/export', { lang, ...(asOf ? { asOf } : {}) }),
+  exportSupplierStatement: (supplierId: string, lang = 'es', asOf?: string) => csv(`/treasury/suppliers/${supplierId}/statement/export`, { lang, ...(asOf ? { asOf } : {}) }),
+
+  listPayments: (filters: PaymentFilters = {}) => {
+    const { status, ...rest } = filters;
+    return http.get<PaymentPage>('/treasury/payments', { params: { ...rest, ...(status?.length ? { status: status.join(',') } : {}) } }).then((r) => r.data);
+  },
+  getPayment: (id: string) => http.get<Payment>(`/treasury/payments/${id}`).then((r) => r.data),
+  createPayment: (body: PaymentCreateInput) => http.post<Payment>('/treasury/payments', body).then((r) => r.data),
+  /** Solo un borrador (o un pago aprobado, que pierde la aprobación) se edita. `expectedVersion` evita pisar lo que otra persona cambió. */
+  updatePayment: (id: string, body: PaymentInput & { expectedVersion?: number }) => http.put<Payment>(`/treasury/payments/${id}`, body).then((r) => r.data),
+  approvePayment: (id: string) => http.post<Payment>(`/treasury/payments/${id}/approve`).then((r) => r.data),
+  postPayment: (id: string) => http.post<Payment>(`/treasury/payments/${id}/post`).then((r) => r.data),
+  voidPayment: (id: string, reason: string) => http.post<Payment>(`/treasury/payments/${id}/void`, { reason }).then((r) => r.data),
+  getPaymentSettings: () => http.get<PaymentSettings>('/treasury/payments/settings').then((r) => r.data),
+  setPaymentSettings: (approvalThresholdCents: number | null) => http.put<PaymentSettings>('/treasury/payments/settings', { approvalThresholdCents }).then((r) => r.data),
 };

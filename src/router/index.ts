@@ -51,6 +51,12 @@ import TreasuryReceiptsView from '@/views/treasury/ReceiptsView.vue';
 import TreasuryReceiptFormView from '@/views/treasury/ReceiptFormView.vue';
 import TreasuryReceiptDetailView from '@/views/treasury/ReceiptDetailView.vue';
 import TreasuryRemindersView from '@/views/treasury/RemindersView.vue';
+import TreasuryPayablesView from '@/views/treasury/PayablesView.vue';
+import TreasurySupplierStatementView from '@/views/treasury/SupplierStatementView.vue';
+import TreasuryPaymentsView from '@/views/treasury/PaymentsView.vue';
+import TreasuryPaymentFormView from '@/views/treasury/PaymentFormView.vue';
+import TreasuryPaymentDetailView from '@/views/treasury/PaymentDetailView.vue';
+import TreasuryPayableOpeningView from '@/views/treasury/PayableOpeningBalancesView.vue';
 import PurchasingOrdersView from '@/views/purchasing/PurchaseOrdersView.vue';
 import PurchasingOrderFormView from '@/views/purchasing/PurchaseOrderFormView.vue';
 import PurchasingOrderView from '@/views/purchasing/PurchaseOrderView.vue';
@@ -330,6 +336,7 @@ const router = createRouter({
       component: RestaurantScheduleView,
       meta: { requiresAuth: true, requiredPermission: 'restaurant:read', requiredPlugin: 'restaurant.floorplan' },
     },
+
     {
       // Compras (módulos `inventory.suppliers` y `purchasing.purchase_orders`): órdenes, sus recepciones, las facturas de compra
       // y los proveedores. El menú apunta a las órdenes; las pestañas llevan al resto. Cada pantalla pide su propio permiso
@@ -461,6 +468,48 @@ const router = createRouter({
       name: 'treasury-reminders',
       component: TreasuryRemindersView,
       meta: { requiresAuth: true, requiredPermission: 'reminder:manage', requiredPlugin: 'finance.accounts_receivable_payable' },
+    },
+    {
+      path: '/treasury/payables',
+      name: 'treasury-payables',
+      component: TreasuryPayablesView,
+      meta: { requiresAuth: true, requiredPermission: 'payable:read', requiredPlugin: 'finance.accounts_receivable_payable' },
+    },
+    {
+      path: '/treasury/suppliers/:id/statement',
+      name: 'treasury-supplier-statement',
+      component: TreasurySupplierStatementView,
+      meta: { requiresAuth: true, requiredPermission: 'payable:read', requiredPlugin: 'finance.accounts_receivable_payable' },
+    },
+    {
+      path: '/treasury/payments',
+      name: 'treasury-payments',
+      component: TreasuryPaymentsView,
+      meta: { requiresAuth: true, requiredPermission: 'payment:read', requiredPlugin: 'finance.accounts_receivable_payable' },
+    },
+    {
+      path: '/treasury/payments/new',
+      name: 'treasury-payment-new',
+      component: TreasuryPaymentFormView,
+      meta: { requiresAuth: true, requiredPermission: 'payment:create', requiredPlugin: 'finance.accounts_receivable_payable' },
+    },
+    {
+      path: '/treasury/payments/:id',
+      name: 'treasury-payment',
+      component: TreasuryPaymentDetailView,
+      meta: { requiresAuth: true, requiredPermission: 'payment:read', requiredPlugin: 'finance.accounts_receivable_payable' },
+    },
+    {
+      path: '/treasury/payments/:id/edit',
+      name: 'treasury-payment-edit',
+      component: TreasuryPaymentFormView,
+      meta: { requiresAuth: true, requiredPermission: 'payment:create', requiredPlugin: 'finance.accounts_receivable_payable' },
+    },
+    {
+      path: '/treasury/payable-opening-balances',
+      name: 'treasury-payable-opening',
+      component: TreasuryPayableOpeningView,
+      meta: { requiresAuth: true, requiredPermission: 'opening_balance:load', requiredPlugin: 'finance.accounts_receivable_payable' },
     },
 
     {
