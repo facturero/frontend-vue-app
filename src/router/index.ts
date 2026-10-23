@@ -61,6 +61,9 @@ import TreasuryBankAccountsView from '@/views/treasury/BankAccountsView.vue';
 import TreasuryBankImportView from '@/views/treasury/BankStatementImportView.vue';
 import TreasuryBankReconcileView from '@/views/treasury/BankReconciliationView.vue';
 import TreasuryCashFlowView from '@/views/treasury/CashFlowView.vue';
+import ReportingAnnexesView from '@/views/reporting/AnnexesView.vue';
+import ReportingAnnexRunDetailView from '@/views/reporting/AnnexRunDetailView.vue';
+import ReportingDocumentsView from '@/views/reporting/DocumentsView.vue';
 import PurchasingOrdersView from '@/views/purchasing/PurchaseOrdersView.vue';
 import PurchasingOrderFormView from '@/views/purchasing/PurchaseOrderFormView.vue';
 import PurchasingOrderView from '@/views/purchasing/PurchaseOrderView.vue';
@@ -538,6 +541,26 @@ const router = createRouter({
       name: 'treasury-cash-flow',
       component: TreasuryCashFlowView,
       meta: { requiresAuth: true, requiredPermission: 'bank_account:read', requiredPlugin: 'finance.accounts_receivable_payable' },
+    },
+
+    // Anexos del SRI (ATS, formularios 103 y 104). Detrás del módulo y del permiso de ver; generar y descargar piden el suyo (los botones se ocultan sin él).
+    {
+      path: '/reporting/annexes',
+      name: 'reporting-annexes',
+      component: ReportingAnnexesView,
+      meta: { requiresAuth: true, requiredPermission: 'tax_annex:read', requiredPlugin: 'compliance.sri_annexes' },
+    },
+    {
+      path: '/reporting/annexes/:id',
+      name: 'reporting-annex-run',
+      component: ReportingAnnexRunDetailView,
+      meta: { requiresAuth: true, requiredPermission: 'tax_annex:read', requiredPlugin: 'compliance.sri_annexes' },
+    },
+    {
+      path: '/reporting/documents',
+      name: 'reporting-documents',
+      component: ReportingDocumentsView,
+      meta: { requiresAuth: true, requiredPermission: 'tax_annex:read', requiredPlugin: 'compliance.sri_annexes' },
     },
 
     {

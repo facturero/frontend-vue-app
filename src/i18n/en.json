@@ -381,6 +381,7 @@
       "accounting": "Accounting",
       "purchasing": "Purchasing",
       "treasury": "Treasury",
+      "reporting": "SRI annexes",
       "restaurant": "Restaurant"
     },
     "empty": "No activity recorded with these filters",
@@ -548,6 +549,9 @@
       "treasury_bank_line_unmarked_external": "Posted-outside-treasury mark removed",
       "treasury_bank_reconciliation_closed": "Bank reconciliation closed",
       "treasury_bank_reconciliation_reopened": "Bank reconciliation reopened",
+      "reporting_tax_annex_generated": "SRI annex generated (new version)",
+      "reporting_tax_annex_exported": "SRI annex downloaded",
+      "reporting_tax_annex_manual_input_set": "Manual box of an SRI annex changed",
       "purchasing_bill_withholding_issued": "Withholding issued on purchase bill",
       "purchasing_settings_updated": "Purchasing policy updated",
       "fiscal_ec_purchase_settlement_issued": "Purchase settlement issued",
@@ -1175,6 +1179,230 @@
       "addItem": "Add goods",
       "addRecipient": "Add recipient",
       "submit": "Issue and send to the SRI"
+    }
+  },
+  "reporting": {
+    "title": "SRI annexes",
+    "intro": "Prepare the ATS and forms 103 and 104 from your invoices, purchases and withholdings. Every run is saved as a version.",
+    "tabs": {
+      "annexes": "Annexes",
+      "documents": "Documents"
+    },
+    "annexName": {
+      "ats": "ATS",
+      "f103": "Form 103",
+      "f104": "Form 104"
+    },
+    "annexHint": {
+      "ats": "The month's purchases, sales and withholdings. The XML is enabled once the official SRI schema is available.",
+      "f103": "Income-tax withholdings you made, by concept code.",
+      "f104": "The month's VAT: what sales generated, the credit from your purchases and what comes out to pay."
+    },
+    "draftNote": "This is a draft for your accountant to review. This system does not file anything with the SRI.",
+    "generate": {
+      "annex": "Annex",
+      "period": "Period",
+      "button": "Generate",
+      "again": "Generate again",
+      "created": "Version {version} was created.",
+      "unchanged": "Nothing changed since version {version}: it is still current."
+    },
+    "versions": {
+      "title": "Versions",
+      "empty": "There are no versions for this period yet. Generate the first one.",
+      "version": "Version",
+      "generatedAt": "Generated",
+      "annex": "Annex",
+      "period": "Period",
+      "open": "Open"
+    },
+    "detail": {
+      "back": "Back to the annexes",
+      "subtitle": "Version {version} · generated on {date}",
+      "hash": "Content fingerprint"
+    },
+    "summary": {
+      "title": "Summary"
+    },
+    "metrics": {
+      "ivaGeneradoCents": "VAT generated on sales",
+      "ivaComprasCents": "VAT on purchases",
+      "creditoAplicableCents": "Applicable tax credit",
+      "saldoCents": "Balance for the month",
+      "ivaRetenidoPracticadoCents": "VAT withheld from suppliers",
+      "ventas": "Sales",
+      "compras": "Purchases",
+      "retenciones": "Withholdings",
+      "conceptos": "Concepts",
+      "totalBaseCents": "Withholding base",
+      "totalRetenidoCents": "Income tax withheld",
+      "retencionesIvaEIsdNoIncluidasCents": "VAT and ISD withheld (outside form 103)",
+      "comprasAnuladas": "Voided purchases",
+      "comprobantesVenta": "Sales documents",
+      "clientes": "Customers",
+      "anulados": "Voided documents",
+      "retencionesEmitidas": "Withholdings issued",
+      "retencionesSinCompra": "Withholdings whose purchase is not in the system",
+      "comprasBaseGravadaCents": "Purchases with VAT (base)",
+      "comprasBase0Cents": "Purchases at 0 % (base)",
+      "comprasIvaCents": "VAT on purchases",
+      "ventasBaseGravadaCents": "Sales with VAT (base)",
+      "ventasBase0Cents": "Sales at 0 % (base)",
+      "ventasIvaCents": "VAT on sales"
+    },
+    "result": {
+      "a_pagar": "Tax payable",
+      "a_favor": "Credit balance",
+      "cero": "No balance"
+    },
+    "findings": {
+      "title": "Findings",
+      "none": "Nothing to fix was found in this period's data.",
+      "errors": "{n} error | {n} errors",
+      "warnings": "{n} warning | {n} warnings",
+      "seeDocument": "See document",
+      "severity": {
+        "error": "Error",
+        "warning": "Warning"
+      },
+      "intro": "Review these before filing. An error can make the SRI reject the annex; a warning is something worth confirming."
+    },
+    "changes": {
+      "title": "What changed since version {version}",
+      "first": "This is the first version of this period.",
+      "none": "The figures are the same; something in the detail changed.",
+      "figure": "Figure",
+      "previous": "Before",
+      "current": "Now",
+      "delta": "Difference"
+    },
+    "f103": {
+      "title": "Income-tax withholdings by concept",
+      "concept": "Concept code",
+      "percentages": "Rates",
+      "count": "Withholdings",
+      "base": "Base",
+      "withheld": "Amount withheld",
+      "total": "Total",
+      "empty": "You issued no income-tax withholdings in this period.",
+      "casilleroNote": "The form box is assigned by concept code: the system does not carry that official table yet, so the code is shown as is.",
+      "otherTaxes": "You also withheld {amount} of VAT and ISD, which do not go on form 103 (VAT goes on form 104)."
+    },
+    "f104": {
+      "sales": "Sales by rate (net of credit notes)",
+      "purchases": "Purchases by rate (VAT credit)",
+      "rate": "Rate",
+      "base": "Base",
+      "iva": "VAT",
+      "total": "Total",
+      "settlement": "VAT settlement",
+      "rows": {
+        "generated": "VAT generated on sales",
+        "credit": "(−) Tax credit on purchases",
+        "previousCredit": "(−) Credit from the previous month",
+        "withheldByClients": "(−) VAT your customers withheld",
+        "adjustments": "(±) Adjustments"
+      },
+      "withheldSuppliers": "VAT you withheld from suppliers (paid separately, not part of this calculation)",
+      "empty": "There are no sales or purchases with VAT in this period."
+    },
+    "ats": {
+      "informant": "Reporting party",
+      "noInformant": "The organization's tax ID and legal name could not be read.",
+      "purchases": "Purchases",
+      "salesByCustomer": "Sales by customer and document type",
+      "voided": "Voided documents",
+      "withholdingsWithoutPurchase": "Withholdings whose purchase is not in the system",
+      "date": "Date",
+      "type": "Type",
+      "number": "Number",
+      "authorization": "Authorization",
+      "support": "Support",
+      "id": "Tax ID",
+      "party": "Supplier",
+      "customer": "Customer",
+      "base0": "0 % base",
+      "baseTaxed": "Base with VAT",
+      "iva": "VAT",
+      "total": "Total",
+      "withholdings": "Withholdings",
+      "receipts": "Documents",
+      "origin": "Origin",
+      "issued": "Issued",
+      "voidedOn": "Voided",
+      "supportDocument": "Supporting document",
+      "emptyPurchases": "There are no purchases in this period.",
+      "emptySales": "There are no sales in this period.",
+      "emptyVoided": "There are no voided documents.",
+      "emptyWithholdings": "Every withholding has its purchase in the system."
+    },
+    "manual": {
+      "title": "Accountant's boxes",
+      "intro": "The system cannot calculate these values: they depend on your judgment or on data it does not have. After saving them, generate the annex again so they enter the calculation.",
+      "save": "Save",
+      "saved": "Saved. Generate the annex again so it enters the calculation.",
+      "invalid": "Enter a valid value.",
+      "pending": "Not filled in: the default value is used.",
+      "fields": {
+        "factor_proporcionalidad_bps": "Credit proportionality factor (%)",
+        "credito_anterior": "Tax credit from the previous month (USD)",
+        "iva_retenido_sufrido": "VAT your customers withheld (USD)",
+        "ajustes": "Adjustments (USD; positive increases what is paid)"
+      },
+      "hints": {
+        "factor_proporcionalidad_bps": "100 % if all of your credit can be used.",
+        "credito_anterior": "What was left in your favor on the previous return.",
+        "iva_retenido_sufrido": "Certificates of the VAT withholdings made to you.",
+        "ajustes": "Any correction your accountant decides to apply."
+      }
+    },
+    "reconciliation": {
+      "title": "Reconciliation with the general ledger",
+      "intro": "Compares this version's figures with what accounting recorded in the same period.",
+      "check": "Check",
+      "recheck": "Check again",
+      "ok": "It matches accounting.",
+      "mismatch": "There are differences with accounting. Check manual entries, documents without an entry or later voids.",
+      "unavailable": "The organization has no accounting set up: there is nothing to compare with.",
+      "item": "Item",
+      "annex": "Annex",
+      "accounting": "Accounting",
+      "difference": "Difference",
+      "items": {
+        "vat_generated": "VAT generated on sales",
+        "vat_purchases": "VAT on purchases",
+        "vat_withheld": "VAT withheld from suppliers",
+        "income_withheld": "Income tax withheld",
+        "vat_sales": "VAT on sales"
+      }
+    },
+    "export": {
+      "csv": "Download CSV",
+      "xml": "Download XML",
+      "failed": "The file could not be downloaded."
+    },
+    "documents": {
+      "title": "Documents that feed the annexes",
+      "intro": "Sales, purchases and withholdings as this module knows them. If a finding points to a document, look it up here by its number.",
+      "search": "Search by number, name or tax ID",
+      "direction": "Origin",
+      "status": "Status",
+      "empty": "There are no documents with those filters.",
+      "number": "Number",
+      "type": "Type",
+      "date": "Date",
+      "party": "Customer or supplier",
+      "total": "Total",
+      "all": "All",
+      "directions": {
+        "sale": "Sale",
+        "purchase": "Purchase",
+        "withholding_issued": "Withholding issued"
+      },
+      "statuses": {
+        "active": "Active",
+        "voided": "Voided"
+      }
     }
   },
   "treasury": {
@@ -2105,6 +2333,7 @@
   "nav": {
     "accounting": "Accounting",
     "treasury": "Treasury",
+    "reporting": "SRI annexes",
     "audit": "Audit log",
     "brand": "CRM",
     "brandSubtitle": "Admin panel",

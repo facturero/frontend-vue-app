@@ -30,6 +30,7 @@ const items: NavItem[] = [
   { titleKey: 'nav.restaurant', icon: 'mdi-silverware-fork-knife', to: '/restaurant/tables', activeFor: ['/restaurant'], permission: 'restaurant:read', plugin: 'restaurant.floorplan' },
   { titleKey: 'nav.purchasing', icon: 'mdi-cart-arrow-down', to: '/purchasing/orders', activeFor: ['/purchasing'], permission: 'purchase:read', plugin: 'purchasing.purchase_orders' },
   { titleKey: 'nav.treasury', icon: 'mdi-cash-multiple', to: '/treasury/receivables', activeFor: ['/treasury'], permission: 'receivable:read', plugin: 'finance.accounts_receivable_payable' },
+  { titleKey: 'nav.reporting', icon: 'mdi-file-document-check-outline', to: '/reporting/annexes', activeFor: ['/reporting'], permission: 'tax_annex:read', plugin: 'compliance.sri_annexes' },
   { titleKey: 'nav.accounting', icon: 'mdi-calculator-variant-outline', to: '/accounting/accounts', activeFor: ['/accounting'], permission: 'account:read', plugin: 'finance.general_ledger' },
   { titleKey: 'nav.stock', icon: 'mdi-warehouse', to: '/stock', activeFor: ['/stock', '/warehouses'], permission: 'inventory:read', plugin: 'inventory.kardex' },
   // Arquetipo F: el menú ya no tiene 4 ítems de configuración sueltos; uno

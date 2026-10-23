@@ -381,6 +381,7 @@
       "accounting": "Comptabilité",
       "purchasing": "Achats",
       "treasury": "Trésorerie",
+      "reporting": "Annexes du SRI",
       "restaurant": "Restaurant"
     },
     "empty": "Aucune activité enregistrée avec ces filtres",
@@ -548,6 +549,9 @@
       "treasury_bank_line_unmarked_external": "Marque « comptabilisé hors trésorerie » retirée",
       "treasury_bank_reconciliation_closed": "Rapprochement bancaire clôturé",
       "treasury_bank_reconciliation_reopened": "Rapprochement bancaire rouvert",
+      "reporting_tax_annex_generated": "Annexe du SRI générée (nouvelle version)",
+      "reporting_tax_annex_exported": "Annexe du SRI téléchargée",
+      "reporting_tax_annex_manual_input_set": "Case manuelle d'une annexe du SRI modifiée",
       "purchasing_bill_withholding_issued": "Retenue émise sur facture d'achat",
       "purchasing_settings_updated": "Politique d'achats modifiée",
       "fiscal_ec_purchase_settlement_issued": "Liquidation de compra émise",
@@ -1175,6 +1179,230 @@
       "addItem": "Ajouter une marchandise",
       "addRecipient": "Ajouter un destinataire",
       "submit": "Émettre et envoyer au SRI"
+    }
+  },
+  "reporting": {
+    "title": "Annexes du SRI",
+    "intro": "Préparez l'ATS et les formulaires 103 et 104 à partir de vos factures, achats et retenues. Chaque génération est conservée comme une version.",
+    "tabs": {
+      "annexes": "Annexes",
+      "documents": "Documents"
+    },
+    "annexName": {
+      "ats": "ATS",
+      "f103": "Formulaire 103",
+      "f104": "Formulaire 104"
+    },
+    "annexHint": {
+      "ats": "Les achats, ventes et retenues du mois. Le XML sera activé quand le schéma officiel du SRI sera disponible.",
+      "f103": "Les retenues à la source sur l'impôt sur le revenu que vous avez effectuées, par code de concept.",
+      "f104": "La TVA du mois : celle des ventes, le crédit de vos achats et ce qui reste à payer."
+    },
+    "draftNote": "Ceci est un brouillon à faire relire par votre comptable. Ce système ne dépose rien auprès du SRI.",
+    "generate": {
+      "annex": "Annexe",
+      "period": "Période",
+      "button": "Générer",
+      "again": "Générer à nouveau",
+      "created": "La version {version} a été créée.",
+      "unchanged": "Rien n'a changé depuis la version {version} : elle reste en vigueur."
+    },
+    "versions": {
+      "title": "Versions",
+      "empty": "Il n'y a pas encore de version pour cette période. Générez la première.",
+      "version": "Version",
+      "generatedAt": "Générée",
+      "annex": "Annexe",
+      "period": "Période",
+      "open": "Ouvrir"
+    },
+    "detail": {
+      "back": "Retour aux annexes",
+      "subtitle": "Version {version} · générée le {date}",
+      "hash": "Empreinte du contenu"
+    },
+    "summary": {
+      "title": "Résumé"
+    },
+    "metrics": {
+      "ivaGeneradoCents": "TVA générée sur les ventes",
+      "ivaComprasCents": "TVA sur les achats",
+      "creditoAplicableCents": "Crédit de taxe applicable",
+      "saldoCents": "Solde du mois",
+      "ivaRetenidoPracticadoCents": "TVA retenue aux fournisseurs",
+      "ventas": "Ventes",
+      "compras": "Achats",
+      "retenciones": "Retenues",
+      "conceptos": "Concepts",
+      "totalBaseCents": "Base retenue",
+      "totalRetenidoCents": "Impôt sur le revenu retenu",
+      "retencionesIvaEIsdNoIncluidasCents": "TVA et ISD retenus (hors formulaire 103)",
+      "comprasAnuladas": "Achats annulés",
+      "comprobantesVenta": "Documents de vente",
+      "clientes": "Clients",
+      "anulados": "Documents annulés",
+      "retencionesEmitidas": "Retenues émises",
+      "retencionesSinCompra": "Retenues dont l'achat n'est pas dans le système",
+      "comprasBaseGravadaCents": "Achats avec TVA (base)",
+      "comprasBase0Cents": "Achats à 0 % (base)",
+      "comprasIvaCents": "TVA sur les achats",
+      "ventasBaseGravadaCents": "Ventes avec TVA (base)",
+      "ventasBase0Cents": "Ventes à 0 % (base)",
+      "ventasIvaCents": "TVA sur les ventes"
+    },
+    "result": {
+      "a_pagar": "Impôt à payer",
+      "a_favor": "Solde en votre faveur",
+      "cero": "Aucun solde"
+    },
+    "findings": {
+      "title": "Constats",
+      "none": "Rien à corriger n'a été détecté dans les données de cette période.",
+      "errors": "{n} erreur | {n} erreurs",
+      "warnings": "{n} avertissement | {n} avertissements",
+      "seeDocument": "Voir le document",
+      "severity": {
+        "error": "Erreur",
+        "warning": "Avertissement"
+      },
+      "intro": "Vérifiez ceci avant de déclarer. Une erreur peut faire rejeter l'annexe par le SRI ; un avertissement mérite d'être confirmé."
+    },
+    "changes": {
+      "title": "Ce qui a changé depuis la version {version}",
+      "first": "C'est la première version de cette période.",
+      "none": "Les chiffres sont les mêmes ; un détail a changé.",
+      "figure": "Chiffre",
+      "previous": "Avant",
+      "current": "Maintenant",
+      "delta": "Écart"
+    },
+    "f103": {
+      "title": "Retenues sur le revenu par concept",
+      "concept": "Code de concept",
+      "percentages": "Taux",
+      "count": "Retenues",
+      "base": "Base",
+      "withheld": "Montant retenu",
+      "total": "Total",
+      "empty": "Vous n'avez émis aucune retenue sur le revenu pendant cette période.",
+      "casilleroNote": "La case du formulaire s'attribue par code de concept : le système n'a pas encore ce tableau officiel, le code est donc affiché tel quel.",
+      "otherTaxes": "Vous avez aussi retenu {amount} de TVA et d'ISD, qui ne figurent pas dans le 103 (la TVA va dans le 104)."
+    },
+    "f104": {
+      "sales": "Ventes par taux (nettes des avoirs)",
+      "purchases": "Achats par taux (crédit de TVA)",
+      "rate": "Taux",
+      "base": "Base",
+      "iva": "TVA",
+      "total": "Total",
+      "settlement": "Liquidation de la TVA",
+      "rows": {
+        "generated": "TVA générée sur les ventes",
+        "credit": "(−) Crédit de taxe sur les achats",
+        "previousCredit": "(−) Crédit du mois précédent",
+        "withheldByClients": "(−) TVA retenue par vos clients",
+        "adjustments": "(±) Ajustements"
+      },
+      "withheldSuppliers": "TVA que vous avez retenue aux fournisseurs (payée à part, hors de ce calcul)",
+      "empty": "Il n'y a ni ventes ni achats avec TVA pendant cette période."
+    },
+    "ats": {
+      "informant": "Déclarant",
+      "noInformant": "Le numéro fiscal et la raison sociale de l'organisation n'ont pas pu être lus.",
+      "purchases": "Achats",
+      "salesByCustomer": "Ventes par client et type de document",
+      "voided": "Documents annulés",
+      "withholdingsWithoutPurchase": "Retenues dont l'achat n'est pas dans le système",
+      "date": "Date",
+      "type": "Type",
+      "number": "Numéro",
+      "authorization": "Autorisation",
+      "support": "Justificatif",
+      "id": "Identifiant fiscal",
+      "party": "Fournisseur",
+      "customer": "Client",
+      "base0": "Base 0 %",
+      "baseTaxed": "Base avec TVA",
+      "iva": "TVA",
+      "total": "Total",
+      "withholdings": "Retenues",
+      "receipts": "Documents",
+      "origin": "Origine",
+      "issued": "Émis",
+      "voidedOn": "Annulé",
+      "supportDocument": "Document justificatif",
+      "emptyPurchases": "Il n'y a pas d'achats pendant cette période.",
+      "emptySales": "Il n'y a pas de ventes pendant cette période.",
+      "emptyVoided": "Il n'y a pas de documents annulés.",
+      "emptyWithholdings": "Toutes les retenues ont leur achat dans le système."
+    },
+    "manual": {
+      "title": "Cases du comptable",
+      "intro": "Le système ne peut pas calculer ces valeurs : elles dépendent de votre jugement ou de données qu'il n'a pas. Après les avoir enregistrées, générez l'annexe à nouveau pour qu'elles entrent dans le calcul.",
+      "save": "Enregistrer",
+      "saved": "Enregistré. Générez l'annexe à nouveau pour qu'il entre dans le calcul.",
+      "invalid": "Saisissez une valeur valide.",
+      "pending": "Non renseigné : la valeur par défaut est utilisée.",
+      "fields": {
+        "factor_proporcionalidad_bps": "Facteur de proportionnalité du crédit (%)",
+        "credito_anterior": "Crédit de taxe du mois précédent (USD)",
+        "iva_retenido_sufrido": "TVA retenue par vos clients (USD)",
+        "ajustes": "Ajustements (USD ; positif augmente ce qui est payé)"
+      },
+      "hints": {
+        "factor_proporcionalidad_bps": "100 % si tout votre crédit est utilisable.",
+        "credito_anterior": "Ce qui est resté en votre faveur lors de la déclaration précédente.",
+        "iva_retenido_sufrido": "Attestations des retenues de TVA qui vous ont été appliquées.",
+        "ajustes": "Toute correction que votre comptable décide d'appliquer."
+      }
+    },
+    "reconciliation": {
+      "title": "Rapprochement avec le grand livre",
+      "intro": "Compare les chiffres de cette version avec ce que la comptabilité a enregistré sur la même période.",
+      "check": "Vérifier",
+      "recheck": "Vérifier à nouveau",
+      "ok": "Cela correspond à la comptabilité.",
+      "mismatch": "Il y a des écarts avec la comptabilité. Vérifiez les écritures manuelles, les documents sans écriture ou les annulations ultérieures.",
+      "unavailable": "L'organisation n'a pas de comptabilité configurée : il n'y a rien à comparer.",
+      "item": "Élément",
+      "annex": "Annexe",
+      "accounting": "Comptabilité",
+      "difference": "Écart",
+      "items": {
+        "vat_generated": "TVA générée sur les ventes",
+        "vat_purchases": "TVA sur les achats",
+        "vat_withheld": "TVA retenue aux fournisseurs",
+        "income_withheld": "Impôt sur le revenu retenu",
+        "vat_sales": "TVA sur les ventes"
+      }
+    },
+    "export": {
+      "csv": "Télécharger le CSV",
+      "xml": "Télécharger le XML",
+      "failed": "Le fichier n'a pas pu être téléchargé."
+    },
+    "documents": {
+      "title": "Documents qui alimentent les annexes",
+      "intro": "Les ventes, achats et retenues tels que ce module les connaît. Si un constat renvoie à un document, retrouvez-le ici par son numéro.",
+      "search": "Rechercher par numéro, nom ou identifiant fiscal",
+      "direction": "Origine",
+      "status": "Statut",
+      "empty": "Aucun document avec ces filtres.",
+      "number": "Numéro",
+      "type": "Type",
+      "date": "Date",
+      "party": "Client ou fournisseur",
+      "total": "Total",
+      "all": "Tous",
+      "directions": {
+        "sale": "Vente",
+        "purchase": "Achat",
+        "withholding_issued": "Retenue émise"
+      },
+      "statuses": {
+        "active": "En vigueur",
+        "voided": "Annulé"
+      }
     }
   },
   "treasury": {
@@ -2105,6 +2333,7 @@
   "nav": {
     "accounting": "Comptabilité",
     "treasury": "Trésorerie",
+    "reporting": "Annexes SRI",
     "audit": "Journal d'audit",
     "brand": "CRM",
     "brandSubtitle": "Panneau d'admin.",
