@@ -27,6 +27,11 @@ const items: NavItem[] = [
   { titleKey: 'nav.invoices', icon: 'mdi-file-document-outline', to: '/invoices', permission: 'invoice:read', plugin: 'finance.electronic_invoicing' },
   { titleKey: 'nav.taxDocuments', icon: 'mdi-file-sign', to: '/tax-documents/withholdings', activeFor: ['/tax-documents'], permission: 'fiscal:read', plugin: 'finance.electronic_invoicing' },
   { titleKey: 'nav.products', icon: 'mdi-package-variant-closed', to: '/products', permission: 'product:read', plugin: 'infra.catalog_products' },
+  // Proyectos y tareas (al estilo Asana): «Mis tareas» primero, como en Asana, y la lista de proyectos.
+  { titleKey: 'nav.myTasks', icon: 'mdi-check-circle-outline', to: '/my-tasks', permission: 'project:read', plugin: 'projects.tasks_kanban' },
+  { titleKey: 'nav.projects', icon: 'mdi-folder-multiple-outline', to: '/projects', permission: 'project:read', plugin: 'projects.tasks_kanban' },
+  { titleKey: 'nav.timeTracking', icon: 'mdi-timer-outline', to: '/time-tracking', permission: 'project:read', plugin: 'projects.time_tracking' },
+  { titleKey: 'nav.workload', icon: 'mdi-chart-bar-stacked', to: '/workload', permission: 'project:read', plugin: 'projects.resource_allocation' },
   { titleKey: 'nav.restaurant', icon: 'mdi-silverware-fork-knife', to: '/restaurant/tables', activeFor: ['/restaurant'], permission: 'restaurant:read', plugin: 'restaurant.floorplan' },
   { titleKey: 'nav.purchasing', icon: 'mdi-cart-arrow-down', to: '/purchasing/orders', activeFor: ['/purchasing'], permission: 'purchase:read', plugin: 'purchasing.purchase_orders' },
   { titleKey: 'nav.treasury', icon: 'mdi-cash-multiple', to: '/treasury/receivables', activeFor: ['/treasury'], permission: 'receivable:read', plugin: 'finance.accounts_receivable_payable' },

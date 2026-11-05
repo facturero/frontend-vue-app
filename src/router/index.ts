@@ -64,6 +64,12 @@ import TreasuryCashFlowView from '@/views/treasury/CashFlowView.vue';
 import ReportingAnnexesView from '@/views/reporting/AnnexesView.vue';
 import ReportingAnnexRunDetailView from '@/views/reporting/AnnexRunDetailView.vue';
 import ReportingDocumentsView from '@/views/reporting/DocumentsView.vue';
+import ProjectsView from '@/views/projects/ProjectsView.vue';
+import ProjectView from '@/views/projects/ProjectView.vue';
+import MyTasksView from '@/views/projects/MyTasksView.vue';
+import TimeTrackingView from '@/views/projects/TimeTrackingView.vue';
+import WorkloadView from '@/views/projects/WorkloadView.vue';
+import FormFillView from '@/views/projects/FormFillView.vue';
 import PurchasingOrdersView from '@/views/purchasing/PurchaseOrdersView.vue';
 import PurchasingOrderFormView from '@/views/purchasing/PurchaseOrderFormView.vue';
 import PurchasingOrderView from '@/views/purchasing/PurchaseOrderView.vue';
@@ -561,6 +567,48 @@ const router = createRouter({
       name: 'reporting-documents',
       component: ReportingDocumentsView,
       meta: { requiresAuth: true, requiredPermission: 'tax_annex:read', requiredPlugin: 'compliance.sri_annexes' },
+    },
+
+    // Proyectos y tareas, al estilo Asana (módulo `projects.tasks_kanban`). «Mis tareas» vive en su propia ruta para que el menú
+    // pueda marcar «Mis tareas» y «Proyectos» por separado. Qué se puede hacer DENTRO de un proyecto lo decide el rol en él.
+    {
+      path: '/my-tasks',
+      name: 'my-tasks',
+      component: MyTasksView,
+      meta: { requiresAuth: true, requiredPermission: 'project:read', requiredPlugin: 'projects.tasks_kanban' },
+    },
+    {
+      path: '/projects',
+      name: 'projects',
+      component: ProjectsView,
+      meta: { requiresAuth: true, requiredPermission: 'project:read', requiredPlugin: 'projects.tasks_kanban' },
+    },
+    {
+      path: '/projects/:id',
+      name: 'project',
+      component: ProjectView,
+      meta: { requiresAuth: true, requiredPermission: 'project:read', requiredPlugin: 'projects.tasks_kanban' },
+    },
+    // Horas y carga de trabajo (entregable 5): módulos que se compran aparte. Rutas propias, fuera de `/projects`, para que el menú
+    // no marque «Proyectos» a la vez.
+    {
+      path: '/time-tracking',
+      name: 'time-tracking',
+      component: TimeTrackingView,
+      meta: { requiresAuth: true, requiredPermission: 'project:read', requiredPlugin: 'projects.time_tracking' },
+    },
+    // Formulario de solicitud (entregable 7): lo llena cualquiera de la organización con el enlace, aunque no sea miembro del proyecto.
+    {
+      path: '/project-forms/:id',
+      name: 'project-form',
+      component: FormFillView,
+      meta: { requiresAuth: true, requiredPermission: 'project:read', requiredPlugin: 'projects.tasks_kanban' },
+    },
+    {
+      path: '/workload',
+      name: 'workload',
+      component: WorkloadView,
+      meta: { requiresAuth: true, requiredPermission: 'project:read', requiredPlugin: 'projects.resource_allocation' },
     },
 
     {

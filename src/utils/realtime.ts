@@ -1,6 +1,7 @@
 import { io, type Socket } from 'socket.io-client';
 import { getAccessToken } from '@/utils/http';
 import { useRealtimeStore } from '@/stores/realtime';
+import { useProjectsStore } from '@/stores/projects';
 import { usePosThemeStore } from '@/stores/posTheme';
 import { useAuthStore } from '@/stores/auth';
 import type { AssistantTurn } from '@/types/assistant';
@@ -87,6 +88,16 @@ export function connectRealtime(): void {
       useRealtimeStore().pushPluginEvent(data);
     } catch {
       // pinia aún no activa (no debería ocurrir tras el login)
+    }
+  });
+
+  // Tablero en vivo de Proyectos y tareas: el aviso solo dice qué proyecto y qué tarea cambiaron (sin datos); el store vuelve a
+  // pedir lo que tenga abierto, y ahí el servidor aplica los permisos. Ver el gateway, realtime/projects-routing.ts.
+  socket.on('projects.changed', (data: { event: string; projectIds: string[]; taskId: string | null }) => {
+    try {
+      useProjectsStore().onRealtime(data);
+    } catch {
+      // pinia aún no activa
     }
   });
 

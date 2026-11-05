@@ -37,6 +37,17 @@ const EVENT_TITLE_KEYS: Record<string, string> = {
   'billing.invoice.issued': 'notifications.invoiceIssued',
   'billing.invoice.voided': 'notifications.invoiceVoided',
   'fiscal.ec.invoice.attention_required': 'notifications.fiscalAttention',
+  // Proyectos y tareas (providers de notification-service, solo campana).
+  'projects.task.assigned': 'notifications.projectsTaskAssigned',
+  'projects.task.mentioned': 'notifications.projectsTaskMentioned',
+  'projects.comment.created': 'notifications.projectsCommentCreated',
+  'projects.task.completed': 'notifications.projectsTaskCompleted',
+  'projects.task.due_soon': 'notifications.projectsTaskDueSoon',
+  'projects.approval.requested': 'notifications.projectsApprovalRequested',
+  'projects.approval.decided': 'notifications.projectsApprovalDecided',
+  'projects.member.added': 'notifications.projectsMemberAdded',
+  'projects.task.unblocked': 'notifications.projectsTaskUnblocked',
+  'projects.status_update.posted': 'notifications.projectsStatusUpdatePosted',
 };
 
 /**
@@ -53,6 +64,11 @@ export function routeForEvent(
     return id ? `/invoices/${id}` : '/invoices';
   }
   if (event.startsWith('plugin.')) return '/plugins';
+  // Proyectos: el proyecto al que te sumaron, o la tarea en el panel de «Mis tareas». Se abre ahí (no en su proyecto) porque quien
+  // recibe el aviso puede ver la tarea —es responsable, seguidor o lo mencionaron— sin ser miembro de un proyecto privado.
+  if (event === 'projects.member.added') return typeof data.projectId === 'string' ? `/projects/${data.projectId}` : '/projects';
+  if (event === 'projects.status_update.posted') return typeof data.projectId === 'string' ? `/projects/${data.projectId}?view=overview` : '/projects';
+  if (event.startsWith('projects.')) return typeof data.taskId === 'string' ? `/my-tasks?task=${data.taskId}` : '/my-tasks';
   // Los identity.* de la campana (cuenta activada/desactivada) hablan de la
   // cuenta del propio usuario.
   if (event.startsWith('identity.')) return '/settings';
@@ -70,6 +86,12 @@ function detailFor(event: string, data: Record<string, unknown>): string {
   }
   if (event.startsWith('identity.')) {
     return typeof data.organizationName === 'string' ? data.organizationName : '';
+  }
+  if (event === 'projects.member.added') return typeof data.projectName === 'string' ? data.projectName : '';
+  if (event === 'projects.status_update.posted') return [data.projectName, data.excerpt].filter((v) => typeof v === 'string' && v).join(' — ');
+  if (event.startsWith('projects.')) {
+    // El título de la tarea y, si es un comentario o una mención, cómo empieza.
+    return [data.title, data.excerpt].filter((v) => typeof v === 'string' && v).join(' — ');
   }
   return typeof data.code === 'string' ? data.code : '';
 }

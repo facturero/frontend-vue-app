@@ -91,6 +91,15 @@ function iconFor(event: string): string {
   if (event === 'identity.user.enabled') return 'mdi-account-check-outline';
   if (event === 'identity.user.disabled') return 'mdi-account-cancel-outline';
   if (event === 'identity.user.invited') return 'mdi-account-plus-outline';
+  if (event === 'projects.task.mentioned') return 'mdi-at';
+  if (event === 'projects.comment.created') return 'mdi-comment-text-outline';
+  if (event === 'projects.task.completed') return 'mdi-check-circle-outline';
+  if (event === 'projects.task.due_soon') return 'mdi-calendar-alert';
+  if (event.startsWith('projects.approval.')) return 'mdi-thumbs-up-down-outline';
+  if (event === 'projects.member.added') return 'mdi-folder-account-outline';
+  if (event === 'projects.task.unblocked') return 'mdi-lock-open-variant-outline';
+  if (event === 'projects.status_update.posted') return 'mdi-flag-outline';
+  if (event.startsWith('projects.')) return 'mdi-checkbox-marked-circle-outline';
   return 'mdi-bell-ring-outline';
 }
 

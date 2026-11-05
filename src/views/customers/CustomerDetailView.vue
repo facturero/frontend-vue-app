@@ -8,6 +8,7 @@ import { usePluginsStore } from '@/stores/plugins';
 import { customerApi } from '@/api/customers';
 import type { ContactInput, AddressInput, AddressType } from '@/types/customers';
 import PageHeader from '@/components/ui/PageHeader.vue';
+import LinkedTasksCard from '@/components/projects/LinkedTasksCard.vue';
 import { fileUrl } from '@/composable/useFileUrl';
 
 
@@ -368,6 +369,8 @@ onMounted(async () => {
                 @update:model-value="assignTag" />
             </v-card-text>
           </v-card>
+
+          <LinkedTasksCard entity-type="customer" :entity-id="customer.id" :label="customer.tradeName || customer.businessName" />
         </v-col>
       </v-row>
     </div>
