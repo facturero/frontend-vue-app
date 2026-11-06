@@ -3609,6 +3609,9 @@
       "send": "Commenter"
     },
     "activity": {
+      "showAll": "Tout voir ({n})",
+      "showMore": "Voir {n} de plus",
+      "showLess": "Voir moins",
       "title": "Activité",
       "dependencyAdded": "l’a fait attendre « {task} »",
       "dependencyRemoved": "a retiré l’attente de « {task} »",

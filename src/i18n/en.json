@@ -3609,6 +3609,9 @@
       "send": "Comment"
     },
     "activity": {
+      "showAll": "See all ({n})",
+      "showMore": "See {n} more",
+      "showLess": "See less",
       "title": "Activity",
       "dependencyAdded": "made it wait on \"{task}\"",
       "dependencyRemoved": "removed the wait on \"{task}\"",

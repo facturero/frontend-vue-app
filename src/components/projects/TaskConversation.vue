@@ -2,7 +2,6 @@
 import { computed, nextTick, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { formatRelative } from '@/utils/format';
-import { useStoredFlag } from '@/composable/useStoredFlag';
 import { useAuthStore } from '@/stores/auth';
 import { useProjectsStore } from '@/stores/projects';
 import { displayName } from '@/utils/projects';
@@ -13,7 +12,7 @@ import UserAvatar from './UserAvatar.vue';
 
 /**
  * Los comentarios de la tarea, en orden de fecha, con la caja para comentar al pie (Ctrl+Enter envía). El historial de cambios va
- * aparte, al final del panel (TaskActivity). La sección se pliega y se despliega, y cada persona la encuentra como la dejó.
+ * aparte, al final del panel (TaskActivity). Siempre visible: no se pliega.
  *
  * El borrador vive en el store, por tarea (`commentDrafts`): un clic fuera del panel lo cierra y, cuando el borrador era de este
  * componente, se perdía lo escrito. Los comentarios borrados dejan su hueco; editar o borrar un comentario lo hace su autor (el
@@ -23,7 +22,6 @@ const { t } = useI18n();
 const store = useProjectsStore();
 const auth = useAuthStore();
 
-const open = useStoredFlag('crm:projects:panel:comments', true);
 const composer = ref<InstanceType<typeof RichTextEditor> | null>(null);
 const sending = ref(false);
 const editingId = ref<string | null>(null);
@@ -79,10 +77,9 @@ async function remove(c: TaskComment): Promise<void> {
   }
 }
 
-// Tab+K: al comentario, desplegando la sección si estaba plegada.
+// Tab+K: a la caja de comentar.
 defineExpose({
   focus: async () => {
-    open.value = true;
     await nextTick();
     composer.value?.focus();
   },
@@ -91,17 +88,8 @@ defineExpose({
 
 <template>
   <div v-if="store.detail">
-    <v-btn
-      variant="text"
-      class="px-0 mb-2 text-body-large font-weight-medium"
-      :append-icon="open ? 'mdi-chevron-up' : 'mdi-chevron-down'"
-      :aria-expanded="open"
-      @click="open = !open"
-    >
-      {{ t('projects.conversation.title') }} ({{ comments.length }})
-    </v-btn>
+    <div class="text-body-large font-weight-medium mb-2">{{ t('projects.conversation.title') }} ({{ comments.length }})</div>
 
-    <template v-if="open">
       <div class="d-flex flex-column ga-2">
         <div v-if="!comments.length" class="text-body-medium text-medium-emphasis">{{ t('projects.conversation.empty') }}</div>
         <div v-for="c in comments" :key="c.id" class="d-flex ga-2">
@@ -157,6 +145,5 @@ defineExpose({
           <v-btn color="primary" size="small" :loading="sending" @click="send">{{ t('projects.conversation.send') }}</v-btn>
         </div>
       </div>
-    </template>
   </div>
 </template>

@@ -1,23 +1,35 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { formatMinutes } from '@/utils/duration';
 import { formatDate, formatDateTime, formatRelative } from '@/utils/format';
-import { useStoredFlag } from '@/composable/useStoredFlag';
 import { useProjectsStore } from '@/stores/projects';
 import { displayName } from '@/utils/projects';
 import type { TaskActivity } from '@/types/projects';
 
 /**
  * El historial de la tarea (quién cambió qué y cuándo), al final del panel y separado de los comentarios: mezclado con ellos tapaba
- * la conversación. Va plegado al principio y cada persona lo encuentra como lo dejó. Cierra con quién creó la tarea.
+ * la conversación. Siempre visible, pero corto: las últimas `MIN` líneas. «Ver todo» muestra el resto; si es mucho, «Ver más» lo
+ * va soltando de `STEP` en `STEP` para no alargar el panel de golpe. Cierra con quién creó la tarea.
  */
 const { t } = useI18n();
 const store = useProjectsStore();
 
-const open = useStoredFlag('crm:projects:panel:activity', false);
+const MIN = 5;
+const STEP = 20;
+const limit = ref(MIN);
 
 const items = computed<TaskActivity[]>(() => [...(store.detail?.activity ?? [])].sort((a, b) => a.at.localeCompare(b.at)));
+/** Las más recientes, en orden de fecha: lo último que pasó queda abajo, junto a quién creó la tarea. */
+const visible = computed(() => items.value.slice(-limit.value));
+const hidden = computed(() => items.value.length - visible.value.length);
+// Otra tarea: vuelve a empezar corto.
+watch(() => store.detail?.id, () => (limit.value = MIN));
+
+function showMore(): void {
+  // Si lo que falta cabe en un tramo, se muestra todo de una vez («Ver todo»); si no, otro tramo («Ver más»).
+  limit.value = hidden.value <= STEP ? items.value.length : limit.value + STEP;
+}
 const name = (id: string | null) => (id ? displayName(store.users.get(id)) || t('projects.share.unknownUser') : t('projects.activity.system'));
 const date = (value: unknown) => (typeof value === 'string' && value ? formatDate(value) : '');
 
@@ -77,17 +89,15 @@ function describe(a: TaskActivity): string {
 
 <template>
   <div v-if="store.detail">
-    <v-btn
-      variant="text"
-      class="px-0 mb-2 text-body-large font-weight-medium"
-      :append-icon="open ? 'mdi-chevron-up' : 'mdi-chevron-down'"
-      :aria-expanded="open"
-      @click="open = !open"
-    >
-      {{ t('projects.activity.title') }} ({{ items.length }})
-    </v-btn>
-    <div v-if="open" class="d-flex flex-column ga-2">
-      <div v-for="a in items" :key="a.id" class="d-flex align-center ga-2 text-body-small text-medium-emphasis">
+    <div class="text-body-large font-weight-medium mb-2">{{ t('projects.activity.title') }} ({{ items.length }})</div>
+    <div class="d-flex flex-column ga-2">
+      <div class="d-flex flex-wrap ga-2">
+        <v-btn v-if="hidden" variant="text" size="small" class="px-0" prepend-icon="mdi-history" @click="showMore">
+          {{ hidden <= STEP ? t('projects.activity.showAll', { n: items.length }) : t('projects.activity.showMore', { n: STEP }) }}
+        </v-btn>
+        <v-btn v-if="limit > MIN" variant="text" size="small" class="px-0" @click="limit = MIN">{{ t('projects.activity.showLess') }}</v-btn>
+      </div>
+      <div v-for="a in visible" :key="a.id" class="d-flex align-center ga-2 text-body-small text-medium-emphasis">
         <v-icon icon="mdi-history" size="x-small" />
         <span><strong>{{ name(a.actorUserId) }}</strong> {{ describe(a) }} · {{ formatRelative(a.at) }}</span>
       </div>
