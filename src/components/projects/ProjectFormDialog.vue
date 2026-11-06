@@ -68,12 +68,13 @@ async function save(): Promise<void> {
       <v-card-text class="d-flex flex-column ga-4">
         <v-alert v-if="failure" type="error">{{ failure }}</v-alert>
         <v-text-field v-model="name" :label="t('projects.form.name')" :counter="120" autofocus @keyup.enter="save" />
-        <v-textarea v-model="description" :label="t('projects.form.description')" rows="2" auto-grow />
+        <!-- `mb-2` en los dos primeros bloques: 24 px entre secciones (campos, visibilidad, color y vista) frente a los 16 px de dentro. -->
+        <v-textarea v-model="description" :label="t('projects.form.description')" rows="2" auto-grow class="mb-2" />
 
-        <div>
+        <div class="mb-2">
           <div class="text-body-medium mb-2">{{ t('projects.form.visibility') }}</div>
           <v-radio-group v-model="visibility">
-            <v-radio value="organization">
+            <v-radio value="organization" class="mb-2">
               <template #label>
                 <div>
                   <div>{{ t('projects.visibility.organization') }}</div>

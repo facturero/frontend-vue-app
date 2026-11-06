@@ -49,4 +49,19 @@
     font-weight: inherit;
     letter-spacing: inherit;
   }
+
+  /* 4. Márgenes de un diálogo (REGLAS-FRONT R-21). Vuetify 4 da 24 px a los lados al `v-card-text` de un diálogo, pero deja al
+   *    `v-card-title` suelto con los 0.5rem 1rem de una tarjeta y al `v-card-actions` con 0.5rem: el título, los campos y los
+   *    botones quedaban cada uno a una distancia distinta del borde. Aquí los tres van a 24 px del borde (como el `v-card-item` de
+   *    un diálogo en Vuetify), con 16 px del título al contenido (el `padding-top` del texto) y 24 px del contenido al pie (su
+   *    `padding-bottom`). */
+  .v-dialog > .v-overlay__content > .v-card > .v-card-title,
+  .v-dialog > .v-overlay__content > form > .v-card > .v-card-title {
+    padding: 24px 24px 0;
+  }
+
+  .v-dialog > .v-overlay__content > .v-card > .v-card-actions,
+  .v-dialog > .v-overlay__content > form > .v-card > .v-card-actions {
+    padding: 0 24px 24px;
+  }
 }
