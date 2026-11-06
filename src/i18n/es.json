@@ -3599,7 +3599,8 @@
       "orderedList": "Lista numerada"
     },
     "conversation": {
-      "title": "Comentarios y actividad",
+      "empty": "Aún no hay comentarios.",
+      "title": "Comentarios",
       "showActivity": "Mostrar actividad",
       "edited": "editado",
       "deleted": "Comentario eliminado",
@@ -3608,6 +3609,7 @@
       "send": "Comentar"
     },
     "activity": {
+      "title": "Actividad",
       "dependencyAdded": "la puso a esperar a «{task}»",
       "dependencyRemoved": "quitó la espera de «{task}»",
       "system": "El sistema",
@@ -3831,9 +3833,11 @@
       }
     },
     "tags": {
+      "none": "No hay más etiquetas",
+      "create": "Crear «{name}»",
       "title": "Etiquetas",
       "add": "Agregar etiqueta",
-      "hint": "Escribe un nombre nuevo y pulsa Enter para crearla"
+      "hint": "Elige una o escribe un nombre nuevo y pulsa Enter para crearla"
     },
     "fields": {
       "title": "Campos personalizados",

@@ -3599,7 +3599,8 @@
       "orderedList": "Liste numérotée"
     },
     "conversation": {
-      "title": "Commentaires et activité",
+      "empty": "Pas encore de commentaires.",
+      "title": "Commentaires",
       "showActivity": "Afficher l'activité",
       "edited": "modifié",
       "deleted": "Commentaire supprimé",
@@ -3608,6 +3609,7 @@
       "send": "Commenter"
     },
     "activity": {
+      "title": "Activité",
       "dependencyAdded": "l’a fait attendre « {task} »",
       "dependencyRemoved": "a retiré l’attente de « {task} »",
       "system": "Le système",
@@ -3831,9 +3833,11 @@
       }
     },
     "tags": {
+      "none": "Plus d’étiquettes",
+      "create": "Créer « {name} »",
       "title": "Étiquettes",
       "add": "Ajouter une étiquette",
-      "hint": "Saisissez un nouveau nom et appuyez sur Entrée pour la créer"
+      "hint": "Choisissez-en une, ou saisissez un nouveau nom et appuyez sur Entrée pour la créer"
     },
     "fields": {
       "title": "Champs personnalisés",

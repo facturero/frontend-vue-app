@@ -62,6 +62,18 @@ export const useProjectsStore = defineStore('projects', () => {
   const tags = ref<Tag[]>([]);
   const myTasks = ref<MyTask[]>([]);
   const detail = ref<TaskDetail | null>(null);
+  /**
+   * Comentarios a medio escribir, por tarea. Viven en el store y no en el panel: cerrar el panel (un clic fuera de él) o abrir otra
+   * tarea desmontaba la caja y se perdía lo escrito. Al volver a la tarea, el borrador sigue ahí; se borra al enviarlo.
+   */
+  const commentDrafts = ref<Record<string, RichDoc>>({});
+  function setCommentDraft(taskId: string, doc: RichDoc | null): void {
+    const next = { ...commentDrafts.value };
+    if (doc) next[taskId] = doc;
+    else delete next[taskId];
+    commentDrafts.value = next;
+  }
+
   const directory = ref<DirectoryUser[]>([]);
   const loading = ref(false);
   const error = ref<string | null>(null);
@@ -637,6 +649,8 @@ export const useProjectsStore = defineStore('projects', () => {
     deleteTask,
     openTask,
     closeTask,
+    commentDrafts,
+    setCommentDraft,
     fetchMyTasks,
     createMyTask,
     addComment,

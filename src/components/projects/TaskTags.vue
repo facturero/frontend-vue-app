@@ -6,42 +6,71 @@ import { PROJECT_COLORS } from '@/utils/projects';
 import type { Tag } from '@/types/projects';
 
 /**
- * Etiquetas de la tarea. Son de toda la organización (como en Asana): escribir un nombre nuevo y pulsar Enter la crea; si ya existe
- * una que se llama igual, sin importar mayúsculas, el servidor devuelve esa y no se duplica.
+ * Etiquetas de la tarea. Son de toda la organización (como en Asana): se elige una de la lista o, si no existe, se crea con Enter o
+ * con «Crear "…"». Si ya hay una que se llama igual, sin importar mayúsculas, se usa esa y no se duplica.
+ *
+ * Es un `v-autocomplete` y no un `v-combobox` a propósito: el combobox confirma lo escrito al salir del campo, y un clic en otro
+ * botón (o en otra parte del panel) creaba la etiqueta a medio escribir. Aquí lo escrito solo es búsqueda hasta que se pide crearla.
  */
 const props = defineProps<{ canEdit: boolean }>();
 const { t } = useI18n();
 const store = useProjectsStore();
 
 const menu = ref(false);
-const text = ref<string | Tag | null>(null);
+const search = ref('');
+const busy = ref(false);
 
 watch(menu, (open) => {
   if (open) void store.ensureTags();
+  else search.value = '';
 });
 
 const current = computed(() => store.detail?.tags ?? []);
 const candidates = computed(() => store.tags.filter((tag) => !current.value.some((c) => c.id === tag.id)));
+const typed = computed(() => search.value.trim());
+/** Una etiqueta con ese nombre exacto (sin importar mayúsculas), en la organización. */
+const sameName = computed(() => store.tags.find((x) => x.name.toLowerCase() === typed.value.toLowerCase()));
+/** «Crear "…"» solo si lo escrito no es ya una etiqueta. */
+const canCreate = computed(() => !!typed.value && !sameName.value);
+const visible = computed(() => {
+  const q = typed.value.toLowerCase();
+  return q ? candidates.value.filter((tag) => tag.name.toLowerCase().includes(q)) : candidates.value;
+});
 
-async function choose(value: string | Tag | null): Promise<void> {
+async function add(tag: Tag): Promise<void> {
   const task = store.detail;
-  if (!task || !value) return;
+  if (!task) return;
+  busy.value = true;
   try {
-    let tag: Tag | undefined;
-    if (typeof value === 'string') {
-      const name = value.trim();
-      if (!name) return;
-      tag = store.tags.find((x) => x.name.toLowerCase() === name.toLowerCase());
-      // Color rotando por cuántas hay: así dos etiquetas nuevas seguidas no salen iguales.
-      tag ??= await store.createTag(name, PROJECT_COLORS[store.tags.length % PROJECT_COLORS.length]);
-    } else tag = value;
-    await store.setTaskTag(task.id, tag.id, true);
+    if (!current.value.some((c) => c.id === tag.id)) await store.setTaskTag(task.id, tag.id, true);
+    menu.value = false;
   } catch {
     // El aviso lo deja el store.
   } finally {
-    text.value = null;
-    menu.value = false;
+    busy.value = false;
   }
+}
+
+async function create(): Promise<void> {
+  if (!typed.value || busy.value) return;
+  if (sameName.value) return add(sameName.value);
+  busy.value = true;
+  try {
+    // Color rotando por cuántas hay: así dos etiquetas nuevas seguidas no salen iguales.
+    const tag = await store.createTag(typed.value, PROJECT_COLORS[store.tags.length % PROJECT_COLORS.length]!);
+    busy.value = false;
+    await add(tag);
+  } catch {
+    busy.value = false;
+  }
+}
+
+/**
+ * Enter con coincidencias lo resuelve el propio `v-autocomplete` (`auto-select-first`: la primera de la lista). Sin ninguna, crea la
+ * etiqueta (o usa la que se llama igual y ya estaba en la tarea).
+ */
+function onEnter(): void {
+  if (!visible.value.length) void create();
 }
 
 async function remove(tagId: string): Promise<void> {
@@ -61,25 +90,42 @@ async function remove(tagId: string): Promise<void> {
     </v-chip>
     <v-menu v-if="props.canEdit" v-model="menu" :close-on-content-click="false">
       <template #activator="{ props: activator }">
-        <v-tooltip location="top" :text="t('projects.tags.add')"><template #activator="{ props: tip }"><v-btn v-bind="mergeProps(activator, tip)" icon="mdi-tag-plus-outline" variant="text" size="x-small" :aria-label="t('projects.tags.add')" /></template></v-tooltip>
+        <v-tooltip location="top" :text="t('projects.tags.add')">
+          <template #activator="{ props: tip }">
+            <v-btn v-bind="mergeProps(activator, tip)" icon="mdi-tag-plus-outline" variant="text" size="x-small" :aria-label="t('projects.tags.add')" />
+          </template>
+        </v-tooltip>
       </template>
       <v-card min-width="280" class="pa-2">
-        <v-combobox
-          v-model="text"
-          :items="candidates"
+        <v-autocomplete
+          v-model:search="search"
+          :model-value="null"
+          :items="visible"
           item-title="name"
+          return-object
+          no-filter
+          auto-select-first
           :label="t('projects.tags.add')"
           :hint="t('projects.tags.hint')"
           persistent-hint
+          :loading="busy"
           autofocus
-          @update:model-value="choose"
+          @update:model-value="(tag: Tag | null) => tag && add(tag)"
+          @keydown.enter="onEnter"
         >
           <template #item="{ props: item, item: option }">
             <v-list-item v-bind="item">
               <template #prepend><v-icon :color="option.color" icon="mdi-tag" /></template>
             </v-list-item>
           </template>
-        </v-combobox>
+          <template #prepend-item>
+            <v-list-item v-if="canCreate && visible.length" prepend-icon="mdi-plus" :title="t('projects.tags.create', { name: typed })" @click="create" />
+          </template>
+          <template #no-data>
+            <v-list-item v-if="canCreate" prepend-icon="mdi-plus" :title="t('projects.tags.create', { name: typed })" @click="create" />
+            <v-list-item v-else :title="t('projects.tags.none')" disabled />
+          </template>
+        </v-autocomplete>
       </v-card>
     </v-menu>
     <span v-if="!current.length && !props.canEdit" class="text-body-medium text-medium-emphasis">—</span>

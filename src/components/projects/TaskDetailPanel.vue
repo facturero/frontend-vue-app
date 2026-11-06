@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch, mergeProps } from 'vue';
-import { formatDateTime } from '@/utils/format';
 import { useConfirm } from '@/composable/useConfirm';
 import { useI18n } from 'vue-i18n';
 import { useDisplay } from 'vuetify';
@@ -12,6 +11,7 @@ import type { ApprovalDecision, RichDoc, Task } from '@/types/projects';
 import DueDateChip from './DueDateChip.vue';
 import RichTextEditor from './RichTextEditor.vue';
 import TaskAttachments from './TaskAttachments.vue';
+import TaskActivity from './TaskActivity.vue';
 import TaskConversation from './TaskConversation.vue';
 import TaskFieldInput from './TaskFieldInput.vue';
 import TaskLinks from './TaskLinks.vue';
@@ -209,12 +209,6 @@ const moveTargets = computed(() => {
   return here ? store.sections.filter((sec) => sec.id !== here) : [];
 });
 
-const createdLine = computed(() => {
-  if (!task.value) return '';
-  const who = displayName(store.users.get(task.value.createdBy)) || t('projects.share.unknownUser');
-  const when = formatDateTime(task.value.createdAt);
-  return t('projects.detail.createdBy', { who, when });
-});
 </script>
 
 <template>
@@ -517,7 +511,8 @@ const createdLine = computed(() => {
         <TaskAttachments />
         <v-divider />
         <TaskConversation ref="conversation" />
-        <div class="text-body-small text-medium-emphasis">{{ createdLine }}</div>
+        <!-- El historial va al final del panel, aparte de los comentarios (que tapaba) y plegable. -->
+        <TaskActivity />
       </div>
     </template>
   </v-navigation-drawer>

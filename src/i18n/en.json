@@ -3599,7 +3599,8 @@
       "orderedList": "Numbered list"
     },
     "conversation": {
-      "title": "Comments and activity",
+      "empty": "No comments yet.",
+      "title": "Comments",
       "showActivity": "Show activity",
       "edited": "edited",
       "deleted": "Comment deleted",
@@ -3608,6 +3609,7 @@
       "send": "Comment"
     },
     "activity": {
+      "title": "Activity",
       "dependencyAdded": "made it wait on \"{task}\"",
       "dependencyRemoved": "removed the wait on \"{task}\"",
       "system": "The system",
@@ -3831,9 +3833,11 @@
       }
     },
     "tags": {
+      "none": "No more tags",
+      "create": "Create “{name}”",
       "title": "Tags",
       "add": "Add tag",
-      "hint": "Type a new name and press Enter to create it"
+      "hint": "Pick one, or type a new name and press Enter to create it"
     },
     "fields": {
       "title": "Custom fields",
