@@ -55,3 +55,46 @@ export function formatNumber(value: number | null | undefined, maxDecimals = 2):
   if (value == null || Number.isNaN(value)) return '';
   return new Intl.NumberFormat(currentLocale(), { maximumFractionDigits: maxDecimals }).format(value);
 }
+
+// ── Rótulos (no son «una fecha»: ejes, calendarios, cabeceras). Siguen el idioma, a diferencia de formatDate. ──
+
+/** `14 sept` — semanas de un gráfico, columnas de la carga de trabajo. */
+export function formatDayMonth(value: DateInput): string {
+  const d = toDate(value);
+  return d ? new Intl.DateTimeFormat(currentLocale(), { day: 'numeric', month: 'short' }).format(d) : '';
+}
+
+/** `Noviembre de 2026` — título de un mes (solo la primera letra en mayúscula; `text-capitalize` pondría «De»). */
+export function formatMonthYear(value: DateInput): string {
+  const d = toDate(value);
+  if (!d) return '';
+  const text = new Intl.DateTimeFormat(currentLocale(), { month: 'long', year: 'numeric' }).format(d);
+  return text.charAt(0).toLocaleUpperCase(currentLocale()) + text.slice(1);
+}
+
+/** `['lun', 'mar', …, 'dom']` — cabecera de un calendario que empieza en lunes. */
+export function weekdayLabels(): string[] {
+  // 2026-11-02 fue lunes: siete días seguidos dan la semana en el idioma activo.
+  const fmt = new Intl.DateTimeFormat(currentLocale(), { weekday: 'short' });
+  return Array.from({ length: 7 }, (_, i) => fmt.format(new Date(2026, 10, 2 + i, 12)));
+}
+
+/** `850 KB`, `2,4 MB` — tamaño de un archivo. */
+export function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  return bytes < 1024 * 1024 ? `${formatNumber(bytes / 1024, 0)} KB` : `${formatNumber(bytes / 1024 / 1024, 1)} MB`;
+}
+
+/** `hace 5 minutos`, `ayer` — solo para actividad y avisos (REGLAS-FRONT R-60). Pasada una semana, la fecha dd/mm/yyyy. */
+export function formatRelative(value: DateInput, now: Date = new Date()): string {
+  const d = toDate(value);
+  if (!d) return '';
+  const seconds = Math.round((d.getTime() - now.getTime()) / 1000);
+  const rtf = new Intl.RelativeTimeFormat(currentLocale(), { numeric: 'auto' });
+  const abs = Math.abs(seconds);
+  if (abs < 60) return rtf.format(seconds, 'second');
+  if (abs < 3600) return rtf.format(Math.round(seconds / 60), 'minute');
+  if (abs < 86400) return rtf.format(Math.round(seconds / 3600), 'hour');
+  if (abs < 7 * 86400) return rtf.format(Math.round(seconds / 86400), 'day');
+  return formatDate(d);
+}

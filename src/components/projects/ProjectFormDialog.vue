@@ -62,7 +62,7 @@ async function save(): Promise<void> {
 </script>
 
 <template>
-  <v-dialog :model-value="modelValue" max-width="560" @update:model-value="emit('update:modelValue', $event)">
+  <v-dialog :model-value="modelValue" max-width="640" @update:model-value="emit('update:modelValue', $event)">
     <v-card>
       <v-card-title>{{ editing ? t('projects.form.editTitle') : t('projects.form.newTitle') }}</v-card-title>
       <v-card-text class="d-flex flex-column ga-4">

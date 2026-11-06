@@ -21,7 +21,7 @@ const files = execSync('git ls-files src', { encoding: 'utf8' })
  * atributos que contienen ">" (funciones flecha, comparaciones) y ese regex se
  * corta antes de tiempo, dejando pasar props redundantes sin avisar.
  */
-const FIELD_TAGS = /^v-(text-field|textarea|select|autocomplete|combobox|file-input|date-input)$/;
+const FIELD_TAGS = /^v-(text-field|textarea|select|autocomplete|combobox|file-input|date-input|number-input)$/;
 
 const REDUNDANT_BY_TAG = {
   __fields__: {
@@ -129,6 +129,11 @@ for (const file of files) {
     const ownConfirm = src.includes('useConfirm') || /function confirm\(|const confirm\s*=/.test(src);
     if (/window\.confirm\(/.test(line) || (/(^|[^.\w])confirm\(/.test(line) && !ownConfirm)) {
       add(file, n, 'confirmar', 'confirm() del navegador: usa useConfirm() (composable/useConfirm.ts, REGLAS-FRONT.md R-22)');
+    }
+
+    // 2f. Botones con borde (REGLAS-FRONT R-10): compiten con los campos, que son `outlined`. `v-btn-toggle` sí puede: es un grupo.
+    if (/<v-btn(?!-)[^>]*variant="outlined"/.test(line)) {
+      add(file, n, 'boton', 'v-btn variant="outlined": usa tonal (alternar, navegar: «Hoy») o text (secundaria) — REGLAS-FRONT R-10');
     }
 
     // 3. Colores fijos

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch, mergeProps } from 'vue';
 import { formatDateTime } from '@/utils/format';
 import { useConfirm } from '@/composable/useConfirm';
 import { useI18n } from 'vue-i18n';
@@ -26,7 +26,8 @@ import UserAvatar from './UserAvatar.vue';
  */
 const { t } = useI18n();
 const confirm = useConfirm();
-const { smAndDown } = useDisplay();
+// En el teléfono el panel ocupa toda la pantalla (REGLAS-FRONT R-23): 360 px fijos dejaban una franja inútil.
+const { mobile, width: displayWidth } = useDisplay();
 const store = useProjectsStore();
 const auth = useAuthStore();
 
@@ -202,6 +203,12 @@ async function remove(): Promise<void> {
   }
 }
 
+/** Secciones del proyecto abierto a las que se puede mover la tarea (todas menos la suya). */
+const moveTargets = computed(() => {
+  const here = task.value?.projects.find((p) => p.projectId === store.current?.id)?.sectionId;
+  return here ? store.sections.filter((sec) => sec.id !== here) : [];
+});
+
 const createdLine = computed(() => {
   if (!task.value) return '';
   const who = displayName(store.users.get(task.value.createdBy)) || t('projects.share.unknownUser');
@@ -211,12 +218,12 @@ const createdLine = computed(() => {
 </script>
 
 <template>
-  <v-navigation-drawer v-model="open" location="right" temporary :width="smAndDown ? 360 : 560">
+  <v-navigation-drawer v-model="open" location="right" temporary :width="mobile ? displayWidth : 560">
     <template v-if="task">
       <div class="d-flex align-center flex-wrap ga-2 pa-4 border-b">
         <v-btn
           :color="task.completedAt ? 'success' : undefined"
-          :variant="task.completedAt ? 'flat' : 'outlined'"
+          :variant="task.completedAt ? 'flat' : 'tonal'"
           prepend-icon="mdi-check"
           size="small"
           :disabled="!task.canComplete"
@@ -254,6 +261,18 @@ const createdLine = computed(() => {
               :title="t('projects.approval.makeTask')"
               @click="run(() => store.setKind('task'))"
             />
+            <!-- Mover sin arrastrar (REGLAS-FRONT R-91): las demás secciones del proyecto abierto. -->
+            <template v-if="moveTargets.length">
+              <v-divider />
+              <v-list-subheader>{{ t('projects.task.moveTo') }}</v-list-subheader>
+              <v-list-item
+                v-for="sec in moveTargets"
+                :key="sec.id"
+                prepend-icon="mdi-arrow-right"
+                :title="sec.name"
+                @click="run(() => store.moveTaskToSection(task!.id, sec.id))"
+              />
+            </template>
           </v-list>
         </v-menu>
         <v-btn v-if="task.canEdit" icon="mdi-trash-can-outline" variant="text" size="small" :aria-label="t('common.delete')" @click="remove" />
@@ -268,7 +287,7 @@ const createdLine = computed(() => {
         <v-text-field
           v-model="title"
           variant="plain"
-          class="text-title-large"
+          class="title-field text-title-large"
           :readonly="readOnly"
           :aria-label="t('projects.task.title')"
           @blur="saveTitle"
@@ -281,7 +300,7 @@ const createdLine = computed(() => {
           <div>{{ t(`projects.approval.status.${task.approvalStatus ?? 'pending'}`) }}</div>
           <div v-if="task.canDecide && (task.approvalStatus === 'pending' || task.approvalStatus === 'changes_requested')" class="d-flex flex-wrap ga-2 mt-2">
             <v-btn color="success" size="small" prepend-icon="mdi-check" @click="decide('approved')">{{ t('projects.approval.approve') }}</v-btn>
-            <v-btn color="warning" size="small" variant="outlined" prepend-icon="mdi-pencil-outline" @click="decide('changes_requested')">
+            <v-btn color="warning" size="small" variant="tonal" prepend-icon="mdi-pencil-outline" @click="decide('changes_requested')">
               {{ t('projects.approval.requestChanges') }}
             </v-btn>
             <v-btn color="error" size="small" variant="text" prepend-icon="mdi-close" @click="decide('rejected')">{{ t('projects.approval.reject') }}</v-btn>
@@ -423,7 +442,7 @@ const createdLine = computed(() => {
                   <UserAvatar v-for="f in task.followers" :key="f" :user-id="f" :size="26" />
                   <v-menu v-if="task.canEdit" :close-on-content-click="false">
                     <template #activator="{ props: menu }">
-                      <v-btn v-bind="menu" icon="mdi-account-plus-outline" variant="text" size="x-small" :aria-label="t('projects.followers.add')" />
+                      <v-tooltip location="top" :text="t('projects.followers.add')"><template #activator="{ props: tip }"><v-btn v-bind="mergeProps(menu, tip)" icon="mdi-account-plus-outline" variant="text" size="x-small" :aria-label="t('projects.followers.add')" /></template></v-tooltip>
                     </template>
                     <v-card min-width="280" class="pa-2">
                       <v-autocomplete
@@ -437,7 +456,7 @@ const createdLine = computed(() => {
                   <v-btn
                     v-if="task.canComment"
                     size="small"
-                    :variant="following ? 'tonal' : 'outlined'"
+                    :variant="following ? 'tonal' : 'text'"
                     :prepend-icon="following ? 'mdi-bell-ring-outline' : 'mdi-bell-outline'"
                     @click="run(() => store.setFollowing(me, !following))"
                   >
@@ -466,14 +485,13 @@ const createdLine = computed(() => {
           <v-list density="compact" class="pa-0">
             <v-list-item v-for="s in task.subtasks" :key="s.id" class="px-0" @click="store.openTask(s.id)">
               <template #prepend>
-                <v-btn
+                <v-tooltip location="top" :text="t('projects.task.markComplete')"><template #activator="{ props: tip }"><v-btn v-bind="tip"
                   :icon="s.completedAt ? 'mdi-check-circle' : 'mdi-check-circle-outline'"
                   :color="s.completedAt ? 'success' : undefined"
                   variant="text"
                   size="small"
                   :aria-label="t('projects.task.markComplete')"
-                  @click.stop="toggle(s)"
-                />
+                  @click.stop="toggle(s)" /></template></v-tooltip>
               </template>
               <v-list-item-title :class="{ 'text-decoration-line-through text-medium-emphasis': s.completedAt }">{{ s.title }}</v-list-item-title>
               <template #append>

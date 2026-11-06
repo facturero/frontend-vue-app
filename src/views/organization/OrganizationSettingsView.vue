@@ -314,7 +314,7 @@ async function submit(): Promise<void> {
                 {{ $t('organization.establishmentsCardHint') }}
               </p>
             </div>
-            <v-btn variant="outlined" color="primary" to="/organization/establishments">
+            <v-btn variant="tonal" color="primary" to="/organization/establishments">
               {{ $t('organization.manage') }}
             </v-btn>
           </v-card-text>
@@ -332,7 +332,7 @@ async function submit(): Promise<void> {
                 {{ $t('organization.certificateCardHint') }}
               </p>
             </div>
-            <v-btn variant="outlined" color="primary" to="/organization/certificates">
+            <v-btn variant="tonal" color="primary" to="/organization/certificates">
               {{ $t('organization.manage') }}
             </v-btn>
           </v-card-text>

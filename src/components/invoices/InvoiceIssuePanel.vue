@@ -127,7 +127,7 @@ watch(() => props.establishmentId, (estId) => {
     </p>
 
     <div class="d-flex ga-3 justify-end">
-      <v-btn variant="outlined" :to="{ name: 'invoices' }">
+      <v-btn variant="tonal" :to="{ name: 'invoices' }">
         {{ $t('common.cancel') }}
       </v-btn>
       <v-btn

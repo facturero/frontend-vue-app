@@ -139,12 +139,13 @@ async function remove(): Promise<void> {
           <v-chip v-if="project.latestStatus" :color="HEALTH_COLOR[project.latestStatus.status]" prepend-icon="mdi-circle" size="small" @click="view = 'overview'">
             {{ t(`projects.health.${project.latestStatus.status}`) }}
           </v-chip>
-          <div class="d-flex align-center">
-            <UserAvatar v-for="m in visibleMembers" :key="m.userId" :user-id="m.userId" :size="30" class="ml-n2 border" />
-            <span v-if="(project.members.length ?? 0) > 5" class="text-body-small text-medium-emphasis ml-1">+{{ project.members.length - 5 }}</span>
-          </div>
+          <v-avatar-group :size="30" border hoverable>
+            <UserAvatar v-for="m in visibleMembers" :key="m.userId" :user-id="m.userId" :size="30" />
+            <v-avatar v-if="project.members.length > visibleMembers.length" color="surface-variant" class="text-label-medium">
+              +{{ project.members.length - visibleMembers.length }}
+            </v-avatar>
+          </v-avatar-group>
           <RunningTimerChip />
-          <v-btn variant="text" icon="mdi-keyboard-outline" :aria-label="t('projects.shortcuts.title')" @click="helpOpen = true" />
           <v-btn color="primary" prepend-icon="mdi-account-plus-outline" @click="sharing = true">{{ t('projects.share.button') }}</v-btn>
           <v-menu>
             <template #activator="{ props: menu }">
@@ -163,7 +164,11 @@ async function remove(): Promise<void> {
                 @click="setArchived(!archived)"
               />
               <v-list-item v-if="store.canManage" prepend-icon="mdi-trash-can-outline" :title="t('projects.delete')" @click="remove" />
-              <v-divider v-if="store.canManage" />
+              <v-divider />
+              <!-- Los atajos son ayuda, no una acción: van al menú y no ocupan sitio en el encabezado (REGLAS-FRONT R-70). -->
+              <v-list-item prepend-icon="mdi-keyboard-outline" :title="t('projects.shortcuts.title')" @click="helpOpen = true">
+                <template #append><v-hotkey keys="shift+slash" /></template>
+              </v-list-item>
               <v-list-item>
                 <v-switch
                   :model-value="celebration.enabled.value"
@@ -211,7 +216,7 @@ async function remove(): Promise<void> {
     <ProjectRulesDialog v-model="managingRules" />
     <ProjectFormsDialog v-model="managingForms" />
 
-    <v-dialog v-model="duplicating" max-width="480">
+    <v-dialog v-model="duplicating">
       <v-card>
         <v-card-title>{{ t('projects.duplicate.title') }}</v-card-title>
         <v-card-text class="d-flex flex-column ga-4">

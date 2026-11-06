@@ -16,11 +16,11 @@
               </div>
               <div v-if="config.lastStatus" class="text-body-medium">Estado: {{ config.lastStatus }}</div>
               <div v-if="config.lastError" class="text-body-medium text-error">{{ config.lastError }}</div>
-              <v-alert v-if="config.blockedBySri" type="error" density="compact" class="mt-2">
+              <v-alert v-if="config.blockedBySri" type="error" class="mt-2">
                 {{ config.blockedReason || 'Sincronización bloqueada por intentos fallidos.' }}
                 <div class="mt-1">Guarda credenciales correctas para desbloquear.</div>
               </v-alert>
-              <v-alert v-else-if="config.hasPassword && config.loginFailCount > 0" type="warning" density="compact" class="mt-2">
+              <v-alert v-else-if="config.hasPassword && config.loginFailCount > 0" type="warning" class="mt-2">
                 Intentos fallidos: {{ config.loginFailCount }} / {{ config.maxAttempts }}. Te quedan {{ config.attemptsLeft }} intento(s) antes de bloquear la sincronización.
               </v-alert>
             </div>
@@ -30,7 +30,6 @@
                 v-model="form.username"
                 label="Usuario/RUC portal SRI"
                 density="comfortable"
-                variant="outlined"
                 class="mb-2"
               />
               <v-text-field
@@ -38,7 +37,6 @@
                 label="Contraseña"
                 :type="showPass ? 'text' : 'password'"
                 density="comfortable"
-                variant="outlined"
                 class="mb-2"
                 :placeholder="config.hasPassword ? '********' : ''"
                 :append-inner-icon="showPass ? 'mdi-eye-off' : 'mdi-eye'"
@@ -55,7 +53,7 @@
                 Desactivar cron
               </v-btn>
             </div>
-            <v-alert v-if="msg" :type="msgType" density="compact" class="mt-3">{{ msg }}</v-alert>
+            <v-alert v-if="msg" :type="msgType" class="mt-3">{{ msg }}</v-alert>
           </v-card-text>
         </v-card>
       </v-col>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, mergeProps } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useProjectsStore } from '@/stores/projects';
 import { PROJECT_COLORS } from '@/utils/projects';
@@ -61,7 +61,7 @@ async function remove(tagId: string): Promise<void> {
     </v-chip>
     <v-menu v-if="props.canEdit" v-model="menu" :close-on-content-click="false">
       <template #activator="{ props: activator }">
-        <v-btn v-bind="activator" icon="mdi-tag-plus-outline" variant="text" size="x-small" :aria-label="t('projects.tags.add')" />
+        <v-tooltip location="top" :text="t('projects.tags.add')"><template #activator="{ props: tip }"><v-btn v-bind="mergeProps(activator, tip)" icon="mdi-tag-plus-outline" variant="text" size="x-small" :aria-label="t('projects.tags.add')" /></template></v-tooltip>
       </template>
       <v-card min-width="280" class="pa-2">
         <v-combobox

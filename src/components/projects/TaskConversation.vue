@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { formatMinutes } from '@/utils/duration';
-import { formatDate } from '@/utils/format';
+import { formatDate, formatRelative } from '@/utils/format';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
@@ -16,7 +16,7 @@ import UserAvatar from './UserAvatar.vue';
  * envía). Los comentarios borrados dejan su hueco; editar o borrar un comentario lo hace su autor (el servidor además deja borrar
  * al administrador del proyecto).
  */
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const store = useProjectsStore();
 const auth = useAuthStore();
 
@@ -40,16 +40,7 @@ const entries = computed<Entry[]>(() => {
   return list.sort((a, b) => a.at.localeCompare(b.at));
 });
 
-const relative = (iso: string) => {
-  const seconds = Math.round((new Date(iso).getTime() - Date.now()) / 1000);
-  const rtf = new Intl.RelativeTimeFormat(locale.value, { numeric: 'auto' });
-  const abs = Math.abs(seconds);
-  if (abs < 60) return rtf.format(seconds, 'second');
-  if (abs < 3600) return rtf.format(Math.round(seconds / 60), 'minute');
-  if (abs < 86400) return rtf.format(Math.round(seconds / 3600), 'hour');
-  if (abs < 7 * 86400) return rtf.format(Math.round(seconds / 86400), 'day');
-  return formatDate(iso);
-};
+const relative = (iso: string) => formatRelative(iso);
 
 const date = (value: unknown) => {
   if (typeof value !== 'string' || !value) return '';

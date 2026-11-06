@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue';
+import { formatMonthYear } from '@/utils/format';
 import { useI18n } from 'vue-i18n';
 import { useProjectsStore } from '@/stores/projects';
 import { localIsoDate } from '@/utils/projects';
@@ -15,7 +16,7 @@ import UserAvatar from './UserAvatar.vue';
  * programa ese día. Se hace con eventos de puntero (no con el arrastre nativo de HTML5) para que funcione igual con ratón, lápiz y
  * dedo, y el cambio se guarda al soltar, con la versión de la tarea.
  */
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const store = useProjectsStore();
 
 const DAY_W = 28;
@@ -42,6 +43,16 @@ const drag = reactive<{ taskId: string | null; mode: DragMode; x0: number; delta
 
 function datesOf(task: BoardTask): { startOn: string | null; dueOn: string | null } {
   return drag.taskId === task.id && drag.delta !== 0 ? dragDates(task, drag.delta, drag.mode) : task;
+}
+
+/**
+ * ¿Cabe el título dentro de la barra? A `text-body-small` (11,3 px) cada carácter ocupa ~6,5 px, más 16 px de relleno. Si no cabe, el
+ * título va a la derecha de la barra: dentro quedaba «Revi…» en las tareas de uno o dos días.
+ */
+const LABEL_CHAR_W = 6.5;
+function labelInside(task: BoardTask): boolean {
+  const b = bar(task);
+  return !!b && b.width - 20 >= task.title.length * LABEL_CHAR_W;
 }
 
 function bar(task: BoardTask): { left: number; width: number } | null {
@@ -116,7 +127,7 @@ const arrows = computed(() =>
   }),
 );
 
-const monthLabel = (iso: string) => new Intl.DateTimeFormat(locale.value, { month: 'long', year: 'numeric' }).format(new Date(`${iso}T12:00:00`));
+const monthLabel = (iso: string) => formatMonthYear(iso);
 const months = computed(() => {
   const out: Array<{ label: string; span: number }> = [];
   for (const d of days.value) {
@@ -136,9 +147,9 @@ const width = DAYS * DAY_W;
 <template>
   <v-card>
     <div class="d-flex align-center flex-wrap ga-2 pa-2 border-b">
-      <v-btn icon="mdi-chevron-left" variant="text" size="small" :aria-label="t('projects.timeline.previous')" @click="start = shiftDay(start, -14)" />
-      <v-btn variant="outlined" size="small" @click="start = mondayOf(shiftDay(today, -7))">{{ t('projects.due.today') }}</v-btn>
-      <v-btn icon="mdi-chevron-right" variant="text" size="small" :aria-label="t('projects.timeline.next')" @click="start = shiftDay(start, 14)" />
+      <v-tooltip location="top" :text="t('projects.timeline.previous')"><template #activator="{ props: tip }"><v-btn v-bind="tip" icon="mdi-chevron-left" variant="text" size="small" :aria-label="t('projects.timeline.previous')" @click="start = shiftDay(start, -14)" /></template></v-tooltip>
+      <v-btn variant="tonal" size="small" @click="start = mondayOf(shiftDay(today, -7))">{{ t('projects.due.today') }}</v-btn>
+      <v-tooltip location="top" :text="t('projects.timeline.next')"><template #activator="{ props: tip }"><v-btn v-bind="tip" icon="mdi-chevron-right" variant="text" size="small" :aria-label="t('projects.timeline.next')" @click="start = shiftDay(start, 14)" /></template></v-tooltip>
       <span class="text-body-medium text-medium-emphasis">{{ t('projects.timeline.hint') }}</span>
     </div>
 
@@ -218,7 +229,7 @@ const width = DAYS * DAY_W;
                       @pointermove="onPointerMove"
                       @pointerup.stop="onPointerUp(row.task)"
                     />
-                    <span class="text-body-small text-truncate px-2">{{ row.task.title }}</span>
+                    <span v-if="labelInside(row.task)" class="text-body-small text-truncate px-2">{{ row.task.title }}</span>
                     <span
                       v-if="editable"
                       class="timeline__edge timeline__edge--end"
@@ -227,6 +238,14 @@ const width = DAYS * DAY_W;
                       @pointerup.stop="onPointerUp(row.task)"
                     />
                   </div>
+                  <!-- El título que no cabe en la barra (o el de un hito), a su derecha; no recibe clics para no estorbar al arrastre. -->
+                  <span
+                    v-if="row.task.kind === 'milestone' || !labelInside(row.task)"
+                    class="timeline__label text-body-small text-medium-emphasis text-no-wrap"
+                    :style="{ left: `${bar(row.task)!.left + (row.task.kind === 'milestone' ? DAY_W : bar(row.task)!.width) + 4}px` }"
+                  >
+                    {{ row.task.title }}
+                  </span>
                 </template>
               </div>
             </template>
@@ -289,6 +308,11 @@ const width = DAYS * DAY_W;
     rgba(var(--v-border-color), var(--v-border-opacity)) 27px,
     rgba(var(--v-border-color), var(--v-border-opacity)) 28px
   );
+}
+.timeline__label {
+  position: absolute;
+  top: 12px;
+  pointer-events: none;
 }
 .timeline__bar {
   position: absolute;

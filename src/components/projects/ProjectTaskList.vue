@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, reactive, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useDisplay } from 'vuetify';
 import { VueDraggable } from 'vue-draggable-plus';
 import { useProjectsStore } from '@/stores/projects';
 import { formatMinutes } from '@/utils/duration';
@@ -22,6 +23,13 @@ import UserAvatar from './UserAvatar.vue';
 const props = defineProps<{ showCompleted: boolean }>();
 const { t, locale } = useI18n();
 const store = useProjectsStore();
+const { mobile } = useDisplay();
+
+/**
+ * Anchos de las columnas, una sola vez para la cabecera y las filas (REGLAS-FRONT R-51). El título tiene un mínimo: con muchos campos
+ * la tarjeta hace scroll horizontal en vez de dejar el título en cero.
+ */
+const COL = { title: '240px', assignee: '120px', due: '120px', field: '140px' } as const;
 
 /** Filas marcadas para editar en lote (Asana: casilla al pasar el ratón; aquí siempre visible para que funcione en táctil). */
 const selected = ref<Set<string>>(new Set());
@@ -108,23 +116,22 @@ defineExpose({
 
 <template>
   <TaskBulkBar v-if="editable()" :task-ids="selectedIds" class="mb-2" @done="selected = new Set()" />
-  <v-card>
+  <v-card class="overflow-x-auto">
     <div class="d-none d-md-flex align-center px-4 py-2 border-b text-body-medium text-medium-emphasis">
-      <div class="flex-grow-1 pl-16">{{ t('projects.task.title') }}</div>
-      <div class="flex-shrink-0 text-center" style="width: 120px">{{ t('projects.task.assignee') }}</div>
-      <div class="flex-shrink-0" style="width: 120px">{{ t('projects.task.dueOn') }}</div>
-      <div v-for="f in store.fields" :key="f.id" class="flex-shrink-0 text-truncate" style="width: 140px">{{ f.name }}</div>
+      <div class="flex-grow-1 pl-16" :style="{ minWidth: COL.title }">{{ t('projects.task.title') }}</div>
+      <div class="flex-shrink-0 text-center" :style="{ width: COL.assignee }">{{ t('projects.task.assignee') }}</div>
+      <div class="flex-shrink-0" :style="{ width: COL.due }">{{ t('projects.task.dueOn') }}</div>
+      <div v-for="f in store.fields" :key="f.id" class="flex-shrink-0 text-truncate" :style="{ width: COL.field }">{{ f.name }}</div>
     </div>
 
     <div v-for="section in store.sections" :key="section.id">
       <div class="d-flex align-center ga-2 px-2 py-2 border-b">
-        <v-btn
+        <v-tooltip location="top" :text="section.name"><template #activator="{ props: tip }"><v-btn v-bind="tip"
           :icon="collapsed[section.id] ? 'mdi-chevron-right' : 'mdi-chevron-down'"
           variant="text"
           size="small"
           :aria-label="section.name"
-          @click="collapsed[section.id] = !collapsed[section.id]"
-        />
+          @click="collapsed[section.id] = !collapsed[section.id]" /></template></v-tooltip>
         <span class="text-body-large font-weight-bold">{{ section.name }}</span>
         <span class="text-body-small text-medium-emphasis">{{ (store.columns[section.id] ?? []).filter((x) => !x.completedAt).length }}</span>
         <SectionMenu :section="section" />
@@ -149,7 +156,8 @@ defineExpose({
             :class="{ 'd-none': task.completedAt && !props.showCompleted, 'bg-lightprimary': store.detail?.id === task.id }"
             @click="store.openTask(task.id)"
           >
-            <v-icon v-if="editable()" icon="mdi-drag-vertical" size="small" class="task-drag text-medium-emphasis" @click.stop />
+            <!-- En el teléfono no hay asa: arrastrar con el dedo choca con el scroll, y la fila gana sitio para el título. -->
+            <v-icon v-if="editable() && !mobile" icon="mdi-drag-vertical" size="small" class="task-drag text-medium-emphasis" @click.stop />
             <v-checkbox-btn
               v-if="editable()"
               :model-value="selected.has(task.id)"
@@ -161,19 +169,19 @@ defineExpose({
             />
             <v-icon v-if="task.kind === 'approval'" icon="mdi-thumbs-up-down-outline" size="small" color="info" />
             <v-icon v-else-if="task.kind === 'milestone'" icon="mdi-rhombus" size="small" color="warning" />
-            <v-btn
+            <v-tooltip location="top" :text="t('projects.task.markComplete')"><template #activator="{ props: tip }"><v-btn v-bind="tip"
               :icon="task.completedAt ? 'mdi-check-circle' : 'mdi-check-circle-outline'"
               :color="task.completedAt ? 'success' : undefined"
               variant="text"
               size="small"
               :aria-label="t('projects.task.markComplete')"
-              @click.stop="toggle(task)"
-            />
-            <div class="flex-grow-1" @click.stop>
+              @click.stop="toggle(task)" /></template></v-tooltip>
+            <!-- En el teléfono el título no se edita en la fila: tocarla abre el detalle (como Asana), y ahí se edita. -->
+            <div class="flex-grow-1" :style="mobile ? undefined : { minWidth: COL.title }" @click="(e: MouseEvent) => !mobile && e.stopPropagation()">
               <v-text-field
                 :model-value="titles[task.id] ?? task.title"
                 variant="plain"
-                :readonly="!editable()"
+                :readonly="!editable() || mobile"
                 :class="{ 'text-decoration-line-through text-medium-emphasis': task.completedAt }"
                 :aria-label="t('projects.task.title')"
                 @focus="startEdit(task)"
@@ -188,14 +196,13 @@ defineExpose({
             <v-chip v-if="task.subtasks.total" size="x-small" prepend-icon="mdi-file-tree-outline" class="flex-shrink-0">
               {{ task.subtasks.completed }}/{{ task.subtasks.total }}
             </v-chip>
-            <v-btn icon="mdi-chevron-right" variant="text" size="small" class="d-md-none" :aria-label="t('projects.task.open')" />
-            <div class="d-none d-md-flex justify-center flex-shrink-0" style="width: 120px">
+            <div class="d-none d-md-flex justify-center flex-shrink-0" :style="{ width: COL.assignee }">
               <UserAvatar :user-id="task.assigneeUserId" />
             </div>
-            <div class="d-none d-md-block flex-shrink-0" style="width: 120px">
+            <div class="d-none d-md-block flex-shrink-0" :style="{ width: COL.due }">
               <DueDateChip :due-on="task.dueOn" :completed="!!task.completedAt" />
             </div>
-            <div v-for="f in store.fields" :key="f.id" class="d-none d-md-block flex-shrink-0 text-body-medium text-truncate" style="width: 140px">
+            <div v-for="f in store.fields" :key="f.id" class="d-none d-md-block flex-shrink-0 text-body-medium text-truncate" :style="{ width: COL.field }">
               <v-chip v-if="optionOf(f, task)" size="x-small" :color="optionOf(f, task)!.color">{{ optionOf(f, task)!.label }}</v-chip>
               <template v-else>{{ cellText(f, task) }}</template>
             </div>

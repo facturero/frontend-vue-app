@@ -3543,6 +3543,7 @@
     "send": "Envoyer des commentaires"
   },
   "projects": {
+    "boardEmptyColumn": "Aucune tâche : glissez-en une ici",
     "timeline": {
       "previous": "Précédent",
       "next": "Suivant",
@@ -3662,6 +3663,7 @@
     },
     "attachments": {
       "title": "Pièces jointes",
+      "drop": "Déposez des fichiers ici",
       "add": "Joindre",
       "remove": "Retirer la pièce jointe",
       "empty": "Aucune pièce jointe."
@@ -3769,6 +3771,7 @@
       "add": "Ajouter une section"
     },
     "task": {
+      "moveTo": "Déplacer vers",
       "title": "Nom de la tâche",
       "assignee": "Responsable",
       "dueOn": "Échéance",
@@ -3985,6 +3988,13 @@
       "saved": "Paramètres enregistrés",
       "milestones": "Jalons avec montant",
       "milestonesHint": "Un jalon terminé avec un montant peut être facturé à prix fixe (par ex. la livraison du design).",
+      "columns": {
+        "date": "Date",
+        "status": "Statut",
+        "number": "Numéro",
+        "work": "Travail",
+        "amount": "Montant"
+      },
       "inInvoice": "Dans une facture",
       "completed": "Terminé",
       "notCompleted": "Non terminé",
@@ -4019,6 +4029,9 @@
       "releaseText": "Elles redeviennent à facturer. Le brouillon reste dans Facturation (il ne peut pas être supprimé) : ne l’émettez pas. S’il est émis quand même, ses heures sont de nouveau marquées comme facturées et ce qui était déjà dans une autre facture est signalé ici."
     },
     "dashboard": {
+      "noCompletions": "Aucune tâche terminée pour l’instant",
+      "empty": "Ce projet n’a pas encore de tâches",
+      "emptyText": "Le tableau de bord se remplit à mesure que l’équipe crée et termine des tâches.",
       "open": "Ouvertes",
       "completed": "Terminées",
       "overdue": "En retard",

@@ -60,7 +60,7 @@ const leave = () =>
 </script>
 
 <template>
-  <v-dialog :model-value="props.modelValue" max-width="600" @update:model-value="emit('update:modelValue', $event)">
+  <v-dialog :model-value="props.modelValue" max-width="640" @update:model-value="emit('update:modelValue', $event)">
     <v-card>
       <v-card-title>{{ t('projects.share.title', { name: store.current?.name }) }}</v-card-title>
       <v-card-subtitle>

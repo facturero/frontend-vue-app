@@ -115,7 +115,7 @@ VDialog        max-width 480
 VDataTable     hover
 ```
 
-\* `v-text-field`, `v-textarea`, `v-select`, `v-autocomplete`, `v-combobox`, `v-file-input`
+\* `v-text-field`, `v-textarea`, `v-select`, `v-autocomplete`, `v-combobox`, `v-file-input`, `v-number-input`, `v-date-input`
 
 ### Colores tonales
 
@@ -324,6 +324,94 @@ pisa el `gap` de la rejilla. Para juntar o separar columnas usa `density`
    funcione solo.
 
 ---
+
+## 7 bis. Vuetify 4: clases, componentes y trampas
+
+Resumen operativo de la documentación de Vuetify 4.3 (vuetifyjs.com, revisada el 2026-11-06) aplicado a este proyecto. Lo que no
+esté aquí, se busca allí antes de inventarlo (§1, «Solo componentes de Vuetify»).
+
+### Tamaños reales: `html { font-size: 15px }`
+
+`index.html` fija la raíz en 15 px, así que todo lo que Vuetify define en `rem` sale al 93,75 %: `text-body-medium` (0,875rem)
+mide 13,1 px, no 14. Los tamaños de abajo ya están calculados así. No cambies la raíz sin mirar todas las pantallas.
+
+### Tipografía (Material Design 3)
+
+| Clase | Tamaño · peso | Para |
+|---|---|---|
+| `text-headline-small` | 22,5 px · 400 | título de página (lo pone `PageHeader`, con `font-weight-bold`) |
+| `text-title-large` | 20,6 px · 400 | título de tarjeta o sección |
+| `text-title-medium` | 15 px · 500 | subtítulo, nombre destacado en una fila |
+| `text-title-small` | 13,1 px · 500 | rótulo de grupo, cabecera de bloque pequeño |
+| `text-body-large` | 15 px · 400 | texto de lectura |
+| `text-body-medium` | 13,1 px · 400 | texto secundario (con `text-medium-emphasis`) |
+| `text-body-small` | 11,3 px · 400 | anotaciones, fechas en filas, ids técnicos |
+| `text-label-large` / `-medium` / `-small` | 13,1 / 11,3 / 10,3 px · 500 | etiquetas cortas (chips propios, contadores) |
+
+No se usan `text-display-*` ni `text-headline-large`/`-medium` en vistas. Peso: `font-weight-medium` (500) o `-bold` (700) solo para
+resaltar; el MD3 base es 400. Énfasis de color: `text-high-emphasis`, `text-medium-emphasis`, `text-disabled`. Cortar o partir:
+`text-truncate`, `text-wrap`, `text-no-wrap`; en un `v-text-field` las clases de tamaño no cambian el texto del campo (va por el
+componente, no por la clase del contenedor).
+
+### Espaciado, radios y sombras
+
+- Espaciado: escala de 4 px (`ga-1` = 4 px … `ga-16` = 64 px; igual `pa-*`, `ma-*`, `ms-*`/`me-*` para izquierda/derecha según el
+  idioma). En este proyecto solo los escalones de §4.
+- Radios: `rounded-sm` 2 px, `rounded`/`-md` 4 px, `rounded-lg` 8 px, `rounded-xl` 24 px, `rounded-pill`, `rounded-circle`. Las
+  tarjetas llevan 7 px por `card-surface` (§2); un elemento suelto que deba verse igual usa `rounded-lg`.
+- Sombras: 6 niveles (`elevation-0` … `elevation-5`); 1 tarjeta, 2 menú, 3 diálogo y snackbar, 4 lo que se arrastra. Una tarjeta
+  clicable puede subir al pasar el ratón con la prop `hover-elevation`; **ojo:** `card-surface` pone la sombra con `!important` fuera de
+  capa, así que en `v-card` la de Vuetify no se ve. Para resaltar una tarjeta clicable usa el borde o el fondo, no la sombra.
+
+### Rejilla
+
+`v-row` separa con `gap` (24 px). `density="comfortable"` (16 px) o `density="compact"` (8 px) para juntar; `gap` acepta número o
+`[x, y]`. Alineación con clases (`align-center`, `justify-space-between`), no con las props `align`/`justify` de la 3. No pongas
+`ga-*` en un `v-row` (§6). Breakpoints: los de la 3 (`display.thresholds` en `vuetify.ts`: md 960, lg 1280, xl 1920).
+
+### Capas CSS
+
+Vuetify va en capas (`vuetify-core`, `vuetify-components`, `vuetify-overrides`, `vuetify-utilities`…). Cualquier CSS propio **sin
+capa** les gana siempre, también a las utilidades. Consecuencias: un `<style>` de componente pisa a `pa-4` o `d-none`; y una regla
+propia con `!important` sin capa pierde ante un `!important` de Vuetify (en capas, el `!important` se invierte). Los estilos base
+propios van en `src/styles/base.css`, dentro de `@layer vuetify-core.reset`.
+
+### Componentes de la 4 que hay que preferir
+
+| Necesito | Componente | En lugar de |
+|---|---|---|
+| Fila de avatares con «+N» | `v-avatar-group` (`limit`, `border`, `hoverable`) | avatares con `ml-n2` a mano |
+| Botón solo de icono | `v-icon-btn` o `v-btn icon`, con `aria-label` y `v-tooltip` si no es universal (REGLAS R-12) | `v-icon` con `@click` |
+| Mostrar un atajo de teclado | `v-hotkey keys="cmd+k"` (o `v-kbd` para una tecla) | `v-chip` o `<kbd>` |
+| Atender un atajo | composable `useHotkey('cmd+k', fn)` (sintaxis: `+` combina, `/` alternativas, `-` secuencia) | `keydown` a mano |
+| Soltar archivos | `v-file-upload` (`density="compact"`, `multiple`) | `<input type="file">` oculto |
+| Gráfico pequeño de barras o línea | `v-sparkline type="bar"` | `div` con alturas en `:style` |
+| Resaltar lo buscado | `v-highlight :text :query` | `split` + `<mark>` |
+| Sin datos | `EmptyState` (envuelve `v-empty-state`) | tarjeta armada a mano |
+| Fecha | `DateField` (envuelve `v-date-input`) | `type="date"` |
+| Número o importe | `v-number-input` (`:precision`, `:min`, `control-variant`) | `type="number"` |
+| Editar en línea con Guardar/Cancelar | `v-confirm-edit` | botones a mano alrededor del campo |
+| Lista muy larga | `v-virtual-scroll` | pintar mil filas |
+| Botón flotante en el teléfono | `v-fab` (y `v-speed-dial` si son varias acciones) | botón fijo con CSS |
+| Avisos | `notify` (usa `v-snackbar-queue`) | `v-snackbar` en la vista |
+
+*Labs* en 4.3 (necesitan decisión del dueño, §1): `v-command-palette`, `v-pie`, `v-heatmap`, `v-time-input`, `v-date-range-picker`,
+`v-mask-input`, `v-split-btn`, `v-checkbox-group`.
+
+### Trampas conocidas
+
+- `v-card-actions` pone sus botones en `variant="text"` por encima de los defaults: la acción principal lleva `variant="flat"`
+  (§2, `lint:ui` kind `dialogo`).
+- Al abrir un `v-dialog`, el foco va a la caja e ignora `autofocus`: para enfocar un botón, `@after-enter` + `ref.$el.focus()`
+  (ver `ConfirmDialog.vue`).
+- Las clases MD2 (`text-h6`, `text-body-2`, `text-caption`…) ya no existen y no dan error (§5, `lint:ui` kind `tipografia`).
+- Un campo (`v-text-field`, `v-textarea`…) mide siempre 16 px: Vuetify 4 lo fija en `.v-field` en px. Para un título editable en
+  línea, `class="title-field text-title-large"` (`src/styles/base.css`) hace que el campo herede la clase.
+- Un `v-btn` con `icon` y contenido dentro pierde el icono: el contenido lo reemplaza. El tooltip de un botón de icono va por fuera,
+  con `<v-tooltip><template #activator="{ props: tip }"><v-btn v-bind="tip" … /></template></v-tooltip>`; si el botón ya abre un
+  menú, `v-bind="mergeProps(menu, tip)"`.
+- `v-btn variant="outlined"` no se usa (REGLAS-FRONT R-10, `lint:ui` kind `boton`); `v-btn-toggle` sí puede ir con borde.
+- El tema por defecto de la 4 es `system`; aquí está fijo en `light` (`vuetify.ts`).
 
 ## 8. Tour guiado (driver.js)
 

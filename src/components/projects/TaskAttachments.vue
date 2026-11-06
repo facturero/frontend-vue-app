@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { formatBytes } from '@/utils/format';
 import { useI18n } from 'vue-i18n';
 import { openFile } from '@/composable/useFileUrl';
 import { useAuthStore } from '@/stores/auth';
@@ -10,12 +11,13 @@ import type { TaskAttachment } from '@/types/projects';
  * Adjuntos de la tarea. El archivo se sube a document-service (URL firmada) y la tarea guarda la referencia; abrirlo pide un enlace
  * firmado con la sesión, así que un archivo de otra empresa no se abre aunque alguien conozca su id.
  */
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const store = useProjectsStore();
 const auth = useAuthStore();
 
-const input = ref<HTMLInputElement | null>(null);
 const uploading = ref(0);
+/** Lo que `v-file-upload` tiene en la mano: se sube al instante y se vacía, así la lista que manda es la de adjuntos de la tarea. */
+const dropped = ref<File[]>([]);
 
 const items = computed(() => store.detail?.attachments ?? []);
 
@@ -27,16 +29,11 @@ function icon(a: TaskAttachment): string {
   return 'mdi-file-outline';
 }
 
-const size = (bytes: number) =>
-  bytes < 1024
-    ? `${bytes} B`
-    : bytes < 1024 * 1024
-    ? `${new Intl.NumberFormat(locale.value, { maximumFractionDigits: 0 }).format(bytes / 1024)} KB`
-    : `${new Intl.NumberFormat(locale.value, { maximumFractionDigits: 1 }).format(bytes / 1024 / 1024)} MB`;
+const size = (bytes: number) => formatBytes(bytes);
 
-async function picked(event: Event): Promise<void> {
-  const files = [...((event.target as HTMLInputElement).files ?? [])];
-  (event.target as HTMLInputElement).value = '';
+async function picked(value: File | File[] | null): Promise<void> {
+  const files = value ? (Array.isArray(value) ? value : [value]) : [];
+  dropped.value = [];
   for (const file of files) {
     uploading.value += 1;
     try {
@@ -54,16 +51,18 @@ const canRemove = (a: TaskAttachment) => a.uploadedBy === auth.user?.id || !!sto
 
 <template>
   <div v-if="store.detail">
-    <div class="d-flex align-center mb-2">
-      <span class="text-body-large font-weight-medium">{{ t('projects.attachments.title') }}</span>
-      <v-spacer />
-      <template v-if="store.detail.canComment">
-        <input ref="input" type="file" multiple class="d-none" @change="picked" />
-        <v-btn variant="text" size="small" prepend-icon="mdi-paperclip" :loading="uploading > 0" @click="input?.click()">
-          {{ t('projects.attachments.add') }}
-        </v-btn>
-      </template>
-    </div>
+    <div class="text-body-large font-weight-medium mb-2">{{ t('projects.attachments.title') }}</div>
+    <!-- `v-file-upload` (Vuetify 4): soltar archivos sobre la tarea o elegirlos; en vez de un <input type="file"> oculto. -->
+    <v-file-upload
+      v-if="store.detail.canComment"
+      :model-value="dropped"
+      multiple
+      density="compact"
+      :title="t('projects.attachments.drop')"
+      :loading="uploading > 0"
+      class="mb-2"
+      @update:model-value="picked"
+    />
     <v-list v-if="items.length" density="compact" class="pa-0">
       <v-list-item v-for="a in items" :key="a.id" :prepend-icon="icon(a)" class="px-0" @click="openFile(a.documentId)">
         <v-list-item-title class="text-body-medium">{{ a.fileName }}</v-list-item-title>

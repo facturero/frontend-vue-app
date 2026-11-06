@@ -118,7 +118,7 @@ async function remove(f: ProjectForm): Promise<void> {
 </script>
 
 <template>
-  <v-dialog :model-value="modelValue" max-width="720" scrollable @update:model-value="emit('update:modelValue', $event)">
+  <v-dialog :model-value="modelValue" max-width="880" scrollable @update:model-value="emit('update:modelValue', $event)">
     <v-card>
       <v-card-title>{{ t('projects.forms.title') }}</v-card-title>
       <v-card-text class="d-flex flex-column ga-4">

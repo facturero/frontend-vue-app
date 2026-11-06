@@ -3543,6 +3543,7 @@
     "send": "Send feedback"
   },
   "projects": {
+    "boardEmptyColumn": "No tasks: drag one here",
     "timeline": {
       "previous": "Previous",
       "next": "Next",
@@ -3662,6 +3663,7 @@
     },
     "attachments": {
       "title": "Attachments",
+      "drop": "Drop files here",
       "add": "Attach",
       "remove": "Remove attachment",
       "empty": "No attachments."
@@ -3769,6 +3771,7 @@
       "add": "Add section"
     },
     "task": {
+      "moveTo": "Move to",
       "title": "Task name",
       "assignee": "Assignee",
       "dueOn": "Due date",
@@ -3985,6 +3988,13 @@
       "saved": "Settings saved",
       "milestones": "Milestones with an amount",
       "milestonesHint": "A completed milestone with an amount can be billed at a fixed price (e.g. the design delivery).",
+      "columns": {
+        "date": "Date",
+        "status": "Status",
+        "number": "Number",
+        "work": "Work",
+        "amount": "Amount"
+      },
       "inInvoice": "In an invoice",
       "completed": "Completed",
       "notCompleted": "Not completed",
@@ -4019,6 +4029,9 @@
       "releaseText": "They become unbilled again. The draft stays in Invoicing (it cannot be deleted): do not issue it. If it is issued anyway, its hours are marked as billed again and anything already in another invoice is flagged here."
     },
     "dashboard": {
+      "noCompletions": "No tasks completed yet",
+      "empty": "This project has no tasks yet",
+      "emptyText": "The dashboard fills in as the team creates and completes tasks.",
       "open": "Open",
       "completed": "Completed",
       "overdue": "Overdue",

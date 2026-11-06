@@ -161,7 +161,7 @@ async function post(): Promise<void> {
     </v-col>
   </v-row>
 
-  <v-dialog v-model="posting" max-width="600">
+  <v-dialog v-model="posting" max-width="640">
     <v-card>
       <v-card-title>{{ t('projects.overview.update') }}</v-card-title>
       <v-card-text class="d-flex flex-column ga-4">

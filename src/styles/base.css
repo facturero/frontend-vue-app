@@ -38,3 +38,15 @@
     -webkit-appearance: none;
   }
 }
+
+/* 3. Títulos editables en línea (título de la tarea en su panel, nombre en un encabezado editable). Vuetify 4 fija el tamaño del
+ *    campo en `.v-field { font-size: 16px }`, en px y sin variable, así que una clase de tipografía en el `v-text-field` no llega al
+ *    texto. Con `class="title-field text-title-large"` el campo hereda el tamaño y el peso de la clase. Va en `vuetify-overrides`
+ *    porque tiene que ganarle a la regla del componente, pero seguir perdiendo ante las utilidades. */
+@layer vuetify-overrides {
+  .title-field .v-field {
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+  }
+}

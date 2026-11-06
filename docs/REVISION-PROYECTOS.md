@@ -75,3 +75,82 @@ Se corrigen una vez, con las piezas de `REGLAS-FRONT.md` §1, no módulo por mó
 2. **Proyectos completo** con este documento como lista, más las mejoras de producto que se decidan. Captura antes y después a 375 y
    1366 px, en claro y oscuro.
 3. **El resto de módulos**, de a uno, quitando sus excepciones del guardián.
+
+## Segunda pasada (2026-11-06, Vuetify 4.3 y capturas a 1366 y 375 px)
+
+Revisión del código y de las capturas `cmr-proyect/.visual/v4b/`. Cada punto: dónde, qué pasa y con qué pieza de Vue/Vuetify 4 se
+resuelve. Sin librerías nuevas; lo marcado *labs* necesita decisión del dueño (UI-UX.md §1).
+
+### P1. Se nota al usarlo
+
+- **P1.1 Fila de la lista en el teléfono.** `ProjectTaskList.vue:153`: cada fila lleva asa, casilla de selección y círculo de
+  completar; en 375 px el título queda en ~18 caracteres («Revisar comprobantes»). La casilla solo en modo selección (o desde `md`),
+  el asa solo en escritorio, y el título en dos líneas.
+- **P1.2 Panel de tarea angosto en teléfono y tableta** (pendiente del punto 2): `TaskDetailPanel.vue:214`, 360 px fijos.
+  `:width="mobile ? width : 560"` con `useDisplay()`.
+- **P1.3 Encabezado del proyecto** (pendiente del punto 1): en el teléfono ocupa dos filas. Atajos de teclado al menú `⋯`, miembros
+  como `v-avatar-group` junto al subtítulo.
+- **P1.4 Vacíos** (pendiente del punto 3): columna del tablero, sección de la lista, calendario sin fechas, panel sin tareas y
+  facturación sin configurar, con `EmptyState compact`.
+- **P1.5 Cronograma: etiquetas cortadas.** `ProjectTimeline.vue:205`: el título va dentro de la barra y en tareas de 1–2 días se ve
+  «Revi…», «R…». Si no cabe, a la derecha de la barra.
+- **P1.6 Calendario en el teléfono.** El mes en rejilla deja chips de dos letras («Re…»). En `mobile`, vista de agenda (lista de días
+  con tareas) en vez de la rejilla.
+- **P1.7 Facturación.** `ProjectBilling.vue:325`: el importe del hito es un campo sin etiqueta visible (en la captura, una caja vacía);
+  `v-number-input` con `:precision="2"` y etiqueta. `ProjectBilling.vue:397`: la tabla de facturas no tiene encabezados (fecha, estado,
+  número, horas, importe).
+
+### P2. Piezas de Vuetify 4.3 que reemplazan código propio
+
+- `ProjectView.vue:143`: pila de avatares a mano (`ml-n2 border` + «+N») → `v-avatar-group`.
+- `ShortcutsDialog.vue`: las teclas como `v-chip` → `v-kbd` / `v-hotkey`.
+- `TaskAttachments.vue:61`: `<input type="file">` oculto → `v-file-upload` (soltar archivos sobre la tarea).
+- `ProjectDashboard.vue:99`: barras de «Completadas por semana» con `div` y `:style` → `v-sparkline type="bar"`.
+- `ProjectSearchDialog.vue`: resaltar lo buscado con `v-highlight`.
+- Botones solo de icono sin tooltip (`ProjectView.vue:147` atajos, `ProjectCalendar.vue:80/82`, `LinkedTasksCard.vue:69`, diálogos de
+  campos, formularios y reglas) → `v-icon-btn` + `v-tooltip` (R-12).
+- Teléfono: «Agregar tarea» como `v-fab` en lista y tablero; `v-pull-to-refresh` en «Mis tareas».
+- *labs*, a decidir: `v-command-palette` (buscar tareas y proyectos con Ctrl+K), `v-pie` (tareas por estado en el panel).
+- A evaluar: `ProjectCalendar.vue` es una rejilla propia con `<style>`; `v-calendar` (núcleo) la reemplazaría si no hace falta
+  arrastrar tareas entre días.
+
+### P3. Coherencia con REGLAS-FRONT
+
+- Botones `outlined` (R-10, pendiente del punto 5): `ProjectBilling.vue:360`, `ProjectCalendar.vue:81`, `ProjectTimeline.vue:140`,
+  `TaskDetailPanel.vue:284`, `WorkloadView.vue:106` → `tonal` («Hoy») o `text`.
+- Anchos de diálogo (R-20, pendiente del punto 6): 560 / 600 / 640 / 720 / 880 → normal / 640 / 880.
+- `RunningTimerChip.vue:37`: `mdi-delete-outline` → `mdi-trash-can-outline` (R-13).
+- `MyTasksView.vue:100`: «Celebrar al completar» como interruptor en la barra de la página; es una preferencia, va al menú (R-70).
+- `ProjectTaskList.vue:114-198`: anchos de columna repetidos a mano y sin scroll horizontal propio (R-51, pendiente del punto 4).
+- Mover una tarea solo arrastrando (R-91) y asa no enfocable (R-90): puntos 11 y 12, pendientes.
+- Rótulos con `new Intl.*` en `ProjectCalendar`, `ProjectDashboard`, `ProjectTimeline`, `WorkloadView`, `TaskAttachments`: pasarlos a
+  `utils/format.ts` (`formatWeekday`, `formatMonth`, `formatBytes`) para poder sumar la regla R-60 al guardián.
+
+### P4. Necesitan backend o decisión
+
+- **Tarjetas de la lista de proyectos**: hoy solo muestran el rol. Para progreso (`v-progress-linear`), tareas abiertas, próxima
+  entrega y miembros (`v-avatar-group`), `GET /projects` debe devolver esos totales. También buscar, ordenar y alternar tarjetas/tabla.
+- Nombre de las personas: en panel, horas y carga se ve el correo (`admin@admin.com`) porque el usuario de la semilla no tiene
+  nombre; confirmar que `displayName` usa el nombre cuando existe.
+- En la captura en paralelo (4 navegadores), la lista del proyecto recibió 860 respuestas 429 del gateway; con un navegador hace 20
+  peticiones. Revisar qué reintenta sin espera ante un 429.
+
+### Hecho el 2026-11-06 (tras la segunda pasada, revisado a 1366 y 1920 px)
+
+- **Encabezado** (puntos 1 y P1.3): miembros en `v-avatar-group`; atajos de teclado al menú `⋯` con `v-hotkey`. En «Mis tareas», atajos
+  y «Celebrar al completar» también al menú.
+- **Panel de tarea** (punto 2 y P1.2): ancho completo en el teléfono; título con `title-field text-title-large` (antes salía a 16 px);
+  «Mover a» con las demás secciones en su menú (punto 11, R-91); botones sin borde.
+- **Lista** (punto 4, P1.1): anchos de columna en una constante, mínimo para el título y scroll horizontal si hay muchos campos; en el
+  teléfono sin asa de arrastre y tocar la fila abre el detalle (sin la flecha `>`).
+- **Vacíos** (punto 3, P1.4): columna del tablero vacía y panel sin tareas o sin completadas con `EmptyState`.
+- **Cronograma** (P1.5): el título que no cabe en la barra, y el de los hitos, va a su derecha.
+- **Facturación** (P1.7): importe del hito con `v-number-input` y etiqueta; tabla de facturas con encabezados.
+- **Vuetify 4** (P2): `v-file-upload` en adjuntos, `v-sparkline` en el panel, `v-highlight` en la búsqueda, tooltips en los 16 botones
+  de icono que no son universales (punto 9).
+- **Coherencia** (P3, puntos 5, 6, 10): ningún `v-btn` con borde en toda la app (regla `boton` en `lint:ui`); diálogos de Proyectos en
+  normal / 640 / 880; `mdi-trash-can-outline`; rótulos de calendario, cronograma, carga y adjuntos con `utils/format.ts`
+  (`formatDayMonth`, `formatMonthYear`, `weekdayLabels`, `formatBytes`, `formatRelative`): ya no queda `new Intl.` en Proyectos.
+
+Pendiente: calendario en el teléfono como agenda (P1.6), `v-fab` y `v-pull-to-refresh` en el teléfono, asa de arrastre enfocable
+(punto 12), *labs* (`v-command-palette`, `v-pie`), decidir `v-calendar` (P2) y los totales de la lista de proyectos (P4, backend).

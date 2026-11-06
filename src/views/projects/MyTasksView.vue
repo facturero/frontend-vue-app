@@ -78,9 +78,26 @@ async function toggle(task: MyTask): Promise<void> {
     <PageHeader :title="t('projects.myTasks.title')" :subtitle="t('projects.myTasks.subtitle')">
       <template #actions>
         <RunningTimerChip />
-        <v-btn variant="text" icon="mdi-keyboard-outline" :aria-label="t('projects.shortcuts.title')" @click="helpOpen = true" />
         <v-btn variant="text" prepend-icon="mdi-folder-multiple-outline" to="/projects">{{ t('projects.title') }}</v-btn>
         <v-btn color="primary" prepend-icon="mdi-plus" @click="quickInput?.focus()">{{ t('projects.task.addTask') }}</v-btn>
+        <!-- Atajos y la celebración son ayuda y preferencia, no acciones: al menú (REGLAS-FRONT R-70). -->
+        <v-menu>
+          <template #activator="{ props: menu }">
+            <v-btn v-bind="menu" icon="mdi-dots-horizontal" variant="text" :aria-label="t('projects.menu')" />
+          </template>
+          <v-list>
+            <v-list-item prepend-icon="mdi-keyboard-outline" :title="t('projects.shortcuts.title')" @click="helpOpen = true">
+              <template #append><v-hotkey keys="shift+slash" /></template>
+            </v-list-item>
+            <v-list-item>
+              <v-switch
+                :model-value="celebration.enabled.value"
+                :label="t('projects.celebrations')"
+                @update:model-value="(v) => celebration.setEnabled(!!v)"
+              />
+            </v-list-item>
+          </v-list>
+        </v-menu>
       </template>
     </PageHeader>
 
@@ -96,12 +113,6 @@ async function toggle(task: MyTask): Promise<void> {
         @keyup.enter="addQuick"
       />
       <v-switch v-model="showCompleted" :label="t('projects.showCompleted')" class="flex-grow-0" />
-      <v-switch
-        :model-value="celebration.enabled.value"
-        :label="t('projects.celebrations')"
-        class="flex-grow-0"
-        @update:model-value="(v) => celebration.setEnabled(!!v)"
-      />
     </div>
 
     <v-progress-linear v-if="store.loading" indeterminate color="primary" class="mb-4" />
@@ -109,13 +120,12 @@ async function toggle(task: MyTask): Promise<void> {
     <v-card>
       <div v-for="group in MY_TASKS_GROUPS" :key="group">
         <div class="d-flex align-center ga-2 px-2 py-2 border-b">
-          <v-btn
+          <v-tooltip location="top" :text="t(`projects.myTasks.groups.${group}`)"><template #activator="{ props: tip }"><v-btn v-bind="tip"
             :icon="collapsed[group] ? 'mdi-chevron-right' : 'mdi-chevron-down'"
             variant="text"
             size="small"
             :aria-label="t(`projects.myTasks.groups.${group}`)"
-            @click="collapsed[group] = !collapsed[group]"
-          />
+            @click="collapsed[group] = !collapsed[group]" /></template></v-tooltip>
           <span class="text-body-large font-weight-bold">{{ t(`projects.myTasks.groups.${group}`) }}</span>
           <span class="text-body-small text-medium-emphasis">{{ groups[group].length }}</span>
         </div>
@@ -130,14 +140,13 @@ async function toggle(task: MyTask): Promise<void> {
             :class="{ 'bg-lightprimary': store.detail?.id === task.id }"
             @click="store.openTask(task.id)"
           >
-            <v-btn
+            <v-tooltip location="top" :text="t('projects.task.markComplete')"><template #activator="{ props: tip }"><v-btn v-bind="tip"
               :icon="task.completedAt ? 'mdi-check-circle' : 'mdi-check-circle-outline'"
               :color="task.completedAt ? 'success' : undefined"
               variant="text"
               size="small"
               :aria-label="t('projects.task.markComplete')"
-              @click.stop="toggle(task)"
-            />
+              @click.stop="toggle(task)" /></template></v-tooltip>
             <div class="flex-grow-1">
               <div :class="{ 'text-decoration-line-through text-medium-emphasis': task.completedAt }">{{ task.title }}</div>
               <div v-if="task.parent" class="text-body-small text-medium-emphasis">{{ t('projects.task.subtaskOf', { title: task.parent.title }) }}</div>

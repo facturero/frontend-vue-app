@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, ref, watch, mergeProps } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { customerApi } from '@/api/customers';
 import { invoiceApi } from '@/api/invoices';
@@ -136,7 +136,7 @@ async function remove(linkId: string): Promise<void> {
     </v-chip>
     <v-menu v-if="props.canEdit && available.length" v-model="menu" :close-on-content-click="false">
       <template #activator="{ props: activator }">
-        <v-btn v-bind="activator" icon="mdi-link-plus" variant="text" size="x-small" :aria-label="t('projects.links.add')" />
+        <v-tooltip location="top" :text="t('projects.links.add')"><template #activator="{ props: tip }"><v-btn v-bind="mergeProps(activator, tip)" icon="mdi-link-plus" variant="text" size="x-small" :aria-label="t('projects.links.add')" /></template></v-tooltip>
       </template>
       <v-card min-width="320" class="pa-4 d-flex flex-column ga-2">
         <v-select v-model="type" :items="typeItems" :label="t('projects.links.what')" />

@@ -132,17 +132,18 @@ async function saveSettings(): Promise<void> {
 }
 
 // ── Hitos ──
-const amounts = ref<Record<string, string>>({});
+// En dólares (con decimales) para `v-number-input`; la API habla en centavos.
+const amounts = ref<Record<string, number | null>>({});
 watch(summary, (s) => {
-  amounts.value = Object.fromEntries((s?.milestones ?? []).map((m) => [m.taskId, m.amountCents ? (m.amountCents / 100).toFixed(2).replace('.', ',') : '']));
+  amounts.value = Object.fromEntries((s?.milestones ?? []).map((m) => [m.taskId, m.amountCents ? m.amountCents / 100 : null]));
 });
 
 async function saveMilestone(taskId: string): Promise<void> {
   if (!project.value) return;
-  const text = amounts.value[taskId] ?? '';
-  const cents = text.trim() ? parseMoney(text) : null;
+  const value = amounts.value[taskId];
+  const cents = value == null || Number.isNaN(value) ? null : Math.round(value * 100);
   const current = summary.value?.milestones.find((m) => m.taskId === taskId)?.amountCents ?? null;
-  if ((text.trim() && cents === null) || cents === current) return;
+  if (cents === current) return;
   try {
     await projectsApi.setMilestoneAmount(project.value.id, taskId, cents);
     await load();
@@ -322,11 +323,14 @@ async function release(i: ProjectInvoice): Promise<void> {
                 <v-chip v-else size="x-small">{{ t('projects.billing.notCompleted') }}</v-chip>
               </td>
               <td class="text-right" style="width: 180px">
-                <v-text-field
+                <v-number-input
                   v-model="amounts[m.taskId]"
+                  :label="t('projects.billing.amount')"
                   prefix="$"
+                  :precision="2"
+                  :min="0"
+                  control-variant="hidden"
                   :disabled="!!m.billingId"
-                  :aria-label="t('projects.billing.amount')"
                   @blur="saveMilestone(m.taskId)"
                   @keyup.enter="($event.target as HTMLInputElement).blur()"
                 />
@@ -357,7 +361,7 @@ async function release(i: ProjectInvoice): Promise<void> {
           />
         </div>
         <div class="d-flex flex-wrap ga-2">
-          <v-btn variant="outlined" :disabled="!configured" @click="runPreview">{{ t('projects.billing.previewBtn') }}</v-btn>
+          <v-btn variant="text" :disabled="!configured" @click="runPreview">{{ t('projects.billing.previewBtn') }}</v-btn>
           <v-btn color="primary" :disabled="!configured || !preview || !preview.groups.length" :loading="creating" prepend-icon="mdi-receipt-text-plus-outline" @click="createDraft">
             {{ t('projects.billing.createDraft') }}
           </v-btn>
@@ -395,6 +399,16 @@ async function release(i: ProjectInvoice): Promise<void> {
         <div class="text-title-large mb-2">{{ t('projects.billing.invoices') }}</div>
         <div v-if="!summary.invoices.length" class="text-body-medium text-medium-emphasis">{{ t('projects.billing.noInvoices') }}</div>
         <v-table v-else density="compact">
+          <thead>
+            <tr>
+              <th>{{ t('projects.billing.columns.date') }}</th>
+              <th>{{ t('projects.billing.columns.status') }}</th>
+              <th class="d-none d-sm-table-cell">{{ t('projects.billing.columns.number') }}</th>
+              <th class="d-none d-md-table-cell">{{ t('projects.billing.columns.work') }}</th>
+              <th class="text-right">{{ t('projects.billing.columns.amount') }}</th>
+              <th />
+            </tr>
+          </thead>
           <tbody>
             <tr v-for="i in summary.invoices" :key="i.id">
               <td class="text-no-wrap">{{ formatDate(i.createdAt) }}</td>
@@ -415,7 +429,7 @@ async function release(i: ProjectInvoice): Promise<void> {
       </v-card>
     </template>
 
-    <v-dialog :model-value="!!confirmRelease" max-width="480" @update:model-value="(v) => !v && (confirmRelease = null)">
+    <v-dialog :model-value="!!confirmRelease" @update:model-value="(v) => !v && (confirmRelease = null)">
       <v-card>
         <v-card-title>{{ t('projects.billing.releaseTitle') }}</v-card-title>
         <v-card-text>{{ t('projects.billing.releaseText') }}</v-card-text>

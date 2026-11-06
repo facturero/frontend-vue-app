@@ -71,7 +71,9 @@ function go(path: string, query?: Record<string, string>): void {
           <div v-if="!result.tasks.length && !result.projects.length" class="text-body-medium text-medium-emphasis">{{ t('projects.search.none') }}</div>
           <v-list v-if="result.projects.length" density="compact">
             <v-list-subheader>{{ t('projects.title') }}</v-list-subheader>
-            <v-list-item v-for="p in result.projects" :key="p.id" :title="p.name" @click="go(`/projects/${p.id}`)">
+            <v-list-item v-for="p in result.projects" :key="p.id" @click="go(`/projects/${p.id}`)">
+              <!-- `v-highlight` (Vuetify 4.3) marca lo buscado; sin tildes ni mayúsculas, como busca el servidor. -->
+              <v-list-item-title><v-highlight :text="p.name" :query="q.trim()" ignore-case ignore-accents /></v-list-item-title>
               <template #prepend>
                 <v-avatar :color="p.color" rounded="lg" size="28"><v-icon :icon="p.icon" size="small" /></v-avatar>
               </template>
@@ -85,7 +87,7 @@ function go(path: string, query?: Record<string, string>): void {
               :prepend-icon="task.completedAt ? 'mdi-check-circle' : 'mdi-check-circle-outline'"
               @click="task.projects[0] ? go(`/projects/${task.projects[0].projectId}`, { task: task.id }) : go('/my-tasks', { task: task.id })"
             >
-              <v-list-item-title :class="{ 'text-decoration-line-through text-medium-emphasis': task.completedAt }">{{ task.title }}</v-list-item-title>
+              <v-list-item-title :class="{ 'text-decoration-line-through text-medium-emphasis': task.completedAt }"><v-highlight :text="task.title" :query="q.trim()" ignore-case ignore-accents /></v-list-item-title>
               <v-list-item-subtitle>{{ task.projects.map((p) => p.name).join(' · ') || t('projects.task.personal') }}</v-list-item-subtitle>
               <template #append><DueDateChip :due-on="task.dueOn" :completed="!!task.completedAt" /></template>
             </v-list-item>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
+import { formatDayMonth } from '@/utils/format';
 import { useI18n } from 'vue-i18n';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import DueDateChip from '@/components/projects/DueDateChip.vue';
@@ -20,7 +21,7 @@ import type { Workload, WorkloadPerson } from '@/types/projects';
  * Las tareas sin estimación cuentan en el número de tareas, no en las horas.
  */
 const WEEKS = 4;
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const auth = useAuthStore();
 const store = useProjectsStore();
 
@@ -50,10 +51,8 @@ onMounted(() => {
 watch([start, projectId], () => void load());
 
 const projectItems = computed(() => store.projects.map((p) => ({ value: p.id, title: p.name })));
-const weekFmt = computed(() => new Intl.DateTimeFormat(locale.value, { day: 'numeric', month: 'short' }));
 function weekLabel(iso: string): string {
-  const [y, m, d] = iso.split('-').map(Number);
-  return weekFmt.value.format(new Date(y!, m! - 1, d!));
+  return formatDayMonth(iso);
 }
 const thisWeek = mondayOf(localIsoDate(new Date()));
 
@@ -102,9 +101,9 @@ async function saveCapacity(): Promise<void> {
     <PageHeader :title="t('projects.workload.title')" :subtitle="t('projects.workload.subtitle')" />
 
     <div class="d-flex align-center flex-wrap ga-2 mb-4">
-      <v-btn icon="mdi-chevron-left" variant="text" :aria-label="t('projects.workload.previous')" @click="start = addDays(start, -7 * WEEKS)" />
-      <v-btn variant="outlined" :disabled="start === thisWeek" @click="start = thisWeek">{{ t('projects.workload.today') }}</v-btn>
-      <v-btn icon="mdi-chevron-right" variant="text" :aria-label="t('projects.workload.next')" @click="start = addDays(start, 7 * WEEKS)" />
+      <v-tooltip location="top" :text="t('projects.workload.previous')"><template #activator="{ props: tip }"><v-btn v-bind="tip" icon="mdi-chevron-left" variant="text" :aria-label="t('projects.workload.previous')" @click="start = addDays(start, -7 * WEEKS)" /></template></v-tooltip>
+      <v-btn variant="tonal" :disabled="start === thisWeek" @click="start = thisWeek">{{ t('projects.workload.today') }}</v-btn>
+      <v-tooltip location="top" :text="t('projects.workload.next')"><template #activator="{ props: tip }"><v-btn v-bind="tip" icon="mdi-chevron-right" variant="text" :aria-label="t('projects.workload.next')" @click="start = addDays(start, 7 * WEEKS)" /></template></v-tooltip>
       <v-spacer />
       <v-autocomplete v-model="projectId" :items="projectItems" :label="t('projects.time.project')" clearable class="flex-grow-0 w-100" style="max-width: 320px" />
     </div>
@@ -153,7 +152,7 @@ async function saveCapacity(): Promise<void> {
     </v-card>
     <div class="text-body-medium text-medium-emphasis mt-2">{{ t('projects.workload.hint') }}</div>
 
-    <v-dialog :model-value="!!cell" max-width="560" scrollable @update:model-value="(v) => !v && (cell = null)">
+    <v-dialog :model-value="!!cell" max-width="640" scrollable @update:model-value="(v) => !v && (cell = null)">
       <v-card v-if="cell">
         <v-card-title>
           {{ displayName(store.users.get(cell.person.userId)) }} · {{ t('projects.workload.weekOf', { date: weekLabel(cell.weekStart) }) }}
@@ -179,7 +178,7 @@ async function saveCapacity(): Promise<void> {
       </v-card>
     </v-dialog>
 
-    <v-dialog :model-value="!!capacityFor" max-width="400" @update:model-value="(v) => !v && (capacityFor = null)">
+    <v-dialog :model-value="!!capacityFor" @update:model-value="(v) => !v && (capacityFor = null)">
       <v-card v-if="capacityFor">
         <v-card-title>{{ t('projects.workload.editCapacity') }}</v-card-title>
         <v-card-text class="d-flex flex-column ga-2">

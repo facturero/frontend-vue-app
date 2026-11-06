@@ -284,6 +284,18 @@ export const useProjectsStore = defineStore('projects', () => {
     }
   }
 
+  /**
+   * Mover una tarea a otra sección sin arrastrar (REGLAS-FRONT R-91): la pone al final de esa sección y usa el mismo camino que el
+   * arrastre (`moveTask` calcula las vecinas sobre la columna ya reordenada).
+   */
+  async function moveTaskToSection(taskId: string, sectionId: string): Promise<void> {
+    const from = Object.keys(columns.value).find((id) => (columns.value[id] ?? []).some((t) => t.id === taskId));
+    if (!from || from === sectionId) return;
+    const card = columns.value[from]!.find((t) => t.id === taskId)!;
+    columns.value = { ...columns.value, [from]: columns.value[from]!.filter((t) => t.id !== taskId), [sectionId]: [...(columns.value[sectionId] ?? []), card] };
+    await moveTask(taskId, sectionId);
+  }
+
   async function toggleComplete(task: Task): Promise<Task> {
     const done = !task.completedAt;
     const updated = await write(() => (done ? projectsApi.completeTask(task.id) : projectsApi.reopenTask(task.id)));
@@ -619,6 +631,7 @@ export const useProjectsStore = defineStore('projects', () => {
     deleteSection,
     createTask,
     updateTask,
+    moveTaskToSection,
     moveTask,
     toggleComplete,
     deleteTask,

@@ -321,6 +321,6 @@ listadas y con fecha, igual que `EXCEPTIONS` en `check-ui.mjs`):
 4. `v-btn` con `icon=` sin `aria-label` (R-12).
 5. `new Intl.`, `toLocale*` y `toFixed(` en `.vue` (R-60).
 6. ~~`<v-snackbar` fuera de `App.vue` (R-31)~~ **hecho el 2026-11-06** (kind `aviso`, sin excepciones).
-7. `variant="outlined"` en `v-btn` (R-10).
+7. ~~`variant="outlined"` en `v-btn` (R-10)~~ **hecho el 2026-11-06** (kind `boton`, sin excepciones; `v-btn-toggle` sí puede).
 8. ~~`type="date"`~~ **hecho el 2026-11-06** (kind `fecha`, sin excepciones). Faltan `type="time|number|color"`,
    `<select>` y `<button>` fuera de las excepciones de `UI-UX.md` §1.

@@ -49,6 +49,7 @@ export default createVuetify({
     VAutocomplete: { variant: 'outlined', density: 'compact', hideDetails: 'auto' },
     VCombobox: { variant: 'outlined', density: 'compact', hideDetails: 'auto' },
     VFileInput: { variant: 'outlined', density: 'compact', hideDetails: 'auto' },
+    VNumberInput: { variant: 'outlined', density: 'compact', hideDetails: 'auto' },
     // Fecha (siempre a través de components/ui/DateField.vue). El icono del calendario va DENTRO del campo: el default de Vuetify
     // lo pone fuera, a la izquierda, y descuadra el campo respecto a los demás de una fila o un formulario.
     // `inputFormat`: las fechas se escriben y se ven dd/mm/yyyy en CUALQUIER idioma (decisión del dueño, 2026-11-06; igual que

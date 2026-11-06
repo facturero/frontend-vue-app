@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { formatDate } from '@/utils/format';
+import { formatDate, weekdayLabels, formatMonthYear } from '@/utils/format';
 import { useI18n } from 'vue-i18n';
 import { useProjectsStore } from '@/stores/projects';
 import { localIsoDate } from '@/utils/projects';
@@ -11,7 +11,7 @@ import type { BoardTask } from '@/types/projects';
  * Vista Calendario, como la de Asana: el mes con las tareas en su fecha de entrega. Arrastrar una tarea a otro día la reprograma
  * (si tenía inicio, se desplaza igual: la duración no cambia). «+» en un día crea ahí una tarea. Clic en una tarea abre el detalle.
  */
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const store = useProjectsStore();
 
 const today = localIsoDate(new Date());
@@ -29,14 +29,8 @@ const byDay = computed(() => {
 });
 const undated = computed(() => Object.values(store.columns).flat().filter((t) => !t.dueOn && !t.completedAt).length);
 
-const weekdays = computed(() =>
-  Array.from({ length: 7 }, (_, i) => new Intl.DateTimeFormat(locale.value, { weekday: 'short' }).format(new Date(Date.UTC(2026, 10, 2 + i, 12)))),
-);
-// Solo la primera letra en mayúscula («Noviembre de 2026»): `text-capitalize` ponía «De» en mayúscula.
-const title = computed(() => {
-  const text = new Intl.DateTimeFormat(locale.value, { month: 'long', year: 'numeric' }).format(new Date(cursor.value.year, cursor.value.month - 1, 1));
-  return text.charAt(0).toLocaleUpperCase(locale.value) + text.slice(1);
-});
+const weekdays = computed(() => weekdayLabels());
+const title = computed(() => formatMonthYear(new Date(cursor.value.year, cursor.value.month - 1, 1)));
 
 function move(delta: number): void {
   const d = new Date(cursor.value.year, cursor.value.month - 1 + delta, 1);
@@ -77,9 +71,9 @@ async function add(): Promise<void> {
 <template>
   <v-card>
     <div class="d-flex align-center flex-wrap ga-2 pa-2 border-b">
-      <v-btn icon="mdi-chevron-left" variant="text" size="small" :aria-label="t('projects.timeline.previous')" @click="move(-1)" />
-      <v-btn variant="outlined" size="small" @click="cursor = { year: Number(today.slice(0, 4)), month: Number(today.slice(5, 7)) }">{{ t('projects.due.today') }}</v-btn>
-      <v-btn icon="mdi-chevron-right" variant="text" size="small" :aria-label="t('projects.timeline.next')" @click="move(1)" />
+      <v-tooltip location="top" :text="t('projects.timeline.previous')"><template #activator="{ props: tip }"><v-btn v-bind="tip" icon="mdi-chevron-left" variant="text" size="small" :aria-label="t('projects.timeline.previous')" @click="move(-1)" /></template></v-tooltip>
+      <v-btn variant="tonal" size="small" @click="cursor = { year: Number(today.slice(0, 4)), month: Number(today.slice(5, 7)) }">{{ t('projects.due.today') }}</v-btn>
+      <v-tooltip location="top" :text="t('projects.timeline.next')"><template #activator="{ props: tip }"><v-btn v-bind="tip" icon="mdi-chevron-right" variant="text" size="small" :aria-label="t('projects.timeline.next')" @click="move(1)" /></template></v-tooltip>
       <span class="text-body-large font-weight-medium">{{ title }}</span>
       <v-spacer />
       <span v-if="undated" class="text-body-small text-medium-emphasis">{{ t('projects.calendar.undated', undated) }}</span>

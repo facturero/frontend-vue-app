@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
+import { formatDayMonth } from '@/utils/format';
 import { useI18n } from 'vue-i18n';
 import { projectsApi } from '@/api/projects';
 import { useProjectsStore } from '@/stores/projects';
@@ -7,6 +8,7 @@ import { formatMinutes } from '@/utils/duration';
 import { extractError } from '@/utils/error';
 import { displayName } from '@/utils/projects';
 import type { ProjectDashboard } from '@/types/projects';
+import EmptyState from '@/components/ui/EmptyState.vue';
 import DueDateChip from './DueDateChip.vue';
 import UserAvatar from './UserAvatar.vue';
 
@@ -14,7 +16,7 @@ import UserAvatar from './UserAvatar.vue';
  * Panel del proyecto (entregable 7), como el «Dashboard» de Asana: lo mismo que la lista, contado. Sin librería de gráficos: barras
  * de Vuetify, que bastan para «cuánto hay en cada sección» y «cuánto se cerró cada semana».
  */
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const store = useProjectsStore();
 const data = ref<ProjectDashboard | null>(null);
 const failure = ref<string | null>(null);
@@ -33,19 +35,17 @@ watch(() => store.columns, () => void load(), { deep: true });
 
 const percentDone = computed(() => (data.value?.totals.total ? Math.round((data.value.totals.completed / data.value.totals.total) * 100) : 0));
 const maxSection = computed(() => Math.max(1, ...(data.value?.bySection ?? []).map((s) => s.open + s.completed)));
-const maxWeek = computed(() => Math.max(1, ...(data.value?.completedByWeek ?? []).map((w) => w.count)));
-const weekFmt = computed(() => new Intl.DateTimeFormat(locale.value, { day: 'numeric', month: 'short' }));
-function weekLabel(iso: string): string {
-  const [y, m, d] = iso.split('-').map(Number);
-  return weekFmt.value.format(new Date(y!, m! - 1, d!));
-}
+const completedTotal = computed(() => (data.value?.completedByWeek ?? []).reduce((sum, w) => sum + w.count, 0));
 const person = (id: string | null) => (id ? displayName(store.users.get(id)) || t('projects.share.unknownUser') : t('projects.task.unassigned'));
 </script>
 
 <template>
   <div class="d-flex flex-column ga-4">
     <v-alert v-if="failure" type="error" closable @click:close="failure = null">{{ failure }}</v-alert>
-    <template v-if="data">
+    <v-card v-if="data && !data.totals.total">
+      <EmptyState icon="mdi-view-dashboard-outline" :title="t('projects.dashboard.empty')" :text="t('projects.dashboard.emptyText')" />
+    </v-card>
+    <template v-else-if="data">
       <v-row>
         <v-col v-for="k in (['open', 'completed', 'overdue', 'dueThisWeek', 'unassigned'] as const)" :key="k" cols="6" sm="4" md>
           <v-card class="pa-4 h-100">
@@ -96,13 +96,20 @@ const person = (id: string | null) => (id ? displayName(store.users.get(id)) || 
         <v-col cols="12" md="6">
           <v-card class="pa-6 h-100">
             <div class="text-title-large mb-4">{{ t('projects.dashboard.completedByWeek') }}</div>
-            <div class="d-flex align-end ga-2" style="height: 140px">
-              <div v-for="w in data.completedByWeek" :key="w.weekStart" class="flex-grow-1 d-flex flex-column align-center justify-end h-100">
-                <span class="text-body-small">{{ w.count || '' }}</span>
-                <div class="bg-primary rounded w-100" :style="{ height: `${(w.count / maxWeek) * 100}px`, minHeight: w.count ? '4px' : '0' }" />
-                <span class="text-body-small text-medium-emphasis text-no-wrap">{{ weekLabel(w.weekStart) }}</span>
-              </div>
-            </div>
+            <EmptyState v-if="!completedTotal" compact icon="mdi-chart-bar" :title="t('projects.dashboard.noCompletions')" />
+            <!-- `v-sparkline` (núcleo de Vuetify 4) en vez de barras con `div` y alturas a mano. Los rótulos llevan el número del día de la semana. -->
+            <v-sparkline
+              v-else
+              type="bar"
+              :model-value="data.completedByWeek.map((w) => w.count)"
+              :labels="data.completedByWeek.map((w) => `${formatDayMonth(w.weekStart)} · ${w.count}`)"
+              color="primary"
+              :height="90"
+              :padding="10"
+              label-size="6"
+              :line-width="18"
+              :smooth="4"
+            />
           </v-card>
         </v-col>
         <v-col cols="12" md="6">

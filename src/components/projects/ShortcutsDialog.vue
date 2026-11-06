@@ -6,16 +6,20 @@ defineProps<{ modelValue: boolean }>();
 const emit = defineEmits<{ 'update:modelValue': [boolean] }>();
 const { t } = useI18n();
 
+/**
+ * Sintaxis de `v-hotkey` (Vuetify 4, UI-UX.md §7 bis): `+` combina teclas. `v-hotkey` dibuja cada tecla con `v-kbd` y se adapta al
+ * sistema (⌘ en Mac). `@` no es una combinación: se muestra tal cual con `v-kbd`.
+ */
 const SHORTCUTS: Array<[string, string]> = [
-  ['Tab + Q', 'quickAdd'],
-  ['Tab + M', 'assignMe'],
-  ['Tab + C', 'complete'],
-  ['Tab + D', 'dueDate'],
-  ['Tab + L', 'like'],
-  ['Tab + K', 'comment'],
-  ['Ctrl + Enter', 'send'],
+  ['tab+q', 'quickAdd'],
+  ['tab+m', 'assignMe'],
+  ['tab+c', 'complete'],
+  ['tab+d', 'dueDate'],
+  ['tab+l', 'like'],
+  ['tab+k', 'comment'],
+  ['ctrl+enter', 'send'],
   ['@', 'mention'],
-  ['?', 'help'],
+  ['shift+slash', 'help'],
 ];
 </script>
 
@@ -27,7 +31,10 @@ const SHORTCUTS: Array<[string, string]> = [
         <v-table density="compact">
           <tbody>
             <tr v-for="[keys, action] in SHORTCUTS" :key="action">
-              <td class="text-no-wrap"><v-chip size="small" label>{{ keys }}</v-chip></td>
+              <td class="text-no-wrap">
+                <v-kbd v-if="keys === '@'">@</v-kbd>
+                <v-hotkey v-else :keys="keys" />
+              </td>
               <td>{{ t(`projects.shortcuts.${action}`) }}</td>
             </tr>
           </tbody>

@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { VueDraggable } from 'vue-draggable-plus';
 import { useProjectsStore } from '@/stores/projects';
 import type { BoardTask } from '@/types/projects';
+import EmptyState from '@/components/ui/EmptyState.vue';
 import DueDateChip from './DueDateChip.vue';
 import SectionMenu from './SectionMenu.vue';
 import UserAvatar from './UserAvatar.vue';
@@ -133,14 +134,13 @@ function onColumnDrop(evt: DropEvent): void {
             @click="store.openTask(task.id)"
           >
             <div class="d-flex align-start ga-1">
-              <v-btn
+              <v-tooltip location="top" :text="t('projects.task.markComplete')"><template #activator="{ props: tip }"><v-btn v-bind="tip"
                 :icon="task.completedAt ? 'mdi-check-circle' : 'mdi-check-circle-outline'"
                 :color="task.completedAt ? 'success' : undefined"
                 variant="text"
                 size="x-small"
                 :aria-label="t('projects.task.markComplete')"
-                @click.stop="toggle(task)"
-              />
+                @click.stop="toggle(task)" /></template></v-tooltip>
               <span class="text-body-medium pt-1" :class="{ 'text-medium-emphasis text-decoration-line-through': task.completedAt }">
                 <v-icon v-if="task.kind === 'approval'" icon="mdi-thumbs-up-down-outline" size="x-small" color="info" class="mr-1" />
                 <v-icon v-else-if="task.kind === 'milestone'" icon="mdi-rhombus" size="x-small" color="warning" class="mr-1" />{{ task.title }}
@@ -160,6 +160,8 @@ function onColumnDrop(evt: DropEvent): void {
             </div>
           </v-card>
         </VueDraggable>
+        <!-- Columna vacía: se ve que está vacía y que admite tarjetas (REGLAS-FRONT R-03, R-55). -->
+        <EmptyState v-if="!(store.columns[section.id] ?? []).length && !adding[section.id]" compact icon="mdi-tray-arrow-down" :title="t('projects.boardEmptyColumn')" />
 
         <div v-if="editable()" class="px-1 pt-2">
           <v-textarea

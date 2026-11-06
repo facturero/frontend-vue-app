@@ -276,7 +276,7 @@ async function remove(e: TimeReportRow): Promise<void> {
       </v-table>
     </v-card>
 
-    <v-dialog :model-value="!!editing" max-width="480" @update:model-value="(v) => !v && (editing = null)">
+    <v-dialog :model-value="!!editing" @update:model-value="(v) => !v && (editing = null)">
       <v-card>
         <v-card-title>{{ t('projects.time.editTitle') }}</v-card-title>
         <v-card-text class="d-flex flex-column ga-4">
