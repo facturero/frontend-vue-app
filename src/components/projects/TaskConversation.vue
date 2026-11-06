@@ -1,6 +1,10 @@
 <script setup lang="ts">
-import { computed, nextTick, ref } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { assistantApi } from '@/api/assistant';
+import { useNotify } from '@/composable/useNotify';
+import { extractError } from '@/utils/error';
+import type { TaskSummary } from '@/types/assistant';
 import { formatRelative } from '@/utils/format';
 import { useAuthStore } from '@/stores/auth';
 import { useProjectsStore } from '@/stores/projects';
@@ -38,6 +42,31 @@ const me = computed(() => auth.user?.id ?? '');
 const name = (id: string | null) => (id ? displayName(store.users.get(id)) || t('projects.share.unknownUser') : t('projects.activity.system'));
 const comments = computed<TaskComment[]>(() => [...(store.detail?.comments ?? [])].sort((a, b) => a.createdAt.localeCompare(b.createdAt)));
 const relative = (iso: string) => formatRelative(iso);
+
+/**
+ * «Resumir»: la IA lee comentarios e historial y devuelve en qué punto está la tarea, qué se decidió y qué falta. Solo tiene
+ * sentido con conversación (dos comentarios o más). El resumen es de la tarea abierta: al cambiar de tarea se descarta, y no se
+ * guarda en ningún sitio (pedirlo otra vez lo rehace con lo último que se haya escrito).
+ */
+const notify = useNotify();
+const summary = ref<TaskSummary | null>(null);
+const summarizing = ref(false);
+const canSummarize = computed(() => comments.value.filter((c) => !c.deleted).length >= 2);
+watch(() => store.detail?.id, () => (summary.value = null));
+
+async function summarize(): Promise<void> {
+  const task = store.detail;
+  if (!task) return;
+  summarizing.value = true;
+  try {
+    const result = await assistantApi.summarizeTask(task.id);
+    if (store.detail?.id === task.id) summary.value = result;
+  } catch (err) {
+    notify.error(t('projects.ai.failed', { message: extractError(err) }));
+  } finally {
+    summarizing.value = false;
+  }
+}
 
 async function send(): Promise<void> {
   const task = store.detail;
@@ -88,7 +117,24 @@ defineExpose({
 
 <template>
   <div v-if="store.detail">
-    <div class="text-body-large font-weight-medium mb-2">{{ t('projects.conversation.title') }} ({{ comments.length }})</div>
+    <div class="d-flex align-center ga-2 mb-2">
+      <div class="text-body-large font-weight-medium">{{ t('projects.conversation.title') }} ({{ comments.length }})</div>
+      <v-spacer />
+      <v-btn v-if="canSummarize" variant="text" size="small" prepend-icon="mdi-creation" :loading="summarizing" @click="summarize">
+        {{ t('projects.ai.summarize') }}
+      </v-btn>
+    </div>
+
+    <v-alert v-if="summary" color="primary" icon="mdi-creation" :title="t('projects.ai.summaryTitle')" closable class="mb-4" @click:close="summary = null">
+      <div class="text-body-medium">{{ summary.summary }}</div>
+      <template v-for="block in [{ label: t('projects.ai.decisions'), items: summary.decisions }, { label: t('projects.ai.nextSteps'), items: summary.nextSteps }]" :key="block.label">
+        <div v-if="block.items.length" class="mt-2">
+          <div class="text-body-small font-weight-medium">{{ block.label }}</div>
+          <div v-for="item in block.items" :key="item" class="text-body-medium">• {{ item }}</div>
+        </div>
+      </template>
+      <div class="text-body-small text-medium-emphasis mt-2">{{ t('projects.ai.note') }}</div>
+    </v-alert>
 
       <div class="d-flex flex-column ga-2">
         <div v-if="!comments.length" class="text-body-medium text-medium-emphasis">{{ t('projects.conversation.empty') }}</div>

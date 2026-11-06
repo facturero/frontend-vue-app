@@ -269,6 +269,7 @@ export interface CreateTaskInput extends Position {
   assigneeUserId?: string | null;
   startOn?: string | null;
   dueOn?: string | null;
+  estimatedMinutes?: number | null;
   projectId?: string | null;
   sectionId?: string | null;
   parentTaskId?: string | null;

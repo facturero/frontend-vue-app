@@ -2,6 +2,11 @@
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { formatDateTime } from '@/utils/format';
 import { useI18n } from 'vue-i18n';
+import { assistantApi } from '@/api/assistant';
+import { useConfirm } from '@/composable/useConfirm';
+import { useNotify } from '@/composable/useNotify';
+import { extractError } from '@/utils/error';
+import type { StatusDraft } from '@/types/assistant';
 import { useProjectsStore } from '@/stores/projects';
 import { displayName, HEALTH_COLOR, localIsoDate } from '@/utils/projects';
 import type { ProjectHealth, RichDoc } from '@/types/projects';
@@ -60,6 +65,50 @@ function open(): void {
   status.value = latest.value?.status ?? 'on_track';
   body.value = null;
   posting.value = true;
+}
+
+/**
+ * «Redactar con IA»: la IA propone la salud y el texto con lo que pasó en la semana (terminadas, vencidas, bloqueos, hitos). Llena
+ * el diálogo y la persona lo corrige antes de publicar; nada sale hacia los miembros sin pulsar «Publicar».
+ */
+const confirm = useConfirm();
+const notify = useNotify();
+const drafting = ref(false);
+
+function draftDoc(d: StatusDraft): RichDoc {
+  const paragraph = (text: string, bold = false): RichDoc => ({
+    type: 'paragraph',
+    content: [{ type: 'text', text, ...(bold ? { marks: [{ type: 'bold' }] } : {}) }],
+  });
+  const content: RichDoc[] = [paragraph(d.summary)];
+  const sections: Array<[string, string[]]> = [['accomplished', d.accomplished], ['risks', d.risks], ['nextSteps', d.nextSteps]];
+  for (const [key, items] of sections) {
+    if (!items.length) continue;
+    content.push(paragraph(t(`projects.ai.sections.${key}`), true), {
+      type: 'bulletList',
+      content: items.map((item) => ({ type: 'listItem', content: [paragraph(item)] })),
+    });
+  }
+  return { type: 'doc', content };
+}
+
+async function draft(): Promise<void> {
+  const projectId = store.current?.id;
+  if (!projectId) return;
+  if (editor.value && !editor.value.isEmpty()) {
+    const ok = await confirm({ title: t('projects.ai.overwriteTitle'), text: t('projects.ai.overwriteText'), confirmText: t('projects.ai.overwrite') });
+    if (!ok) return;
+  }
+  drafting.value = true;
+  try {
+    const result = await assistantApi.draftStatus(projectId);
+    status.value = result.status;
+    body.value = draftDoc(result);
+  } catch (err) {
+    notify.error(t('projects.ai.failed', { message: extractError(err) }));
+  } finally {
+    drafting.value = false;
+  }
 }
 
 async function post(): Promise<void> {
@@ -165,9 +214,14 @@ async function post(): Promise<void> {
     <v-card>
       <v-card-title>{{ t('projects.overview.update') }}</v-card-title>
       <v-card-text class="d-flex flex-column ga-4">
-        <v-chip-group v-model="status" mandatory selected-class="font-weight-bold">
-          <v-chip v-for="h in HEALTHS" :key="h" :value="h" :color="HEALTH_COLOR[h]" filter>{{ t(`projects.health.${h}`) }}</v-chip>
-        </v-chip-group>
+        <div class="d-flex align-center flex-wrap ga-2">
+          <v-chip-group v-model="status" mandatory selected-class="font-weight-bold">
+            <v-chip v-for="h in HEALTHS" :key="h" :value="h" :color="HEALTH_COLOR[h]" filter>{{ t(`projects.health.${h}`) }}</v-chip>
+          </v-chip-group>
+          <v-spacer />
+          <v-btn variant="tonal" size="small" prepend-icon="mdi-creation" :loading="drafting" @click="draft">{{ t('projects.ai.draftStatus') }}</v-btn>
+        </div>
+        <div v-if="drafting" class="text-body-small text-medium-emphasis">{{ t('projects.ai.drafting') }}</div>
         <RichTextEditor ref="editor" v-model="body" :placeholder="t('projects.overview.placeholder')" @submit="post" />
       </v-card-text>
       <v-card-actions class="flex-wrap ga-2">

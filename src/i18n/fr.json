@@ -4138,6 +4138,33 @@
       "sentHint": "Elle est arrivée à l’équipe comme tâche. Vous la suivez : vous verrez ses commentaires et quand elle sera terminée.",
       "seeRequest": "Voir ma demande",
       "another": "En envoyer une autre"
+    },
+    "ai": {
+      "badge": "IA",
+      "note": "Rédigé par l’IA à partir du contenu du projet : relisez-le avant de l’utiliser.",
+      "failed": "L’assistant n’a pas pu répondre. {message}",
+      "summarize": "Résumer",
+      "summaryTitle": "Résumé",
+      "decisions": "Décidé",
+      "nextSteps": "En attente",
+      "summarizing": "Lecture des commentaires et de l’historique…",
+      "suggestSubtasks": "Suggérer des sous-tâches",
+      "suggestTitle": "Sous-tâches suggérées",
+      "suggestLoading": "Recherche de sous-tâches… cela peut prendre quelques secondes.",
+      "suggestEmpty": "L’IA n’a proposé aucune nouvelle sous-tâche pour cette tâche.",
+      "suggestHint": "Cochez celles à créer. Vous pouvez modifier le titre avant.",
+      "createSubtasks": "Créer les sous-tâches ({n})",
+      "created": "{n} sous-tâches créées.",
+      "draftStatus": "Rédiger avec l’IA",
+      "drafting": "Rédaction…",
+      "overwriteTitle": "Remplacer ce que vous avez écrit ?",
+      "overwriteText": "L’IA va rédiger le statut à nouveau et le texte actuel sera perdu.",
+      "overwrite": "Remplacer",
+      "sections": {
+        "accomplished": "Ce qui a été fait",
+        "risks": "Risques",
+        "nextSteps": "La suite"
+      }
     }
   }
 }

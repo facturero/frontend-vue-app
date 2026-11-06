@@ -33,3 +33,24 @@ export interface ConversationDetail {
   messages: ConversationMessage[];
   pendingActions: PendingAction[];
 }
+
+// ── IA de Proyectos (assistant-service, application/project-ai.ts). Son propuestas: nada se guarda hasta que la persona lo aplica. ──
+
+export interface TaskSummary {
+  summary: string;
+  decisions: string[];
+  nextSteps: string[];
+}
+
+export interface StatusDraft {
+  status: 'on_track' | 'at_risk' | 'off_track' | 'complete';
+  summary: string;
+  accomplished: string[];
+  risks: string[];
+  nextSteps: string[];
+}
+
+export interface SubtaskSuggestion {
+  title: string;
+  estimatedMinutes: number | null;
+}

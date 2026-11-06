@@ -4138,6 +4138,33 @@
       "sentHint": "Llegó como tarea al equipo. La sigues: verás sus comentarios y cuándo se completa.",
       "seeRequest": "Ver mi solicitud",
       "another": "Enviar otra"
+    },
+    "ai": {
+      "badge": "IA",
+      "note": "Lo redactó la IA con lo que hay en el proyecto: revísalo antes de usarlo.",
+      "failed": "El asistente no pudo responder. {message}",
+      "summarize": "Resumir",
+      "summaryTitle": "Resumen",
+      "decisions": "Decidido",
+      "nextSteps": "Pendiente",
+      "summarizing": "Leyendo comentarios e historial…",
+      "suggestSubtasks": "Sugerir subtareas",
+      "suggestTitle": "Subtareas sugeridas",
+      "suggestLoading": "Pensando las subtareas… puede tardar unos segundos.",
+      "suggestEmpty": "La IA no propuso subtareas nuevas para esta tarea.",
+      "suggestHint": "Marca las que quieras crear. Puedes cambiar el título antes.",
+      "createSubtasks": "Crear subtareas ({n})",
+      "created": "Se crearon {n} subtareas.",
+      "draftStatus": "Redactar con IA",
+      "drafting": "Redactando…",
+      "overwriteTitle": "¿Reemplazar lo que escribiste?",
+      "overwriteText": "La IA va a redactar el estado de nuevo y se perderá el texto actual.",
+      "overwrite": "Reemplazar",
+      "sections": {
+        "accomplished": "Lo que se hizo",
+        "risks": "Riesgos",
+        "nextSteps": "Lo que viene"
+      }
     }
   }
 }

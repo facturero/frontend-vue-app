@@ -11,6 +11,7 @@ import type { ApprovalDecision, RichDoc, Task } from '@/types/projects';
 import DueDateChip from './DueDateChip.vue';
 import RichTextEditor from './RichTextEditor.vue';
 import TaskAttachments from './TaskAttachments.vue';
+import SubtaskSuggestionsDialog from './SubtaskSuggestionsDialog.vue';
 import TaskActivity from './TaskActivity.vue';
 import TaskConversation from './TaskConversation.vue';
 import TaskFieldInput from './TaskFieldInput.vue';
@@ -53,6 +54,8 @@ function docFromText(text: string | null): RichDoc | null {
   return { type: 'doc', content: text.split('\n').map((line) => (line ? { type: 'paragraph', content: [{ type: 'text', text: line }] } : { type: 'paragraph' })) };
 }
 const newSubtask = ref('');
+/** Diálogo de subtareas que propone la IA. */
+const suggesting = ref(false);
 const subtaskInput = ref<{ focus: () => void } | null>(null);
 
 watch(
@@ -475,7 +478,14 @@ const moveTargets = computed(() => {
         </div>
 
         <div v-if="!task.parent">
-          <div class="text-body-large font-weight-medium mb-2">{{ t('projects.task.subtasks') }}</div>
+          <div class="d-flex align-center ga-2 mb-2">
+            <div class="text-body-large font-weight-medium">{{ t('projects.task.subtasks') }}</div>
+            <v-spacer />
+            <v-btn v-if="!readOnly" variant="text" size="small" prepend-icon="mdi-creation" @click="suggesting = true">
+              {{ t('projects.ai.suggestSubtasks') }}
+            </v-btn>
+          </div>
+          <SubtaskSuggestionsDialog v-if="!readOnly" v-model="suggesting" :task-id="task.id" />
           <v-list density="compact" class="pa-0">
             <v-list-item v-for="s in task.subtasks" :key="s.id" class="px-0" @click="store.openTask(s.id)">
               <template #prepend>

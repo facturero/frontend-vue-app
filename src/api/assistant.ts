@@ -3,6 +3,9 @@ import type {
   AssistantTurn,
   ConversationDetail,
   ConversationSummary,
+  StatusDraft,
+  SubtaskSuggestion,
+  TaskSummary,
 } from '@/types/assistant';
 
 /**
@@ -44,4 +47,16 @@ export const assistantApi = {
         { timeout: TURN_TIMEOUT_MS },
       )
       .then((r) => r.data),
+
+  // IA de Proyectos: proponen, no guardan. Un modelo local tarda de 15 a 30 s, por eso el mismo tiempo de espera que un turno.
+  summarizeTask: (taskId: string) =>
+    http.post<TaskSummary>(`/assistant/projects/tasks/${taskId}/summary`, {}, { timeout: TURN_TIMEOUT_MS }).then((r) => r.data),
+
+  suggestSubtasks: (taskId: string) =>
+    http
+      .post<{ subtasks: SubtaskSuggestion[] }>(`/assistant/projects/tasks/${taskId}/subtasks`, {}, { timeout: TURN_TIMEOUT_MS })
+      .then((r) => r.data.subtasks),
+
+  draftStatus: (projectId: string) =>
+    http.post<StatusDraft>(`/assistant/projects/${projectId}/status-draft`, {}, { timeout: TURN_TIMEOUT_MS }).then((r) => r.data),
 };

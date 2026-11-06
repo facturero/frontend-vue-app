@@ -4138,6 +4138,33 @@
       "sentHint": "It reached the team as a task. You follow it: you will see its comments and when it is done.",
       "seeRequest": "See my request",
       "another": "Send another"
+    },
+    "ai": {
+      "badge": "AI",
+      "note": "Written by AI from what is in the project: review it before using it.",
+      "failed": "The assistant could not answer. {message}",
+      "summarize": "Summarize",
+      "summaryTitle": "Summary",
+      "decisions": "Decided",
+      "nextSteps": "Pending",
+      "summarizing": "Reading comments and history…",
+      "suggestSubtasks": "Suggest subtasks",
+      "suggestTitle": "Suggested subtasks",
+      "suggestLoading": "Thinking of subtasks… this can take a few seconds.",
+      "suggestEmpty": "The AI did not suggest any new subtasks for this task.",
+      "suggestHint": "Check the ones you want to create. You can edit the title first.",
+      "createSubtasks": "Create subtasks ({n})",
+      "created": "{n} subtasks created.",
+      "draftStatus": "Draft with AI",
+      "drafting": "Drafting…",
+      "overwriteTitle": "Replace what you wrote?",
+      "overwriteText": "The AI will draft the status again and your current text will be lost.",
+      "overwrite": "Replace",
+      "sections": {
+        "accomplished": "What got done",
+        "risks": "Risks",
+        "nextSteps": "What is next"
+      }
     }
   }
 }
