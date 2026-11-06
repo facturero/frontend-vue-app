@@ -275,3 +275,82 @@ export interface AddScheduleExceptionInput {
   closesAt?: string | null;
   reason?: string | null;
 }
+
+// ── Reservas (entregable 2) ──────────────────────────────────────────────────
+
+export type ReservationStatus = 'pending' | 'confirmed' | 'seated' | 'completed' | 'cancelled' | 'no_show';
+export type ReservationSource = 'online' | 'staff';
+
+/** Ajustes del local para recibir reservas del cliente final (página pública y límites). */
+export interface ReservationSettings {
+  id: string;
+  establishmentId: string;
+  /** Interruptor del dueño: apagado, la página pública responde como si el local no existiera. */
+  enabled: boolean;
+  /** Dirección pública (`reservas.noahsolution.com/<publicSlug>`). Única en todo el sistema. */
+  publicSlug: string | null;
+  displayName: string | null;
+  publicNote: string | null;
+  contactPhone: string | null;
+  /** A dónde llega el aviso de cada reserva o cancelación en línea. */
+  notifyEmail: string | null;
+  maxDaysAhead: number;
+  minNoticeMinutes: number;
+  maxPartySize: number;
+  maxTablesPerReservation: number;
+  updatedAt: string;
+}
+
+export type ReservationSettingsInput = Partial<
+  Omit<ReservationSettings, 'id' | 'establishmentId' | 'updatedAt'>
+>;
+
+export interface Reservation {
+  id: string;
+  establishmentId: string;
+  /** Código corto que el cliente puede dictar por teléfono. */
+  code: string;
+  status: ReservationStatus;
+  source: ReservationSource;
+  guestName: string;
+  guestEmail: string | null;
+  guestPhone: string;
+  partySize: number;
+  /** Fecha y hora LOCALES del restaurante. */
+  date: string;
+  time: string;
+  startsAt: string;
+  endsAt: string;
+  notes: string | null;
+  tables: Array<{ id: string; name: string }>;
+  cancelledAt: string | null;
+  cancelledBy: 'guest' | 'staff' | null;
+  cancelReason: string | null;
+  createdAt: string;
+}
+
+export interface AvailabilitySlot {
+  time: string;
+  startsAt: string;
+  shiftLabel: string | null;
+  available: boolean;
+  /** `full`: no hay mesa libre; `notice`: ya pasó o falta antelación. */
+  reason?: 'full' | 'notice';
+}
+
+export interface DayAvailability {
+  date: string;
+  status: 'open' | 'closed' | 'past' | 'too_far';
+  slots: AvailabilitySlot[];
+}
+
+export interface StaffReservationInput {
+  date: string;
+  time: string;
+  partySize: number;
+  guestName: string;
+  guestPhone: string;
+  guestEmail?: string | null;
+  notes?: string | null;
+  tableIds?: string[];
+}

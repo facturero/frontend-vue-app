@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
+import DateField from '@/components/ui/DateField.vue';
 import { useI18n } from 'vue-i18n';
 import { projectsApi } from '@/api/projects';
 import { useProjectsStore } from '@/stores/projects';
@@ -20,7 +21,7 @@ const templates = ref<ProjectTemplate[]>([]);
 const chosen = ref<ProjectTemplate | null>(null);
 const name = ref('');
 const visibility = ref<Visibility>('organization');
-const startOn = ref(localIsoDate(new Date()));
+const startOn = ref<string | null>(localIsoDate(new Date()));
 const saving = ref(false);
 const failure = ref<string | null>(null);
 
@@ -47,7 +48,7 @@ function choose(template: ProjectTemplate): void {
 const valid = computed(() => !!chosen.value && name.value.trim().length > 0 && name.value.trim().length <= 120 && !!startOn.value);
 
 async function create(): Promise<void> {
-  if (!valid.value || !chosen.value) return;
+  if (!valid.value || !chosen.value || !startOn.value) return;
   saving.value = true;
   failure.value = null;
   try {
@@ -100,7 +101,7 @@ function blank(): void {
                   <v-card-title>{{ tpl.name }}</v-card-title>
                   <v-card-subtitle>{{ t('projects.templates.tasks', tpl.taskCount) }}</v-card-subtitle>
                 </v-card-item>
-                <v-card-text class="text-body-2 text-medium-emphasis">{{ tpl.description }}</v-card-text>
+                <v-card-text class="text-body-medium text-medium-emphasis">{{ tpl.description }}</v-card-text>
               </v-card>
             </v-col>
           </v-row>
@@ -108,12 +109,12 @@ function blank(): void {
 
         <div v-else class="d-flex flex-column ga-4">
           <v-alert v-if="failure" type="error">{{ failure }}</v-alert>
-          <div class="text-body-2 text-medium-emphasis">{{ chosen.description }}</div>
+          <div class="text-body-medium text-medium-emphasis">{{ chosen.description }}</div>
           <div class="d-flex flex-wrap ga-2">
             <v-chip v-for="s in chosen.sections" :key="s" size="small" prepend-icon="mdi-view-column-outline">{{ s }}</v-chip>
           </div>
           <v-text-field v-model="name" :label="t('projects.form.name')" :counter="120" autofocus />
-          <v-text-field v-model="startOn" type="date" :label="t('projects.templates.startOn')" :hint="t('projects.templates.startHint')" persistent-hint />
+          <DateField v-model="startOn" :label="t('projects.templates.startOn')" :hint="t('projects.templates.startHint')" persistent-hint />
           <v-radio-group v-model="visibility" :label="t('projects.form.visibility')">
             <v-radio value="organization" :label="t('projects.visibility.organization')" />
             <v-radio value="members" :label="t('projects.visibility.members')" />
@@ -124,7 +125,7 @@ function blank(): void {
         <v-btn v-if="chosen" variant="text" prepend-icon="mdi-arrow-left" @click="chosen = null">{{ t('projects.templates.back') }}</v-btn>
         <v-spacer />
         <v-btn variant="text" @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</v-btn>
-        <v-btn v-if="chosen" color="primary" :loading="saving" :disabled="!valid" @click="create">{{ t('projects.form.create') }}</v-btn>
+        <v-btn variant="flat" v-if="chosen" color="primary" :loading="saving" :disabled="!valid" @click="create">{{ t('projects.form.create') }}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

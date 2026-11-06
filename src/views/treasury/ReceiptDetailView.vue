@@ -5,6 +5,8 @@
  * Administrador) y se rehace. Anular NO borra nada: la aplicación queda en la historia y contabilidad reversa el asiento.
  */
 import { computed, onMounted, ref } from 'vue';
+import { formatDate, formatDateTime } from '@/utils/format';
+import { notify } from '@/composable/useNotify';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
@@ -22,11 +24,10 @@ const store = useTreasuryStore();
 const receiptId = computed(() => route.params.id as string);
 const receipt = computed(() => store.currentReceipt);
 const actions = computed(() => (receipt.value ? receiptActions(receipt.value, (p) => auth.can(p)) : { edit: false, post: false, void: false }));
-const snackbar = ref<string | null>(null);
 const actionError = ref<string | null>(null);
 
 const money = (cents: number) => formatMoney(cents, locale.value, receipt.value?.currencyCode ?? 'USD');
-const dateTime = (iso: string | null) => (iso ? new Date(iso).toLocaleString(locale.value) : '—');
+const dateTime = (iso: string | null) => formatDateTime(iso) || '—';
 
 onMounted(async () => {
   await store.fetchReceipt(receiptId.value);
@@ -48,7 +49,7 @@ async function post(): Promise<void> {
   actionError.value = null;
   try {
     const posted = await store.postReceipt(receiptId.value);
-    snackbar.value = t('treasury.receipts.posted', { number: posted.number });
+    notify.success(t('treasury.receipts.posted', { number: posted.number }));
     await store.fetchCustomer(posted.customerId);
   } catch {
     actionError.value = store.error;
@@ -72,7 +73,7 @@ async function confirmVoid(): Promise<void> {
   try {
     await store.voidReceipt(receiptId.value, reason.value.trim());
     voidDialog.value = false;
-    snackbar.value = t('treasury.receipts.voidedDone');
+    notify.success(t('treasury.receipts.voidedDone'));
     if (store.currentReceipt) await store.fetchCustomer(store.currentReceipt.customerId);
   } catch {
     voidError.value = store.error;
@@ -103,53 +104,53 @@ async function confirmVoid(): Promise<void> {
       <v-row class="mb-2">
         <v-col cols="6" md="3">
           <v-card><v-card-text>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.receipts.received') }}</div>
-            <div class="text-h6">{{ money(receipt.totalCents) }}</div>
-            <div class="text-body-2 text-medium-emphasis">{{ $t(`treasury.receipts.accounts.${receipt.accountRole}`) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.receipts.received') }}</div>
+            <div class="text-title-large">{{ money(receipt.totalCents) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t(`treasury.receipts.accounts.${receipt.accountRole}`) }}</div>
           </v-card-text></v-card>
         </v-col>
         <v-col cols="6" md="3">
           <v-card><v-card-text>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.receipts.applied') }}</div>
-            <div class="text-h6">{{ money(receipt.appliedCents) }}</div>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.receipts.lines', { n: receipt.lineCount }) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.receipts.applied') }}</div>
+            <div class="text-title-large">{{ money(receipt.appliedCents) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.receipts.lines', { n: receipt.lineCount }) }}</div>
           </v-card-text></v-card>
         </v-col>
         <v-col cols="6" md="3">
           <v-card><v-card-text>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.receipts.advanceUsed') }}</div>
-            <div class="text-h6">{{ money(receipt.advanceUsedCents) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.receipts.advanceUsed') }}</div>
+            <div class="text-title-large">{{ money(receipt.advanceUsedCents) }}</div>
           </v-card-text></v-card>
         </v-col>
         <v-col cols="6" md="3">
           <v-card><v-card-text>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.receipts.excess') }}</div>
-            <div class="text-h6">{{ money(receipt.advanceCents) }}</div>
-            <div v-if="receipt.advanceCents > 0" class="text-body-2 text-medium-emphasis">{{ $t('treasury.receipts.becameAdvance') }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.receipts.excess') }}</div>
+            <div class="text-title-large">{{ money(receipt.advanceCents) }}</div>
+            <div v-if="receipt.advanceCents > 0" class="text-body-medium text-medium-emphasis">{{ $t('treasury.receipts.becameAdvance') }}</div>
           </v-card-text></v-card>
         </v-col>
       </v-row>
 
       <v-card class="mb-4">
-        <v-card-title class="d-flex flex-wrap align-center ga-2 text-h6">
+        <v-card-title class="d-flex flex-wrap align-center ga-2 text-title-large">
           {{ $t('treasury.receipts.data') }}
           <v-chip :color="RECEIPT_STATUS_COLOR[receipt.status]" variant="flat" size="small">{{ $t(`treasury.receipts.status.${receipt.status}`) }}</v-chip>
         </v-card-title>
         <v-card-text>
           <div class="d-flex flex-wrap ga-6">
-            <div><div class="text-body-2 text-medium-emphasis">{{ $t('treasury.receipts.date') }}</div>{{ receipt.receiptDate }}</div>
-            <div><div class="text-body-2 text-medium-emphasis">{{ $t('treasury.receipts.method') }}</div>{{ $t(`treasury.receipts.methods.${receipt.method}`) }}</div>
-            <div v-if="receipt.reference"><div class="text-body-2 text-medium-emphasis">{{ $t('treasury.receipts.reference') }}</div>{{ receipt.reference }}</div>
-            <div v-if="receipt.notes"><div class="text-body-2 text-medium-emphasis">{{ $t('treasury.receipts.notes') }}</div>{{ receipt.notes }}</div>
+            <div><div class="text-body-medium text-medium-emphasis">{{ $t('treasury.receipts.date') }}</div>{{ formatDate(receipt.receiptDate) }}</div>
+            <div><div class="text-body-medium text-medium-emphasis">{{ $t('treasury.receipts.method') }}</div>{{ $t(`treasury.receipts.methods.${receipt.method}`) }}</div>
+            <div v-if="receipt.reference"><div class="text-body-medium text-medium-emphasis">{{ $t('treasury.receipts.reference') }}</div>{{ receipt.reference }}</div>
+            <div v-if="receipt.notes"><div class="text-body-medium text-medium-emphasis">{{ $t('treasury.receipts.notes') }}</div>{{ receipt.notes }}</div>
           </div>
-          <div class="text-body-2 text-medium-emphasis mt-3">
+          <div class="text-body-medium text-medium-emphasis mt-3">
             {{ $t('treasury.receipts.history', { created: dateTime(receipt.createdAt), posted: dateTime(receipt.postedAt) }) }}
           </div>
         </v-card-text>
       </v-card>
 
       <v-card class="mb-4">
-        <v-card-title class="text-h6">{{ $t('treasury.receipts.appliedTo') }}</v-card-title>
+        <v-card-title class="text-title-large">{{ $t('treasury.receipts.appliedTo') }}</v-card-title>
         <v-card-text>
           <div v-if="receipt.lines.length === 0" class="text-medium-emphasis">{{ $t('treasury.receipts.noLines') }}</div>
           <v-table v-else density="comfortable">
@@ -165,7 +166,7 @@ async function confirmVoid(): Promise<void> {
       </v-card>
 
       <v-card v-if="receipt.advanceUses.length > 0">
-        <v-card-title class="text-h6">{{ $t('treasury.receipts.advancesConsumed') }}</v-card-title>
+        <v-card-title class="text-title-large">{{ $t('treasury.receipts.advancesConsumed') }}</v-card-title>
         <v-card-text>
           <v-table density="comfortable">
             <tbody>
@@ -184,17 +185,16 @@ async function confirmVoid(): Promise<void> {
         <v-card-title>{{ $t('treasury.receipts.voidTitle', { number: receipt?.number }) }}</v-card-title>
         <v-card-text>
           <v-alert v-if="voidError" type="error" class="mb-4">{{ voidError }}</v-alert>
-          <div class="text-body-2 text-medium-emphasis mb-3">{{ $t('treasury.receipts.voidHint') }}</div>
+          <div class="text-body-medium text-medium-emphasis mb-3">{{ $t('treasury.receipts.voidHint') }}</div>
           <v-textarea v-model="reason" :label="$t('treasury.receipts.voidReason')" :hint="$t('treasury.receipts.voidReasonHint')" persistent-hint rows="2" auto-grow maxlength="300" />
         </v-card-text>
         <v-card-actions class="flex-wrap ga-2">
           <v-spacer />
           <v-btn variant="text" @click="voidDialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="error" :loading="store.saving" :disabled="!reasonOk" @click="confirmVoid">{{ $t('treasury.receipts.void') }}</v-btn>
+          <v-btn variant="flat" color="error" :loading="store.saving" :disabled="!reasonOk" @click="confirmVoid">{{ $t('treasury.receipts.void') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <v-snackbar :model-value="snackbar !== null" timeout="3500" @update:model-value="snackbar = null">{{ snackbar }}</v-snackbar>
   </v-container>
 </template>

@@ -156,7 +156,7 @@ function onAvatarSuccess(fileIds: string[]): void {
                 size="small"
                 rounded="circle"
                 color="primary"
-                elevation="2"
+                elevation="1"
                 class="position-absolute"
                 style="right: 0; bottom: 0; border: 3px solid rgb(var(--v-theme-surface))"
                 :aria-label="$t('profile.changePhoto')"
@@ -170,7 +170,7 @@ function onAvatarSuccess(fileIds: string[]): void {
           </div>
 
           <div v-else class="mt-8">
-            <p class="text-body-2 text-medium-emphasis text-center mb-6">
+            <p class="text-body-medium text-medium-emphasis text-center mb-6">
               {{ isSetup ? $t('profile.setupIntro') : $t('profile.editIntro') }}
             </p>
 
@@ -196,7 +196,7 @@ function onAvatarSuccess(fileIds: string[]): void {
 
             <v-form data-tour="profile-form" class="d-flex flex-column ga-6" @submit.prevent="submit">
               <div>
-                <v-label for="profile-full-name" class="text-body-2 font-weight-medium mb-2">
+                <v-label for="profile-full-name" class="text-body-medium font-weight-medium mb-2">
                   {{ $t('customers.fullName') }}
                   <FieldHelp :text="$t('profile.help.fullName')" />
                 </v-label>
@@ -209,7 +209,7 @@ function onAvatarSuccess(fileIds: string[]): void {
 
               <v-row>
                 <v-col cols="12" sm="5">
-                  <v-label class="text-body-2 font-weight-medium mb-2">
+                  <v-label class="text-body-medium font-weight-medium mb-2">
                     {{ $t('customers.idType') }}
                     <FieldHelp :text="$t('profile.help.idType')" />
                   </v-label>
@@ -224,7 +224,7 @@ function onAvatarSuccess(fileIds: string[]): void {
                   />
                 </v-col>
                 <v-col cols="12" sm="7">
-                  <v-label for="profile-id-number" class="text-body-2 font-weight-medium mb-2">
+                  <v-label for="profile-id-number" class="text-body-medium font-weight-medium mb-2">
                     {{ identificationType === 'ruc' ? $t('profile.rucNumber') : $t('customers.idNumber') }}
                     <FieldHelp :text="$t('profile.help.idNumber')" />
                   </v-label>

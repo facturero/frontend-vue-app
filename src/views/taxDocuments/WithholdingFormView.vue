@@ -7,6 +7,7 @@
  * el valor antes de enviar; el servidor lo recalcula y manda. Una vez enviado a autorización no se edita: se emite otro.
  */
 import { computed, onMounted, reactive, ref, watch } from 'vue';
+import DateField from '@/components/ui/DateField.vue';
 import { useRouter } from 'vue-router';
 import { useTaxDocumentsStore } from '@/stores/taxDocuments';
 import {
@@ -225,14 +226,14 @@ onMounted(async () => {
 
     <v-form @submit.prevent="submit">
       <v-card class="mb-4">
-        <v-card-title class="text-h6">{{ $t('taxDocuments.issuer') }}</v-card-title>
+        <v-card-title class="text-title-large">{{ $t('taxDocuments.issuer') }}</v-card-title>
         <v-card-text>
           <IssuerPicker v-model:establishment-id="establishmentId" v-model:emission-point-id="emissionPointId" />
         </v-card-text>
       </v-card>
 
       <v-card class="mb-4">
-        <v-card-title class="text-h6">{{ $t('taxDocuments.withholdings.supplier') }}</v-card-title>
+        <v-card-title class="text-title-large">{{ $t('taxDocuments.withholdings.supplier') }}</v-card-title>
         <v-card-text>
           <v-row>
             <v-col cols="12" sm="3">
@@ -262,7 +263,7 @@ onMounted(async () => {
       </v-card>
 
       <v-card class="mb-4">
-        <v-card-title class="text-h6">{{ $t('taxDocuments.withholdings.support') }}</v-card-title>
+        <v-card-title class="text-title-large">{{ $t('taxDocuments.withholdings.support') }}</v-card-title>
         <v-card-subtitle>{{ $t('taxDocuments.withholdings.supportHint') }}</v-card-subtitle>
         <v-card-text>
           <v-row>
@@ -280,7 +281,7 @@ onMounted(async () => {
               <v-text-field v-model="support.number" :label="$t('taxDocuments.withholdings.supportNumber')" placeholder="000-000-000000000" maxlength="17" />
             </v-col>
             <v-col cols="12" sm="4">
-              <v-text-field v-model="support.issueDate" :label="$t('taxDocuments.withholdings.supportDate')" type="date" :max="todayIso()" />
+              <DateField v-model="support.issueDate" :label="$t('taxDocuments.withholdings.supportDate')" :max="todayIso()" />
             </v-col>
             <v-col cols="12" sm="6">
               <v-select
@@ -304,7 +305,7 @@ onMounted(async () => {
             </v-col>
           </v-row>
 
-          <div class="text-subtitle-2 mb-2">{{ $t('taxDocuments.withholdings.amounts') }}</div>
+          <div class="text-title-small mb-2">{{ $t('taxDocuments.withholdings.amounts') }}</div>
           <v-row>
             <v-col cols="12" sm="4">
               <v-text-field v-model="support.subtotal" :label="$t('taxDocuments.withholdings.subtotal')" inputmode="decimal" />
@@ -333,13 +334,13 @@ onMounted(async () => {
             <v-btn variant="text" color="primary" prepend-icon="mdi-plus" @click="taxes.push(newTax())">
               {{ $t('taxDocuments.withholdings.addTax') }}
             </v-btn>
-            <div class="text-h6">{{ $t('taxDocuments.withholdings.supportTotal') }}: {{ fromCents(totalCents) }}</div>
+            <div class="text-title-large">{{ $t('taxDocuments.withholdings.supportTotal') }}: {{ fromCents(totalCents) }}</div>
           </div>
         </v-card-text>
       </v-card>
 
       <v-card class="mb-4">
-        <v-card-title class="text-h6">{{ $t('taxDocuments.withholdings.retained') }}</v-card-title>
+        <v-card-title class="text-title-large">{{ $t('taxDocuments.withholdings.retained') }}</v-card-title>
         <v-card-subtitle>{{ $t('taxDocuments.withholdings.retainedHint') }}</v-card-subtitle>
         <v-card-text>
           <v-row v-for="(row, i) in rows" :key="i">
@@ -379,7 +380,7 @@ onMounted(async () => {
             <v-btn variant="text" color="primary" prepend-icon="mdi-plus" @click="addRow()">
               {{ $t('taxDocuments.withholdings.addRetention') }}
             </v-btn>
-            <div class="text-h6">{{ $t('taxDocuments.withholdings.totalWithheld') }}: {{ fromCents(totalWithheldCents) }}</div>
+            <div class="text-title-large">{{ $t('taxDocuments.withholdings.totalWithheld') }}: {{ fromCents(totalWithheldCents) }}</div>
           </div>
         </v-card-text>
       </v-card>

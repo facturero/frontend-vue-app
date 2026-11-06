@@ -66,7 +66,7 @@ async function submit(): Promise<void> {
       <v-card-actions>
         <v-spacer />
         <v-btn variant="text" @click="close">{{ $t('common.cancel') }}</v-btn>
-        <v-btn color="primary" :loading="orgDialogSaving" :disabled="!quickTaxId" @click="submit">
+        <v-btn variant="flat" color="primary" :loading="orgDialogSaving" :disabled="!quickTaxId" @click="submit">
           {{ $t('common.save') }}
         </v-btn>
       </v-card-actions>

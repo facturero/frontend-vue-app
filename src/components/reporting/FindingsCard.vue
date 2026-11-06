@@ -17,7 +17,7 @@ const warnings = computed(() => props.findings.length - errors.value);
 
 <template>
   <v-card>
-    <v-card-title class="text-h6">
+    <v-card-title class="text-title-large">
       {{ $t('reporting.findings.title') }}
       <v-chip v-if="errors > 0" color="error" size="small" class="ml-2">{{ $t('reporting.findings.errors', { n: errors }, errors) }}</v-chip>
       <v-chip v-if="warnings > 0" color="warning" size="small" class="ml-2">{{ $t('reporting.findings.warnings', { n: warnings }, warnings) }}</v-chip>
@@ -25,7 +25,7 @@ const warnings = computed(() => props.findings.length - errors.value);
     <v-card-text>
       <v-alert v-if="findings.length === 0" type="success">{{ $t('reporting.findings.none') }}</v-alert>
       <template v-else>
-        <p class="text-body-2 text-medium-emphasis mb-4">{{ $t('reporting.findings.intro') }}</p>
+        <p class="text-body-medium text-medium-emphasis mb-4">{{ $t('reporting.findings.intro') }}</p>
         <v-list>
           <v-list-item v-for="f in sorted" :key="f.id" :prepend-icon="severityIcon(f.severity)" :base-color="severityColor(f.severity)">
             <v-list-item-title class="text-wrap">{{ f.message }}</v-list-item-title>

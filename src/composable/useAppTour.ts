@@ -52,7 +52,9 @@ let _prevRail = true;
 let _prevDrawer = true;
 
 /** `.driver-popover.app-tour` y elementos de su árbol. */
-function applyThemeVars(colors: Record<string, string | undefined>): void {
+// Vuetify 4 admite colores de tema como objeto (RGB/HSV), no solo texto: aquí solo sirve el texto (hex), lo demás cae al respaldo.
+function applyThemeVars(themeColors: Readonly<Record<string, unknown>>): void {
+  const colors = Object.fromEntries(Object.entries(themeColors).filter((e): e is [string, string] => typeof e[1] === 'string'));
   const root = document.documentElement.style;
   root.setProperty('--tour-primary', colors.primary ?? '#5D87FF');
   root.setProperty('--tour-on-primary', colors['on-primary'] ?? '#FFFFFF');

@@ -185,6 +185,15 @@ Aquí está la diferencia real entre "un Vuetify genérico" y "parece Modernize"
 | `plugins/PluginCatalogTab.vue` | `eCommerce` (listado) | Tarjetas con imagen y precio |
 | `plugins/CustomRequestsTab.vue` | `tickets` | Lista con chips de estado |
 
+> **Estado real (2026-10-19): las fases 2 y 3 están aplicadas salvo el dashboard.** Verificado contra el código, no contra este plan (el inventario de arriba es del 2026-09-04):
+>
+> - `PageHeader` ya es el panel `lightprimary` (el patrón de mayor retorno). `RoleBadge` usa `light*` + `flat`. `NotificationBell` y `MessageInbox` ya son listas con avatar + título + texto secundario. `LocaleSwitcher` ya usa banderas (`fi fi-*`). Las pestañas de plugins (`MyPluginsTab`, `PluginCatalogTab`, `CustomRequestsTab`) ya son rejillas/tarjetas con chips `light*` + `flat`.
+> - Arquetipo A: `AuthView` ya es de dos columnas con el token `auth-panel` (y `ResetPasswordView`/`AcceptInviteView` heredan el contenedor).
+> - Arquetipos C, D, E, F y G: se resuelven en los `defaults` de `vuetify.ts` (radio/sombra de `card-surface`, `VDataTable`) y en los tokens, así que las vistas heredan sin tocarse. `AccountSettingsView` (Ajustes con pestañas) existe.
+> - **Queda solo el arquetipo B (`HomeView`)**: es diseño de producto (qué métricas muestra), no estilo — decisión del dueño (§«Lo que este plan no cubre», punto 2).
+> - El inventario de los «3 ficheros con `<style>`» está caducado: hoy son `AppNavigationDrawer`, `AssistantPanel`, `ImageUploader`, `InvoiceLinesEditor` e `InvoiceTotals`. Todos son **componentes** (no vistas) y su `<style>` es real (posiciones, overlays, lienzos): `lint:ui` solo prohíbe `<style>` en vistas. `ImageUploader` sigue siendo el caso a vigilar.
+> - Iconos: se mantiene **MDI** (opción A). Migrar a Tabler (73 iconos, 130 usos) sigue sin bloqueo.
+
 ---
 
 ## FASE 3 — Vistas (22)

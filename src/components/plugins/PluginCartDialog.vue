@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue';
+import { formatDate as fmtDate } from '@/utils/format';
 import { useI18n } from 'vue-i18n';
 import { usePluginCartStore } from '@/stores/pluginCart';
 import type { CartQuoteItem } from '@/types/plugins';
@@ -17,7 +18,7 @@ function formatPrice(cents: number): string {
 }
 
 function formatDate(iso: string): string {
-  return new Intl.DateTimeFormat(locale.value, { dateStyle: 'long' }).format(new Date(iso));
+  return fmtDate(iso);
 }
 
 function priceOf(item: CartQuoteItem): string {
@@ -54,12 +55,12 @@ function discountErrorText(error: { code: string; message: string }): string {
         <div v-if="!cart.count" class="text-center text-medium-emphasis pa-6">{{ $t('plugins.cart.empty') }}</div>
 
         <template v-else-if="cart.quote">
-          <div class="text-subtitle-2 mb-2">{{ $t('plugins.cart.chosen') }}</div>
+          <div class="text-title-small mb-2">{{ $t('plugins.cart.chosen') }}</div>
           <v-list class="mb-4">
             <v-list-item v-for="i in selected" :key="i.plugin.code">
               <v-list-item-title class="text-wrap">{{ i.plugin.name }}</v-list-item-title>
               <template #append>
-                <span class="text-body-2 mr-2">{{ priceOf(i) }}</span>
+                <span class="text-body-medium mr-2">{{ priceOf(i) }}</span>
                 <v-btn
                   icon="mdi-close"
                   size="x-small"
@@ -72,7 +73,7 @@ function discountErrorText(error: { code: string; message: string }): string {
           </v-list>
 
           <template v-if="extras.length">
-            <div class="text-subtitle-2 mb-2">{{ $t('plugins.cart.alsoIncluded') }}</div>
+            <div class="text-title-small mb-2">{{ $t('plugins.cart.alsoIncluded') }}</div>
             <v-list class="mb-4">
               <v-list-item v-for="i in extras" :key="i.plugin.code">
                 <v-list-item-title class="text-wrap">{{ i.plugin.name }}</v-list-item-title>
@@ -83,7 +84,7 @@ function discountErrorText(error: { code: string; message: string }): string {
                   <v-chip v-if="i.kind === 'already_active'" size="x-small" color="primary" class="mr-2">
                     {{ $t('plugins.alreadyActive') }}
                   </v-chip>
-                  <span v-else class="text-body-2">{{ priceOf(i) }}</span>
+                  <span v-else class="text-body-medium">{{ priceOf(i) }}</span>
                 </template>
               </v-list-item>
             </v-list>
@@ -123,21 +124,21 @@ function discountErrorText(error: { code: string; message: string }): string {
           <div class="d-flex justify-end align-center ga-2">
             <span
               v-if="cart.quote.total_after_discount !== undefined"
-              class="text-body-1 text-medium-emphasis text-decoration-line-through"
+              class="text-body-large text-medium-emphasis text-decoration-line-through"
             >
               {{ formatPrice(cart.quote.total_monthly) }}
             </span>
-            <span :class="cart.quote.total_with_vat === undefined ? 'text-h6' : 'text-body-1'">
+            <span :class="cart.quote.total_with_vat === undefined ? 'text-title-large' : 'text-body-large'">
               {{ $t('plugins.monthlySubtotal') }}
               {{ formatPrice(cart.quote.total_after_discount ?? cart.quote.total_monthly) }}
             </span>
           </div>
           <template v-if="cart.quote.total_with_vat !== undefined">
-            <div class="d-flex justify-end text-body-2 text-medium-emphasis">
+            <div class="d-flex justify-end text-body-medium text-medium-emphasis">
               {{ $t('plugins.vatLine', { percent: cart.quote.vat_percent }) }}
               {{ formatPrice(cart.quote.vat_cents ?? 0) }}
             </div>
-            <div class="d-flex justify-end text-h6">
+            <div class="d-flex justify-end text-title-large">
               {{ $t('plugins.monthlyTotal') }}
               {{ formatPrice(cart.quote.total_with_vat) }}
             </div>

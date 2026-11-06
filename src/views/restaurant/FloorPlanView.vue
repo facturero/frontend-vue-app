@@ -11,6 +11,7 @@
  * pierde del todo; aun así se pide confirmación, porque no están en el servidor.
  */
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
+import { notify } from '@/composable/useNotify';
 import { onBeforeRouteLeave } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
@@ -41,7 +42,6 @@ const saveError = ref<string | null>(null);
 const noFloor = ref(false);
 const restoredDraft = ref(false);
 const saving = ref(false);
-const snackbar = ref<string | null>(null);
 
 const conflictOpen = ref(false);
 const leaveOpen = ref(false);
@@ -104,7 +104,7 @@ async function save(): Promise<void> {
     const floor = await restaurant.savePlan(id, editor.toPayload());
     editor.markSaved(floor);
     restoredDraft.value = false;
-    snackbar.value = t('restaurant.plan.saved');
+    notify.success(t('restaurant.plan.saved'));
   } catch (e) {
     if (extractErrorCode(e) === 'PLAN_VERSION_CONFLICT') conflictOpen.value = true;
     else saveError.value = restaurant.error;
@@ -124,7 +124,7 @@ async function reloadAfterConflict(): Promise<void> {
 async function copyMine(): Promise<void> {
   try {
     await navigator.clipboard.writeText(JSON.stringify(editor.toPayload(), null, 2));
-    snackbar.value = t('restaurant.plan.conflictCopied');
+    notify.success(t('restaurant.plan.conflictCopied'));
   } catch {
     saveError.value = t('restaurant.plan.saveError');
   }
@@ -133,7 +133,7 @@ async function copyMine(): Promise<void> {
 /** «Unir paredes»: pega los extremos que casi llegaban a otra pared y dice cuántos arregló. */
 function joinWalls(): void {
   const joined = editor.joinWalls();
-  snackbar.value = joined > 0 ? t('restaurant.plan.joined', { count: joined }) : t('restaurant.plan.nothingToJoin');
+  notify.success(joined > 0 ? t('restaurant.plan.joined', { count: joined }) : t('restaurant.plan.nothingToJoin'));
 }
 
 function openRoom(): void {
@@ -293,9 +293,9 @@ function leaveAnyway(): void {
           v-if="editor.activeTool === 'wall'"
           class="pa-2 position-absolute d-flex align-center ga-3 flex-wrap"
           style="top: 8px; left: 8px; right: 8px; pointer-events: none"
-          elevation="2"
+          elevation="1"
         >
-          <span class="text-body-2 text-medium-emphasis">{{ $t('restaurant.plan.wallHint') }}</span>
+          <span class="text-body-medium text-medium-emphasis">{{ $t('restaurant.plan.wallHint') }}</span>
           <v-text-field
             v-if="editor.wallAnchor"
             v-model.number="wallLengthM"
@@ -349,7 +349,7 @@ function leaveAnyway(): void {
       <v-card>
         <v-card-title>{{ $t('restaurant.plan.roomTitle') }}</v-card-title>
         <v-card-text class="d-flex flex-column ga-3">
-          <p class="text-body-2 text-medium-emphasis">{{ $t('restaurant.plan.roomIntro') }}</p>
+          <p class="text-body-medium text-medium-emphasis">{{ $t('restaurant.plan.roomIntro') }}</p>
           <div v-if="roomError"><v-alert type="error">{{ roomError }}</v-alert></div>
           <div class="d-flex ga-3">
             <v-text-field v-model.number="roomForm.widthM" type="number" min="1" step="0.5" :label="$t('restaurant.plan.roomWidth')" suffix="m" />
@@ -364,6 +364,5 @@ function leaveAnyway(): void {
       </v-card>
     </v-dialog>
 
-    <v-snackbar :model-value="snackbar !== null" color="success" @update:model-value="snackbar = null">{{ snackbar }}</v-snackbar>
   </v-container>
 </template>

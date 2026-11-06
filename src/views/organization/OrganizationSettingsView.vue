@@ -157,7 +157,7 @@ async function submit(): Promise<void> {
       <v-col cols="12">
         <v-card>
           <v-card-text>
-            <p class="text-body-2 text-medium-emphasis mb-4">
+            <p class="text-body-medium text-medium-emphasis mb-4">
               {{ $t('organization.settingsIntro') }}
             </p>
 
@@ -241,7 +241,7 @@ async function submit(): Promise<void> {
               <v-expansion-panels v-if="countryCode === 'EC'" variant="accordion" class="mb-4">
                 <v-expansion-panel :title="$t('organization.sriProfile.title')">
                   <v-expansion-panel-text>
-                    <p class="text-body-2 text-medium-emphasis mb-4">{{ $t('organization.sriProfile.intro') }}</p>
+                    <p class="text-body-medium text-medium-emphasis mb-4">{{ $t('organization.sriProfile.intro') }}</p>
 
                     <v-select
                       v-model="contribuyenteRimpe"
@@ -309,8 +309,8 @@ async function submit(): Promise<void> {
         <v-card class="mt-2">
           <v-card-text class="d-flex align-center justify-space-between">
             <div>
-              <p class="text-body-1 font-weight-medium mb-1">{{ $t('organization.establishmentsCard') }}</p>
-              <p class="text-body-2 text-medium-emphasis mb-0">
+              <p class="text-body-large font-weight-medium mb-1">{{ $t('organization.establishmentsCard') }}</p>
+              <p class="text-body-medium text-medium-emphasis mb-0">
                 {{ $t('organization.establishmentsCardHint') }}
               </p>
             </div>
@@ -327,8 +327,8 @@ async function submit(): Promise<void> {
         <v-card class="mt-2">
           <v-card-text class="d-flex align-center justify-space-between">
             <div>
-              <p class="text-body-1 font-weight-medium mb-1">{{ $t('organization.certificateCard') }}</p>
-              <p class="text-body-2 text-medium-emphasis mb-0">
+              <p class="text-body-large font-weight-medium mb-1">{{ $t('organization.certificateCard') }}</p>
+              <p class="text-body-medium text-medium-emphasis mb-0">
                 {{ $t('organization.certificateCardHint') }}
               </p>
             </div>

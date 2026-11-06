@@ -104,7 +104,7 @@ async function removeLine(lineId: string) {
 
   <!-- Captura de la línea nueva: columnas de Vuetify en vez de una fila de la tabla, para que en el teléfono se apile y el botón
        no quede fuera de la pantalla dentro del desplazamiento horizontal de la tabla. -->
-  <v-row dense class="mb-2">
+  <v-row density="compact" class="mb-2">
     <v-col cols="12" md="4">
       <v-select
         v-model="newLine.productId"

@@ -1,10 +1,8 @@
 import type { CustomField, DirectoryUser, FieldType, FieldValue, LinkEntity, MyTask, ProjectColor, ProjectHealth } from '@/types/projects';
+import { localIsoDate } from './isoDate';
 
-/** Fecha local `YYYY-MM-DD` (no `toISOString`, que es UTC: a las 20:00 en Ecuador ya diría «mañana»). */
-export function localIsoDate(d: Date): string {
-  const p = (n: number) => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
-}
+// Vive en utils/isoDate.ts (la usan otros módulos); se reexporta aquí para no tocar los imports de Proyectos.
+export { localIsoDate };
 
 export function addDays(iso: string, days: number): string {
   const [y, m, d] = iso.split('-').map(Number);

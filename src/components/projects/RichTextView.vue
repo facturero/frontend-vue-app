@@ -45,7 +45,7 @@ function render(node: RichDoc, key: number): VNodeChild {
     case 'blockquote':
       return h('blockquote', { key, class: 'pl-3 border-s-md text-medium-emphasis mb-1' }, kids());
     case 'codeBlock':
-      return h('pre', { key, class: 'bg-surface-variant pa-2 rounded mb-1 text-body-2' }, kids());
+      return h('pre', { key, class: 'bg-surface-variant pa-2 rounded mb-1 text-body-medium' }, kids());
     default:
       return null;
   }

@@ -4,6 +4,7 @@
  * facturas y las retenciones ya la citan; si estaba mal, se desactiva y se crea otro. Los proveedores no se borran: se desactivan.
  */
 import { computed, onMounted, ref, watch } from 'vue';
+import { notify } from '@/composable/useNotify';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { usePurchasingStore } from '@/stores/purchasing';
@@ -18,7 +19,6 @@ const store = usePurchasingStore();
 const canManage = computed(() => auth.can('supplier:manage'));
 const search = ref('');
 const showInactive = ref(false);
-const snackbar = ref<string | null>(null);
 
 const dialog = ref(false);
 const editing = ref<Supplier | null>(null);
@@ -108,7 +108,7 @@ async function save(): Promise<void> {
   try {
     await store.saveSupplier(editing.value?.id ?? null, input);
     dialog.value = false;
-    snackbar.value = t(editing.value ? 'purchasing.suppliers.updated' : 'purchasing.suppliers.created');
+    notify.success(t(editing.value ? 'purchasing.suppliers.updated' : 'purchasing.suppliers.created'));
     await load();
   } catch {
     formError.value = store.error;
@@ -118,10 +118,10 @@ async function save(): Promise<void> {
 async function toggle(supplier: Supplier): Promise<void> {
   try {
     await store.setSupplierActive(supplier.id, supplier.status !== 'active');
-    snackbar.value = t(supplier.status === 'active' ? 'purchasing.suppliers.deactivated' : 'purchasing.suppliers.activated');
+    notify.success(t(supplier.status === 'active' ? 'purchasing.suppliers.deactivated' : 'purchasing.suppliers.activated'));
     await load();
   } catch {
-    snackbar.value = store.error;
+    notify.error(store.error);
   }
 }
 </script>
@@ -149,15 +149,15 @@ async function toggle(supplier: Supplier): Promise<void> {
         <v-data-table :headers="headers" :items="store.suppliers" :loading="store.loading" :items-per-page="-1" hide-default-footer>
           <template #item.identification="{ item }">
             {{ item.identification }}
-            <div class="text-body-2 text-medium-emphasis">{{ $t(`purchasing.idTypes.${item.identificationType}`) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t(`purchasing.idTypes.${item.identificationType}`) }}</div>
           </template>
           <template #item.legalName="{ item }">
             {{ item.legalName }}
-            <div v-if="item.tradeName" class="text-body-2 text-medium-emphasis">{{ item.tradeName }}</div>
+            <div v-if="item.tradeName" class="text-body-medium text-medium-emphasis">{{ item.tradeName }}</div>
           </template>
           <template #item.contact="{ item }">
             <div>{{ item.email ?? '—' }}</div>
-            <div class="text-body-2 text-medium-emphasis">{{ item.phone ?? '' }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ item.phone ?? '' }}</div>
           </template>
           <template #item.paymentTermDays="{ item }">
             {{ item.paymentTermDays === 0 ? $t('purchasing.suppliers.cash') : $t('purchasing.suppliers.days', { n: item.paymentTermDays }) }}
@@ -237,11 +237,10 @@ async function toggle(supplier: Supplier): Promise<void> {
         <v-card-actions class="flex-wrap ga-2">
           <v-spacer />
           <v-btn variant="text" @click="dialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="primary" :loading="store.saving" :disabled="!canSave" @click="save">{{ $t('common.save') }}</v-btn>
+          <v-btn variant="flat" color="primary" :loading="store.saving" :disabled="!canSave" @click="save">{{ $t('common.save') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <v-snackbar :model-value="snackbar !== null" timeout="3000" @update:model-value="snackbar = null">{{ snackbar }}</v-snackbar>
   </v-container>
 </template>

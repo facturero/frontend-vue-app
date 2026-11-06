@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue';
+import { formatDate as fmtDate } from '@/utils/format';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useInvoiceStore } from '@/stores/invoices';
@@ -12,7 +13,7 @@ import type { TaxRate } from '@/types/products';
 import FiscalStatusCard from '@/components/invoices/FiscalStatusCard.vue';
 
 const props = defineProps<{ id: string }>();
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 const store = useInvoiceStore();
@@ -97,8 +98,8 @@ const statusColor = (status: string) => {
 
 const formatMoney = (cents: number) => (cents / 100).toFixed(2);
 const formatDate = (date: string | null) => {
-  if (!date) return '-';
-  return new Date(date).toLocaleDateString(locale.value, { year: 'numeric', month: 'long', day: 'numeric' });
+  // `YYYY-MM-DD` se lee como día LOCAL (utils/isoDate): con `new Date(...)` salía el día anterior en Ecuador.
+  return fmtDate(date) || '-';
 };
 
 function downloadFile(fileId: string) {
@@ -240,46 +241,23 @@ onMounted(async () => {
 
 <template>
   <v-container fluid>
-    <v-row align="center" class="mb-4">
+    <v-row class="mb-4 align-center">
       <v-col>
-        <v-btn variant="text" prepend-icon="mdi-arrow-left" @click="router.push('/invoices')">
+        <v-btn variant="text" prepend-icon="mdi-arrow-left" @click="router.push('/invoices');">
           {{ $t('common.back') }}
         </v-btn>
       </v-col>
       <v-col class="d-flex flex-wrap justify-end ga-2">
-        <v-btn
-          v-if="store.current?.status === 'draft' && canUpdate"
-          color="primary"
-          variant="tonal"
-          prepend-icon="mdi-pencil"
-          @click="router.push(`/invoices/${invoiceId}/edit`)"
-        >
+        <v-btn v-if="store.current?.status === 'draft' && canUpdate" color="primary" variant="tonal" prepend-icon="mdi-pencil" @click="router.push(`/invoices/${invoiceId}/edit`);">
           {{ $t('common.edit') }}
         </v-btn>
-        <v-btn
-          v-if="canCreditNote"
-          color="primary"
-          variant="tonal"
-          prepend-icon="mdi-credit-card-refund"
-          @click="openCreditNoteDialog"
-        >
+        <v-btn v-if="canCreditNote" color="primary" variant="tonal" prepend-icon="mdi-credit-card-refund" @click="openCreditNoteDialog">
           {{ $t('invoices.creditNote') }}
         </v-btn>
-        <v-btn
-          v-if="canDebitNote"
-          color="primary"
-          variant="tonal"
-          prepend-icon="mdi-cash-plus"
-          @click="openDebitNoteDialog"
-        >
+        <v-btn v-if="canDebitNote" color="primary" variant="tonal" prepend-icon="mdi-cash-plus" @click="openDebitNoteDialog">
           {{ $t('invoices.debitNote') }}
         </v-btn>
-        <v-btn
-          v-if="store.current?.status === 'issued' && canVoid"
-          color="error"
-          prepend-icon="mdi-cancel"
-          @click="voidDialog = true"
-        >
+        <v-btn v-if="store.current?.status === 'issued' && canVoid" color="error" prepend-icon="mdi-cancel" @click="voidDialog = true;">
           {{ $t('invoices.void') }}
         </v-btn>
       </v-col>
@@ -357,7 +335,7 @@ onMounted(async () => {
         <v-card-text class="text-right">
           <div><strong>{{ $t('invoices.subtotal') }}:</strong> {{ store.current.subtotal }}</div>
           <div><strong>{{ $t('invoices.taxTotal') }}:</strong> {{ store.current.taxTotal }}</div>
-          <div class="text-h6"><strong>{{ $t('invoices.total') }}:</strong> {{ store.current.total }}</div>
+          <div class="text-title-large"><strong>{{ $t('invoices.total') }}:</strong> {{ store.current.total }}</div>
         </v-card-text>
       </v-card>
 
@@ -381,7 +359,7 @@ onMounted(async () => {
                 v-for="doc in documents"
                 :key="doc.id"
                 :title="doc.originalName"
-                :subtitle="`${doc.mimeType} - ${new Date(doc.createdAt).toLocaleDateString(locale)}`"
+                :subtitle="`${doc.mimeType} - ${fmtDate(doc.createdAt)}`"
               >
                 <template #append>
                   <v-btn
@@ -414,7 +392,7 @@ onMounted(async () => {
         <v-card-actions>
           <v-spacer />
           <v-btn variant="text" @click="voidDialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="error" :disabled="!voidReason" :loading="store.saving" @click="handleVoid">
+          <v-btn variant="flat" color="error" :disabled="!voidReason" :loading="store.saving" @click="handleVoid">
             {{ $t('invoices.voidInvoice') }}
           </v-btn>
         </v-card-actions>
@@ -428,7 +406,7 @@ onMounted(async () => {
           <v-alert v-if="creditNoteError" type="error" class="mb-4">
             {{ creditNoteError }}
           </v-alert>
-          <p class="text-caption text-medium-emphasis mb-4">
+          <p class="text-body-small text-medium-emphasis mb-4">
             {{ $t('invoices.creditNoteHint') }}
           </p>
           <v-textarea
@@ -454,7 +432,7 @@ onMounted(async () => {
         <v-card-actions>
           <v-spacer />
           <v-btn variant="text" @click="creditNoteDialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn
+          <v-btn variant="flat"
             color="primary"
             :loading="creditNoteSaving"
             :disabled="!creditNoteReason || !creditNoteEstablishmentId || !creditNoteEmissionPointId"
@@ -473,10 +451,10 @@ onMounted(async () => {
           <v-alert v-if="debitNoteError" type="error" class="mb-4">
             {{ debitNoteError }}
           </v-alert>
-          <p class="text-body-2 text-medium-emphasis mb-4">
+          <p class="text-body-medium text-medium-emphasis mb-4">
             {{ $t('invoices.debitNoteHint') }}
           </p>
-          <v-row v-for="(motive, i) in debitNoteMotives" :key="i" dense>
+          <v-row v-for="(motive, i) in debitNoteMotives" :key="i" density="compact">
             <v-col cols="12" sm="5">
               <v-text-field v-model="motive.reason" :label="$t('invoices.debitNoteMotive')" maxlength="300" />
             </v-col>
@@ -529,14 +507,14 @@ onMounted(async () => {
               :disabled="!debitNoteEstablishmentId"
             />
           </v-sheet>
-          <div class="text-h6 text-right">
+          <div class="text-title-large text-right">
             {{ $t('invoices.debitNoteTotal') }}: {{ debitNoteTotal }}
           </div>
         </v-card-text>
         <v-card-actions>
           <v-spacer />
           <v-btn variant="text" @click="debitNoteDialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn
+          <v-btn variant="flat"
             color="primary"
             :loading="debitNoteSaving"
             :disabled="!debitMotivesValid || !debitNoteEstablishmentId || !debitNoteEmissionPointId"

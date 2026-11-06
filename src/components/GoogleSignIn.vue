@@ -48,7 +48,7 @@ onMounted(() => {
 
     <div class="d-flex align-center ga-4 my-6">
       <v-divider />
-      <span class="text-body-2 text-medium-emphasis flex-shrink-0">{{ dividerLabel }}</span>
+      <span class="text-body-medium text-medium-emphasis flex-shrink-0">{{ dividerLabel }}</span>
       <v-divider />
     </div>
   </div>

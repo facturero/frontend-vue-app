@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+import { useConfirm } from '@/composable/useConfirm';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { useOrganizationStore } from '@/stores/organization';
@@ -9,6 +10,7 @@ import PageHeader from '@/components/ui/PageHeader.vue';
 import { getSocket } from '@/utils/realtime';
 
 const { t } = useI18n();
+const confirm = useConfirm();
 const auth = useAuthStore();
 const store = useOrganizationStore();
 const themeStore = usePosThemeStore();
@@ -85,11 +87,13 @@ function closePairingDialog(): void {
 
 async function handleUnlink(ep: EmissionPointDTO): Promise<void> {
   if (!selected.value) return;
-  const confirmed = confirm(
-    t('establishments.unlinkConfirm', {
+  const confirmed = await confirm({
+    title: t('establishments.unlinkConfirm', {
       name: ep.name || t('establishments.pointFallback', { code: ep.code }),
     }),
-  );
+    confirmText: t('establishments.unlink'),
+    destructive: true,
+  });
   if (!confirmed) return;
   await store.unlinkEmissionPoint(selected.value.id, ep.id);
 }
@@ -152,7 +156,7 @@ onUnmounted(() => {
       <v-col cols="12" md="5">
         <v-card>
           <v-card-title class="d-flex align-center justify-space-between">
-            <span class="text-body-1 font-weight-medium">{{ $t('establishments.listTitle') }}</span>
+            <span class="text-body-large font-weight-medium">{{ $t('establishments.listTitle') }}</span>
             <v-btn v-if="canCreate" size="small" variant="tonal" color="primary" prepend-icon="mdi-plus"
               @click="showEstablishmentDialog = true">
               {{ $t('establishments.new') }}
@@ -186,7 +190,7 @@ onUnmounted(() => {
       <v-col cols="12" md="7">
         <v-card v-if="selected">
           <v-card-title class="d-flex align-center justify-space-between">
-            <span class="text-body-1 font-weight-medium">
+            <span class="text-body-large font-weight-medium">
               {{ $t('establishments.pointsFor', { name: selected.name }) }}
             </span>
             <v-btn v-if="canCreate" size="small" variant="tonal" color="primary" prepend-icon="mdi-plus"
@@ -203,7 +207,7 @@ onUnmounted(() => {
                 </v-chip>
               </v-list-item-title>
               <v-list-item-subtitle class="d-flex align-center ga-2">
-                <span class="text-caption">{{ $t('establishments.code', { code: ep.code }) }}</span>
+                <span class="text-body-small">{{ $t('establishments.code', { code: ep.code }) }}</span>
                 <v-chip size="x-small" variant="flat" :color="ep.status === 'active' ? 'lightsuccess' : 'lightwarning'">
                   {{ ep.status === 'active' ? $t('common.active') : $t('common.inactive') }}
                 </v-chip>
@@ -266,7 +270,7 @@ onUnmounted(() => {
               </v-list-item-title>
             </v-list-item>
           </v-list>
-          <v-card-text class="text-caption text-medium-emphasis">
+          <v-card-text class="text-body-small text-medium-emphasis">
             {{ $t('establishments.idHint', { id: selected.id }) }}
           </v-card-text>
         </v-card>
@@ -298,7 +302,7 @@ onUnmounted(() => {
         <v-card-actions>
           <v-spacer />
           <v-btn variant="text" @click="showEstablishmentDialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="primary" :loading="store.saving" :disabled="!newEstablishmentName" @click="submitEstablishment">
+          <v-btn variant="flat" color="primary" :loading="store.saving" :disabled="!newEstablishmentName" @click="submitEstablishment">
             {{ $t('common.create') }}
           </v-btn>
         </v-card-actions>
@@ -316,19 +320,19 @@ onUnmounted(() => {
             class="mb-4"
             :placeholder="$t('establishments.namePlaceholder')"
           />
-          <p class="text-caption text-medium-emphasis mb-2">{{ $t('establishments.pointType') }}</p>
+          <p class="text-body-small text-medium-emphasis mb-2">{{ $t('establishments.pointType') }}</p>
           <v-btn-toggle v-model="newEmissionPointType" mandatory color="primary" density="comfortable" class="mb-2">
             <v-btn value="web">{{ $t('establishments.typeWeb') }}</v-btn>
             <v-btn value="pos">{{ $t('establishments.typePosLong') }}</v-btn>
           </v-btn-toggle>
-          <p v-if="newEmissionPointType === 'pos'" class="text-caption text-medium-emphasis">
+          <p v-if="newEmissionPointType === 'pos'" class="text-body-small text-medium-emphasis">
             {{ $t('establishments.posHint') }}
           </p>
         </v-card-text>
         <v-card-actions>
           <v-spacer />
           <v-btn variant="text" @click="showEmissionPointDialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="primary" :loading="store.saving" @click="submitEmissionPoint">
+          <v-btn variant="flat" color="primary" :loading="store.saving" @click="submitEmissionPoint">
             {{ $t('common.create') }}
           </v-btn>
         </v-card-actions>
@@ -344,13 +348,13 @@ onUnmounted(() => {
           }) }}
         </v-card-title>
         <v-card-text class="text-center">
-          <p class="text-body-2 text-medium-emphasis mb-4">
+          <p class="text-body-medium text-medium-emphasis mb-4">
             {{ $t('establishments.pairHint') }}
           </p>
-          <p class="text-h4 text-sm-h3 font-weight-bold font-mono" style="letter-spacing: 0.3em;">
+          <p class="text-headline-large text-sm-display-medium font-weight-bold font-mono" style="letter-spacing: 0.3em;">
             {{ store.pairingCode ?? '······' }}
           </p>
-          <p class="text-caption text-medium-emphasis mt-2">
+          <p class="text-body-small text-medium-emphasis mt-2">
             {{ $t('establishments.rotatesIn', { seconds: store.pairingSecondsRemaining }) }}
           </p>
         </v-card-text>

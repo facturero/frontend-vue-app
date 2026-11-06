@@ -109,7 +109,7 @@ onMounted(async () => {
 
     <v-card class="mb-4">
       <v-card-text>
-        <v-row dense align="end">
+        <v-row class="align-end" density="compact">
           <v-col cols="12" sm="4">
             <v-select
               v-model="establishmentFilter"

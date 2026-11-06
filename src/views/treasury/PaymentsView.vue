@@ -5,6 +5,9 @@
  * El umbral solo lo ve y lo cambia quien tiene `payment:approve` (el Administrador): nace apagado.
  */
 import { computed, onMounted, ref, watch } from 'vue';
+import { formatDate } from '@/utils/format';
+import DateField from '@/components/ui/DateField.vue';
+import { notify } from '@/composable/useNotify';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
@@ -30,7 +33,7 @@ const pages = computed(() => Math.max(1, Math.ceil(store.paymentsTotal / store.p
 
 const headers = computed(() => [
   { title: t('treasury.payments.number'), key: 'number', sortable: false, align: 'start' as const },
-  { title: t('treasury.payments.date'), key: 'paymentDate', sortable: false, align: 'start' as const },
+  { title: t('treasury.payments.date'), key: 'paymentDate', value: (item: Record<string, unknown>) => formatDate(item.paymentDate as string), sortable: false, align: 'start' as const },
   { title: t('treasury.payments.supplier'), key: 'supplierName', sortable: false, align: 'start' as const },
   { title: t('treasury.payments.method'), key: 'method', sortable: false, align: 'start' as const },
   { title: t('treasury.payments.paid'), key: 'totalCents', sortable: false, align: 'end' as const },
@@ -60,7 +63,6 @@ const dialog = ref(false);
 const threshold = ref('');
 const thresholdError = ref<string | null>(null);
 const parsed = computed(() => parseApprovalThreshold(threshold.value));
-const snackbar = ref<string | null>(null);
 
 function openThreshold(): void {
   threshold.value = store.settings?.approvalThresholdCents != null ? centsToInput(store.settings.approvalThresholdCents) : '';
@@ -74,7 +76,7 @@ async function saveThreshold(): Promise<void> {
   try {
     await store.saveSettings(parsed.value);
     dialog.value = false;
-    snackbar.value = t('treasury.payments.thresholdSaved');
+    notify.success(t('treasury.payments.thresholdSaved'));
   } catch {
     thresholdError.value = store.error;
   }
@@ -93,7 +95,7 @@ async function saveThreshold(): Promise<void> {
     <v-alert v-if="store.error && !dialog" type="error" closable class="mb-4">{{ store.error }}</v-alert>
 
     <v-card v-if="canApprove" class="mb-4">
-      <v-card-title class="d-flex flex-wrap align-center ga-2 text-h6">
+      <v-card-title class="d-flex flex-wrap align-center ga-2 text-title-large">
         {{ $t('treasury.payments.approvalTitle') }}
         <v-spacer />
         <v-btn variant="tonal" size="small" prepend-icon="mdi-pencil-outline" @click="openThreshold">{{ $t('common.edit') }}</v-btn>
@@ -103,7 +105,7 @@ async function saveThreshold(): Promise<void> {
           {{ $t('treasury.payments.approvalOn', { amount: money(store.settings.approvalThresholdCents) }) }}
         </div>
         <div v-else class="text-medium-emphasis">{{ $t('treasury.payments.approvalOff') }}</div>
-        <div class="text-body-2 text-medium-emphasis mt-2">{{ $t('treasury.payments.approvalHint') }}</div>
+        <div class="text-body-medium text-medium-emphasis mt-2">{{ $t('treasury.payments.approvalHint') }}</div>
       </v-card-text>
     </v-card>
 
@@ -117,10 +119,10 @@ async function saveThreshold(): Promise<void> {
             <v-select v-model="status" :items="statusItems" :label="$t('common.status')" clearable />
           </v-col>
           <v-col cols="6" md="2">
-            <v-text-field v-model="from" type="date" :label="$t('treasury.payments.from')" />
+            <DateField v-model="from" :max="to" :label="$t('treasury.payments.from')" />
           </v-col>
           <v-col cols="6" md="2">
-            <v-text-field v-model="to" type="date" :label="$t('treasury.payments.to')" />
+            <DateField v-model="to" :min="from" :label="$t('treasury.payments.to')" />
           </v-col>
         </v-row>
 
@@ -128,16 +130,16 @@ async function saveThreshold(): Promise<void> {
           <template #item.number="{ item }">{{ item.number ?? $t('treasury.payments.draft') }}</template>
           <template #item.supplierName="{ item }">
             {{ item.supplierName }}
-            <div v-if="item.supplierIdentification" class="text-body-2 text-medium-emphasis">{{ item.supplierIdentification }}</div>
+            <div v-if="item.supplierIdentification" class="text-body-medium text-medium-emphasis">{{ item.supplierIdentification }}</div>
           </template>
           <template #item.method="{ item }">
             {{ $t(`treasury.payments.methods.${item.method}`) }}
-            <div v-if="item.reference" class="text-body-2 text-medium-emphasis">{{ item.reference }}</div>
+            <div v-if="item.reference" class="text-body-medium text-medium-emphasis">{{ item.reference }}</div>
           </template>
           <template #item.totalCents="{ item }">{{ money(item.totalCents, item.currencyCode) }}</template>
           <template #item.appliedCents="{ item }">
             {{ money(item.appliedCents, item.currencyCode) }}
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.payments.lines', { n: item.lineCount }) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.payments.lines', { n: item.lineCount }) }}</div>
           </template>
           <template #item.status="{ item }">
             <v-chip :color="PAYMENT_STATUS_COLOR[item.status]" variant="flat" size="small">{{ $t(`treasury.payments.status.${item.status}`) }}</v-chip>
@@ -169,11 +171,10 @@ async function saveThreshold(): Promise<void> {
         <v-card-actions class="flex-wrap ga-2">
           <v-spacer />
           <v-btn variant="text" @click="dialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="primary" :loading="store.saving" :disabled="parsed === undefined" @click="saveThreshold">{{ $t('common.save') }}</v-btn>
+          <v-btn variant="flat" color="primary" :loading="store.saving" :disabled="parsed === undefined" @click="saveThreshold">{{ $t('common.save') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <v-snackbar :model-value="snackbar !== null" timeout="3000" @update:model-value="snackbar = null">{{ snackbar }}</v-snackbar>
   </v-container>
 </template>

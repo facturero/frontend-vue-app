@@ -23,6 +23,7 @@ const { toggleTheme, isDark } = useThemeToggle();
 const bareShell = useBareShell();
 const assistant = useAssistantStore();
 const { startTour } = useAppTour();
+const feedbackUrl = import.meta.env.VITE_FEEDBACK_URL;
 
 /** En móvil el drawer es temporal (se abre y cierra); en escritorio es fijo y alterna entre rail y ancho completo. */
 function toggleNavigation(): void {
@@ -117,7 +118,7 @@ function logout(): void {
         <v-btn v-bind="menuProps" icon class="ml-2">
           <v-avatar :color="avatarUrl ? undefined : 'primary'" size="32">
             <v-img v-if="avatarUrl" :src="avatarUrl" alt="avatar" cover />
-            <span v-else class="text-body-2 font-weight-bold text-white">{{ initials }}</span>
+            <span v-else class="text-body-medium font-weight-bold text-white">{{ initials }}</span>
           </v-avatar>
         </v-btn>
       </template>
@@ -128,11 +129,11 @@ function logout(): void {
           <template #append>
             <v-avatar :color="avatarUrl ? undefined : 'primary'" size="40">
               <v-img v-if="avatarUrl" :src="avatarUrl" alt="avatar" cover />
-              <span v-else class="text-body-2 font-weight-bold text-white">{{ initials }}</span>
+              <span v-else class="text-body-medium font-weight-bold text-white">{{ initials }}</span>
             </v-avatar>
           </template>
           <v-list-item-title class="font-weight-medium">{{ me?.fullName || me?.email }}</v-list-item-title>
-          <v-list-item-subtitle v-if="me?.fullName" class="text-caption text-medium-emphasis">{{ me?.email }}</v-list-item-subtitle>
+          <v-list-item-subtitle v-if="me?.fullName" class="text-body-small text-medium-emphasis">{{ me?.email }}</v-list-item-subtitle>
         </v-list-item>
       </v-list>
 
@@ -164,7 +165,7 @@ function logout(): void {
               value="language">
               <template #append>
                 <span v-if="current" :class="`fi fi-${current.flag}`" class="rounded-sm elevation-1 ml-2" />
-                <span class="text-body-2 text-medium-emphasis ml-2">{{ current?.nativeName }}</span>
+                <span class="text-body-medium text-medium-emphasis ml-2">{{ current?.nativeName }}</span>
                 <v-icon icon="mdi-chevron-right" size="18" class="ml-1 text-medium-emphasis" />
               </template>
             </v-list-item>
@@ -180,6 +181,15 @@ function logout(): void {
       <v-divider />
 
       <v-list density="compact" class="py-0">
+        <v-list-item
+          v-if="feedbackUrl"
+          prepend-icon="mdi-comment-outline"
+          :title="$t('feedback.send')"
+          value="feedback"
+          :href="feedbackUrl"
+          target="_blank"
+          rel="noopener noreferrer"
+        />
         <v-list-item prepend-icon="mdi-logout" :title="$t('common.logout')" value="logout" @click="logout" />
       </v-list>
       </v-card>

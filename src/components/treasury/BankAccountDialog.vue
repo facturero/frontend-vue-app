@@ -5,6 +5,8 @@
  * el CSV de ese banco (no se inventa el formato de ninguno): se puede dejar para la primera vez que se importe un extracto.
  */
 import { computed, ref, watch } from 'vue';
+import { localIsoDate } from '@/utils/isoDate';
+import DateField from '@/components/ui/DateField.vue';
 import { useI18n } from 'vue-i18n';
 import { buildBankAccountInput, defaultImportProfile, emptyBankAccountForm, type BankAccountForm } from '@/utils/treasury-banking';
 import { BANK_ACCOUNT_TYPES, type BankAccount, type BankAccountInput } from '@/types/treasury';
@@ -25,7 +27,7 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-const today = () => new Date().toLocaleDateString('en-CA');
+const today = () => localIsoDate(new Date());
 const form = ref<BankAccountForm>(emptyBankAccountForm(today()));
 const isActive = ref(true);
 const withProfile = ref(false);
@@ -97,26 +99,26 @@ function submit(): void {
             <v-text-field v-model="form.opening" :label="$t('treasury.banking.opening')" :hint="$t('treasury.banking.openingHint')" persistent-hint :error-messages="err('opening')" :disabled="openingLocked" inputmode="decimal" />
           </v-col>
           <v-col cols="12" sm="6">
-            <v-text-field v-model="form.openingDate" type="date" :label="$t('treasury.banking.openingDate')" :error-messages="err('openingDate')" :disabled="openingLocked" />
+            <DateField v-model="form.openingDate" :label="$t('treasury.banking.openingDate')" :error-messages="err('openingDate')" :disabled="openingLocked" />
           </v-col>
           <v-col v-if="openingLocked" cols="12">
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.banking.openingLocked') }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.banking.openingLocked') }}</div>
           </v-col>
           <v-col v-if="account" cols="12">
             <v-switch v-model="isActive" color="primary" hide-details :label="$t('treasury.banking.active')" />
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.banking.activeHint') }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.banking.activeHint') }}</div>
           </v-col>
         </v-row>
 
         <v-divider class="my-4" />
         <v-switch v-model="withProfile" color="primary" hide-details :label="$t('treasury.banking.profile.toggle')" @update:model-value="onProfileToggle" />
-        <div class="text-body-2 text-medium-emphasis mb-3">{{ $t('treasury.banking.profile.toggleHint') }}</div>
+        <div class="text-body-medium text-medium-emphasis mb-3">{{ $t('treasury.banking.profile.toggleHint') }}</div>
         <ImportProfileForm v-if="withProfile && form.profile" v-model="form.profile" :errors="errors" />
       </v-card-text>
       <v-card-actions class="flex-wrap ga-2">
         <v-spacer />
         <v-btn variant="text" @click="emit('update:modelValue', false)">{{ $t('common.cancel') }}</v-btn>
-        <v-btn color="primary" :loading="saving" @click="submit">{{ $t('common.save') }}</v-btn>
+        <v-btn variant="flat" color="primary" :loading="saving" @click="submit">{{ $t('common.save') }}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

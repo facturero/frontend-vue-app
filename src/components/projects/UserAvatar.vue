@@ -16,7 +16,7 @@ const name = computed(() => displayName(user.value));
 <template>
   <v-tooltip :text="name" :disabled="!tooltip || !name" location="top">
     <template #activator="{ props: tip }">
-      <v-avatar v-if="userId" v-bind="tip" :size="size" :color="photo ? undefined : avatarColor(userId)" class="text-caption font-weight-bold">
+      <v-avatar v-if="userId" v-bind="tip" :size="size" :color="photo ? undefined : avatarColor(userId)" class="text-body-small font-weight-bold">
         <v-img v-if="photo" :src="photo" :alt="name" cover />
         <span v-else>{{ initials(user) }}</span>
       </v-avatar>

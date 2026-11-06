@@ -63,7 +63,7 @@ watch(() => [props.entityType, props.entityId], load);
 
 <template>
   <v-card v-if="enabled" class="mb-4">
-    <v-card-title class="text-h6 d-flex align-center">
+    <v-card-title class="text-title-large d-flex align-center">
       {{ t('projects.linked.title') }}
       <v-spacer />
       <v-btn icon="mdi-plus" variant="text" size="small" :aria-label="t('projects.linked.add')" @click="adding = !adding" />
@@ -91,8 +91,8 @@ watch(() => [props.entityType, props.entityId], load);
           <template #append><DueDateChip :due-on="task.dueOn" :completed="false" /></template>
         </v-list-item>
       </v-list>
-      <p v-else-if="!loading" class="text-body-2 text-medium-emphasis">{{ t('projects.linked.none') }}</p>
-      <p v-if="done" class="text-caption text-medium-emphasis mt-2">{{ t('projects.linked.done', done) }}</p>
+      <p v-else-if="!loading" class="text-body-medium text-medium-emphasis">{{ t('projects.linked.none') }}</p>
+      <p v-if="done" class="text-body-small text-medium-emphasis mt-2">{{ t('projects.linked.done', done) }}</p>
     </v-card-text>
   </v-card>
 </template>

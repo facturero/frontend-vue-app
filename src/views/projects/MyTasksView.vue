@@ -116,11 +116,11 @@ async function toggle(task: MyTask): Promise<void> {
             :aria-label="t(`projects.myTasks.groups.${group}`)"
             @click="collapsed[group] = !collapsed[group]"
           />
-          <span class="text-body-1 font-weight-bold">{{ t(`projects.myTasks.groups.${group}`) }}</span>
-          <span class="text-caption text-medium-emphasis">{{ groups[group].length }}</span>
+          <span class="text-body-large font-weight-bold">{{ t(`projects.myTasks.groups.${group}`) }}</span>
+          <span class="text-body-small text-medium-emphasis">{{ groups[group].length }}</span>
         </div>
         <div v-show="!collapsed[group]">
-          <div v-if="groups[group].length === 0" class="px-6 py-3 text-body-2 text-medium-emphasis border-b">
+          <div v-if="groups[group].length === 0" class="px-6 py-3 text-body-medium text-medium-emphasis border-b">
             {{ t('projects.myTasks.emptyGroup') }}
           </div>
           <div
@@ -140,7 +140,7 @@ async function toggle(task: MyTask): Promise<void> {
             />
             <div class="flex-grow-1">
               <div :class="{ 'text-decoration-line-through text-medium-emphasis': task.completedAt }">{{ task.title }}</div>
-              <div v-if="task.parent" class="text-caption text-medium-emphasis">{{ t('projects.task.subtaskOf', { title: task.parent.title }) }}</div>
+              <div v-if="task.parent" class="text-body-small text-medium-emphasis">{{ t('projects.task.subtaskOf', { title: task.parent.title }) }}</div>
             </div>
             <v-chip
               v-for="p in task.projects"
@@ -161,6 +161,5 @@ async function toggle(task: MyTask): Promise<void> {
     <TaskDetailPanel />
     <TaskCelebration />
     <ShortcutsDialog v-model="helpOpen" />
-    <v-snackbar :model-value="!!store.notice" timeout="4000" @update:model-value="store.notice = null">{{ store.notice }}</v-snackbar>
   </v-container>
 </template>

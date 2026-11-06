@@ -5,6 +5,8 @@
  * las tolerancias con las que se admite recibir o facturar de más sin bloquear la conciliación.
  */
 import { computed, onMounted, ref, watch } from 'vue';
+import { formatDate } from '@/utils/format';
+import DateField from '@/components/ui/DateField.vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
@@ -35,7 +37,7 @@ const pages = computed(() => Math.max(1, Math.ceil(store.ordersTotal / store.pag
 
 const headers = computed(() => [
   { title: t('purchasing.orders.number'), key: 'number', sortable: false, align: 'start' as const },
-  { title: t('common.date'), key: 'orderDate', sortable: false, align: 'start' as const },
+  { title: t('common.date'), key: 'orderDate', value: (item: Record<string, unknown>) => formatDate(item.orderDate as string), sortable: false, align: 'start' as const },
   { title: t('purchasing.orders.supplier'), key: 'supplier', sortable: false, align: 'start' as const },
   { title: t('purchasing.orders.lines'), key: 'lineCount', sortable: false, align: 'end' as const },
   { title: t('invoices.total'), key: 'totalCents', sortable: false, align: 'end' as const },
@@ -143,14 +145,14 @@ async function saveSettings(): Promise<void> {
           <v-col cols="12" sm="6" md="3">
             <v-select v-model="status" :items="statusItems" :label="$t('common.status')" clearable />
           </v-col>
-          <v-col cols="12" sm="6" md="3">
+          <v-col cols="12" sm="6" md="2">
             <v-autocomplete v-model="supplierId" :items="supplierItems" :label="$t('purchasing.orders.supplier')" clearable />
           </v-col>
-          <v-col cols="6" sm="3" md="1">
-            <v-text-field v-model="from" type="date" :label="$t('purchasing.orders.from')" />
+          <v-col cols="6" sm="3" md="2">
+            <DateField v-model="from" :max="to" :label="$t('purchasing.orders.from')" />
           </v-col>
           <v-col cols="6" sm="3" md="2">
-            <v-text-field v-model="to" type="date" :label="$t('purchasing.orders.to')" />
+            <DateField v-model="to" :min="from" :label="$t('purchasing.orders.to')" />
           </v-col>
         </v-row>
 
@@ -167,7 +169,7 @@ async function saveSettings(): Promise<void> {
           </template>
           <template #item.supplier="{ item }">
             {{ item.supplier.legalName }}
-            <div class="text-body-2 text-medium-emphasis">{{ item.supplier.identification }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ item.supplier.identification }}</div>
           </template>
           <template #item.totalCents="{ item }">{{ formatMoney(item.totalCents, locale, item.currencyCode) }}</template>
           <template #item.status="{ item }">
@@ -187,7 +189,7 @@ async function saveSettings(): Promise<void> {
         <v-card-title>{{ $t('purchasing.settings.title') }}</v-card-title>
         <v-card-text>
           <v-alert v-if="settingsError" type="error" class="mb-4">{{ settingsError }}</v-alert>
-          <p class="text-body-2 text-medium-emphasis mb-4">{{ $t('purchasing.settings.intro') }}</p>
+          <p class="text-body-medium text-medium-emphasis mb-4">{{ $t('purchasing.settings.intro') }}</p>
           <v-switch v-model="requireApproval" :label="$t('purchasing.settings.require')" color="primary" />
           <v-text-field
             v-if="requireApproval"
@@ -206,8 +208,8 @@ async function saveSettings(): Promise<void> {
             class="mb-4"
           />
 
-          <div class="text-h6 mb-2">{{ $t('purchasing.settings.tolerances') }}</div>
-          <p class="text-body-2 text-medium-emphasis mb-4">{{ $t('purchasing.settings.toleranceHint') }}</p>
+          <div class="text-title-large mb-2">{{ $t('purchasing.settings.tolerances') }}</div>
+          <p class="text-body-medium text-medium-emphasis mb-4">{{ $t('purchasing.settings.toleranceHint') }}</p>
           <v-row>
             <v-col cols="12" sm="4">
               <v-text-field
@@ -229,7 +231,7 @@ async function saveSettings(): Promise<void> {
         <v-card-actions class="flex-wrap ga-2">
           <v-spacer />
           <v-btn variant="text" @click="settingsDialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="primary" :loading="store.saving" :disabled="!settingsValid" @click="saveSettings">{{ $t('common.save') }}</v-btn>
+          <v-btn variant="flat" color="primary" :loading="store.saving" :disabled="!settingsValid" @click="saveSettings">{{ $t('common.save') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

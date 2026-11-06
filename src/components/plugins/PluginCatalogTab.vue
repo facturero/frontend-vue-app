@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
+import { formatDate as fmtDate } from '@/utils/format';
 import { useI18n } from 'vue-i18n';
 import { usePluginsStore } from '@/stores/plugins';
 import { usePluginCartStore } from '@/stores/pluginCart';
@@ -102,7 +103,7 @@ async function activateOrReactivate(p: CatalogPlugin): Promise<void> {
 }
 
 function formatDate(iso: string): string {
-  return new Intl.DateTimeFormat(locale.value, { dateStyle: 'long' }).format(new Date(iso));
+  return fmtDate(iso);
 }
 </script>
 
@@ -135,7 +136,7 @@ function formatDate(iso: string): string {
     >
       {{ store.error }}
       <template v-if="store.errorDetails.length">
-        <ul class="ml-4 text-caption">
+        <ul class="ml-4 text-body-small">
           <li v-for="d in store.errorDetails" :key="d">{{ d }}</li>
         </ul>
       </template>
@@ -143,7 +144,7 @@ function formatDate(iso: string): string {
 
     <v-card class="mb-4">
       <v-card-text class="pb-2">
-        <v-row dense align="end">
+        <v-row class="align-end" density="compact">
           <v-col cols="12" md="5">
             <v-text-field
               v-model="search"
@@ -195,19 +196,19 @@ function formatDate(iso: string): string {
       <v-col v-for="p in filtered" :key="p.id" cols="12" sm="6" lg="4" xl="3">
         <v-card class="d-flex flex-column fill-height">
           <v-card-title class="d-flex align-start justify-space-between ga-2">
-            <span class="text-subtitle-1 font-weight-medium">{{ p.name }}</span>
+            <span class="text-body-large font-weight-medium">{{ p.name }}</span>
             <v-chip v-if="p.is_exclusive" size="x-small" color="deep-purple">
               {{ $t('plugins.exclusive') }}
             </v-chip>
           </v-card-title>
-          <v-card-subtitle class="text-caption">{{ p.code }} · {{ p.category }}</v-card-subtitle>
-          <v-card-text class="text-body-2 flex-grow-1">
+          <v-card-subtitle class="text-body-small">{{ p.code }} · {{ p.category }}</v-card-subtitle>
+          <v-card-text class="text-body-medium flex-grow-1">
             {{ p.description }}
-            <div v-if="p.depends_on.length" class="mt-2 text-caption text-medium-emphasis">
+            <div v-if="p.depends_on.length" class="mt-2 text-body-small text-medium-emphasis">
               {{ $t('plugins.requires') }} {{ p.depends_on.map((d) => d.name).join(', ') }}
             </div>
           </v-card-text>
-          <div class="px-4 pb-2 text-subtitle-2">{{ p.display_status === 'incluido' || p.priceCents === 0 ? $t('plugins.included') : formatPrice(p.priceCents, p.currency) + $t('plugins.perMonth') + $t('plugins.plusVat') }}</div>
+          <div class="px-4 pb-2 text-title-small">{{ p.display_status === 'incluido' || p.priceCents === 0 ? $t('plugins.included') : formatPrice(p.priceCents, p.currency) + $t('plugins.perMonth') + $t('plugins.plusVat') }}</div>
           <v-card-actions class="pt-0">
             <v-chip size="small" :color="statusMeta[p.display_status].color" :variant="statusMeta[p.display_status].variant">
               {{ statusMeta[p.display_status].label }}

@@ -6,6 +6,8 @@
  * bloquea la facturación.
  */
 import { computed, onMounted, ref } from 'vue';
+import { formatDate } from '@/utils/format';
+import { notify } from '@/composable/useNotify';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
@@ -31,7 +33,6 @@ async function exportCsv(): Promise<void> {
   if (blob) downloadBlob(`${t('treasury.export.fileStatement')}-${statement.value?.asOf ?? ''}.csv`, blob);
 }
 const customerName = ref('');
-const snackbar = ref<string | null>(null);
 
 const statement = computed(() => store.statement);
 const terms = computed(() => store.terms);
@@ -57,7 +58,7 @@ const applicationsOf = (receivableId: string) => statement.value?.applications.f
 
 const receivableHeaders = computed(() => [
   { title: t('treasury.receivables.document'), key: 'documentNumber', sortable: false, align: 'start' as const },
-  { title: t('treasury.receivables.issueDate'), key: 'issueDate', sortable: false, align: 'start' as const },
+  { title: t('treasury.receivables.issueDate'), key: 'issueDate', value: (item: Record<string, unknown>) => formatDate(item.issueDate as string), sortable: false, align: 'start' as const },
   { title: t('treasury.receivables.dueDate'), key: 'dueDate', sortable: false, align: 'start' as const },
   { title: t('treasury.receivables.original'), key: 'originalCents', sortable: false, align: 'end' as const },
   { title: t('treasury.receivables.balance'), key: 'balanceCents', sortable: false, align: 'end' as const },
@@ -91,7 +92,7 @@ async function saveTerms(): Promise<void> {
   try {
     await store.saveTerms(customerId.value, { creditDays: parsedDays.value!, creditLimitCents: parsedLimit.value ?? null, customerName: customerName.value || null });
     dialog.value = false;
-    snackbar.value = t('treasury.statement.termsSaved');
+    notify.success(t('treasury.statement.termsSaved'));
   } catch {
     formError.value = store.error;
   }
@@ -115,17 +116,17 @@ async function saveTerms(): Promise<void> {
       <v-col cols="12" sm="4">
         <v-card>
           <v-card-text>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.statement.owed') }}</div>
-            <div class="text-h6">{{ money(statement.receivableCents) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.statement.owed') }}</div>
+            <div class="text-title-large">{{ money(statement.receivableCents) }}</div>
           </v-card-text>
         </v-card>
       </v-col>
       <v-col cols="12" sm="4">
         <v-card>
           <v-card-text>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.statement.credit') }}</div>
-            <div class="text-h6">{{ money(statement.advanceCents) }}</div>
-            <div v-if="statement.customerAdvanceCents > 0" class="text-body-2 text-medium-emphasis">
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.statement.credit') }}</div>
+            <div class="text-title-large">{{ money(statement.advanceCents) }}</div>
+            <div v-if="statement.customerAdvanceCents > 0" class="text-body-medium text-medium-emphasis">
               {{ $t('treasury.statement.customerAdvances') }}: {{ money(statement.customerAdvanceCents) }}
             </div>
           </v-card-text>
@@ -134,16 +135,16 @@ async function saveTerms(): Promise<void> {
       <v-col cols="12" sm="4">
         <v-card>
           <v-card-text>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.statement.net') }}</div>
-            <div class="text-h6" :class="statement.netCents < 0 ? 'text-error' : undefined">{{ money(statement.netCents) }}</div>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.statement.asOf', { date: statement.asOf }) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.statement.net') }}</div>
+            <div class="text-title-large" :class="statement.netCents < 0 ? 'text-error' : undefined">{{ money(statement.netCents) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.statement.asOf', { date: formatDate(statement.asOf) }) }}</div>
           </v-card-text>
         </v-card>
       </v-col>
     </v-row>
 
     <v-card class="mb-4">
-      <v-card-title class="d-flex flex-wrap align-center ga-2 text-h6">
+      <v-card-title class="d-flex flex-wrap align-center ga-2 text-title-large">
         {{ $t('treasury.statement.terms') }}
         <v-spacer />
         <v-btn v-if="canEditTerms" variant="tonal" size="small" prepend-icon="mdi-pencil-outline" @click="openTerms">{{ $t('common.edit') }}</v-btn>
@@ -151,37 +152,37 @@ async function saveTerms(): Promise<void> {
       <v-card-text>
         <div class="d-flex flex-wrap ga-6">
           <div>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.statement.creditDays') }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.statement.creditDays') }}</div>
             <div>{{ (terms?.creditDays ?? 0) === 0 ? $t('treasury.statement.cash') : $t('treasury.statement.days', { n: terms?.creditDays }) }}</div>
           </div>
           <div>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.statement.creditLimit') }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.statement.creditLimit') }}</div>
             <div>{{ terms?.creditLimitCents != null ? money(terms.creditLimitCents) : $t('treasury.statement.noLimit') }}</div>
           </div>
           <div v-if="usage">
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.statement.limitUsage') }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.statement.limitUsage') }}</div>
             <div :class="usage.over ? 'text-error' : undefined">
               {{ $t('treasury.statement.available2', { amount: money(usage.availableCents) }) }}
             </div>
             <v-progress-linear :model-value="usage.percent" :color="usage.over ? 'error' : 'primary'" height="6" class="mt-1" />
           </div>
         </div>
-        <div class="text-body-2 text-medium-emphasis mt-3">{{ $t('treasury.statement.termsHint') }}</div>
+        <div class="text-body-medium text-medium-emphasis mt-3">{{ $t('treasury.statement.termsHint') }}</div>
       </v-card-text>
     </v-card>
 
     <v-card class="mb-4">
-      <v-card-title class="text-h6">{{ $t('treasury.statement.receivables') }}</v-card-title>
+      <v-card-title class="text-title-large">{{ $t('treasury.statement.receivables') }}</v-card-title>
       <v-card-text>
         <v-data-table :headers="receivableHeaders" :items="statement?.receivables ?? []" :loading="store.loading" :items-per-page="-1" hide-default-footer>
           <template #item.documentNumber="{ item }">
             {{ item.documentNumber ?? $t(`treasury.receivables.source.${item.sourceType}`) }}
-            <div v-for="a in applicationsOf(item.id)" :key="a.id" class="text-body-2 text-medium-emphasis">
+            <div v-for="a in applicationsOf(item.id)" :key="a.id" class="text-body-medium text-medium-emphasis">
               {{ $t('treasury.statement.applied', { doc: a.documentNumber ?? $t(`treasury.statement.creditNote`), amount: money(a.appliedCents) }) }}
             </div>
           </template>
           <template #item.dueDate="{ item }">
-            {{ item.dueDate }}
+            {{ formatDate(item.dueDate) }}
             <v-chip v-if="dueChip(item) > 0" color="lighterror" variant="flat" size="x-small" class="ml-2">{{ $t('treasury.receivables.overdueDays', { n: dueChip(item) }) }}</v-chip>
           </template>
           <template #item.originalCents="{ item }">{{ money(item.originalCents, item.currencyCode) }}</template>
@@ -197,7 +198,7 @@ async function saveTerms(): Promise<void> {
     </v-card>
 
     <v-card v-if="statement && statement.advances.length > 0">
-      <v-card-title class="text-h6">{{ $t('treasury.statement.advances') }}</v-card-title>
+      <v-card-title class="text-title-large">{{ $t('treasury.statement.advances') }}</v-card-title>
       <v-card-text>
         <v-data-table :headers="advanceHeaders" :items="statement.advances" :items-per-page="-1" hide-default-footer>
           <template #item.documentNumber="{ item }">{{ item.documentNumber ?? '—' }}</template>
@@ -239,11 +240,10 @@ async function saveTerms(): Promise<void> {
         <v-card-actions class="flex-wrap ga-2">
           <v-spacer />
           <v-btn variant="text" @click="dialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="primary" :loading="store.saving" :disabled="!canSave" @click="saveTerms">{{ $t('common.save') }}</v-btn>
+          <v-btn variant="flat" color="primary" :loading="store.saving" :disabled="!canSave" @click="saveTerms">{{ $t('common.save') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <v-snackbar :model-value="snackbar !== null" timeout="3000" @update:model-value="snackbar = null">{{ snackbar }}</v-snackbar>
   </v-container>
 </template>

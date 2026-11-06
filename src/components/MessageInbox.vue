@@ -42,15 +42,15 @@ function timeAgo(at?: number): string {
               <v-icon icon="mdi-email-outline" color="info" size="20" />
             </v-avatar>
           </template>
-          <v-list-item-title class="text-body-2 font-weight-medium">{{ m.title }}</v-list-item-title>
-          <v-list-item-subtitle class="text-caption">
+          <v-list-item-title class="text-body-medium font-weight-medium">{{ m.title }}</v-list-item-title>
+          <v-list-item-subtitle class="text-body-small">
             {{ m.excerpt }}<template v-if="m.at"> · {{ timeAgo(m.at) }}</template>
           </v-list-item-subtitle>
         </v-list-item>
       </v-list>
       <div v-if="!messages.length" class="text-center text-medium-emphasis pa-8">
         <v-icon icon="mdi-email-off-outline" size="48" class="mb-4" />
-        <p class="text-body-2">{{ $t('messages.empty') }}</p>
+        <p class="text-body-medium">{{ $t('messages.empty') }}</p>
       </div>
     </v-card>
   </v-menu>

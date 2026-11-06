@@ -12,6 +12,7 @@
  * reservas del entregable 2.
  */
 import { computed, onMounted, ref } from 'vue';
+import { notify as appNotify } from '@/composable/useNotify';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { useRestaurantEstablishment } from '@/composable/useRestaurantEstablishment';
@@ -30,7 +31,6 @@ const auth = useAuthStore();
 const canManage = computed(() => auth.can('restaurant:manage'));
 
 const loadError = ref<string | null>(null);
-const snackbar = ref<{ text: string; color: string } | null>(null);
 
 const tableDialog = ref(false);
 const bulkDialog = ref(false);
@@ -60,7 +60,9 @@ function zoneLabel(zoneId: string | null): string {
 }
 
 function notify(text: string, color = 'success'): void {
-  snackbar.value = { text, color };
+  // Envoltorio del aviso global (composable/useNotify): las llamadas de esta vista ya pasan su color.
+  if (color === 'error') appNotify.error(text);
+  else appNotify.success(text);
 }
 
 async function load(): Promise<void> {
@@ -203,8 +205,8 @@ async function reactivate(table: DiningTable): Promise<void> {
 
     <!-- Arranque: quien no tiene nada montado empieza aquí. -->
     <v-card v-else-if="!hasTables" class="pa-6 text-center">
-      <div class="text-h6 mb-2">{{ $t('restaurant.tables.emptyTitle') }}</div>
-      <p class="text-body-2 text-medium-emphasis mb-4 mx-auto" style="max-width: 520px">
+      <div class="text-title-large mb-2">{{ $t('restaurant.tables.emptyTitle') }}</div>
+      <p class="text-body-medium text-medium-emphasis mb-4 mx-auto" style="max-width: 520px">
         {{ $t('restaurant.tables.emptyIntro') }}
       </p>
       <v-btn v-if="canManage" color="primary" size="large" prepend-icon="mdi-table-furniture" @click="openBulk">
@@ -264,8 +266,8 @@ async function reactivate(table: DiningTable): Promise<void> {
       <v-card v-if="hasDrawing" class="pa-4">
         <div class="d-flex align-center justify-space-between mb-2 ga-4">
           <div>
-            <div class="text-h6">{{ $t('restaurant.tables.planCardTitle') }}</div>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('restaurant.tables.planCardIntro') }}</div>
+            <div class="text-title-large">{{ $t('restaurant.tables.planCardTitle') }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('restaurant.tables.planCardIntro') }}</div>
           </div>
           <v-btn variant="tonal" :to="{ name: 'restaurant-plan' }">{{ $t('restaurant.tables.openPlan') }}</v-btn>
         </div>
@@ -298,8 +300,5 @@ async function reactivate(table: DiningTable): Promise<void> {
       </v-card>
     </v-dialog>
 
-    <v-snackbar :model-value="snackbar !== null" :color="snackbar?.color" @update:model-value="snackbar = null">
-      {{ snackbar?.text }}
-    </v-snackbar>
   </v-container>
 </template>

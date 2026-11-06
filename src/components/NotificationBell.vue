@@ -14,7 +14,7 @@
     </template>
     <v-card>
       <div class="d-flex align-center px-4 py-2">
-        <span class="text-subtitle-2">{{ $t('notifications.title') }}</span>
+        <span class="text-title-small">{{ $t('notifications.title') }}</span>
         <v-spacer />
         <v-btn
           v-if="realtime.unread > 0"
@@ -39,17 +39,17 @@
               <v-icon :icon="iconFor(n.event)" :color="n.read ? 'medium-emphasis' : 'primary'" size="20" />
             </v-avatar>
           </template>
-          <v-list-item-title class="text-body-2" :class="{ 'font-weight-medium': !n.read }">
+          <v-list-item-title class="text-body-medium" :class="{ 'font-weight-medium': !n.read }">
             {{ $t(n.titleKey) }}
           </v-list-item-title>
-          <v-list-item-subtitle class="text-caption">
+          <v-list-item-subtitle class="text-body-small">
             {{ n.detail }}<template v-if="n.detail"> · </template>{{ timeAgo(n.at) }}
           </v-list-item-subtitle>
         </v-list-item>
       </v-list>
       <div v-if="!realtime.items.length" class="text-center text-medium-emphasis pa-8">
         <v-icon icon="mdi-bell-off-outline" size="48" class="mb-4" />
-        <p class="text-body-2">{{ $t('notifications.empty') }}</p>
+        <p class="text-body-medium">{{ $t('notifications.empty') }}</p>
       </div>
     </v-card>
   </v-menu>

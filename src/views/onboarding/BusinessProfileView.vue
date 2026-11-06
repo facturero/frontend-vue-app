@@ -61,13 +61,13 @@ async function omit(): Promise<void> {
       {{ store.error }}
     </v-alert>
 
-    <v-row v-if="store.loading && !store.businessProfiles.length" dense>
+    <v-row v-if="store.loading && !store.businessProfiles.length" density="compact">
       <v-col cols="12" class="text-center py-12">
         <v-progress-circular indeterminate color="primary" />
       </v-col>
     </v-row>
 
-    <v-row v-else dense>
+    <v-row v-else density="compact">
       <v-col v-for="p in store.businessProfiles" :key="p.code" cols="12" sm="6" md="4" lg="3">
         <v-card
           :loading="selectingCode === p.code"
@@ -79,15 +79,15 @@ async function omit(): Promise<void> {
             <v-sheet color="lightprimary" class="w-12 h-12 d-flex align-center justify-center mb-4">
               <v-icon :icon="p.icon" color="primary" size="26" />
             </v-sheet>
-            <div class="text-subtitle-1 font-weight-medium">{{ p.name }}</div>
-            <div class="text-body-2 text-medium-emphasis mt-1">{{ p.description }}</div>
+            <div class="text-body-large font-weight-medium">{{ p.name }}</div>
+            <div class="text-body-medium text-medium-emphasis mt-1">{{ p.description }}</div>
           </v-card-text>
         </v-card>
       </v-col>
     </v-row>
 
     <div class="d-flex flex-wrap align-center ga-4 mt-4">
-      <p class="text-body-2 text-medium-emphasis">
+      <p class="text-body-medium text-medium-emphasis">
         {{ t('onboarding.businessProfile.selectHint') }}
       </p>
       <v-btn

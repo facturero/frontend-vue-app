@@ -122,14 +122,14 @@ async function remove(f: ProjectForm): Promise<void> {
     <v-card>
       <v-card-title>{{ t('projects.forms.title') }}</v-card-title>
       <v-card-text class="d-flex flex-column ga-4">
-        <div class="text-body-2 text-medium-emphasis">{{ t('projects.forms.hint') }}</div>
+        <div class="text-body-medium text-medium-emphasis">{{ t('projects.forms.hint') }}</div>
         <v-alert v-if="failure" type="error" closable @click:close="failure = null">{{ failure }}</v-alert>
 
         <template v-if="!editing">
           <v-card v-for="f in forms" :key="f.id" variant="outlined" class="pa-4">
             <div class="d-flex align-center flex-wrap ga-2">
               <v-icon icon="mdi-form-select" color="primary" />
-              <span class="text-body-1 font-weight-medium flex-grow-1">{{ f.title }}</span>
+              <span class="text-body-large font-weight-medium flex-grow-1">{{ f.title }}</span>
               <v-chip v-if="!f.enabled" size="x-small">{{ t('projects.forms.closed') }}</v-chip>
               <v-chip size="x-small">{{ t('projects.forms.submissions', f.submissionCount) }}</v-chip>
               <v-btn size="small" variant="text" :prepend-icon="copied === f.id ? 'mdi-check' : 'mdi-link-variant'" @click="copy(f)">
@@ -140,7 +140,7 @@ async function remove(f: ProjectForm): Promise<void> {
               <v-btn icon="mdi-trash-can-outline" size="small" variant="text" :aria-label="t('common.delete')" @click="remove(f)" />
             </div>
           </v-card>
-          <div v-if="!forms.length" class="text-body-2 text-medium-emphasis">{{ t('projects.forms.empty') }}</div>
+          <div v-if="!forms.length" class="text-body-medium text-medium-emphasis">{{ t('projects.forms.empty') }}</div>
           <v-btn color="primary" prepend-icon="mdi-plus" class="align-self-start" @click="startNew">{{ t('projects.forms.new') }}</v-btn>
         </template>
 
@@ -152,8 +152,8 @@ async function remove(f: ProjectForm): Promise<void> {
             <v-autocomplete v-model="editing.assigneeUserId" :items="people" :label="t('projects.forms.assignee')" clearable />
           </div>
           <v-switch v-model="editing.enabled" :label="t('projects.forms.open_')" />
-          <div class="text-body-2 font-weight-medium">{{ t('projects.forms.questions') }}</div>
-          <div class="text-caption text-medium-emphasis">{{ t('projects.forms.titleAlways') }}</div>
+          <div class="text-body-medium font-weight-medium">{{ t('projects.forms.questions') }}</div>
+          <div class="text-body-small text-medium-emphasis">{{ t('projects.forms.titleAlways') }}</div>
           <v-card v-for="(q, i) in editing.questions" :key="i" variant="outlined" class="pa-2 d-flex flex-column ga-2">
             <div class="d-flex flex-column flex-sm-row ga-2">
               <v-text-field v-model="q.label" :label="t('projects.forms.question')" :counter="200" />

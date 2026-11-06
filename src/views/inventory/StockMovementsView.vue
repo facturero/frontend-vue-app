@@ -8,6 +8,7 @@
  * un consumo interno solo es posible aquí.
  */
 import { computed, onMounted, ref, watch } from 'vue';
+import { formatDateTime as fmtDateTime } from '@/utils/format';
 import { useI18n } from 'vue-i18n';
 import { useInventoryStore } from '@/stores/inventory';
 import { useProductStore } from '@/stores/products';
@@ -98,7 +99,7 @@ function formatMoney(amount: string | null, currency: string): string {
 }
 
 function formatDateTime(iso: string): string {
-  return new Date(iso).toLocaleString(locale.value, { dateStyle: 'short', timeStyle: 'short' });
+  return fmtDateTime(iso);
 }
 
 function warehouseCode(id: string): string {
@@ -149,28 +150,28 @@ onMounted(async () => {
       {{ store.error }}
     </v-alert>
 
-    <v-row v-if="store.productStock" class="mb-2" dense>
+    <v-row v-if="store.productStock" class="mb-2" density="compact">
       <v-col cols="12" sm="4">
         <v-card variant="tonal" color="lightprimary">
           <v-card-text>
-            <div class="text-caption">{{ $t('inventory.onHand') }}</div>
-            <div class="text-h6">{{ store.productStock.totalOnHand }}</div>
+            <div class="text-body-small">{{ $t('inventory.onHand') }}</div>
+            <div class="text-title-large">{{ store.productStock.totalOnHand }}</div>
           </v-card-text>
         </v-card>
       </v-col>
       <v-col cols="12" sm="4">
         <v-card variant="tonal" color="lightprimary">
           <v-card-text>
-            <div class="text-caption">{{ $t('inventory.available') }}</div>
-            <div class="text-h6">{{ store.productStock.totalAvailable }}</div>
+            <div class="text-body-small">{{ $t('inventory.available') }}</div>
+            <div class="text-title-large">{{ store.productStock.totalAvailable }}</div>
           </v-card-text>
         </v-card>
       </v-col>
       <v-col cols="12" sm="4">
         <v-card variant="tonal" color="lightprimary">
           <v-card-text>
-            <div class="text-caption">{{ $t('inventory.warehousesWithStock') }}</div>
-            <div class="text-h6">{{ store.productStock.positions.length }}</div>
+            <div class="text-body-small">{{ $t('inventory.warehousesWithStock') }}</div>
+            <div class="text-title-large">{{ store.productStock.positions.length }}</div>
           </v-card-text>
         </v-card>
       </v-col>
@@ -178,7 +179,7 @@ onMounted(async () => {
 
     <v-card class="mb-4">
       <v-card-text>
-        <v-row dense align="end">
+        <v-row class="align-end" density="compact">
           <v-col v-if="!store.isSingleWarehouse" cols="12" sm="4">
             <v-select
               v-model="warehouseFilter"
@@ -223,7 +224,7 @@ onMounted(async () => {
         @update:options="onTableUpdate"
       >
         <template #item.createdAt="{ item }">
-          <span class="text-caption">{{ formatDateTime(item.createdAt) }}</span>
+          <span class="text-body-small">{{ formatDateTime(item.createdAt) }}</span>
         </template>
 
         <template #item.type="{ item }">
@@ -248,17 +249,17 @@ onMounted(async () => {
           <v-chip size="x-small" variant="flat" :color="natureColor(item.accountingNature)">
             {{ $t(`inventory.nature.${item.accountingNature}`) }}
           </v-chip>
-          <div v-if="item.reasonCode" class="text-caption text-medium-emphasis mt-1">
+          <div v-if="item.reasonCode" class="text-body-small text-medium-emphasis mt-1">
             {{ $t(`inventory.reason.${item.reasonCode}`) }}
           </div>
         </template>
 
         <template #item.reference="{ item }">
-          <span v-if="item.referenceType" class="text-caption">
+          <span v-if="item.referenceType" class="text-body-small">
             {{ $t(`inventory.referenceType.${item.referenceType}`) }}
           </span>
           <span v-else class="text-medium-emphasis">—</span>
-          <div v-if="item.notes" class="text-caption text-medium-emphasis">{{ item.notes }}</div>
+          <div v-if="item.notes" class="text-body-small text-medium-emphasis">{{ item.notes }}</div>
         </template>
 
         <template #no-data>

@@ -1,4 +1,5 @@
 import type { AnnexType, FindingSeverity } from '@/types/reporting';
+import { formatDateTime as fmtDateTime } from '@/utils/format';
 
 export const ANNEXES: { value: AnnexType; icon: string }[] = [
   { value: 'f104', icon: 'mdi-percent-outline' },
@@ -123,6 +124,6 @@ export function keyFigure(annex: AnnexType, summary: Record<string, number>): { 
 
 /** Fecha y hora de una versión en el idioma de la interfaz. */
 export function formatDateTime(iso: string, locale: string): string {
-  const d = new Date(iso);
-  return Number.isNaN(d.getTime()) ? iso : d.toLocaleString(locale);
+  void locale; // se conserva la firma: el formato ya no depende del idioma (dd/mm/yyyy HH:mm en todo el CRM).
+  return fmtDateTime(iso) || iso;
 }

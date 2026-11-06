@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
+import { useConfirm } from '@/composable/useConfirm';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import PageHeader from '@/components/ui/PageHeader.vue';
@@ -33,6 +34,7 @@ const TABS: Tab[] = ['overview', 'list', 'board', 'calendar', 'timeline', 'dashb
 
 /** Un proyecto: Lista o Tablero (como las pestañas de Asana), «Compartir», y el detalle de la tarea en el panel derecho. */
 const { t } = useI18n();
+const confirm = useConfirm();
 const route = useRoute();
 const router = useRouter();
 const store = useProjectsStore();
@@ -47,7 +49,6 @@ const view = ref<Tab>('list');
 const showCompleted = ref(false);
 const editing = ref(false);
 const sharing = ref(false);
-const confirmDelete = ref(false);
 const managingFields = ref(false);
 const managingRules = ref(false);
 const managingForms = ref(false);
@@ -111,7 +112,13 @@ async function duplicate(): Promise<void> {
 }
 
 async function remove(): Promise<void> {
-  confirmDelete.value = false;
+  const ok = await confirm({
+    title: t('projects.deleteTitle', { name: project.value?.name }),
+    text: t('projects.deleteText'),
+    confirmText: t('common.delete'),
+    destructive: true,
+  });
+  if (!ok) return;
   try {
     await store.removeProject();
     void router.push('/projects');
@@ -134,7 +141,7 @@ async function remove(): Promise<void> {
           </v-chip>
           <div class="d-flex align-center">
             <UserAvatar v-for="m in visibleMembers" :key="m.userId" :user-id="m.userId" :size="30" class="ml-n2 border" />
-            <span v-if="(project.members.length ?? 0) > 5" class="text-caption text-medium-emphasis ml-1">+{{ project.members.length - 5 }}</span>
+            <span v-if="(project.members.length ?? 0) > 5" class="text-body-small text-medium-emphasis ml-1">+{{ project.members.length - 5 }}</span>
           </div>
           <RunningTimerChip />
           <v-btn variant="text" icon="mdi-keyboard-outline" :aria-label="t('projects.shortcuts.title')" @click="helpOpen = true" />
@@ -155,7 +162,7 @@ async function remove(): Promise<void> {
                 :title="archived ? t('projects.unarchive') : t('projects.archive')"
                 @click="setArchived(!archived)"
               />
-              <v-list-item v-if="store.canManage" prepend-icon="mdi-trash-can-outline" :title="t('projects.delete')" @click="confirmDelete = true" />
+              <v-list-item v-if="store.canManage" prepend-icon="mdi-trash-can-outline" :title="t('projects.delete')" @click="remove" />
               <v-divider v-if="store.canManage" />
               <v-list-item>
                 <v-switch
@@ -208,30 +215,18 @@ async function remove(): Promise<void> {
       <v-card>
         <v-card-title>{{ t('projects.duplicate.title') }}</v-card-title>
         <v-card-text class="d-flex flex-column ga-4">
-          <div class="text-body-2 text-medium-emphasis">{{ t('projects.duplicate.text') }}</div>
+          <div class="text-body-medium text-medium-emphasis">{{ t('projects.duplicate.text') }}</div>
           <v-text-field v-model="copyName" :label="t('projects.form.name')" :counter="120" autofocus @keyup.enter="duplicate" />
         </v-card-text>
         <v-card-actions class="flex-wrap ga-2">
           <v-spacer />
           <v-btn variant="text" @click="duplicating = false">{{ t('common.cancel') }}</v-btn>
-          <v-btn color="primary" :disabled="!copyName.trim()" @click="duplicate">{{ t('projects.duplicate.action') }}</v-btn>
+          <v-btn variant="flat" color="primary" :disabled="!copyName.trim()" @click="duplicate">{{ t('projects.duplicate.action') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
     <ShareDialog v-model="sharing" @left="router.push('/projects')" />
 
-    <v-dialog v-model="confirmDelete">
-      <v-card>
-        <v-card-title>{{ t('projects.deleteTitle', { name: project?.name }) }}</v-card-title>
-        <v-card-text>{{ t('projects.deleteText') }}</v-card-text>
-        <v-card-actions class="flex-wrap ga-2">
-          <v-spacer />
-          <v-btn variant="text" @click="confirmDelete = false">{{ t('common.cancel') }}</v-btn>
-          <v-btn color="error" @click="remove">{{ t('common.delete') }}</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
 
-    <v-snackbar :model-value="!!store.notice" timeout="4000" @update:model-value="store.notice = null">{{ store.notice }}</v-snackbar>
   </v-container>
 </template>

@@ -11,6 +11,9 @@
  * sustituye todos los turnos de una vez y valida que no se solapen.
  */
 import { computed, onMounted, ref } from 'vue';
+import { formatDate } from '@/utils/format';
+import DateField from '@/components/ui/DateField.vue';
+import { notify } from '@/composable/useNotify';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { useRestaurantEstablishment } from '@/composable/useRestaurantEstablishment';
@@ -27,7 +30,6 @@ const canManage = computed(() => auth.can('restaurant:manage'));
 
 const loadError = ref<string | null>(null);
 const saveError = ref<string | null>(null);
-const snackbar = ref<string | null>(null);
 
 /** Lunes primero, como se lee un horario; el domingo (0) va al final. */
 const weekdays = [1, 2, 3, 4, 5, 6, 0];
@@ -123,7 +125,7 @@ function copyToAll(weekday: number): void {
   if (source.length === 0) return;
   const others = shifts.value.filter((s) => s.weekday !== weekday);
   shifts.value = [...others, ...weekdays.flatMap((day) => source.map((s) => ({ weekday: day, ...s })))];
-  snackbar.value = t('restaurant.schedule.copyDone');
+  notify.success(t('restaurant.schedule.copyDone'));
 }
 
 function addDuration(): void {
@@ -153,7 +155,7 @@ async function save(): Promise<void> {
       shifts: shifts.value,
     });
     syncFromStore();
-    snackbar.value = t('restaurant.schedule.saved');
+    notify.success(t('restaurant.schedule.saved'));
   } catch {
     saveError.value = restaurant.error;
   }
@@ -183,7 +185,7 @@ async function submitException(): Promise<void> {
       reason: exceptionForm.value.reason || null,
     });
     exceptionDialog.value = false;
-    snackbar.value = t('restaurant.schedule.created');
+    notify.success(t('restaurant.schedule.created'));
   } catch {
     exceptionError.value = restaurant.error;
   }
@@ -192,9 +194,9 @@ async function submitException(): Promise<void> {
 async function removeException(exception: ScheduleException): Promise<void> {
   try {
     await restaurant.removeException(exception.id);
-    snackbar.value = t('restaurant.schedule.removed');
+    notify.success(t('restaurant.schedule.removed'));
   } catch {
-    snackbar.value = restaurant.error ?? t('restaurant.schedule.saveError');
+    notify.error(restaurant.error ?? t('restaurant.schedule.saveError'));
   }
 }
 
@@ -253,7 +255,7 @@ onMounted(runPreview);
         <v-card-text>
           <div v-for="weekday in weekdays" :key="weekday" class="mb-4">
             <div class="d-flex align-center ga-2 mb-1">
-              <span class="text-subtitle-2">{{ $t(`restaurant.schedule.weekdays.${weekday}`) }}</span>
+              <span class="text-title-small">{{ $t(`restaurant.schedule.weekdays.${weekday}`) }}</span>
               <v-btn
                 v-if="canManage && shiftsFor(weekday).length"
                 size="x-small"
@@ -265,7 +267,7 @@ onMounted(runPreview);
               </v-btn>
             </div>
 
-            <div v-if="!shiftsFor(weekday).length" class="text-body-2 text-medium-emphasis">
+            <div v-if="!shiftsFor(weekday).length" class="text-body-medium text-medium-emphasis">
               {{ $t('restaurant.schedule.noShifts') }}
             </div>
 
@@ -342,9 +344,9 @@ onMounted(runPreview);
         <v-card-subtitle>{{ $t('restaurant.schedule.durationsIntro') }}</v-card-subtitle>
         <v-card-text>
           <div v-for="(duration, index) in durations" :key="index" class="d-flex align-center ga-2 mb-2 flex-wrap">
-            <span v-if="duration.upTo === null" class="text-body-2">{{ $t('restaurant.schedule.upToMax') }}</span>
+            <span v-if="duration.upTo === null" class="text-body-medium">{{ $t('restaurant.schedule.upToMax') }}</span>
             <template v-else>
-              <span class="text-body-2">{{ $t('restaurant.schedule.upTo') }}</span>
+              <span class="text-body-medium">{{ $t('restaurant.schedule.upTo') }}</span>
               <v-text-field
                 v-model.number="duration.upTo"
                 type="number"
@@ -352,7 +354,7 @@ onMounted(runPreview);
                 style="max-width: 110px"
                 :disabled="!canManage"
               />
-              <span class="text-body-2">{{ $t('restaurant.schedule.people') }}</span>
+              <span class="text-body-medium">{{ $t('restaurant.schedule.people') }}</span>
             </template>
             <v-text-field
               v-model.number="duration.minutes"
@@ -382,15 +384,15 @@ onMounted(runPreview);
         <v-card-title>{{ $t('restaurant.schedule.exceptions') }}</v-card-title>
         <v-card-subtitle>{{ $t('restaurant.schedule.exceptionsIntro') }}</v-card-subtitle>
         <v-card-text>
-          <div v-if="!exceptions.length" class="text-body-2 text-medium-emphasis mb-3">
+          <div v-if="!exceptions.length" class="text-body-medium text-medium-emphasis mb-3">
             {{ $t('restaurant.schedule.noExceptions') }}
           </div>
           <div v-for="exception in exceptions" :key="exception.id" class="d-flex align-center ga-3 mb-2">
-            <span class="font-weight-medium">{{ exception.onDate }}</span>
+            <span class="font-weight-medium">{{ formatDate(exception.onDate) }}</span>
             <v-chip size="x-small" variant="flat" :color="exception.kind === 'closed' ? 'lighterror' : 'lightinfo'">
               {{ exceptionLabel(exception) }}
             </v-chip>
-            <span v-if="exception.reason" class="text-body-2 text-medium-emphasis">{{ exception.reason }}</span>
+            <span v-if="exception.reason" class="text-body-medium text-medium-emphasis">{{ exception.reason }}</span>
             <v-spacer />
             <v-btn
               v-if="canManage"
@@ -412,9 +414,8 @@ onMounted(runPreview);
         <v-card-subtitle>{{ $t('restaurant.schedule.previewIntro') }}</v-card-subtitle>
         <v-card-text>
           <div class="d-flex align-center ga-2 mb-4 flex-wrap">
-            <v-text-field
+            <DateField
               v-model="previewDate"
-              type="date"
               :label="$t('restaurant.schedule.previewDate')"
               style="max-width: 220px"
             />
@@ -428,7 +429,7 @@ onMounted(runPreview);
               {{ $t('restaurant.schedule.previewEmpty') }}
             </v-alert>
             <template v-else>
-              <div class="text-body-2 text-medium-emphasis mb-2">
+              <div class="text-body-medium text-medium-emphasis mb-2">
                 {{ $t('restaurant.schedule.previewCount', { count: restaurant.preview.slots.length }) }}
               </div>
               <div class="d-flex flex-wrap ga-2">
@@ -453,7 +454,7 @@ onMounted(runPreview);
         <v-card-title>{{ $t('restaurant.schedule.addException') }}</v-card-title>
         <v-card-text class="d-flex flex-column ga-3">
           <div v-if="exceptionError"><v-alert type="error">{{ exceptionError }}</v-alert></div>
-          <v-text-field v-model="exceptionForm.onDate" type="date" :label="$t('restaurant.schedule.exceptionDate')" />
+          <DateField v-model="exceptionForm.onDate" :label="$t('restaurant.schedule.exceptionDate')" />
           <v-select
             v-model="exceptionForm.kind"
             :items="[
@@ -482,6 +483,5 @@ onMounted(runPreview);
       </v-card>
     </v-dialog>
 
-    <v-snackbar :model-value="snackbar !== null" color="success" @update:model-value="snackbar = null">{{ snackbar }}</v-snackbar>
   </v-container>
 </template>

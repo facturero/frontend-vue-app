@@ -4,6 +4,7 @@ import { fileApi } from '@/api/files';
 import { projectsApi } from '@/api/projects';
 import { useCelebration } from '@/composable/useCelebration';
 import { extractError, extractErrorCode } from '@/utils/error';
+import { notify } from '@/composable/useNotify';
 import { neighbours } from '@/utils/projects';
 import type {
   ApprovalDecision,
@@ -65,6 +66,13 @@ export const useProjectsStore = defineStore('projects', () => {
   const loading = ref(false);
   const error = ref<string | null>(null);
   const notice = ref<string | null>(null);
+
+  /** Un error de escritura o de carga puntual: queda en `notice` (los diálogos lo leen para mostrarlo dentro, R-04) y sale en el
+   *  aviso global de la app (useNotify), que reemplaza al `<v-snackbar>` que cada vista de Proyectos tenía. */
+  function fail(err: unknown): void {
+    notice.value = extractError(err);
+    notify.error(notice.value);
+  }
   const { celebrate } = useCelebration();
 
   const users = computed(() => new Map(directory.value.map((u) => [u.id, u])));
@@ -89,7 +97,7 @@ export const useProjectsStore = defineStore('projects', () => {
     try {
       return await work();
     } catch (err) {
-      notice.value = extractError(err);
+      fail(err);
       if (extractErrorCode(err) === 'VERSION_CONFLICT' || extractErrorCode(err) === 'INVALID_POSITION') {
         // Otra persona cambió algo: se recarga para mostrar lo que hay de verdad.
         if (current.value) await reloadBoard();
@@ -301,7 +309,7 @@ export const useProjectsStore = defineStore('projects', () => {
     try {
       detail.value = await projectsApi.getTask(taskId);
     } catch (err) {
-      notice.value = extractError(err);
+      fail(err);
       detail.value = null;
     }
   }
@@ -431,7 +439,7 @@ export const useProjectsStore = defineStore('projects', () => {
     try {
       statusUpdates.value = await projectsApi.statusUpdates(current.value.id);
     } catch (err) {
-      notice.value = extractError(err);
+      fail(err);
     }
   }
 
@@ -454,7 +462,7 @@ export const useProjectsStore = defineStore('projects', () => {
       tags.value = await projectsApi.tags();
       tagsLoaded = true;
     } catch (err) {
-      notice.value = extractError(err);
+      fail(err);
     }
   }
 

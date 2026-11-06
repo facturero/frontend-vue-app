@@ -4,6 +4,10 @@ Regla de oro: **el estilo se define una vez, en un sitio, y las vistas sólo
 describen contenido y comportamiento.** Si una vista necesita decidir cómo se ve
 algo, es que falta una decisión aquí.
 
+Este documento fija **el aspecto**. Los **patrones de pantalla** (estados de
+carga y vacío, confirmaciones, avisos, diálogos, formularios, tablas, formatos,
+teclado) están en [`REGLAS-FRONT.md`](REGLAS-FRONT.md).
+
 ---
 
 ## 1. Dónde vive cada decisión
@@ -20,6 +24,78 @@ algo, es que falta una decisión aquí.
 Nunca: colores hex en un `.vue`, `<style>` en una vista, ni `px` a mano cuando
 existe una utilidad.
 
+### Solo componentes de Vuetify
+
+**Toda pieza de interfaz es un componente de Vuetify.** Nunca el control nativo
+de HTML (`<input type="date">`, `type="time"`, `type="number"`, `type="color"`,
+`<select>`, `<button>`) ni una librería de interfaz aparte.
+
+Por qué: un control nativo lo dibuja el navegador, no la app. Se ve distinto en
+Chrome, Safari y Android, no sigue el tema (en oscuro sale blanco), ignora los
+defaults de `vuetify.ts` y muestra la fecha en el idioma **del sistema
+operativo**, no en el que eligió la persona en el CRM. Ejemplo real: las fechas
+de inicio y fin de una tarea usan `v-text-field type="date"`, y lo que se abre
+es el calendario de Chrome, no el `v-date-picker` del tema.
+
+| Necesito | Uso | No uso |
+|---|---|---|
+| Una fecha | `<DateField>` (= `v-date-input`, ver abajo) | `type="date"` |
+| Un rango (inicio–fin) | dos `<DateField>`, el de fin con `:min` = inicio; o uno con `multiple="range"` | dos `type="date"` sin relación |
+| Una hora | `v-time-picker` dentro de un `v-menu` (Vuetify 3.12 no tiene campo de hora, ni en *labs*) | `type="time"` |
+| Un número, una cantidad, un importe | `v-number-input` (con `:precision` y `:min`) | `type="number"` |
+| Un color | `v-color-picker` | `type="color"` |
+| Un archivo | `v-file-input` o `ImageUploader` | `<input type="file">` |
+| Elegir de una lista | `v-select` / `v-autocomplete` | `<select>` |
+| Un botón | `v-btn` | `<button>` |
+
+**Fechas: `v-date-input`, siempre a través de `components/ui/DateField.vue`**
+(existe desde el 2026-11-06). El componente de Vuetify para escribir o elegir una fecha es
+[`v-date-input`](https://vuetifyjs.com/en/components/date-inputs/): un
+`v-text-field` con el `v-date-picker` del tema, que acepta `min`, `max`,
+`clearable`, `readonly`, `input-format`/`display-format` y rangos
+(`multiple="range"`), y es estable desde **Vuetify 4.1** (usamos la 4.3). Ninguna
+vista lo usa directo: lo usa `DateField`, que
+
+- recibe y emite `YYYY-MM-DD` (el componente trabaja con `Date`; la API y el
+  estado, con texto ISO — `REGLAS-FRONT.md` R-43),
+- muestra la fecha en el idioma activo del CRM (`dd/mm/aaaa` en español) y el
+  calendario empieza en lunes,
+- su aspecto (contorno, densidad, icono dentro del campo) sale de `VDateInput`
+  en `plugins/vuetify.ts`,
+- y expone `focus()` (el atajo **D** del detalle de tarea lo usa),
+- y para un rango inicio–fin se usa dos veces, el fin con `:min` = inicio (o
+  una sola con `multiple="range"` cuando el rango se elige de una vez, como un
+  filtro de fechas).
+
+**Componentes *labs* de Vuetify** (`VMaskInput`, `VFileUpload`, `VColorInput`…):
+no se usan sin una decisión explícita del dueño. Si se adopta uno, entra
+envuelto en una pieza de `components/ui/` (como `DateField` con
+`VDateInput`), para que su cambio de API toque un archivo y no veinte, y se
+anota en la lista de excepciones de abajo.
+
+**Si Vuetify no tiene el componente, se pregunta antes de construirlo.** No se
+escribe un control a mano ni se instala una librería por cuenta propia: se
+plantea la necesidad al dueño (qué hace falta, por qué ningún componente de
+Vuetify sirve y qué alternativas hay) y, si se aprueba, queda anotado aquí
+con su motivo.
+
+Excepciones aprobadas hoy:
+
+| Qué | Con qué | Por qué Vuetify no sirve |
+|---|---|---|
+| Caja web (`/pos`) | HTML propio + `pos-kiosk.css` | debe verse igual que la caja de escritorio, con el tema del cliente (ver «La caja web…») |
+| Plano del restaurante | SVG propio | medidas reales, imán y deshacer (ver «El editor del plano…») |
+| Vista previa del tema del POS | `div` con estilos en línea | tiene que ser fiel a la caja, no al CRM (§9) |
+| Texto enriquecido (descripción y comentarios de tareas) | Tiptap (`@tiptap/*`) | Vuetify no tiene editor de texto con formato ni menciones |
+| Arrastrar y soltar (tablero, listas) | `vue-draggable-plus` | Vuetify no tiene arrastrar y soltar |
+| Recorrido guiado | `driver.js` | Vuetify no tiene tours (§8) |
+| Color del editor de tema del POS | `<input type="color">` | **por revisar**: se decidió cuando Vuetify no traía `v-color-picker`; hoy sí lo trae |
+
+**Fechas: hecho el 2026-11-06.** Las 61 `type="date"` de la app pasaron a
+`DateField` y `lint:ui` rechaza cualquier `type="date"` (kind `fecha`, sin
+excepciones). Pendientes, para cuando se toque cada pantalla: 36
+`type="number"` (→ `v-number-input`) y 4 `type="time"`.
+
 ---
 
 ## 2. Los defaults son la fuente de verdad
@@ -29,6 +105,8 @@ existe una utilidad.
 ```
 VCard          elevation 0 + clase card-surface (radio 7px, sombra suave)
 VBtn           variant flat, rounded lg, sin MAYÚSCULAS (text-none)
+               ⚠ dentro de v-card-actions Vuetify fuerza `text`: la acción principal de un
+                 pie de tarjeta o diálogo lleva `variant="flat"` explícito (lint:ui lo exige)
 campos*        variant outlined, density compact, hide-details auto
 VAlert         variant tonal, density compact, rounded lg
 VChip          variant tonal
@@ -197,13 +275,22 @@ un solo valor en el padre en vez de N valores que se pueden desincronizar.
 
 | Rol | Clase |
 |---|---|
-| Título de página | `text-h5 font-weight-bold` (lo pone `PageHeader`) |
-| Título de tarjeta / sección | `text-h6` |
+| Título de página | `text-headline-small font-weight-bold` (lo pone `PageHeader`) |
+| Título de tarjeta / sección | `text-title-large` |
 | Texto normal | por defecto |
-| Texto secundario | `text-body-2 text-medium-emphasis` |
-| Anotación | `text-caption text-medium-emphasis` |
+| Texto secundario | `text-body-medium text-medium-emphasis` |
+| Anotación | `text-body-small text-medium-emphasis` |
 
-No se usan `text-h1`…`text-h4` en vistas de aplicación.
+Son las clases de Material Design 3 de Vuetify 4 (decisión del 2026-11-06: se adopta su tipografía tal cual, sin restaurar
+tamaños ni pesos de la 3). No se usan `text-display-*` ni `text-headline-large`/`-medium` en vistas de aplicación.
+
+Las clases de la 3 (`text-h1`…`text-h6`, `text-subtitle-*`, `text-body-1`/`-2`, `text-caption`, `text-overline`, `text-button`)
+**ya no existen**: un elemento con ellas se pinta sin estilo y sin ningún error. `lint:ui` las rechaza. Equivalencias: `text-h6` →
+`text-title-large`, `text-subtitle-1`/`text-body-1` → `text-body-large`, `text-subtitle-2` → `text-title-small`, `text-body-2` →
+`text-body-medium`, `text-caption` → `text-body-small`.
+
+Fuente: las clases de tipografía usan `--v-font-body` (o `--v-font-heading`), que no definimos, así que pintan en Roboto, mientras
+el resto de la app va en Plus Jakarta Sans (`--v-font-family` en `index.html`). Venía igual de la 3 y se dejó así a propósito.
 
 ---
 
@@ -216,9 +303,11 @@ Se usan los breakpoints de Vuetify, nunca media queries propias:
 - `v-row` / `v-col` con `cols` + `md` + `lg` para las rejillas.
 - Si necesitas el breakpoint en JS: `const { mobile } = useDisplay()`.
 
-Cuidado: en un `v-row` con `no-gutters`, **no** añadas `ga-*`. El gap se suma al
-ancho de las columnas y provoca que se envuelvan. Usa los gutters de `v-row` o
-márgenes en un `v-sheet` interior.
+Desde Vuetify 4 la rejilla separa las columnas con `gap` (no con márgenes
+negativos y relleno, como en la 3). Por eso **no** pongas `ga-*` en un `v-row`:
+pisa el `gap` de la rejilla. Para juntar o separar columnas usa `density`
+(`compact`, `comfortable`) o la prop `gap` de `v-row`; dentro de una columna,
+`ga-*` en un `d-flex` interior.
 
 ---
 
@@ -273,8 +362,10 @@ previa**, y por eso vive aislada.
 - **Por qué no usa `v-card`:** los defaults globales de `vuetify.ts` (radio, sombra)
   son de la app y falsearían la única vista que tiene que ser fiel al 100 % a lo que
   verá la caja. El mock se construye con `div` y estilos en línea.
-- **Selector de color:** un `<input type="color">` nativo (Vuetify no trae uno) con su
-  campo hexadecimal al lado; el contrato solo acepta `#rrggbb` en minúsculas.
+- **Selector de color:** un `<input type="color">` nativo con su campo hexadecimal al
+  lado; el contrato solo acepta `#rrggbb` en minúsculas. Se decidió cuando Vuetify no
+  traía selector de color; hoy trae `v-color-picker`, así que está **por revisar**
+  (ver §1, «Solo componentes de Vuetify»).
 - **Imágenes de marca:** `PosThemeLogoField` reutiliza `ImageUploader`. Los archivos
   cuelgan de la **organización** (`resourceType: pos-theme-brand`, categorías `logo`,
   `logo-dark`, `login-background`), no del tema, porque un tema nuevo aún no tiene id.

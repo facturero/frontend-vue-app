@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { formatMinutes } from '@/utils/duration';
+import { formatDate } from '@/utils/format';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
@@ -47,13 +48,12 @@ const relative = (iso: string) => {
   if (abs < 3600) return rtf.format(Math.round(seconds / 60), 'minute');
   if (abs < 86400) return rtf.format(Math.round(seconds / 3600), 'hour');
   if (abs < 7 * 86400) return rtf.format(Math.round(seconds / 86400), 'day');
-  return new Intl.DateTimeFormat(locale.value, { dateStyle: 'medium' }).format(new Date(iso));
+  return formatDate(iso);
 };
 
 const date = (value: unknown) => {
   if (typeof value !== 'string' || !value) return '';
-  const [y, m, d] = value.split('-').map(Number);
-  return new Intl.DateTimeFormat(locale.value, { day: 'numeric', month: 'short' }).format(new Date(y!, m! - 1, d));
+  return formatDate(value);
 };
 
 /** Texto de una línea del historial. Las claves y sus datos los define projects-service (application/activity.ts). */
@@ -145,14 +145,14 @@ defineExpose({ focus: () => composer.value?.focus() });
 <template>
   <div v-if="store.detail">
     <div class="d-flex align-center mb-2">
-      <span class="text-body-1 font-weight-medium">{{ t('projects.conversation.title') }}</span>
+      <span class="text-body-large font-weight-medium">{{ t('projects.conversation.title') }}</span>
       <v-spacer />
       <v-switch v-model="showActivity" :label="t('projects.conversation.showActivity')" class="flex-grow-0" />
     </div>
 
     <div class="d-flex flex-column ga-2">
       <template v-for="e in entries" :key="e.type === 'comment' ? e.comment.id : e.activity.id">
-        <div v-if="e.type === 'activity'" class="d-flex align-center ga-2 text-caption text-medium-emphasis">
+        <div v-if="e.type === 'activity'" class="d-flex align-center ga-2 text-body-small text-medium-emphasis">
           <v-icon icon="mdi-history" size="x-small" />
           <span>
             <strong>{{ name(e.activity.actorUserId) }}</strong> {{ describe(e.activity) }} · {{ relative(e.activity.at) }}
@@ -163,8 +163,8 @@ defineExpose({ focus: () => composer.value?.focus() });
           <UserAvatar :user-id="e.comment.authorUserId" :size="32" />
           <div class="flex-grow-1">
             <div class="d-flex align-center ga-2">
-              <span class="text-body-2 font-weight-medium">{{ name(e.comment.authorUserId) }}</span>
-              <span class="text-caption text-medium-emphasis">
+              <span class="text-body-medium font-weight-medium">{{ name(e.comment.authorUserId) }}</span>
+              <span class="text-body-small text-medium-emphasis">
                 {{ relative(e.comment.createdAt) }}<template v-if="e.comment.editedAt"> · {{ t('projects.conversation.edited') }}</template>
               </span>
               <v-spacer />
@@ -191,7 +191,7 @@ defineExpose({ focus: () => composer.value?.focus() });
                 </v-menu>
               </template>
             </div>
-            <div v-if="e.comment.deleted" class="text-body-2 text-medium-emphasis font-italic">{{ t('projects.conversation.deleted') }}</div>
+            <div v-if="e.comment.deleted" class="text-body-medium text-medium-emphasis font-italic">{{ t('projects.conversation.deleted') }}</div>
             <div v-else-if="editingId === e.comment.id" class="d-flex flex-column ga-2">
               <RichTextEditor v-model="editDraft" :toolbar="false" autofocus @submit="saveEdit" />
               <div class="d-flex ga-2 justify-end">
@@ -199,7 +199,7 @@ defineExpose({ focus: () => composer.value?.focus() });
                 <v-btn color="primary" size="small" @click="saveEdit">{{ t('common.save') }}</v-btn>
               </div>
             </div>
-            <RichTextView v-else :doc="e.comment.bodyDoc" class="text-body-2" />
+            <RichTextView v-else :doc="e.comment.bodyDoc" class="text-body-medium" />
           </div>
         </div>
       </template>
@@ -208,7 +208,7 @@ defineExpose({ focus: () => composer.value?.focus() });
     <div v-if="store.detail.canComment" class="d-flex flex-column ga-2 mt-4">
       <RichTextEditor ref="composer" v-model="draft" :placeholder="t('projects.conversation.placeholder')" :toolbar="false" @submit="send" />
       <div class="d-flex align-center ga-2">
-        <span class="text-caption text-medium-emphasis">{{ t('projects.conversation.hint') }}</span>
+        <span class="text-body-small text-medium-emphasis">{{ t('projects.conversation.hint') }}</span>
         <v-spacer />
         <v-btn color="primary" size="small" :loading="sending" @click="send">{{ t('projects.conversation.send') }}</v-btn>
       </div>

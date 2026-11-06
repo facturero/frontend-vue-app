@@ -7,6 +7,8 @@
  * «Cobrar» guarda y contabiliza (asigna el número, baja la deuda y genera el asiento); «Guardar borrador» solo guarda.
  */
 import { computed, onMounted, ref, watch } from 'vue';
+import { localIsoDate } from '@/utils/isoDate';
+import DateField from '@/components/ui/DateField.vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
@@ -36,7 +38,7 @@ const bank = useTreasuryBankingStore();
 const store = useTreasuryStore();
 
 const receiptId = computed(() => (route.params.id as string | undefined) ?? null);
-const today = () => new Date().toLocaleDateString('en-CA');
+const today = () => localIsoDate(new Date());
 
 const form = ref<ReceiptForm>({
   customerId: (route.query.customerId as string | undefined) ?? null,
@@ -208,7 +210,7 @@ async function submit(andPost: boolean): Promise<void> {
             <v-autocomplete v-model="form.customerId" :items="customerItems" :label="$t('treasury.receipts.customer')" :disabled="isEditing" :error-messages="err('customerId')" />
           </v-col>
           <v-col cols="6" md="3">
-            <v-text-field v-model="form.receiptDate" type="date" :label="$t('treasury.receipts.date')" :error-messages="err('receiptDate')" />
+            <DateField v-model="form.receiptDate" :label="$t('treasury.receipts.date')" :error-messages="err('receiptDate')" />
           </v-col>
           <v-col cols="6" md="4">
             <v-text-field v-model="form.cash" :label="$t('treasury.receipts.received')" :hint="$t('treasury.receipts.receivedHint')" persistent-hint inputmode="decimal" :error-messages="err('cash')" />
@@ -240,7 +242,7 @@ async function submit(andPost: boolean): Promise<void> {
     </v-card>
 
     <v-card v-if="form.customerId" class="mb-4">
-      <v-card-title class="d-flex flex-wrap align-center ga-2 text-h6">
+      <v-card-title class="d-flex flex-wrap align-center ga-2 text-title-large">
         {{ $t('treasury.receipts.applyTo') }}
         <v-spacer />
         <v-btn variant="tonal" size="small" prepend-icon="mdi-sort-calendar-ascending" :disabled="autoAllocate" @click="redistribute">{{ $t('treasury.receipts.distribute') }}</v-btn>
@@ -251,13 +253,13 @@ async function submit(andPost: boolean): Promise<void> {
         <v-row v-for="(row, index) in form.rows" :key="row.receivableId" class="align-center">
           <v-col cols="12" md="5">
             <div>{{ receivables[index]?.documentNumber ?? $t(`treasury.receivables.source.${receivables[index]?.sourceType ?? 'invoice'}`) }}</div>
-            <div class="text-body-2 text-medium-emphasis">
+            <div class="text-body-medium text-medium-emphasis">
               {{ $t('treasury.receipts.dueOn', { date: receivables[index]?.dueDate }) }}
               <v-chip v-if="receivables[index] && overdue(receivables[index]!) > 0" color="lighterror" variant="flat" size="x-small" class="ml-2">{{ $t('treasury.receivables.overdueDays', { n: overdue(receivables[index]!) }) }}</v-chip>
             </div>
           </v-col>
           <v-col cols="4" md="2" class="text-end">
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.receivables.balance') }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.receivables.balance') }}</div>
             {{ money(receivables[index]?.balanceCents ?? 0) }}
           </v-col>
           <v-col cols="6" md="3">
@@ -271,13 +273,13 @@ async function submit(andPost: boolean): Promise<void> {
     </v-card>
 
     <v-card v-if="advancesAvailable.length > 0" class="mb-4">
-      <v-card-title class="text-h6">{{ $t('treasury.receipts.useAdvances') }}</v-card-title>
+      <v-card-title class="text-title-large">{{ $t('treasury.receipts.useAdvances') }}</v-card-title>
       <v-card-text>
-        <div class="text-body-2 text-medium-emphasis mb-2">{{ $t('treasury.receipts.useAdvancesHint') }}</div>
+        <div class="text-body-medium text-medium-emphasis mb-2">{{ $t('treasury.receipts.useAdvancesHint') }}</div>
         <v-row v-for="(adv, index) in form.advances" :key="adv.advanceId" class="align-center">
           <v-col cols="12" md="6">
             <div>{{ advancesAvailable[index]?.documentNumber ?? '—' }}</div>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.receipts.advanceAvailable', { amount: money(advancesAvailable[index]?.balanceCents ?? 0) }) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.receipts.advanceAvailable', { amount: money(advancesAvailable[index]?.balanceCents ?? 0) }) }}</div>
           </v-col>
           <v-col cols="12" md="3">
             <v-text-field v-model="adv.use" :label="$t('treasury.receipts.useAmount')" inputmode="decimal" :error-messages="err(`advances[${index}].use`)" />
@@ -289,21 +291,21 @@ async function submit(andPost: boolean): Promise<void> {
     <v-card>
       <v-card-text>
         <div class="d-flex flex-wrap ga-6">
-          <div><div class="text-body-2 text-medium-emphasis">{{ $t('treasury.receipts.received') }}</div><div class="text-h6">{{ money(preview.cash) }}</div></div>
-          <div v-if="preview.advanceUsed > 0"><div class="text-body-2 text-medium-emphasis">{{ $t('treasury.receipts.advanceUsed') }}</div><div class="text-h6">{{ money(preview.advanceUsed) }}</div></div>
-          <div><div class="text-body-2 text-medium-emphasis">{{ $t('treasury.receipts.applied') }}</div><div class="text-h6">{{ money(preview.applied) }}</div></div>
+          <div><div class="text-body-medium text-medium-emphasis">{{ $t('treasury.receipts.received') }}</div><div class="text-title-large">{{ money(preview.cash) }}</div></div>
+          <div v-if="preview.advanceUsed > 0"><div class="text-body-medium text-medium-emphasis">{{ $t('treasury.receipts.advanceUsed') }}</div><div class="text-title-large">{{ money(preview.advanceUsed) }}</div></div>
+          <div><div class="text-body-medium text-medium-emphasis">{{ $t('treasury.receipts.applied') }}</div><div class="text-title-large">{{ money(preview.applied) }}</div></div>
           <div>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.receipts.excess') }}</div>
-            <div class="text-h6" :class="preview.excess < 0 ? 'text-error' : undefined">{{ money(preview.excess) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.receipts.excess') }}</div>
+            <div class="text-title-large" :class="preview.excess < 0 ? 'text-error' : undefined">{{ money(preview.excess) }}</div>
           </div>
         </div>
-        <div v-if="preview.excess > 0" class="text-body-2 text-medium-emphasis mt-2">{{ $t('treasury.receipts.excessHint') }}</div>
+        <div v-if="preview.excess > 0" class="text-body-medium text-medium-emphasis mt-2">{{ $t('treasury.receipts.excessHint') }}</div>
       </v-card-text>
       <v-card-actions class="flex-wrap ga-2">
         <v-btn variant="text" :to="{ name: 'treasury-receipts' }">{{ $t('common.cancel') }}</v-btn>
         <v-spacer />
         <v-btn variant="tonal" :loading="store.saving" @click="submit(false)">{{ $t('treasury.receipts.saveDraft') }}</v-btn>
-        <v-btn color="primary" prepend-icon="mdi-cash-check" :loading="store.saving" @click="submit(true)">{{ $t('treasury.receipts.charge') }}</v-btn>
+        <v-btn variant="flat" color="primary" prepend-icon="mdi-cash-check" :loading="store.saving" @click="submit(true)">{{ $t('treasury.receipts.charge') }}</v-btn>
       </v-card-actions>
     </v-card>
   </v-container>

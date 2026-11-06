@@ -4,6 +4,8 @@
  * depende del estado y de los permisos (`orderActions`); el servidor vuelve a comprobarlo todo: ocultar un botón no es seguridad.
  */
 import { computed, onMounted, ref } from 'vue';
+import { formatDate, formatDateTime } from '@/utils/format';
+import { notify } from '@/composable/useNotify';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
@@ -22,20 +24,17 @@ const store = usePurchasingStore();
 const id = computed(() => route.params.id as string);
 const order = computed(() => store.current);
 const actionError = ref<string | null>(null);
-const snackbar = ref<string | null>(null);
 
 const userId = computed(() => (auth.user as { id?: string } | null)?.id ?? null);
 const actions = computed(() => (order.value ? orderActions(order.value, (p) => auth.can(p), userId.value) : null));
 /** Aprobada en adelante ya hay (o puede haber) recepciones: se abre el seguimiento por línea. */
 const canSeeReceiving = computed(() => !!order.value && RECEIVING_VISIBLE_STATUSES.includes(order.value.status));
 const money = (cents: number) => formatMoney(cents, locale.value, order.value?.currencyCode ?? 'USD');
-const date = (iso: string | null) => (iso ? new Date(iso).toLocaleString(locale.value, { dateStyle: 'medium', timeStyle: 'short' }) : '—');
+const date = (iso: string | null) => formatDateTime(iso) || '—';
 
 /** `AAAA-MM-DD` → fecha legible sin pasar por la zona horaria. */
 function day(value: string | null): string {
-  if (!value) return '—';
-  const [y, m, d] = value.split('-').map(Number);
-  return new Date(y!, m! - 1, d).toLocaleDateString(locale.value, { dateStyle: 'medium' });
+  return formatDate(value) || '—';
 }
 
 const lineHeaders = computed(() => [
@@ -57,7 +56,7 @@ async function run(work: () => Promise<unknown>, message: string): Promise<void>
   actionError.value = null;
   try {
     await work();
-    snackbar.value = t(message);
+    notify.success(t(message));
   } catch {
     actionError.value = store.error;
   }
@@ -129,24 +128,24 @@ async function confirmReason(): Promise<void> {
 
           <v-row>
             <v-col cols="12" md="4">
-              <div class="text-body-2 text-medium-emphasis">{{ $t('purchasing.orders.supplier') }}</div>
+              <div class="text-body-medium text-medium-emphasis">{{ $t('purchasing.orders.supplier') }}</div>
               <div>{{ order.supplier.legalName }}</div>
-              <div class="text-body-2 text-medium-emphasis">{{ order.supplier.identification }}</div>
+              <div class="text-body-medium text-medium-emphasis">{{ order.supplier.identification }}</div>
             </v-col>
             <v-col cols="6" md="2">
-              <div class="text-body-2 text-medium-emphasis">{{ $t('purchasing.form.orderDate') }}</div>
+              <div class="text-body-medium text-medium-emphasis">{{ $t('purchasing.form.orderDate') }}</div>
               <div>{{ day(order.orderDate) }}</div>
             </v-col>
             <v-col cols="6" md="2">
-              <div class="text-body-2 text-medium-emphasis">{{ $t('purchasing.form.expectedDate') }}</div>
+              <div class="text-body-medium text-medium-emphasis">{{ $t('purchasing.form.expectedDate') }}</div>
               <div>{{ day(order.expectedDate) }}</div>
             </v-col>
             <v-col cols="6" md="2">
-              <div class="text-body-2 text-medium-emphasis">{{ $t('purchasing.suppliers.creditDays') }}</div>
+              <div class="text-body-medium text-medium-emphasis">{{ $t('purchasing.suppliers.creditDays') }}</div>
               <div>{{ order.paymentTermDays === 0 ? $t('purchasing.suppliers.cash') : $t('purchasing.suppliers.days', { n: order.paymentTermDays }) }}</div>
             </v-col>
             <v-col v-if="order.notes" cols="12">
-              <div class="text-body-2 text-medium-emphasis">{{ $t('common.notes') }}</div>
+              <div class="text-body-medium text-medium-emphasis">{{ $t('common.notes') }}</div>
               <div>{{ order.notes }}</div>
             </v-col>
           </v-row>
@@ -154,7 +153,7 @@ async function confirmReason(): Promise<void> {
       </v-card>
 
       <v-card class="mb-4">
-        <v-card-title class="text-h6">{{ $t('purchasing.orders.lines') }}</v-card-title>
+        <v-card-title class="text-title-large">{{ $t('purchasing.orders.lines') }}</v-card-title>
         <v-data-table :headers="lineHeaders" :items="order.lines ?? []" :items-per-page="-1" hide-default-footer>
           <template #item.unitCostCents="{ item }">{{ money(item.unitCostCents) }}</template>
           <template #item.discountCents="{ item }">{{ money(item.discountCents) }}</template>
@@ -164,12 +163,12 @@ async function confirmReason(): Promise<void> {
         <v-card-text class="d-flex flex-column align-end ga-2">
           <div>{{ $t('invoices.subtotal') }}: {{ money(order.subtotalCents) }}</div>
           <div>{{ $t('invoices.taxTotal') }}: {{ money(order.taxCents) }}</div>
-          <div class="text-h6">{{ $t('invoices.total') }}: {{ money(order.totalCents) }}</div>
+          <div class="text-title-large">{{ $t('invoices.total') }}: {{ money(order.totalCents) }}</div>
         </v-card-text>
       </v-card>
 
       <v-card>
-        <v-card-title class="text-h6">{{ $t('purchasing.orders.history') }}</v-card-title>
+        <v-card-title class="text-title-large">{{ $t('purchasing.orders.history') }}</v-card-title>
         <v-card-text>
           <div>{{ $t('purchasing.orders.createdAt') }}: {{ date(order.createdAt) }}</div>
           <div v-if="order.submittedAt">{{ $t('purchasing.orders.submittedAt') }}: {{ date(order.submittedAt) }}</div>
@@ -192,11 +191,10 @@ async function confirmReason(): Promise<void> {
         <v-card-actions class="flex-wrap ga-2">
           <v-spacer />
           <v-btn variant="text" @click="reasonDialog = null">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="error" :loading="store.saving" :disabled="!reasonValid" @click="confirmReason">{{ $t('common.confirm') }}</v-btn>
+          <v-btn variant="flat" color="error" :loading="store.saving" :disabled="!reasonValid" @click="confirmReason">{{ $t('common.confirm') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <v-snackbar :model-value="snackbar !== null" timeout="3000" @update:model-value="snackbar = null">{{ snackbar }}</v-snackbar>
   </v-container>
 </template>

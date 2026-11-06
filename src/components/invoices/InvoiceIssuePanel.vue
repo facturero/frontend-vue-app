@@ -46,8 +46,8 @@ watch(() => props.establishmentId, (estId) => {
 
 <template>
   <section>
-    <div class="text-subtitle-2 font-weight-medium mb-1">{{ $t('invoices.step3') }}</div>
-    <p class="text-caption text-medium-emphasis mb-4">
+    <div class="text-title-small font-weight-medium mb-1">{{ $t('invoices.step3') }}</div>
+    <p class="text-body-small text-medium-emphasis mb-4">
       {{ authority
         ? $t('invoices.step3Subtitle', { authority })
         : $t('invoices.step3SubtitleGeneric') }}
@@ -119,10 +119,10 @@ watch(() => props.establishmentId, (estId) => {
       </v-alert>
     </template>
 
-    <p v-if="!hasLines" class="text-caption text-medium-emphasis mb-4">
+    <p v-if="!hasLines" class="text-body-small text-medium-emphasis mb-4">
       {{ $t('invoices.addLineFirst') }}
     </p>
-    <p v-else class="text-body-2 text-medium-emphasis mb-4">
+    <p v-else class="text-body-medium text-medium-emphasis mb-4">
       {{ $t('invoices.issueNote') }}
     </p>
 

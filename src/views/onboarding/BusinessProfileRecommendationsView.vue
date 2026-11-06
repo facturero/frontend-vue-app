@@ -119,17 +119,17 @@ function skip(): void {
       {{ store.error }}
     </v-alert>
 
-    <v-row v-if="store.loading && !store.recommendations" dense>
+    <v-row v-if="store.loading && !store.recommendations" density="compact">
       <v-col cols="12" class="text-center py-12">
         <v-progress-circular indeterminate color="primary" />
       </v-col>
     </v-row>
 
     <template v-else>
-      <v-row dense>
+      <v-row density="compact">
         <v-col v-for="[category, list] in groups" :key="category" cols="12" md="6">
           <v-card class="mb-4">
-            <v-card-title class="text-h6 font-weight-medium pb-0">
+            <v-card-title class="text-title-large font-weight-medium pb-0">
               {{ category }}
             </v-card-title>
             <v-card-text>
@@ -148,12 +148,12 @@ function skip(): void {
                     {{ i.plugin.name }}
                   </v-list-item-title>
                   <v-list-item-subtitle>
-                    <span v-if="i.state === 'blocked' && i.requires.some((r) => !r.alreadyActive)" class="text-caption">
+                    <span v-if="i.state === 'blocked' && i.requires.some((r) => !r.alreadyActive)" class="text-body-small">
                       {{ blockedDetail(i) }}
                     </span>
                   </v-list-item-subtitle>
                   <template #append>
-                    <span class="text-body-2">{{ formatPrice(i.plugin.priceCents, i.plugin.currency) }}{{ t('plugins.perMonth') }}</span>
+                    <span class="text-body-medium">{{ formatPrice(i.plugin.priceCents, i.plugin.currency) }}{{ t('plugins.perMonth') }}</span>
                   </template>
                 </v-list-item>
               </v-list>
@@ -162,10 +162,10 @@ function skip(): void {
         </v-col>
       </v-row>
 
-      <v-row v-if="alreadyActive.length" dense>
+      <v-row v-if="alreadyActive.length" density="compact">
         <v-col cols="12" md="6">
           <v-card class="mb-4">
-            <v-card-title class="text-h6 font-weight-medium pb-0">
+            <v-card-title class="text-title-large font-weight-medium pb-0">
               {{ t('onboarding.businessProfile.alreadyActiveTitle') }}
             </v-card-title>
             <v-card-text>
@@ -186,10 +186,10 @@ function skip(): void {
         </v-col>
       </v-row>
 
-      <v-row v-if="comingSoon.length" dense>
+      <v-row v-if="comingSoon.length" density="compact">
         <v-col cols="12" md="6">
           <v-card class="mb-4">
-            <v-card-title class="text-h6 font-weight-medium pb-0">
+            <v-card-title class="text-title-large font-weight-medium pb-0">
               {{ t('onboarding.businessProfile.comingSoon') }}
             </v-card-title>
             <v-card-text>
@@ -211,7 +211,7 @@ function skip(): void {
       </v-row>
 
       <div class="d-flex flex-wrap align-center ga-4">
-        <span class="text-body-2 text-medium-emphasis">
+        <span class="text-body-medium text-medium-emphasis">
           {{ t('onboarding.businessProfile.monthlyTotal', { amount: formatPrice(selectedTotalCents, 'USD') }) }}
         </span>
         <v-spacer />

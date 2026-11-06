@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { onMounted, ref, computed } from 'vue';
+import { formatDate as fmtDate } from '@/utils/format';
 import { useRouter } from 'vue-router';
-import { useI18n } from 'vue-i18n';
 import { useInvoiceStore } from '@/stores/invoices';
 import { useAuthStore } from '@/stores/auth';
 import PageHeader from '@/components/ui/PageHeader.vue';
 
-const { locale } = useI18n();
 const router = useRouter();
 const store = useInvoiceStore();
 const auth = useAuthStore();
@@ -28,10 +27,8 @@ const statusChip = (status: string) => {
 };
 
 const formatDate = (date: string | null) => {
-  if (!date) return '-';
-  return new Date(date).toLocaleDateString(locale.value, {
-    year: 'numeric', month: '2-digit', day: '2-digit',
-  });
+  // `YYYY-MM-DD` se lee como día LOCAL (utils/isoDate): con `new Date(...)` salía el día anterior en Ecuador.
+  return fmtDate(date) || '-';
 };
 
 async function load() {

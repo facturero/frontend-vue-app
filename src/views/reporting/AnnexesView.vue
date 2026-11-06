@@ -67,15 +67,15 @@ const open = (_: Event, { item }: { item: RunSummary }) => router.push({ name: '
     <v-row class="mb-2">
       <v-col v-for="a in ANNEXES" :key="a.value" cols="12" md="4">
         <v-card :color="annex === a.value ? 'primary' : undefined" :variant="annex === a.value ? 'tonal' : 'elevated'" :data-testid="`annex-${a.value}`" @click="annex = a.value">
-          <v-card-title class="text-h6"><v-icon :icon="a.icon" class="mr-2" />{{ $t(`reporting.annexName.${a.value}`) }}</v-card-title>
-          <v-card-text class="text-body-2">{{ $t(`reporting.annexHint.${a.value}`) }}</v-card-text>
+          <v-card-title class="text-title-large"><v-icon :icon="a.icon" class="mr-2" />{{ $t(`reporting.annexName.${a.value}`) }}</v-card-title>
+          <v-card-text class="text-body-medium">{{ $t(`reporting.annexHint.${a.value}`) }}</v-card-text>
         </v-card>
       </v-col>
     </v-row>
 
     <v-card class="mb-4">
       <v-card-text>
-        <v-row align="center">
+        <v-row class="align-center">
           <v-col cols="12" sm="6" md="4">
             <v-select v-model="period" :items="periods" item-value="value" item-title="title" :label="$t('reporting.generate.period')" hide-details data-testid="period-select" />
           </v-col>
@@ -92,7 +92,7 @@ const open = (_: Event, { item }: { item: RunSummary }) => router.push({ name: '
     <v-alert v-if="store.error" type="error" closable class="mb-4">{{ store.error }}</v-alert>
 
     <v-card>
-      <v-card-title class="text-h6">{{ $t('reporting.versions.title') }} · {{ formatPeriod(period, locale) }}</v-card-title>
+      <v-card-title class="text-title-large">{{ $t('reporting.versions.title') }} · {{ formatPeriod(period, locale) }}</v-card-title>
       <v-card-text>
         <v-data-table :headers="headers" :items="store.runs" :loading="store.loading" :items-per-page="-1" hide-default-footer @click:row="open">
           <template #item.annex="{ item }"><v-chip size="small">{{ $t(`reporting.annexName.${item.annex}`) }}</v-chip></template>

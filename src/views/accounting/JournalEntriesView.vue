@@ -4,6 +4,8 @@
  * hay un error, se reversa (la contabilidad no se edita ni se borra).
  */
 import { computed, onMounted, ref, watch } from 'vue';
+import { formatDate } from '@/utils/format';
+import DateField from '@/components/ui/DateField.vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
@@ -32,7 +34,7 @@ const pageSize = ref(25);
 
 const headers = computed(() => [
   { title: t('accounting.journal.number'), key: 'number', sortable: false, align: 'start' as const },
-  { title: t('common.date'), key: 'entryDate', sortable: false, align: 'start' as const },
+  { title: t('common.date'), key: 'entryDate', value: (item: Record<string, unknown>) => formatDate(item.entryDate as string), sortable: false, align: 'start' as const },
   { title: t('common.description'), key: 'description', sortable: false, align: 'start' as const },
   { title: t('accounting.journal.total'), key: 'totalDebitCents', sortable: false, align: 'end' as const },
   { title: t('common.status'), key: 'status', sortable: false, align: 'start' as const },
@@ -103,8 +105,8 @@ function open(_: unknown, row: { item: { id: string } }): void {
         <v-row>
           <v-col cols="6" sm="2"><v-select v-model="status" :items="statusOptions" :label="$t('common.status')" /></v-col>
           <v-col cols="6" sm="2"><v-select v-model="kind" :items="kindOptions" :label="$t('accounting.journal.kind')" /></v-col>
-          <v-col cols="6" sm="2"><v-text-field v-model="from" type="date" :label="$t('accounting.journal.from')" /></v-col>
-          <v-col cols="6" sm="2"><v-text-field v-model="to" type="date" :label="$t('accounting.journal.to')" /></v-col>
+          <v-col cols="6" sm="2"><DateField v-model="from" :max="to" :label="$t('accounting.journal.from')" /></v-col>
+          <v-col cols="6" sm="2"><DateField v-model="to" :min="from" :label="$t('accounting.journal.to')" /></v-col>
           <v-col cols="12" sm="4"><v-text-field v-model="search" prepend-inner-icon="mdi-magnify" :label="$t('common.search')" clearable /></v-col>
         </v-row>
         <v-data-table-server

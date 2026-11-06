@@ -71,7 +71,7 @@ async function remove(): Promise<void> {
       <v-card-actions class="flex-wrap ga-2">
         <v-spacer />
         <v-btn variant="text" @click="renaming = false">{{ t('common.cancel') }}</v-btn>
-        <v-btn color="primary" :disabled="!name.trim()" @click="rename">{{ t('common.save') }}</v-btn>
+        <v-btn variant="flat" color="primary" :disabled="!name.trim()" @click="rename">{{ t('common.save') }}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -90,7 +90,7 @@ async function remove(): Promise<void> {
       <v-card-actions class="flex-wrap ga-2">
         <v-spacer />
         <v-btn variant="text" @click="deleting = false">{{ t('common.cancel') }}</v-btn>
-        <v-btn color="error" :disabled="!!liveTasks && !moveTo" @click="remove">{{ t('common.delete') }}</v-btn>
+        <v-btn variant="flat" color="error" :disabled="!!liveTasks && !moveTo" @click="remove">{{ t('common.delete') }}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

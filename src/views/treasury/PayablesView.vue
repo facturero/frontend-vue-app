@@ -5,6 +5,8 @@
  * servidor: aquí solo se muestran y se filtran. Arriba, la antigüedad: lo que hay que pagar pronto y lo que ya está vencido.
  */
 import { computed, onMounted, ref, watch } from 'vue';
+import { formatDate } from '@/utils/format';
+import DateField from '@/components/ui/DateField.vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
@@ -96,8 +98,8 @@ const sourceLabel = (item: Payable) => item.documentNumber ?? item.internalNumbe
       <v-col v-for="bucket in PAYABLES_AGING_BUCKETS" :key="bucket.key" cols="6" sm="4" md="2">
         <v-card>
           <v-card-text>
-            <div class="text-body-2 text-medium-emphasis">{{ $t(bucket.labelKey) }}</div>
-            <div class="text-h6">{{ money(aging.totals[bucket.key]) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t(bucket.labelKey) }}</div>
+            <div class="text-title-large">{{ money(aging.totals[bucket.key]) }}</div>
           </v-card-text>
         </v-card>
       </v-col>
@@ -116,10 +118,10 @@ const sourceLabel = (item: Payable) => item.documentNumber ?? item.internalNumbe
             <v-select v-model="status" :items="statusItems" :label="$t('common.status')" clearable />
           </v-col>
           <v-col cols="6" md="2">
-            <v-text-field v-model="from" type="date" :label="$t('treasury.payables.from')" />
+            <DateField v-model="from" :max="to" :label="$t('treasury.payables.from')" />
           </v-col>
           <v-col cols="6" md="2">
-            <v-text-field v-model="to" type="date" :label="$t('treasury.payables.to')" />
+            <DateField v-model="to" :min="from" :label="$t('treasury.payables.to')" />
           </v-col>
           <v-col cols="12" class="d-flex flex-wrap ga-4">
             <v-checkbox v-model="overdueOnly" :label="$t('treasury.payables.overdueOnly')" hide-details density="comfortable" />
@@ -130,14 +132,14 @@ const sourceLabel = (item: Payable) => item.documentNumber ?? item.internalNumbe
         <v-data-table :headers="headers" :items="store.payables" :loading="store.loading" :items-per-page="-1" hide-default-footer @click:row="(_: Event, { item }: { item: Payable }) => openSupplier(item)">
           <template #item.supplierName="{ item }">
             {{ item.supplierName }}
-            <div v-if="item.supplierIdentification" class="text-body-2 text-medium-emphasis">{{ item.supplierIdentification }}</div>
+            <div v-if="item.supplierIdentification" class="text-body-medium text-medium-emphasis">{{ item.supplierIdentification }}</div>
           </template>
           <template #item.documentNumber="{ item }">
             {{ sourceLabel(item) }}
-            <div v-if="item.internalNumber && item.documentNumber" class="text-body-2 text-medium-emphasis">{{ item.internalNumber }}</div>
+            <div v-if="item.internalNumber && item.documentNumber" class="text-body-medium text-medium-emphasis">{{ item.internalNumber }}</div>
           </template>
           <template #item.dueDate="{ item }">
-            {{ item.dueDate }}
+            {{ formatDate(item.dueDate) }}
             <v-chip v-if="overdueDays(item) > 0" color="lighterror" variant="flat" size="x-small" class="ml-2">{{ $t('treasury.payables.overdueDays', { n: overdueDays(item) }) }}</v-chip>
           </template>
           <template #item.originalCents="{ item }">{{ money(item.originalCents, item.currencyCode) }}</template>

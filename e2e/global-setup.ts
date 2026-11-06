@@ -9,8 +9,9 @@ const __dirname = dirname(__filename);
 const AUTH_FILE = resolve(__dirname, '.auth', 'user.json');
 
 const API_URL = 'http://localhost:8080';
-const TEST_EMAIL = 'admin@admin.com';
-const TEST_PASSWORD = 'Admin123!';
+// Se pueden pasar por entorno cuando el admin local tiene otra contraseña (las capturas de e2e/visual lo hacen así).
+const TEST_EMAIL = process.env.E2E_EMAIL ?? 'admin@admin.com';
+const TEST_PASSWORD = process.env.E2E_PASSWORD ?? 'Admin123!';
 const TEST_IDENTIFICATION = '0000000000';
 
 async function globalSetup(): Promise<void> {

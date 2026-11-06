@@ -71,13 +71,13 @@ async function save(): Promise<void> {
         <v-textarea v-model="description" :label="t('projects.form.description')" rows="2" auto-grow />
 
         <div>
-          <div class="text-body-2 mb-2">{{ t('projects.form.visibility') }}</div>
+          <div class="text-body-medium mb-2">{{ t('projects.form.visibility') }}</div>
           <v-radio-group v-model="visibility">
             <v-radio value="organization">
               <template #label>
                 <div>
                   <div>{{ t('projects.visibility.organization') }}</div>
-                  <div class="text-caption text-medium-emphasis">{{ t('projects.visibility.organizationHint') }}</div>
+                  <div class="text-body-small text-medium-emphasis">{{ t('projects.visibility.organizationHint') }}</div>
                 </div>
               </template>
             </v-radio>
@@ -85,7 +85,7 @@ async function save(): Promise<void> {
               <template #label>
                 <div>
                   <div>{{ t('projects.visibility.members') }}</div>
-                  <div class="text-caption text-medium-emphasis">{{ t('projects.visibility.membersHint') }}</div>
+                  <div class="text-body-small text-medium-emphasis">{{ t('projects.visibility.membersHint') }}</div>
                 </div>
               </template>
             </v-radio>
@@ -94,7 +94,7 @@ async function save(): Promise<void> {
 
         <div class="d-flex flex-column flex-sm-row ga-4">
           <div>
-            <div class="text-body-2 mb-2">{{ t('projects.form.color') }}</div>
+            <div class="text-body-medium mb-2">{{ t('projects.form.color') }}</div>
             <div class="d-flex ga-2">
               <v-btn
                 v-for="c in COLORS"
@@ -111,7 +111,7 @@ async function save(): Promise<void> {
             </div>
           </div>
           <div>
-            <div class="text-body-2 mb-2">{{ t('projects.form.defaultView') }}</div>
+            <div class="text-body-medium mb-2">{{ t('projects.form.defaultView') }}</div>
             <v-btn-toggle v-model="defaultView" mandatory density="compact" color="primary" variant="outlined" divided>
               <v-btn value="list" prepend-icon="mdi-format-list-checkbox">{{ t('projects.views.list') }}</v-btn>
               <v-btn value="board" prepend-icon="mdi-view-column-outline">{{ t('projects.views.board') }}</v-btn>
@@ -122,7 +122,7 @@ async function save(): Promise<void> {
       <v-card-actions class="flex-wrap ga-2">
         <v-spacer />
         <v-btn variant="text" @click="emit('update:modelValue', false)">{{ t('common.cancel') }}</v-btn>
-        <v-btn color="primary" :loading="saving" :disabled="!valid" @click="save">
+        <v-btn variant="flat" color="primary" :loading="saving" :disabled="!valid" @click="save">
           {{ editing ? t('common.save') : t('projects.form.create') }}
         </v-btn>
       </v-card-actions>

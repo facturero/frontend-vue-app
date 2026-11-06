@@ -69,7 +69,7 @@ function resourceIndeterminate(resource: string, items: PermissionItem[]): boole
             @change="!readonly && toggleResource(resource, items)"
           />
         </template>
-        <v-list-item-title class="text-uppercase text-caption font-weight-bold">
+        <v-list-item-title class="text-uppercase text-body-small font-weight-bold">
           {{ resource }}
         </v-list-item-title>
       </v-list-item>
@@ -89,9 +89,9 @@ function resourceIndeterminate(resource: string, items: PermissionItem[]): boole
             @change="!readonly && toggle(p.code)"
           />
         </template>
-        <v-list-item-title class="text-body-2">
+        <v-list-item-title class="text-body-medium">
           {{ p.action }}
-          <v-chip v-if="p.description" size="x-small" variant="text" class="ml-1 text-caption text-medium-emphasis">
+          <v-chip v-if="p.description" size="x-small" variant="text" class="ml-1 text-body-small text-medium-emphasis">
             {{ p.description }}
           </v-chip>
         </v-list-item-title>

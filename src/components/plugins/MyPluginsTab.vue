@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { formatDate as fmtDate } from '@/utils/format';
 import { useI18n } from 'vue-i18n';
 import { usePluginsStore } from '@/stores/plugins';
 import { useAuthStore } from '@/stores/auth';
@@ -9,7 +10,7 @@ import { dependentCodesOf } from '@/utils/plugin-dependents';
 
 const emit = defineEmits<{ reactivate: [code: string] }>();
 
-const { locale, t } = useI18n();
+const { t } = useI18n();
 const store = usePluginsStore();
 const auth = useAuthStore();
 
@@ -60,7 +61,7 @@ const visiblePlugins = computed(() =>
 );
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString(locale.value, { dateStyle: 'medium' });
+  return fmtDate(iso);
 }
 
 // Desactivar es «suave»: lo ya pagado se respeta. El texto dice hasta cuándo seguirá funcionando el módulo.
@@ -96,7 +97,7 @@ async function confirmDeactivate(): Promise<void> {
     >
       {{ store.error }}
       <template v-if="blockers.length">
-        <ul class="ml-4 text-body-2">
+        <ul class="ml-4 text-body-medium">
           <li v-for="b in blockers" :key="b.code">
             <a
               v-if="b.plugin && !b.scheduledAt"
@@ -112,7 +113,7 @@ async function confirmDeactivate(): Promise<void> {
         </ul>
       </template>
       <template v-else-if="store.errorDetails.length">
-        <ul class="ml-4 text-caption">
+        <ul class="ml-4 text-body-small">
           <li v-for="d in store.errorDetails" :key="d">{{ d }}</li>
         </ul>
       </template>
@@ -128,7 +129,7 @@ async function confirmDeactivate(): Promise<void> {
       <v-col v-for="p in visiblePlugins" :key="p.pluginId" cols="12" sm="6" lg="4">
         <v-card class="d-flex flex-column fill-height">
           <v-card-title class="d-flex align-start justify-space-between ga-2">
-            <span class="text-subtitle-1 font-weight-medium">{{ p.pluginName }}</span>
+            <span class="text-body-large font-weight-medium">{{ p.pluginName }}</span>
             <v-chip
               size="x-small"
               class="flex-shrink-0"
@@ -138,8 +139,8 @@ async function confirmDeactivate(): Promise<void> {
               {{ p.status === 'active' ? $t('common.active') : $t('plugins.status.desactivado') }}
             </v-chip>
           </v-card-title>
-          <v-card-subtitle class="text-caption">{{ p.pluginCode }}</v-card-subtitle>
-          <v-card-text class="text-caption text-medium-emphasis flex-grow-1">
+          <v-card-subtitle class="text-body-small">{{ p.pluginCode }}</v-card-subtitle>
+          <v-card-text class="text-body-small text-medium-emphasis flex-grow-1">
             <div v-if="p.status === 'active' || !p.deactivatedAt">
               {{ $t('plugins.headerActivatedAt') }}: {{ formatDate(p.activatedAt) }}
             </div>
@@ -173,8 +174,8 @@ async function confirmDeactivate(): Promise<void> {
               </template>
               <v-card>
                 <v-card-text>
-                  <div class="text-body-2 font-weight-medium">{{ $t('plugins.requiredByTitle') }}</div>
-                  <ul class="ml-4 text-body-2">
+                  <div class="text-body-medium font-weight-medium">{{ $t('plugins.requiredByTitle') }}</div>
+                  <ul class="ml-4 text-body-medium">
                     <li v-for="d in dependentsOf(p)" :key="d.code">
                       <a
                         v-if="d.plugin && !d.scheduledAt && canActivate"
@@ -188,7 +189,7 @@ async function confirmDeactivate(): Promise<void> {
                       </span>
                     </li>
                   </ul>
-                  <div class="text-caption text-medium-emphasis mt-2">{{ $t('plugins.requiredByHint') }}</div>
+                  <div class="text-body-small text-medium-emphasis mt-2">{{ $t('plugins.requiredByHint') }}</div>
                 </v-card-text>
               </v-card>
             </v-menu>

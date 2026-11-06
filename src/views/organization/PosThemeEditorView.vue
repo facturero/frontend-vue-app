@@ -280,7 +280,7 @@ onMounted(async () => {
       <!-- LOW_CONTRAST: el servidor manda los pares concretos, así que se listan
            en vez de decir solo "contraste bajo". -->
       <ul v-if="store.errorCode === 'LOW_CONTRAST' && store.errorPairs.length > 0" class="ml-4 mt-2">
-        <li v-for="pair in store.errorPairs" :key="`${pair.a}-${pair.b}`" class="text-caption">
+        <li v-for="pair in store.errorPairs" :key="`${pair.a}-${pair.b}`" class="text-body-small">
           {{ $t('posThemes.contrastPair', {
             a: pair.a,
             b: pair.b,
@@ -298,7 +298,7 @@ onMounted(async () => {
       <v-col cols="12" md="7">
         <!-- Presets -->
         <v-card v-if="isNew" class="mb-4">
-          <v-card-title class="text-body-1 font-weight-medium">
+          <v-card-title class="text-body-large font-weight-medium">
             {{ $t('posThemes.presetsTitle') }}
           </v-card-title>
           <v-card-text>
@@ -318,7 +318,7 @@ onMounted(async () => {
                 {{ $t(preset.titleKey) }}
               </v-btn>
             </v-btn-toggle>
-            <p class="text-caption text-medium-emphasis">{{ $t('posThemes.presetsHint') }}</p>
+            <p class="text-body-small text-medium-emphasis">{{ $t('posThemes.presetsHint') }}</p>
           </v-card-text>
         </v-card>
 
@@ -336,7 +336,7 @@ onMounted(async () => {
 
         <!-- Colores -->
         <v-card class="mb-4">
-          <v-card-title class="text-body-1 font-weight-medium">
+          <v-card-title class="text-body-large font-weight-medium">
             {{ $t('posThemes.colorsTitle') }}
           </v-card-title>
           <v-card-text>
@@ -353,10 +353,10 @@ onMounted(async () => {
               <v-tab value="dark">{{ $t('posThemes.modeDark') }}</v-tab>
             </v-tabs>
 
-            <p v-if="config.mode === 'schedule'" class="text-caption text-medium-emphasis mb-2">
+            <p v-if="config.mode === 'schedule'" class="text-body-small text-medium-emphasis mb-2">
               {{ $t('posThemes.scheduleHint') }}
             </p>
-            <v-row v-if="config.mode === 'schedule'" dense>
+            <v-row v-if="config.mode === 'schedule'" density="compact">
               <v-col cols="6">
                 <v-text-field
                   v-model="config.schedule.darkFrom"
@@ -373,7 +373,7 @@ onMounted(async () => {
               </v-col>
             </v-row>
 
-            <v-row dense>
+            <v-row density="compact">
               <v-col v-for="token in COLOR_TOKENS" :key="token" cols="12" sm="6">
                 <div class="d-flex align-center ga-2">
                   <!-- Input nativo: siempre `#rrggbb` en minúsculas, que es lo que
@@ -402,7 +402,7 @@ onMounted(async () => {
 
         <!-- Contraste -->
         <v-card class="mb-4">
-          <v-card-title class="text-body-1 font-weight-medium">
+          <v-card-title class="text-body-large font-weight-medium">
             {{ $t('posThemes.contrastTitle') }}
           </v-card-title>
           <v-card-text>
@@ -417,7 +417,7 @@ onMounted(async () => {
             </v-alert>
 
             <ul v-if="advisoryPairs.length > 0" class="ml-4">
-              <li v-for="pair in advisoryPairs" :key="`${pair.a}-${pair.b}`" class="text-caption">
+              <li v-for="pair in advisoryPairs" :key="`${pair.a}-${pair.b}`" class="text-body-small">
                 {{ $t('posThemes.contrastPair', {
                   a: pair.a,
                   b: pair.b,
@@ -431,11 +431,11 @@ onMounted(async () => {
 
         <!-- Tipografía -->
         <v-card class="mb-4">
-          <v-card-title class="text-body-1 font-weight-medium">
+          <v-card-title class="text-body-large font-weight-medium">
             {{ $t('posThemes.typographyTitle') }}
           </v-card-title>
           <v-card-text>
-            <v-row dense>
+            <v-row density="compact">
               <v-col cols="12" sm="6">
                 <v-select
                   v-model="config.typography.fontFamily"
@@ -466,11 +466,11 @@ onMounted(async () => {
 
         <!-- Forma -->
         <v-card class="mb-4">
-          <v-card-title class="text-body-1 font-weight-medium">
+          <v-card-title class="text-body-large font-weight-medium">
             {{ $t('posThemes.shapeTitle') }}
           </v-card-title>
           <v-card-text>
-            <v-row dense>
+            <v-row density="compact">
               <v-col cols="6" sm="3">
                 <v-select v-model="config.shape.radius" :items="radiusOptions" :label="$t('posThemes.radius')" />
               </v-col>
@@ -489,11 +489,11 @@ onMounted(async () => {
 
         <!-- Distribución -->
         <v-card class="mb-4">
-          <v-card-title class="text-body-1 font-weight-medium">
+          <v-card-title class="text-body-large font-weight-medium">
             {{ $t('posThemes.layoutTitle') }}
           </v-card-title>
           <v-card-text>
-            <v-row dense>
+            <v-row density="compact">
               <v-col cols="6" sm="4">
                 <v-select v-model="config.layout.cartPosition" :items="cartPositionOptions" :label="$t('posThemes.cartPosition')" />
               </v-col>
@@ -521,7 +521,7 @@ onMounted(async () => {
 
         <!-- Marca -->
         <v-card class="mb-4">
-          <v-card-title class="text-body-1 font-weight-medium">
+          <v-card-title class="text-body-large font-weight-medium">
             {{ $t('posThemes.brandingTitle') }}
           </v-card-title>
           <v-card-text>
@@ -532,7 +532,7 @@ onMounted(async () => {
               counter="80"
               class="mb-4"
             />
-            <v-row dense class="mb-2">
+            <v-row density="compact" class="mb-2">
               <v-col cols="12" md="6">
                 <PosThemeLogoField
                   v-model="config.branding.logoFileId"
@@ -552,7 +552,7 @@ onMounted(async () => {
                 />
               </v-col>
             </v-row>
-            <v-row dense>
+            <v-row density="compact">
               <v-col cols="6" sm="4">
                 <v-select v-model="config.branding.logoPosition" :items="logoPositionOptions" :label="$t('posThemes.logoPosition')" />
               </v-col>
@@ -564,7 +564,7 @@ onMounted(async () => {
               </v-col>
             </v-row>
 
-            <div class="text-body-2 font-weight-medium mb-1">{{ $t('posThemes.loginBackground') }}</div>
+            <div class="text-body-medium font-weight-medium mb-1">{{ $t('posThemes.loginBackground') }}</div>
             <v-btn-toggle
               :model-value="loginBgTab"
               mandatory
@@ -576,7 +576,7 @@ onMounted(async () => {
               <v-btn value="color">{{ $t('posThemes.loginBgColor') }}</v-btn>
               <v-btn value="image">{{ $t('posThemes.loginBgImage') }}</v-btn>
             </v-btn-toggle>
-            <p v-if="loginBgTab === 'color'" class="text-caption text-medium-emphasis">
+            <p v-if="loginBgTab === 'color'" class="text-body-small text-medium-emphasis">
               {{ $t('posThemes.loginBgColorHint') }}
             </p>
             <PosThemeLogoField
@@ -600,7 +600,7 @@ onMounted(async () => {
         <div style="position: sticky; top: calc(var(--v-layout-top, 0px) + 68px);">
           <v-card>
             <v-card-title class="d-flex align-center justify-space-between">
-              <span class="text-body-1 font-weight-medium">{{ $t('posThemes.previewTitle') }}</span>
+              <span class="text-body-large font-weight-medium">{{ $t('posThemes.previewTitle') }}</span>
               <v-btn-toggle v-model="editMode" mandatory density="comfortable" color="primary">
                 <v-btn value="light">{{ $t('posThemes.modeLight') }}</v-btn>
                 <v-btn value="dark">{{ $t('posThemes.modeDark') }}</v-btn>

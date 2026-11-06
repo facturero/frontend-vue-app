@@ -10,6 +10,7 @@
  * ejecuta.
  */
 import { nextTick, ref, watch } from 'vue';
+import { formatDate as fmtDate } from '@/utils/format';
 import { useRouter } from 'vue-router';
 import { useAssistantStore } from '@/stores/assistant';
 import type { ConversationSummary } from '@/types/assistant';
@@ -44,11 +45,7 @@ function formatTime(iso: string): string {
 }
 
 function formatDate(iso: string): string {
-  try {
-    return new Date(iso).toLocaleDateString([], { day: '2-digit', month: 'short', year: 'numeric' });
-  } catch {
-    return '';
-  }
+  return fmtDate(iso);
 }
 
 async function openFromHistory(id: string): Promise<void> {
@@ -170,7 +167,7 @@ function onMessageClick(event: MouseEvent): void {
         <v-avatar color="lightprimary" size="36">
           <v-icon icon="mdi-robot-outline" color="primary" size="20" />
         </v-avatar>
-        <span class="text-subtitle-1 font-weight-bold">{{ $t('assistant.title') }}</span>
+        <span class="text-body-large font-weight-bold">{{ $t('assistant.title') }}</span>
         <v-spacer />
         <v-btn
           icon="mdi-plus"
@@ -197,10 +194,10 @@ function onMessageClick(event: MouseEvent): void {
             :key="conversation.id"
             @click="openFromHistory(conversation.id)"
           >
-            <v-list-item-title class="text-body-2">
+            <v-list-item-title class="text-body-medium">
               {{ conversation.title ?? $t('assistant.untitled') }}
             </v-list-item-title>
-            <v-list-item-subtitle class="text-caption text-medium-emphasis">
+            <v-list-item-subtitle class="text-body-small text-medium-emphasis">
               {{ formatDate(conversation.updatedAt) }}
             </v-list-item-subtitle>
             <template #append>
@@ -214,7 +211,7 @@ function onMessageClick(event: MouseEvent): void {
             </template>
           </v-list-item>
         </v-list>
-        <p v-else class="text-body-2 text-medium-emphasis">
+        <p v-else class="text-body-medium text-medium-emphasis">
           {{ $t('assistant.historyEmpty') }}
         </p>
 
@@ -234,7 +231,7 @@ function onMessageClick(event: MouseEvent): void {
           <v-avatar color="lightprimary" size="56" class="mb-3">
             <v-icon icon="mdi-robot-happy-outline" color="primary" size="30" />
           </v-avatar>
-          <p class="text-body-2 mb-4">{{ $t('assistant.emptyHint') }}</p>
+          <p class="text-body-medium mb-4">{{ $t('assistant.emptyHint') }}</p>
           <div class="d-flex flex-column ga-2 align-start mx-auto" style="max-width: 280px">
             <v-chip
               v-for="example in ['assistant.examples.sales', 'assistant.examples.role', 'assistant.examples.customer']"
@@ -274,16 +271,16 @@ function onMessageClick(event: MouseEvent): void {
               class="pa-3 message-bubble"
               elevation="0"
             >
-              <span v-if="message.role === 'user'" class="text-body-2 message-text" style="white-space: pre-wrap; color: white">{{ message.text }}</span>
+              <span v-if="message.role === 'user'" class="text-body-medium message-text" style="white-space: pre-wrap; color: white">{{ message.text }}</span>
               <!-- eslint-disable-next-line vue/no-v-html -->
               <div
                 v-else
-                class="text-body-2 message-text markdown-lite"
+                class="text-body-medium message-text markdown-lite"
                 @click="onMessageClick"
                 v-html="renderMarkdownLite(message.text)"
               />
             </v-sheet>
-            <span class="text-caption text-medium-emphasis mt-1 message-time">{{ formatTime(message.createdAt) }}</span>
+            <span class="text-body-small text-medium-emphasis mt-1 message-time">{{ formatTime(message.createdAt) }}</span>
           </div>
         </div>
 
@@ -297,11 +294,11 @@ function onMessageClick(event: MouseEvent): void {
           <v-card-text class="pb-2">
             <div class="d-flex align-center ga-2 mb-2">
               <v-icon icon="mdi-shield-alert-outline" color="warning" size="18" />
-              <span class="text-caption font-weight-medium text-medium-emphasis">
+              <span class="text-body-small font-weight-medium text-medium-emphasis">
                 {{ $t('assistant.confirmTitle') }}
               </span>
             </div>
-            <p class="text-body-2 mb-0">{{ action.summary }}</p>
+            <p class="text-body-medium mb-0">{{ action.summary }}</p>
           </v-card-text>
           <v-card-actions>
             <v-spacer />
@@ -376,7 +373,7 @@ function onMessageClick(event: MouseEvent): void {
             @click="submit"
           />
         </div>
-        <p class="text-caption text-medium-emphasis mt-2 mb-0">
+        <p class="text-body-small text-medium-emphasis mt-2 mb-0">
           {{ $t('assistant.disclaimer') }}
         </p>
       </div>
@@ -388,10 +385,10 @@ function onMessageClick(event: MouseEvent): void {
       @update:model-value="(v) => { if (!v && !deleting) pendingDelete = null; }"
     >
       <v-card>
-        <v-card-title class="text-subtitle-1 font-weight-bold">
+        <v-card-title class="text-body-large font-weight-bold">
           {{ $t('assistant.deleteTitle') }}
         </v-card-title>
-        <v-card-text class="text-body-2">
+        <v-card-text class="text-body-medium">
           <p class="mb-2 font-weight-medium">{{ pendingDelete?.title ?? $t('assistant.untitled') }}</p>
           <p class="mb-0 text-medium-emphasis">{{ $t('assistant.deleteHint') }}</p>
         </v-card-text>

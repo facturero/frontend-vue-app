@@ -49,7 +49,7 @@ function submit(): void {
     <v-card>
       <v-card-title>{{ $t('restaurant.bulk.title') }}</v-card-title>
       <v-card-text class="d-flex flex-column ga-3">
-        <p class="text-body-2 text-medium-emphasis">{{ $t('restaurant.bulk.intro') }}</p>
+        <p class="text-body-medium text-medium-emphasis">{{ $t('restaurant.bulk.intro') }}</p>
 
         <div v-if="error"><v-alert type="error">{{ error }}</v-alert></div>
 

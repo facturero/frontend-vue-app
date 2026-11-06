@@ -6,6 +6,7 @@
  * mueve su cobro, y por eso lo vencido se muestra aparte. Solo lectura: no toca la contabilidad.
  */
 import { computed, onMounted, ref, watch } from 'vue';
+import { formatDate } from '@/utils/format';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { useTreasuryBankingStore } from '@/stores/treasuryBanking';
@@ -34,9 +35,9 @@ function label(bucket: CashFlowBucket): string {
   return l.n === undefined ? t(l.key) : t(l.key, { n: l.n });
 }
 function period(bucket: CashFlowBucket): string {
-  if (bucket.key === 'overdue') return t('treasury.cashFlow.before', { date: flow.value?.asOf ?? '' });
-  if (bucket.from && bucket.to) return `${bucket.from} → ${bucket.to}`;
-  return bucket.from ? t('treasury.cashFlow.from', { date: bucket.from }) : '';
+  if (bucket.key === 'overdue') return t('treasury.cashFlow.before', { date: formatDate(flow.value?.asOf) });
+  if (bucket.from && bucket.to) return `${formatDate(bucket.from)} → ${formatDate(bucket.to)}`;
+  return bucket.from ? t('treasury.cashFlow.from', { date: formatDate(bucket.from) }) : '';
 }
 const negativeLabel = computed(() => {
   const key = flow.value?.firstNegativeKey;
@@ -81,30 +82,30 @@ const headers = computed(() => [
       <v-row class="mb-2">
         <v-col cols="6" md="3">
           <v-card><v-card-text>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.cashFlow.opening') }}</div>
-            <div class="text-h6">{{ money(flow.openingCents) }}</div>
-            <div v-for="a in flow.accounts" :key="a.id" class="text-body-2 text-medium-emphasis">{{ a.name }}: {{ money(a.balanceCents) }}</div>
-            <div v-if="flow.unassignedCents !== 0" class="text-body-2 text-medium-emphasis">{{ $t('treasury.cashFlow.unassigned') }}: {{ money(flow.unassignedCents) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.cashFlow.opening') }}</div>
+            <div class="text-title-large">{{ money(flow.openingCents) }}</div>
+            <div v-for="a in flow.accounts" :key="a.id" class="text-body-medium text-medium-emphasis">{{ a.name }}: {{ money(a.balanceCents) }}</div>
+            <div v-if="flow.unassignedCents !== 0" class="text-body-medium text-medium-emphasis">{{ $t('treasury.cashFlow.unassigned') }}: {{ money(flow.unassignedCents) }}</div>
           </v-card-text></v-card>
         </v-col>
         <v-col cols="6" md="3">
           <v-card><v-card-text>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.cashFlow.inflow') }}</div>
-            <div class="text-h6 text-success">{{ money(flow.totals.inflowCents) }}</div>
-            <div v-if="flow.totals.overdueInflowCents > 0" class="text-body-2 text-medium-emphasis">{{ $t('treasury.cashFlow.ofWhichOverdue', { amount: money(flow.totals.overdueInflowCents) }) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.cashFlow.inflow') }}</div>
+            <div class="text-title-large text-success">{{ money(flow.totals.inflowCents) }}</div>
+            <div v-if="flow.totals.overdueInflowCents > 0" class="text-body-medium text-medium-emphasis">{{ $t('treasury.cashFlow.ofWhichOverdue', { amount: money(flow.totals.overdueInflowCents) }) }}</div>
           </v-card-text></v-card>
         </v-col>
         <v-col cols="6" md="3">
           <v-card><v-card-text>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.cashFlow.outflow') }}</div>
-            <div class="text-h6 text-error">{{ money(flow.totals.outflowCents) }}</div>
-            <div v-if="flow.totals.overdueOutflowCents > 0" class="text-body-2 text-medium-emphasis">{{ $t('treasury.cashFlow.ofWhichOverdue', { amount: money(flow.totals.overdueOutflowCents) }) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.cashFlow.outflow') }}</div>
+            <div class="text-title-large text-error">{{ money(flow.totals.outflowCents) }}</div>
+            <div v-if="flow.totals.overdueOutflowCents > 0" class="text-body-medium text-medium-emphasis">{{ $t('treasury.cashFlow.ofWhichOverdue', { amount: money(flow.totals.overdueOutflowCents) }) }}</div>
           </v-card-text></v-card>
         </v-col>
         <v-col cols="6" md="3">
           <v-card :color="flow.totals.endingCents < 0 ? 'lighterror' : undefined" :variant="flow.totals.endingCents < 0 ? 'flat' : 'elevated'"><v-card-text>
-            <div class="text-body-2" :class="{ 'text-medium-emphasis': flow.totals.endingCents >= 0 }">{{ $t('treasury.cashFlow.ending') }}</div>
-            <div class="text-h6">{{ money(flow.totals.endingCents) }}</div>
+            <div class="text-body-medium" :class="{ 'text-medium-emphasis': flow.totals.endingCents >= 0 }">{{ $t('treasury.cashFlow.ending') }}</div>
+            <div class="text-title-large">{{ money(flow.totals.endingCents) }}</div>
           </v-card-text></v-card>
         </v-col>
       </v-row>
@@ -114,7 +115,7 @@ const headers = computed(() => [
           <v-data-table :headers="headers" :items="flow.buckets" :items-per-page="-1" hide-default-footer>
             <template #item.period="{ item }">
               <div class="font-weight-medium">{{ label(item) }}</div>
-              <div class="text-body-2 text-medium-emphasis">{{ period(item) }}</div>
+              <div class="text-body-medium text-medium-emphasis">{{ period(item) }}</div>
             </template>
             <template #item.inflowCents="{ item }"><span class="text-success">{{ item.inflowCents > 0 ? money(item.inflowCents) : '—' }}</span></template>
             <template #item.outflowCents="{ item }"><span class="text-error">{{ item.outflowCents > 0 ? money(item.outflowCents) : '—' }}</span></template>
@@ -123,7 +124,7 @@ const headers = computed(() => [
               <v-chip :color="cashFlowClosingColor(item.closingCents) === 'error' ? 'lighterror' : undefined" variant="flat" size="small">{{ money(item.closingCents) }}</v-chip>
             </template>
           </v-data-table>
-          <div class="text-body-2 text-medium-emphasis mt-3">{{ $t('treasury.cashFlow.note') }}</div>
+          <div class="text-body-medium text-medium-emphasis mt-3">{{ $t('treasury.cashFlow.note') }}</div>
         </v-card-text>
       </v-card>
     </template>

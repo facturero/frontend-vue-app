@@ -4,6 +4,7 @@
  * la empresa; una partida anulada con una nota de crédito encima (saldo en contra) no es cartera vencida.
  */
 import { computed, onMounted } from 'vue';
+import { formatDate } from '@/utils/format';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
@@ -55,19 +56,19 @@ const openCustomer = (item: AgingCustomer) => router.push({ name: 'treasury-cust
       <v-col v-for="bucket in AGING_BUCKETS" :key="bucket.key" cols="12" sm="6" md>
         <v-card>
           <v-card-text>
-            <div class="text-body-2 text-medium-emphasis">{{ $t(bucket.labelKey) }}</div>
-            <div class="text-h6">{{ money(aging.totals[bucket.key]) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t(bucket.labelKey) }}</div>
+            <div class="text-title-large">{{ money(aging.totals[bucket.key]) }}</div>
             <v-progress-linear :model-value="shares[bucket.key] ?? 0" :color="bucket.color" height="6" class="mt-2" />
-            <div class="text-body-2 text-medium-emphasis mt-1">{{ shares[bucket.key] ?? 0 }} %</div>
+            <div class="text-body-medium text-medium-emphasis mt-1">{{ shares[bucket.key] ?? 0 }} %</div>
           </v-card-text>
         </v-card>
       </v-col>
     </v-row>
 
     <v-card>
-      <v-card-title class="text-h6">
+      <v-card-title class="text-title-large">
         {{ $t('treasury.aging.byCustomer') }}
-        <span v-if="aging" class="text-body-2 text-medium-emphasis ml-2">{{ $t('treasury.aging.asOf', { date: aging.asOf }) }}</span>
+        <span v-if="aging" class="text-body-medium text-medium-emphasis ml-2">{{ $t('treasury.aging.asOf', { date: formatDate(aging.asOf) }) }}</span>
       </v-card-title>
       <v-card-text>
         <v-data-table

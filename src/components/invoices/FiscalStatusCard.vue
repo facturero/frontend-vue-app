@@ -8,6 +8,7 @@
  * pocos segundos, con tope, para no dejar la pestaña consultando para siempre.
  */
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { formatDateTime as fmtDateTime } from '@/utils/format';
 import { useI18n } from 'vue-i18n';
 import { useFiscalStore } from '@/stores/fiscal';
 import { useAuthStore } from '@/stores/auth';
@@ -17,7 +18,7 @@ import type { FiscalInvoiceStatus } from '@/types/fiscal';
 
 const props = defineProps<{ billingInvoiceId: string }>();
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const store = useFiscalStore();
 const auth = useAuthStore();
 
@@ -57,8 +58,7 @@ const STATUS_ICON: Record<FiscalInvoiceStatus, string> = {
 };
 
 function formatDateTime(iso: string | null): string {
-  if (!iso) return '-';
-  return new Date(iso).toLocaleString(locale.value, { dateStyle: 'medium', timeStyle: 'short' });
+  return fmtDateTime(iso) || '-';
 }
 
 function stopPolling(): void {
@@ -195,7 +195,7 @@ onBeforeUnmount(stopPolling);
       </p>
 
       <template v-else>
-        <p class="text-body-2 text-medium-emphasis mb-3">{{ t(`fiscal.statusHint.${fiscal.status}`) }}</p>
+        <p class="text-body-medium text-medium-emphasis mb-3">{{ t(`fiscal.statusHint.${fiscal.status}`) }}</p>
 
         <v-alert
           v-if="fiscal.billing_voided_at && fiscal.status !== 'error' && fiscal.status !== 'rejected'"
@@ -210,24 +210,24 @@ onBeforeUnmount(stopPolling);
           :type="fiscal.status === 'rejected' ? 'error' : 'warning'"
           class="mb-3"
         >
-          <div class="text-body-2">{{ fiscal.last_error }}</div>
-          <div v-if="fiscal.status === 'error'" class="text-caption mt-1">
+          <div class="text-body-medium">{{ fiscal.last_error }}</div>
+          <div v-if="fiscal.status === 'error'" class="text-body-small mt-1">
             {{ fiscal.next_check_at ? t('fiscal.autoRetry', { when: formatDateTime(fiscal.next_check_at) }) : t('fiscal.needsAction') }}
           </div>
         </v-alert>
 
-        <v-row dense>
+        <v-row density="compact">
           <v-col cols="12" md="8">
-            <div class="text-caption text-medium-emphasis">{{ t('fiscal.accessKey') }}</div>
-            <div class="text-body-2 font-weight-medium text-break">{{ fiscal.access_key || '-' }}</div>
+            <div class="text-body-small text-medium-emphasis">{{ t('fiscal.accessKey') }}</div>
+            <div class="text-body-medium font-weight-medium text-break">{{ fiscal.access_key || '-' }}</div>
           </v-col>
           <v-col v-if="fiscal.status === 'authorized'" cols="12" md="4">
-            <div class="text-caption text-medium-emphasis">{{ t('fiscal.authorizationDate') }}</div>
-            <div class="text-body-2 font-weight-medium">{{ formatDateTime(fiscal.authorization_date) }}</div>
+            <div class="text-body-small text-medium-emphasis">{{ t('fiscal.authorizationDate') }}</div>
+            <div class="text-body-medium font-weight-medium">{{ formatDateTime(fiscal.authorization_date) }}</div>
           </v-col>
           <v-col v-if="fiscal.status === 'authorized' && fiscal.authorization_number !== fiscal.access_key" cols="12">
-            <div class="text-caption text-medium-emphasis">{{ t('fiscal.authorizationNumber') }}</div>
-            <div class="text-body-2 font-weight-medium text-break">{{ fiscal.authorization_number }}</div>
+            <div class="text-body-small text-medium-emphasis">{{ t('fiscal.authorizationNumber') }}</div>
+            <div class="text-body-medium font-weight-medium text-break">{{ fiscal.authorization_number }}</div>
           </v-col>
         </v-row>
 

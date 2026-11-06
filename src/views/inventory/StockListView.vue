@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
+import { formatDate as fmtDate } from '@/utils/format';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
@@ -104,7 +105,7 @@ function formatMoney(amount: string, currency: string): string {
 }
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString(locale.value, { dateStyle: 'medium' });
+  return fmtDate(iso);
 }
 
 function isNegative(value: string): boolean {
@@ -191,7 +192,7 @@ onMounted(async () => {
           })
         }}
       </p>
-      <p class="mb-0 text-body-2">{{ $t('inventory.stale.action') }}</p>
+      <p class="mb-0 text-body-medium">{{ $t('inventory.stale.action') }}</p>
     </v-alert>
 
     <v-alert v-if="store.error" type="error" closable class="mb-4" @click:close="store.error = null">
@@ -200,7 +201,7 @@ onMounted(async () => {
 
     <v-card class="mb-4">
       <v-card-text>
-        <v-row dense align="end">
+        <v-row class="align-end" density="compact">
           <v-col cols="12" sm="5">
             <v-autocomplete
               v-model="productFilter"
@@ -259,7 +260,7 @@ onMounted(async () => {
         @update:options="onTableUpdate"
       >
         <template #item.sku="{ item }">
-          <span class="text-caption font-weight-medium">{{ productSku(item.productId) }}</span>
+          <span class="text-body-small font-weight-medium">{{ productSku(item.productId) }}</span>
         </template>
 
         <template #item.product="{ item }">

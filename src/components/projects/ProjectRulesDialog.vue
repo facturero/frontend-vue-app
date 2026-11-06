@@ -146,23 +146,23 @@ async function remove(r: ProjectRule): Promise<void> {
     <v-card>
       <v-card-title>{{ t('projects.rules.title') }}</v-card-title>
       <v-card-text class="d-flex flex-column ga-4">
-        <div class="text-body-2 text-medium-emphasis">{{ t('projects.rules.hint') }}</div>
+        <div class="text-body-medium text-medium-emphasis">{{ t('projects.rules.hint') }}</div>
         <v-alert v-if="failure" type="error" closable @click:close="failure = null">{{ failure }}</v-alert>
 
         <template v-if="!editing">
           <v-card v-for="r in rules" :key="r.id" variant="outlined" class="pa-4">
             <div class="d-flex align-center ga-2">
               <v-icon icon="mdi-lightning-bolt-outline" color="warning" />
-              <span class="text-body-1 font-weight-medium flex-grow-1">{{ r.name }}</span>
+              <span class="text-body-large font-weight-medium flex-grow-1">{{ r.name }}</span>
               <v-switch :model-value="r.enabled" :disabled="!store.canEdit" class="flex-grow-0" :aria-label="t('projects.rules.enabled')" @update:model-value="(v) => toggle(r, !!v)" />
               <v-btn v-if="store.canEdit" icon="mdi-pencil-outline" size="small" variant="text" :aria-label="t('common.edit')" @click="startEdit(r)" />
               <v-btn v-if="store.canEdit" icon="mdi-trash-can-outline" size="small" variant="text" :aria-label="t('common.delete')" @click="remove(r)" />
             </div>
-            <div class="text-body-2">{{ whenText(r) }} → {{ r.actions.map(actionText).join(', ') }}</div>
-            <div class="text-caption text-medium-emphasis">{{ t('projects.rules.runs', r.runCount) }}</div>
+            <div class="text-body-medium">{{ whenText(r) }} → {{ r.actions.map(actionText).join(', ') }}</div>
+            <div class="text-body-small text-medium-emphasis">{{ t('projects.rules.runs', r.runCount) }}</div>
             <v-alert v-if="r.lastError" type="warning" class="mt-2">{{ t('projects.rules.lastError', { error: r.lastError }) }}</v-alert>
           </v-card>
-          <div v-if="!rules.length" class="text-body-2 text-medium-emphasis">{{ t('projects.rules.empty') }}</div>
+          <div v-if="!rules.length" class="text-body-medium text-medium-emphasis">{{ t('projects.rules.empty') }}</div>
           <v-btn v-if="store.canEdit" color="primary" prepend-icon="mdi-plus" class="align-self-start" @click="startNew">{{ t('projects.rules.new') }}</v-btn>
         </template>
 
@@ -180,7 +180,7 @@ async function remove(r: ProjectRule): Promise<void> {
               persistent-placeholder
             />
           </div>
-          <div class="text-body-2 font-weight-medium">{{ t('projects.rules.thenLabel') }}</div>
+          <div class="text-body-medium font-weight-medium">{{ t('projects.rules.thenLabel') }}</div>
           <div v-for="(a, i) in editing.actions" :key="i" class="d-flex flex-column flex-sm-row align-sm-center ga-2">
             <v-select
               :model-value="a.type"
@@ -198,7 +198,7 @@ async function remove(r: ProjectRule): Promise<void> {
           <v-btn v-if="editing.actions.length < 5" variant="text" size="small" prepend-icon="mdi-plus" class="align-self-start" @click="editing.actions.push({ type: 'complete' })">
             {{ t('projects.rules.addAction') }}
           </v-btn>
-          <div class="text-body-2 text-medium-emphasis">{{ whenText(editing) }} → {{ editing.actions.map(actionText).join(', ') }}</div>
+          <div class="text-body-medium text-medium-emphasis">{{ whenText(editing) }} → {{ editing.actions.map(actionText).join(', ') }}</div>
           <div class="d-flex ga-2">
             <v-spacer />
             <v-btn variant="text" @click="editing = null">{{ t('common.cancel') }}</v-btn>

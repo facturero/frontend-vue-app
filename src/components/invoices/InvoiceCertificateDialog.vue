@@ -50,7 +50,7 @@ function onQuickCertFileChange(e: Event) {
         <v-alert v-if="certDialogError" type="error" class="mb-4">
           {{ certDialogError }}
         </v-alert>
-        <p class="text-caption text-medium-emphasis mb-3">
+        <p class="text-body-small text-medium-emphasis mb-3">
           {{ $t('invoices.certEncryptedHint') }}
         </p>
         <v-file-input
@@ -74,7 +74,7 @@ function onQuickCertFileChange(e: Event) {
       <v-card-actions>
         <v-spacer />
         <v-btn variant="text" @click="close">{{ $t('common.cancel') }}</v-btn>
-        <v-btn color="primary" :loading="fiscalStore.saving" :disabled="!quickCertFile || !quickCertPassword" @click="submit">
+        <v-btn variant="flat" color="primary" :loading="fiscalStore.saving" :disabled="!quickCertFile || !quickCertPassword" @click="submit">
           {{ $t('common.upload') }}
         </v-btn>
       </v-card-actions>

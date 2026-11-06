@@ -5,6 +5,8 @@
  * lo vencido los calcula el servidor: aquí solo se muestran y se filtran.
  */
 import { computed, onMounted, ref, watch } from 'vue';
+import { formatDate } from '@/utils/format';
+import DateField from '@/components/ui/DateField.vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
@@ -30,7 +32,7 @@ const pages = computed(() => Math.max(1, Math.ceil(store.total / store.pageSize)
 const headers = computed(() => [
   { title: t('treasury.receivables.customer'), key: 'customerName', sortable: false, align: 'start' as const },
   { title: t('treasury.receivables.document'), key: 'documentNumber', sortable: false, align: 'start' as const },
-  { title: t('treasury.receivables.issueDate'), key: 'issueDate', sortable: false, align: 'start' as const },
+  { title: t('treasury.receivables.issueDate'), key: 'issueDate', value: (item: Record<string, unknown>) => formatDate(item.issueDate as string), sortable: false, align: 'start' as const },
   { title: t('treasury.receivables.dueDate'), key: 'dueDate', sortable: false, align: 'start' as const },
   { title: t('treasury.receivables.original'), key: 'originalCents', sortable: false, align: 'end' as const },
   { title: t('treasury.receivables.balance'), key: 'balanceCents', sortable: false, align: 'end' as const },
@@ -100,10 +102,10 @@ const sourceLabel = (item: Receivable) => (item.documentNumber ? item.documentNu
             <v-select v-model="status" :items="statusItems" :label="$t('common.status')" clearable />
           </v-col>
           <v-col cols="6" sm="3" md="2">
-            <v-text-field v-model="from" type="date" :label="$t('treasury.receivables.from')" />
+            <DateField v-model="from" :max="to" :label="$t('treasury.receivables.from')" />
           </v-col>
           <v-col cols="6" sm="3" md="2">
-            <v-text-field v-model="to" type="date" :label="$t('treasury.receivables.to')" />
+            <DateField v-model="to" :min="from" :label="$t('treasury.receivables.to')" />
           </v-col>
           <v-col cols="12" md="2" class="d-flex align-center">
             <v-switch v-model="overdueOnly" :label="$t('treasury.receivables.overdueOnly')" color="primary" />
@@ -120,14 +122,14 @@ const sourceLabel = (item: Receivable) => (item.documentNumber ? item.documentNu
         >
           <template #item.customerName="{ item }">
             {{ item.customerName }}
-            <div v-if="item.customerIdentification" class="text-body-2 text-medium-emphasis">{{ item.customerIdentification }}</div>
+            <div v-if="item.customerIdentification" class="text-body-medium text-medium-emphasis">{{ item.customerIdentification }}</div>
           </template>
           <template #item.documentNumber="{ item }">
             {{ sourceLabel(item) }}
-            <div v-if="item.documentNumber && item.sourceType !== 'invoice'" class="text-body-2 text-medium-emphasis">{{ $t(`treasury.receivables.source.${item.sourceType}`) }}</div>
+            <div v-if="item.documentNumber && item.sourceType !== 'invoice'" class="text-body-medium text-medium-emphasis">{{ $t(`treasury.receivables.source.${item.sourceType}`) }}</div>
           </template>
           <template #item.dueDate="{ item }">
-            {{ item.dueDate }}
+            {{ formatDate(item.dueDate) }}
             <v-chip v-if="overdueDays(item) > 0" color="lighterror" variant="flat" size="x-small" class="ml-2">
               {{ $t('treasury.receivables.overdueDays', { n: overdueDays(item) }) }}
             </v-chip>
@@ -135,7 +137,7 @@ const sourceLabel = (item: Receivable) => (item.documentNumber ? item.documentNu
           <template #item.originalCents="{ item }">{{ formatMoney(item.originalCents, locale, item.currencyCode) }}</template>
           <template #item.balanceCents="{ item }">
             <span :class="item.balanceCents < 0 ? 'text-error' : undefined">{{ formatMoney(item.balanceCents, locale, item.currencyCode) }}</span>
-            <div v-if="item.appliedCents > 0" class="text-body-2 text-medium-emphasis">{{ $t('treasury.receivables.applied', { amount: formatMoney(item.appliedCents, locale, item.currencyCode) }) }}</div>
+            <div v-if="item.appliedCents > 0" class="text-body-medium text-medium-emphasis">{{ $t('treasury.receivables.applied', { amount: formatMoney(item.appliedCents, locale, item.currencyCode) }) }}</div>
           </template>
           <template #item.status="{ item }">
             <v-chip :color="RECEIVABLE_STATUS_COLOR[item.status]" variant="flat" size="small">{{ $t(`treasury.receivables.status.${item.status}`) }}</v-chip>

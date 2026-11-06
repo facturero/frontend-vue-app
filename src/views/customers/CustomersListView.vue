@@ -112,7 +112,7 @@ onMounted(async () => {
 
     <v-card class="mb-4">
       <v-card-text>
-        <v-row dense align="end">
+        <v-row class="align-end" density="compact">
           <v-col cols="12" sm="4">
             <v-text-field v-model="search" :label="$t('customers.searchLabel')" hide-details prepend-inner-icon="mdi-magnify" clearable @keyup.enter="doSearch" />
           </v-col>
@@ -155,13 +155,13 @@ onMounted(async () => {
           { title: '50', value: 50 },
         ]">
         <template #item.identification="{ item }">
-          <span class="text-caption font-weight-medium">{{ item.identification || '—' }}</span>
+          <span class="text-body-small font-weight-medium">{{ item.identification || '—' }}</span>
         </template>
 
         <template #item.businessName="{ item }">
           <div>
-            <div class="text-body-2">{{ item.businessName }}</div>
-            <div v-if="item.tradeName" class="text-caption text-medium-emphasis">{{ item.tradeName }}</div>
+            <div class="text-body-medium">{{ item.businessName }}</div>
+            <div v-if="item.tradeName" class="text-body-small text-medium-emphasis">{{ item.tradeName }}</div>
           </div>
         </template>
 
@@ -172,11 +172,11 @@ onMounted(async () => {
         </template>
 
         <template #item.email="{ item }">
-          <span class="text-caption">{{ item.email || '—' }}</span>
+          <span class="text-body-small">{{ item.email || '—' }}</span>
         </template>
 
         <template #item.phone="{ item }">
-          <span class="text-caption">{{ item.phone || '—' }}</span>
+          <span class="text-body-small">{{ item.phone || '—' }}</span>
         </template>
 
         <template #item.status="{ item }">
@@ -209,7 +209,7 @@ onMounted(async () => {
           <i18n-t keypath="customers.disableConfirm" tag="span">
             <template #name><strong>{{ disableDialog?.name }}</strong></template>
           </i18n-t>
-          <p class="text-caption text-medium-emphasis mt-2">{{ $t('customers.disableHint') }}</p>
+          <p class="text-body-small text-medium-emphasis mt-2">{{ $t('customers.disableHint') }}</p>
         </v-card-text>
         <v-card-actions>
           <v-spacer />

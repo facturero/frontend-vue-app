@@ -274,7 +274,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onGlobalKeydown));
       </v-list>
 
       <v-divider />
-      <div class="d-flex ga-4 px-4 py-2 text-caption text-medium-emphasis">
+      <div class="d-flex ga-4 px-4 py-2 text-body-small text-medium-emphasis">
         <span>↑↓ {{ $t('search.hintNavigate') }}</span>
         <span>↵ {{ $t('search.hintOpen') }}</span>
         <span>Esc {{ $t('search.hintClose') }}</span>

@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
+import { formatDate } from '@/utils/format';
+import DateField from '@/components/ui/DateField.vue';
 import { useI18n } from 'vue-i18n';
 import { projectsApi } from '@/api/projects';
 import { useAuthStore } from '@/stores/auth';
@@ -16,7 +18,7 @@ import UserAvatar from './UserAvatar.vue';
  * de trabajo) y las horas se registran con el cronómetro o a mano. Quien ve la tarea ve sus horas; registrar lo hace su responsable o
  * un editor; borrar un registro, quien lo hizo.
  */
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const store = useProjectsStore();
 const timer = useTimerStore();
 const auth = useAuthStore();
@@ -38,7 +40,7 @@ watch(
 );
 
 const adding = ref(false);
-const workedOn = ref(localIsoDate(new Date()));
+const workedOn = ref<string | null>(localIsoDate(new Date()));
 const duration = ref('');
 const billable = ref(true);
 const note = ref('');
@@ -76,7 +78,7 @@ async function refresh(): Promise<void> {
 
 async function log(): Promise<void> {
   const d = task.value;
-  if (!d || !parsed.value) return;
+  if (!d || !parsed.value || !workedOn.value) return;
   saving.value = true;
   failure.value = null;
   try {
@@ -109,17 +111,13 @@ async function remove(id: string): Promise<void> {
   }
 }
 
-const dateFmt = computed(() => new Intl.DateTimeFormat(locale.value, { day: 'numeric', month: 'short' }));
-const day = (iso: string) => {
-  const [y, m, d] = iso.split('-').map(Number);
-  return dateFmt.value.format(new Date(y!, m! - 1, d!));
-};
+const day = (iso: string) => formatDate(iso);
 </script>
 
 <template>
   <div v-if="task && (tracking || showEstimate)">
     <div class="d-flex align-center flex-wrap ga-2 mb-2">
-      <span class="text-body-1 font-weight-medium">{{ t('projects.time.title') }}</span>
+      <span class="text-body-large font-weight-medium">{{ t('projects.time.title') }}</span>
       <v-chip v-if="tracking" size="small" prepend-icon="mdi-timer-outline">
         {{ t('projects.time.actual') }}: {{ formatMinutes(task.actualMinutes) }}
       </v-chip>
@@ -157,14 +155,14 @@ const day = (iso: string) => {
     <v-card v-if="adding" variant="tonal" class="pa-4 mb-2 d-flex flex-column ga-2">
       <div class="d-flex flex-column flex-sm-row ga-2">
         <v-text-field v-model="duration" :label="t('projects.time.duration')" :hint="t('projects.time.durationHint')" persistent-hint autofocus @keyup.enter="log" />
-        <v-text-field v-model="workedOn" type="date" :label="t('projects.time.workedOn')" />
+        <DateField v-model="workedOn" :label="t('projects.time.workedOn')" />
       </div>
       <v-text-field v-model="note" :label="t('projects.time.note')" :counter="500" />
       <div class="d-flex align-center flex-wrap ga-2">
         <v-switch v-model="billable" :label="t('projects.time.billable')" class="flex-grow-0" />
         <v-spacer />
         <v-btn variant="text" @click="adding = false">{{ t('common.cancel') }}</v-btn>
-        <v-btn color="primary" :disabled="!parsed" :loading="saving" @click="log">
+        <v-btn color="primary" :disabled="!parsed || !workedOn" :loading="saving" @click="log">
           {{ parsed ? t('projects.time.logAmount', { amount: formatMinutes(parsed) }) : t('projects.time.log') }}
         </v-btn>
       </div>
@@ -173,7 +171,7 @@ const day = (iso: string) => {
     <v-list v-if="tracking && task.timeEntries.length" density="compact" class="pa-0">
       <v-list-item v-for="e in task.timeEntries" :key="e.id" class="px-0">
         <template #prepend><UserAvatar :user-id="e.userId" :size="24" class="mr-2" /></template>
-        <v-list-item-title class="text-body-2">
+        <v-list-item-title class="text-body-medium">
           {{ formatMinutes(e.minutes) }} · {{ day(e.workedOn) }}
           <v-icon v-if="e.source === 'timer'" icon="mdi-timer-outline" size="x-small" class="ml-1" />
         </v-list-item-title>

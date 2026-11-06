@@ -7,6 +7,7 @@
  * solo redondeo por línea); el servidor los recalcula y manda.
  */
 import { computed, onMounted, ref } from 'vue';
+import DateField from '@/components/ui/DateField.vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { productApi } from '@/api/products';
@@ -207,7 +208,7 @@ onMounted(async () => {
 
     <v-form v-if="!loadError" @submit.prevent="save(false)">
       <v-card class="mb-4">
-        <v-card-title class="text-h6">{{ $t('purchasing.form.header') }}</v-card-title>
+        <v-card-title class="text-title-large">{{ $t('purchasing.form.header') }}</v-card-title>
         <v-card-text>
           <v-row>
             <v-col cols="12" md="6">
@@ -217,10 +218,10 @@ onMounted(async () => {
               <v-select v-model="warehouseId" :items="warehouseItems" :label="$t('purchasing.form.warehouse')" />
             </v-col>
             <v-col cols="12" sm="4">
-              <v-text-field v-model="orderDate" type="date" :label="$t('purchasing.form.orderDate')" />
+              <DateField v-model="orderDate" :label="$t('purchasing.form.orderDate')" />
             </v-col>
             <v-col cols="12" sm="4">
-              <v-text-field v-model="expectedDate" type="date" :min="orderDate" :label="$t('purchasing.form.expectedDate')" />
+              <DateField v-model="expectedDate" :min="orderDate" :label="$t('purchasing.form.expectedDate')" />
             </v-col>
             <v-col cols="12" sm="4">
               <v-text-field v-model="paymentTermDays" inputmode="numeric" :label="$t('purchasing.suppliers.creditDays')" :hint="$t('purchasing.suppliers.creditDaysHint')" persistent-hint />
@@ -233,7 +234,7 @@ onMounted(async () => {
       </v-card>
 
       <v-card class="mb-4">
-        <v-card-title class="text-h6">{{ $t('purchasing.orders.lines') }}</v-card-title>
+        <v-card-title class="text-title-large">{{ $t('purchasing.orders.lines') }}</v-card-title>
         <v-card-text>
           <v-sheet v-for="(row, i) in lines" :key="row.key" color="grey100" rounded="lg" class="pa-4 mb-4">
             <v-row class="align-start">
@@ -268,7 +269,7 @@ onMounted(async () => {
                 />
               </v-col>
               <v-col cols="12" md="2" class="d-flex align-center justify-space-between ga-2">
-                <span class="text-body-2">{{ rowAmounts(row) ? money(rowAmounts(row)!.totalCents) : '—' }}</span>
+                <span class="text-body-medium">{{ rowAmounts(row) ? money(rowAmounts(row)!.totalCents) : '—' }}</span>
                 <v-btn icon="mdi-close" variant="text" :aria-label="$t('common.delete')" :disabled="lines.length === 1" @click="lines.splice(i, 1)" />
               </v-col>
             </v-row>
@@ -283,7 +284,7 @@ onMounted(async () => {
         <v-card-text class="d-flex flex-column align-end ga-2">
           <div>{{ $t('invoices.subtotal') }}: {{ money(totals.subtotalCents) }}</div>
           <div>{{ $t('invoices.taxTotal') }}: {{ money(totals.taxCents) }}</div>
-          <div class="text-h6">{{ $t('invoices.total') }}: {{ money(totals.totalCents) }}</div>
+          <div class="text-title-large">{{ $t('invoices.total') }}: {{ money(totals.totalCents) }}</div>
         </v-card-text>
       </v-card>
 

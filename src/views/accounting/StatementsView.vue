@@ -9,6 +9,8 @@
  * activo = pasivo + patrimonio.
  */
 import { computed, onMounted, ref, watch } from 'vue';
+import { formatDate } from '@/utils/format';
+import DateField from '@/components/ui/DateField.vue';
 import { useI18n } from 'vue-i18n';
 import { todayLocal, useAccountingStore } from '@/stores/accounting';
 import { formatMoney } from '@/utils/accounting';
@@ -165,11 +167,11 @@ const isCurrentBalanced = computed(() => (store.balanceSheet?.totals.differenceC
         <v-card-text>
           <v-row>
             <template v-if="tab === 'balance'">
-              <v-col cols="12" sm="3"><v-text-field v-model="asOf" type="date" :label="$t('accounting.statements.asOf')" /></v-col>
+              <v-col cols="12" sm="3"><DateField v-model="asOf" required :label="$t('accounting.statements.asOf')" /></v-col>
             </template>
             <template v-else>
-              <v-col cols="6" sm="2"><v-text-field v-model="from" type="date" :label="$t('accounting.journal.from')" /></v-col>
-              <v-col cols="6" sm="2"><v-text-field v-model="to" type="date" :label="$t('accounting.journal.to')" /></v-col>
+              <v-col cols="6" sm="2"><DateField v-model="from" :max="to" :label="$t('accounting.journal.from')" /></v-col>
+              <v-col cols="6" sm="2"><DateField v-model="to" :min="from" :label="$t('accounting.journal.to')" /></v-col>
             </template>
             <v-col cols="12" sm="3"><v-select v-model="compareMode" :items="compareOptions" :label="$t('accounting.statements.compareWith')" /></v-col>
             <v-col cols="12" sm="3"><v-select v-model="costCenterId" :items="costCenterOptions" :label="$t('accounting.entry.costCenter')" clearable /></v-col>
@@ -192,7 +194,7 @@ const isCurrentBalanced = computed(() => (store.balanceSheet?.totals.differenceC
       <!-- Balance general -->
       <v-card v-if="tab === 'balance' && store.balanceSheet">
         <v-card-title class="d-flex flex-wrap align-center ga-2">
-          {{ $t('accounting.statements.balanceSheet') }} · {{ $t('accounting.statements.asOfDate', { date: store.balanceSheet.asOf }) }}
+          {{ $t('accounting.statements.balanceSheet') }} · {{ $t('accounting.statements.asOfDate', { date: formatDate(store.balanceSheet.asOf) }) }}
           <v-chip variant="flat" :color="isCurrentBalanced ? 'lightsuccess' : 'lighterror'" size="small">
             {{ isCurrentBalanced ? $t('accounting.statements.balanced') : $t('accounting.statements.unbalanced', { amount: money(store.balanceSheet.totals.differenceCents) }) }}
           </v-chip>
@@ -203,7 +205,7 @@ const isCurrentBalanced = computed(() => (store.balanceSheet?.totals.differenceC
               <tr>
                 <th>{{ $t('accounting.accounts.code') }}</th>
                 <th>{{ $t('accounting.entry.account') }}</th>
-                <th class="text-end">{{ store.balanceSheet.asOf }}</th>
+                <th class="text-end">{{ formatDate(store.balanceSheet.asOf) }}</th>
                 <template v-if="comparing">
                   <th class="text-end">{{ store.balanceSheet.compareAsOf }}</th>
                   <th class="text-end">{{ $t('accounting.statements.variation') }}</th>

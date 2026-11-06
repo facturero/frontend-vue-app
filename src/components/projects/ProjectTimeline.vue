@@ -139,7 +139,7 @@ const width = DAYS * DAY_W;
       <v-btn icon="mdi-chevron-left" variant="text" size="small" :aria-label="t('projects.timeline.previous')" @click="start = shiftDay(start, -14)" />
       <v-btn variant="outlined" size="small" @click="start = mondayOf(shiftDay(today, -7))">{{ t('projects.due.today') }}</v-btn>
       <v-btn icon="mdi-chevron-right" variant="text" size="small" :aria-label="t('projects.timeline.next')" @click="start = shiftDay(start, 14)" />
-      <span class="text-body-2 text-medium-emphasis">{{ t('projects.timeline.hint') }}</span>
+      <span class="text-body-medium text-medium-emphasis">{{ t('projects.timeline.hint') }}</span>
     </div>
 
     <div class="overflow-x-auto">
@@ -149,7 +149,7 @@ const width = DAYS * DAY_W;
           <div class="timeline__name" />
           <div>
             <div class="d-flex">
-              <div v-for="m in months" :key="m.label" class="text-caption font-weight-medium px-2 text-truncate border-e" :style="{ width: `${m.span * DAY_W}px` }">
+              <div v-for="m in months" :key="m.label" class="text-body-small font-weight-medium px-2 text-truncate border-e" :style="{ width: `${m.span * DAY_W}px` }">
                 {{ m.label }}
               </div>
             </div>
@@ -157,7 +157,7 @@ const width = DAYS * DAY_W;
               <div
                 v-for="d in days"
                 :key="d"
-                class="text-caption text-center"
+                class="text-body-small text-center"
                 :class="{ 'bg-lightprimary text-primary font-weight-bold': d === today, 'text-medium-emphasis': d !== today }"
                 :style="{ width: `${DAY_W}px` }"
               >
@@ -170,13 +170,13 @@ const width = DAYS * DAY_W;
         <div class="position-relative">
           <div v-for="row in rows" :key="row.kind === 'section' ? row.id : row.task.id" class="d-flex timeline__row" :style="{ height: `${ROW_H}px` }">
             <template v-if="row.kind === 'section'">
-              <div class="timeline__name d-flex align-center px-3 text-body-2 font-weight-bold">{{ row.name }}</div>
+              <div class="timeline__name d-flex align-center px-3 text-body-medium font-weight-bold">{{ row.name }}</div>
               <div class="timeline__grid" :style="{ width: `${width}px` }" />
             </template>
             <template v-else>
               <div class="timeline__name d-flex align-center ga-2 px-3 cursor-pointer" @click="store.openTask(row.task.id)">
                 <v-icon v-if="row.task.kind === 'milestone'" icon="mdi-rhombus" size="x-small" color="warning" />
-                <span class="text-body-2 text-truncate" :class="{ 'text-decoration-line-through text-medium-emphasis': row.task.completedAt }">{{ row.task.title }}</span>
+                <span class="text-body-medium text-truncate" :class="{ 'text-decoration-line-through text-medium-emphasis': row.task.completedAt }">{{ row.task.title }}</span>
                 <v-spacer />
                 <UserAvatar :user-id="row.task.assigneeUserId" :size="22" />
               </div>
@@ -218,7 +218,7 @@ const width = DAYS * DAY_W;
                       @pointermove="onPointerMove"
                       @pointerup.stop="onPointerUp(row.task)"
                     />
-                    <span class="text-caption text-truncate px-2">{{ row.task.title }}</span>
+                    <span class="text-body-small text-truncate px-2">{{ row.task.title }}</span>
                     <span
                       v-if="editable"
                       class="timeline__edge timeline__edge--end"
@@ -255,8 +255,8 @@ const width = DAYS * DAY_W;
         </div>
       </div>
     </div>
-    <div v-if="rows.every((r) => r.kind === 'section')" class="pa-6 text-center text-body-2 text-medium-emphasis">{{ t('projects.timeline.empty') }}</div>
-    <div class="d-flex flex-wrap ga-4 pa-2 border-t text-caption text-medium-emphasis">
+    <div v-if="rows.every((r) => r.kind === 'section')" class="pa-6 text-center text-body-medium text-medium-emphasis">{{ t('projects.timeline.empty') }}</div>
+    <div class="d-flex flex-wrap ga-4 pa-2 border-t text-body-small text-medium-emphasis">
       <span class="d-flex align-center ga-1"><v-icon icon="mdi-rhombus" size="x-small" color="warning" />{{ t('projects.timeline.legendMilestone') }}</span>
       <span class="d-flex align-center ga-1"><v-icon icon="mdi-arrow-right" size="x-small" />{{ t('projects.timeline.legendDependency') }}</span>
       <span class="d-flex align-center ga-1"><v-icon icon="mdi-arrow-right" size="x-small" color="error" />{{ t('projects.timeline.legendLate') }}</span>

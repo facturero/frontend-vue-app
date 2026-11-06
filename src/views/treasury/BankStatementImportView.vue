@@ -5,6 +5,8 @@
  * errores por fila. Importar es todo o nada: una sola fila mala rechaza el archivo. El mismo archivo no entra dos veces.
  */
 import { computed, onMounted, ref } from 'vue';
+import { formatDate } from '@/utils/format';
+import { notify } from '@/composable/useNotify';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useTreasuryBankingStore } from '@/stores/treasuryBanking';
@@ -32,7 +34,6 @@ const fileName = ref<string | null>(null);
 const files = ref<File[]>([]);
 const preview = ref<StatementPreview | null>(null);
 const problem = ref<string | null>(null);
-const snackbar = ref<string | null>(null);
 const money = (cents: number) => formatMoney(cents, locale.value, account.value?.currencyCode ?? 'USD');
 const profileProblems = computed(() => profileErrors(profile.value));
 const profileInvalid = computed(() => Object.keys(profileProblems.value).length > 0);
@@ -81,7 +82,7 @@ async function doImport(): Promise<void> {
   problem.value = null;
   try {
     const out = await store.importStatement(accountId.value, { csv: csv.value, fileName: fileName.value, profile: normalizeProfile(profile.value), saveProfile: saveProfile.value });
-    snackbar.value = t('treasury.banking.import.done', { n: out.importedLines, skipped: out.skippedDuplicates });
+    notify.success(t('treasury.banking.import.done', { n: out.importedLines, skipped: out.skippedDuplicates }));
     await router.push({ name: 'treasury-bank-reconcile', params: { id: accountId.value } });
   } catch {
     problem.value = store.error;
@@ -90,7 +91,7 @@ async function doImport(): Promise<void> {
 
 const lineHeaders = computed(() => [
   { title: t('treasury.banking.import.row'), key: 'row', sortable: false, align: 'start' as const },
-  { title: t('treasury.banking.lines.date'), key: 'lineDate', sortable: false, align: 'start' as const },
+  { title: t('treasury.banking.lines.date'), key: 'lineDate', value: (item: Record<string, unknown>) => formatDate(item.lineDate as string), sortable: false, align: 'start' as const },
   { title: t('treasury.banking.lines.description'), key: 'description', sortable: false, align: 'start' as const },
   { title: t('treasury.banking.lines.reference'), key: 'reference', sortable: false, align: 'start' as const },
   { title: t('treasury.banking.lines.amount'), key: 'amountCents', sortable: false, align: 'end' as const },
@@ -119,7 +120,7 @@ const errorHeaders = computed(() => [
           <v-expansion-panel>
             <v-expansion-panel-title>{{ $t('treasury.banking.import.profileTitle') }}</v-expansion-panel-title>
             <v-expansion-panel-text>
-              <div class="text-body-2 text-medium-emphasis mb-3">{{ $t('treasury.banking.import.profileHint') }}</div>
+              <div class="text-body-medium text-medium-emphasis mb-3">{{ $t('treasury.banking.import.profileHint') }}</div>
               <ImportProfileForm v-model="profile" :errors="formErrors" />
               <v-checkbox v-model="saveProfile" hide-details density="comfortable" :label="$t('treasury.banking.import.saveProfile')" />
               <div class="d-flex justify-end mt-2">
@@ -130,7 +131,7 @@ const errorHeaders = computed(() => [
         </v-expansion-panels>
 
         <v-file-input v-model="files" accept=".csv,.txt,text/csv,text/plain" prepend-icon="" prepend-inner-icon="mdi-file-delimited-outline" :label="$t('treasury.banking.import.file')" :hint="$t('treasury.banking.import.fileHint')" persistent-hint :disabled="profileInvalid" @update:model-value="onFile" />
-        <div v-if="profileInvalid" class="text-body-2 text-error mt-2">{{ $t('treasury.banking.import.fixProfile') }}</div>
+        <div v-if="profileInvalid" class="text-body-medium text-error mt-2">{{ $t('treasury.banking.import.fixProfile') }}</div>
       </v-card-text>
     </v-card>
 
@@ -143,45 +144,45 @@ const errorHeaders = computed(() => [
       <v-row class="mb-2">
         <v-col cols="6" md="3">
           <v-card><v-card-text>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.banking.import.newLines') }}</div>
-            <div class="text-h6">{{ preview.newLines }}</div>
-            <div v-if="preview.duplicates > 0" class="text-body-2 text-medium-emphasis">{{ $t('treasury.banking.import.duplicates', { n: preview.duplicates }) }}</div>
-            <div v-if="preview.skippedBeforeOpening > 0" class="text-body-2 text-medium-emphasis">{{ $t('treasury.banking.import.beforeOpening', { n: preview.skippedBeforeOpening }) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.banking.import.newLines') }}</div>
+            <div class="text-title-large">{{ preview.newLines }}</div>
+            <div v-if="preview.duplicates > 0" class="text-body-medium text-medium-emphasis">{{ $t('treasury.banking.import.duplicates', { n: preview.duplicates }) }}</div>
+            <div v-if="preview.skippedBeforeOpening > 0" class="text-body-medium text-medium-emphasis">{{ $t('treasury.banking.import.beforeOpening', { n: preview.skippedBeforeOpening }) }}</div>
           </v-card-text></v-card>
         </v-col>
         <v-col cols="6" md="3">
           <v-card><v-card-text>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.banking.import.period') }}</div>
-            <div class="text-h6">{{ preview.periodStart ?? '—' }}</div>
-            <div class="text-body-2 text-medium-emphasis">{{ preview.periodEnd ?? '' }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.banking.import.period') }}</div>
+            <div class="text-title-large">{{ preview.periodStart ?? '—' }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ preview.periodEnd ?? '' }}</div>
           </v-card-text></v-card>
         </v-col>
         <v-col cols="6" md="3">
           <v-card><v-card-text>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.banking.import.inOut') }}</div>
-            <div class="text-h6 text-success">{{ money(preview.inCents) }}</div>
-            <div class="text-body-2 text-error">{{ money(preview.outCents) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.banking.import.inOut') }}</div>
+            <div class="text-title-large text-success">{{ money(preview.inCents) }}</div>
+            <div class="text-body-medium text-error">{{ money(preview.outCents) }}</div>
           </v-card-text></v-card>
         </v-col>
         <v-col cols="6" md="3">
           <v-card><v-card-text>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.banking.import.closing') }}</div>
-            <div class="text-h6">{{ preview.closingBalanceCents === null ? '—' : money(preview.closingBalanceCents) }}</div>
-            <div class="text-body-2 text-medium-emphasis">{{ preview.closingBalanceCents === null ? $t('treasury.banking.import.noBalance') : (preview.closingDate ?? '') }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.banking.import.closing') }}</div>
+            <div class="text-title-large">{{ preview.closingBalanceCents === null ? '—' : money(preview.closingBalanceCents) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ preview.closingBalanceCents === null ? $t('treasury.banking.import.noBalance') : (preview.closingDate ?? '') }}</div>
           </v-card-text></v-card>
         </v-col>
       </v-row>
 
       <v-card v-if="preview.errors.length > 0" class="mb-4">
-        <v-card-title class="text-h6">{{ $t('treasury.banking.import.errorsTitle') }}</v-card-title>
+        <v-card-title class="text-title-large">{{ $t('treasury.banking.import.errorsTitle') }}</v-card-title>
         <v-card-text>
           <v-data-table :headers="errorHeaders" :items="preview.errors" :items-per-page="-1" hide-default-footer density="compact" />
-          <div v-if="preview.errorCount > preview.errors.length" class="text-body-2 text-medium-emphasis mt-2">{{ $t('treasury.banking.import.moreErrors', { n: preview.errorCount - preview.errors.length }) }}</div>
+          <div v-if="preview.errorCount > preview.errors.length" class="text-body-medium text-medium-emphasis mt-2">{{ $t('treasury.banking.import.moreErrors', { n: preview.errorCount - preview.errors.length }) }}</div>
         </v-card-text>
       </v-card>
 
       <v-card class="mb-4">
-        <v-card-title class="text-h6">{{ $t('treasury.banking.import.linesTitle') }}</v-card-title>
+        <v-card-title class="text-title-large">{{ $t('treasury.banking.import.linesTitle') }}</v-card-title>
         <v-card-text>
           <v-data-table :headers="lineHeaders" :items="preview.lines" :items-per-page="-1" hide-default-footer density="compact">
             <template #item.description="{ item }">
@@ -192,7 +193,7 @@ const errorHeaders = computed(() => [
               <span :class="item.amountCents < 0 ? 'text-error' : 'text-success'">{{ money(item.amountCents) }}</span>
             </template>
           </v-data-table>
-          <div v-if="preview.rowCount > preview.lines.length" class="text-body-2 text-medium-emphasis mt-2">{{ $t('treasury.banking.import.onlyFirst', { n: preview.lines.length }) }}</div>
+          <div v-if="preview.rowCount > preview.lines.length" class="text-body-medium text-medium-emphasis mt-2">{{ $t('treasury.banking.import.onlyFirst', { n: preview.lines.length }) }}</div>
         </v-card-text>
       </v-card>
 
@@ -202,6 +203,5 @@ const errorHeaders = computed(() => [
       </div>
     </template>
 
-    <v-snackbar :model-value="snackbar !== null" timeout="3500" @update:model-value="snackbar = null">{{ snackbar }}</v-snackbar>
   </v-container>
 </template>

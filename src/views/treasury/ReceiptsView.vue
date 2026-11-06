@@ -4,6 +4,8 @@
  * lo que el cliente debe y genera su asiento. Anularlo es un permiso aparte: quien cobra no anula lo suyo sin que quede rastro.
  */
 import { computed, onMounted, ref, watch } from 'vue';
+import { formatDate } from '@/utils/format';
+import DateField from '@/components/ui/DateField.vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
@@ -28,7 +30,7 @@ const pages = computed(() => Math.max(1, Math.ceil(store.receiptsTotal / store.p
 
 const headers = computed(() => [
   { title: t('treasury.receipts.number'), key: 'number', sortable: false, align: 'start' as const },
-  { title: t('treasury.receipts.date'), key: 'receiptDate', sortable: false, align: 'start' as const },
+  { title: t('treasury.receipts.date'), key: 'receiptDate', value: (item: Record<string, unknown>) => formatDate(item.receiptDate as string), sortable: false, align: 'start' as const },
   { title: t('treasury.receipts.customer'), key: 'customerName', sortable: false, align: 'start' as const },
   { title: t('treasury.receipts.method'), key: 'method', sortable: false, align: 'start' as const },
   { title: t('treasury.receipts.received'), key: 'totalCents', sortable: false, align: 'end' as const },
@@ -79,10 +81,10 @@ const money = (cents: number, currency = 'USD') => formatMoney(cents, locale.val
             <v-select v-model="status" :items="statusItems" :label="$t('common.status')" clearable />
           </v-col>
           <v-col cols="6" md="2">
-            <v-text-field v-model="from" type="date" :label="$t('treasury.receipts.from')" />
+            <DateField v-model="from" :max="to" :label="$t('treasury.receipts.from')" />
           </v-col>
           <v-col cols="6" md="2">
-            <v-text-field v-model="to" type="date" :label="$t('treasury.receipts.to')" />
+            <DateField v-model="to" :min="from" :label="$t('treasury.receipts.to')" />
           </v-col>
         </v-row>
 
@@ -97,16 +99,16 @@ const money = (cents: number, currency = 'USD') => formatMoney(cents, locale.val
           <template #item.number="{ item }">{{ item.number ?? $t('treasury.receipts.draft') }}</template>
           <template #item.customerName="{ item }">
             {{ item.customerName }}
-            <div v-if="item.customerIdentification" class="text-body-2 text-medium-emphasis">{{ item.customerIdentification }}</div>
+            <div v-if="item.customerIdentification" class="text-body-medium text-medium-emphasis">{{ item.customerIdentification }}</div>
           </template>
           <template #item.method="{ item }">
             {{ $t(`treasury.receipts.methods.${item.method}`) }}
-            <div v-if="item.reference" class="text-body-2 text-medium-emphasis">{{ item.reference }}</div>
+            <div v-if="item.reference" class="text-body-medium text-medium-emphasis">{{ item.reference }}</div>
           </template>
           <template #item.totalCents="{ item }">{{ money(item.totalCents, item.currencyCode) }}</template>
           <template #item.appliedCents="{ item }">
             {{ money(item.appliedCents, item.currencyCode) }}
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.receipts.lines', { n: item.lineCount }) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.receipts.lines', { n: item.lineCount }) }}</div>
           </template>
           <template #item.status="{ item }">
             <v-chip :color="RECEIPT_STATUS_COLOR[item.status]" variant="flat" size="small">{{ $t(`treasury.receipts.status.${item.status}`) }}</v-chip>

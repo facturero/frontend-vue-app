@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
+import { formatDateTime as fmtDateTime } from '@/utils/format';
+import DateField from '@/components/ui/DateField.vue';
 import { useI18n } from 'vue-i18n';
 import { useAuditStore } from '@/stores/audit';
 import PageHeader from '@/components/ui/PageHeader.vue';
@@ -120,7 +122,7 @@ function colorFor(entry: AuditLogEntry): string {
 }
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleString();
+  return fmtDateTime(iso);
 }
 
 /** El input `date` da 'YYYY-MM-DD'; `to` cubre el día entero, no su medianoche. */
@@ -339,19 +341,17 @@ onMounted(load);
                   class="mb-3"
                 />
 
-                <v-row v-if="draft.range === 'custom'" dense class="mb-1">
+                <v-row v-if="draft.range === 'custom'" density="compact" class="mb-1">
                   <v-col cols="6">
-                    <v-text-field
-                      v-model="draft.from"
-                      type="date"
+                    <DateField
+                      v-model="draft.from" :max="draft.to"
                       :label="$t('audit.filters.from')"
                       hide-details
                     />
                   </v-col>
                   <v-col cols="6">
-                    <v-text-field
-                      v-model="draft.to"
-                      type="date"
+                    <DateField
+                      v-model="draft.to" :min="draft.from"
                       :label="$t('audit.filters.to')"
                       hide-details
                     />
@@ -446,23 +446,23 @@ onMounted(load);
         @update:items-per-page="applyFilters"
       >
         <template #item.occurredAt="{ item }">
-          <span class="text-caption text-no-wrap">{{ formatDate(item.occurredAt) }}</span>
+          <span class="text-body-small text-no-wrap">{{ formatDate(item.occurredAt) }}</span>
         </template>
 
         <template #item.event="{ item }">
           <div class="d-flex align-center ga-2">
             <v-icon :icon="iconFor(item)" :color="colorFor(item)" size="18" />
             <div>
-              <div class="text-body-2">{{ eventLabel(item) }}</div>
-              <div class="text-caption text-medium-emphasis">{{ item.event }}</div>
+              <div class="text-body-medium">{{ eventLabel(item) }}</div>
+              <div class="text-body-small text-medium-emphasis">{{ item.event }}</div>
             </div>
           </div>
         </template>
 
         <template #item.userEmail="{ item }">
           <div v-if="item.userEmail || item.userId">
-            <div class="text-body-2">{{ item.userEmail || '—' }}</div>
-            <div v-if="item.userId" class="text-caption text-medium-emphasis audit-mono">
+            <div class="text-body-medium">{{ item.userEmail || '—' }}</div>
+            <div v-if="item.userId" class="text-body-small text-medium-emphasis audit-mono">
               {{ item.userId }}
             </div>
           </div>
@@ -474,11 +474,11 @@ onMounted(load);
         </template>
 
         <template #item.targetId="{ item }">
-          <span class="text-caption audit-mono">{{ item.targetId || '—' }}</span>
+          <span class="text-body-small audit-mono">{{ item.targetId || '—' }}</span>
         </template>
 
         <template #item.ip="{ item }">
-          <span class="text-caption audit-mono">{{ item.ip || '—' }}</span>
+          <span class="text-body-small audit-mono">{{ item.ip || '—' }}</span>
         </template>
 
         <template #item.actions="{ item }">
@@ -527,7 +527,7 @@ onMounted(load);
             </v-list>
 
             <div class="mt-4">
-              <div class="text-subtitle-2 mb-1">{{ $t('audit.detail.payload') }}</div>
+              <div class="text-title-small mb-1">{{ $t('audit.detail.payload') }}</div>
               <v-alert type="info" class="mb-2">
                 {{ $t('audit.detail.redactedNotice') }}
               </v-alert>
@@ -535,7 +535,7 @@ onMounted(load);
                 {{ $t('audit.detail.truncatedNotice') }}
               </v-alert>
               <pre v-if="payloadText" class="audit-payload">{{ payloadText }}</pre>
-              <p v-else class="text-caption text-medium-emphasis">{{ $t('audit.detail.noPayload') }}</p>
+              <p v-else class="text-body-small text-medium-emphasis">{{ $t('audit.detail.noPayload') }}</p>
             </div>
           </template>
         </v-card-text>

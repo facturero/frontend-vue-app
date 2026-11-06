@@ -5,6 +5,7 @@
  * viven en «anticipos a proveedores», no en proveedores.
  */
 import { computed, onMounted, ref } from 'vue';
+import { formatDate } from '@/utils/format';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
@@ -53,7 +54,7 @@ const dueChip = (p: { status: 'open' | 'partial' | 'paid' | 'cancelled'; dueDate
 
 const headers = computed(() => [
   { title: t('treasury.payables.document'), key: 'documentNumber', sortable: false, align: 'start' as const },
-  { title: t('treasury.payables.issueDate'), key: 'issueDate', sortable: false, align: 'start' as const },
+  { title: t('treasury.payables.issueDate'), key: 'issueDate', value: (item: Record<string, unknown>) => formatDate(item.issueDate as string), sortable: false, align: 'start' as const },
   { title: t('treasury.payables.dueDate'), key: 'dueDate', sortable: false, align: 'start' as const },
   { title: t('treasury.payables.original'), key: 'originalCents', sortable: false, align: 'end' as const },
   { title: t('treasury.payables.balance'), key: 'balanceCents', sortable: false, align: 'end' as const },
@@ -83,43 +84,43 @@ const advanceHeaders = computed(() => [
       <v-col cols="12" sm="4">
         <v-card>
           <v-card-text>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.payables.owed') }}</div>
-            <div class="text-h6">{{ money(statement.payableCents) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.payables.owed') }}</div>
+            <div class="text-title-large">{{ money(statement.payableCents) }}</div>
           </v-card-text>
         </v-card>
       </v-col>
       <v-col cols="12" sm="4">
         <v-card>
           <v-card-text>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.payables.advances') }}</div>
-            <div class="text-h6">{{ money(statement.advanceCents) }}</div>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.payables.advancesHint') }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.payables.advances') }}</div>
+            <div class="text-title-large">{{ money(statement.advanceCents) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.payables.advancesHint') }}</div>
           </v-card-text>
         </v-card>
       </v-col>
       <v-col cols="12" sm="4">
         <v-card>
           <v-card-text>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.payables.net') }}</div>
-            <div class="text-h6" :class="statement.netCents < 0 ? 'text-error' : undefined">{{ money(statement.netCents) }}</div>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.payables.asOf', { date: statement.asOf }) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.payables.net') }}</div>
+            <div class="text-title-large" :class="statement.netCents < 0 ? 'text-error' : undefined">{{ money(statement.netCents) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.payables.asOf', { date: formatDate(statement.asOf) }) }}</div>
           </v-card-text>
         </v-card>
       </v-col>
     </v-row>
 
     <v-card class="mb-4">
-      <v-card-title class="text-h6">{{ $t('treasury.payables.debts') }}</v-card-title>
+      <v-card-title class="text-title-large">{{ $t('treasury.payables.debts') }}</v-card-title>
       <v-card-text>
         <v-data-table :headers="headers" :items="statement?.payables ?? []" :loading="store.loading" :items-per-page="-1" hide-default-footer>
           <template #item.documentNumber="{ item }">
             {{ item.documentNumber ?? item.internalNumber ?? $t(`treasury.payables.source.${item.sourceType}`) }}
-            <div v-for="a in applicationsOf(item.id)" :key="a.id" class="text-body-2 text-medium-emphasis">
+            <div v-for="a in applicationsOf(item.id)" :key="a.id" class="text-body-medium text-medium-emphasis">
               {{ $t(`treasury.payables.applied.${a.sourceType}`, { doc: a.documentNumber ?? '—', amount: money(a.appliedCents) }) }}
             </div>
           </template>
           <template #item.dueDate="{ item }">
-            {{ item.dueDate }}
+            {{ formatDate(item.dueDate) }}
             <v-chip v-if="dueChip(item) > 0" color="lighterror" variant="flat" size="x-small" class="ml-2">{{ $t('treasury.payables.overdueDays', { n: dueChip(item) }) }}</v-chip>
           </template>
           <template #item.originalCents="{ item }">{{ money(item.originalCents, item.currencyCode) }}</template>
@@ -135,7 +136,7 @@ const advanceHeaders = computed(() => [
     </v-card>
 
     <v-card v-if="statement && statement.advances.length > 0">
-      <v-card-title class="text-h6">{{ $t('treasury.payables.advancesTitle') }}</v-card-title>
+      <v-card-title class="text-title-large">{{ $t('treasury.payables.advancesTitle') }}</v-card-title>
       <v-card-text>
         <v-data-table :headers="advanceHeaders" :items="statement.advances" :items-per-page="-1" hide-default-footer>
           <template #item.documentNumber="{ item }">{{ item.documentNumber ?? '—' }}</template>

@@ -52,8 +52,8 @@ const stickyStyle = useStickyHeader(sheetEl, () => props.sticky === true);
         color base. Forzar `on-surface` a opacidad completa da el negro sólido
         de la referencia y funciona igual en claro y en oscuro.
       -->
-      <h1 class="text-h5 font-weight-bold" style="color: rgb(var(--v-theme-on-surface))">{{ title }}</h1>
-      <div v-if="subtitle" class="text-body-2 text-medium-emphasis mt-1">
+      <h1 class="text-headline-small font-weight-bold" style="color: rgb(var(--v-theme-on-surface))">{{ title }}</h1>
+      <div v-if="subtitle" class="text-body-medium text-medium-emphasis mt-1">
         {{ subtitle }}
       </div>
     </div>

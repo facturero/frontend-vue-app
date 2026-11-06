@@ -109,7 +109,7 @@ defineExpose({
 <template>
   <TaskBulkBar v-if="editable()" :task-ids="selectedIds" class="mb-2" @done="selected = new Set()" />
   <v-card>
-    <div class="d-none d-md-flex align-center px-4 py-2 border-b text-body-2 text-medium-emphasis">
+    <div class="d-none d-md-flex align-center px-4 py-2 border-b text-body-medium text-medium-emphasis">
       <div class="flex-grow-1 pl-16">{{ t('projects.task.title') }}</div>
       <div class="flex-shrink-0 text-center" style="width: 120px">{{ t('projects.task.assignee') }}</div>
       <div class="flex-shrink-0" style="width: 120px">{{ t('projects.task.dueOn') }}</div>
@@ -125,8 +125,8 @@ defineExpose({
           :aria-label="section.name"
           @click="collapsed[section.id] = !collapsed[section.id]"
         />
-        <span class="text-body-1 font-weight-bold">{{ section.name }}</span>
-        <span class="text-caption text-medium-emphasis">{{ (store.columns[section.id] ?? []).filter((x) => !x.completedAt).length }}</span>
+        <span class="text-body-large font-weight-bold">{{ section.name }}</span>
+        <span class="text-body-small text-medium-emphasis">{{ (store.columns[section.id] ?? []).filter((x) => !x.completedAt).length }}</span>
         <SectionMenu :section="section" />
       </div>
 
@@ -195,7 +195,7 @@ defineExpose({
             <div class="d-none d-md-block flex-shrink-0" style="width: 120px">
               <DueDateChip :due-on="task.dueOn" :completed="!!task.completedAt" />
             </div>
-            <div v-for="f in store.fields" :key="f.id" class="d-none d-md-block flex-shrink-0 text-body-2 text-truncate" style="width: 140px">
+            <div v-for="f in store.fields" :key="f.id" class="d-none d-md-block flex-shrink-0 text-body-medium text-truncate" style="width: 140px">
               <v-chip v-if="optionOf(f, task)" size="x-small" :color="optionOf(f, task)!.color">{{ optionOf(f, task)!.label }}</v-chip>
               <template v-else>{{ cellText(f, task) }}</template>
             </div>

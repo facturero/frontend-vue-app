@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import DateField from '@/components/ui/DateField.vue';
 import { useProjectsStore } from '@/stores/projects';
 import { displayName } from '@/utils/projects';
 import type { CustomField, FieldValue } from '@/types/projects';
@@ -45,12 +46,12 @@ async function save(raw: string | number | null): Promise<void> {
     variant="plain"
     @update:model-value="(v: FieldValue | null) => save(v)"
   >
-    <template #selection="{ item }">
+    <template #selection="{ internalItem: item }">
       <v-chip size="small" :color="item.raw.color">{{ item.title }}</v-chip>
     </template>
     <template #item="{ props: itemProps, item }">
       <v-list-item v-bind="itemProps">
-        <template #prepend><v-icon :color="item.raw.color" icon="mdi-circle" size="small" /></template>
+        <template #prepend><v-icon :color="item.color" icon="mdi-circle" size="small" /></template>
       </v-list-item>
     </template>
   </v-select>
@@ -64,13 +65,12 @@ async function save(raw: string | number | null): Promise<void> {
     variant="plain"
     @update:model-value="(v: FieldValue | null) => save(v)"
   />
-  <v-text-field
+  <DateField
     v-else-if="field.type === 'date'"
-    :model-value="draft"
-    type="date"
+    :model-value="draft || null"
     :readonly="readonly"
     variant="plain"
-    @change="(e: Event) => save((e.target as HTMLInputElement).value)"
+    @update:model-value="(v) => save(v ?? '')"
   />
   <v-text-field
     v-else

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { formatDate } from '@/utils/format';
 import { useI18n } from 'vue-i18n';
 import { useProjectsStore } from '@/stores/projects';
 import { localIsoDate } from '@/utils/projects';
@@ -79,13 +80,13 @@ async function add(): Promise<void> {
       <v-btn icon="mdi-chevron-left" variant="text" size="small" :aria-label="t('projects.timeline.previous')" @click="move(-1)" />
       <v-btn variant="outlined" size="small" @click="cursor = { year: Number(today.slice(0, 4)), month: Number(today.slice(5, 7)) }">{{ t('projects.due.today') }}</v-btn>
       <v-btn icon="mdi-chevron-right" variant="text" size="small" :aria-label="t('projects.timeline.next')" @click="move(1)" />
-      <span class="text-body-1 font-weight-medium">{{ title }}</span>
+      <span class="text-body-large font-weight-medium">{{ title }}</span>
       <v-spacer />
-      <span v-if="undated" class="text-caption text-medium-emphasis">{{ t('projects.calendar.undated', undated) }}</span>
+      <span v-if="undated" class="text-body-small text-medium-emphasis">{{ t('projects.calendar.undated', undated) }}</span>
     </div>
 
     <div class="calendar">
-      <div v-for="w in weekdays" :key="w" class="text-caption text-medium-emphasis text-center py-1 border-b text-capitalize">{{ w }}</div>
+      <div v-for="w in weekdays" :key="w" class="text-body-small text-medium-emphasis text-center py-1 border-b text-capitalize">{{ w }}</div>
       <div
         v-for="day in days"
         :key="day"
@@ -100,7 +101,7 @@ async function add(): Promise<void> {
       >
         <div class="d-flex align-center">
           <span
-            class="text-caption calendar__day"
+            class="text-body-small calendar__day"
             :class="day === today ? 'bg-primary font-weight-bold' : 'text-medium-emphasis'"
           >{{ Number(day.slice(8)) }}</span>
           <v-spacer />
@@ -119,7 +120,7 @@ async function add(): Promise<void> {
             v-for="task in (byDay.get(day) ?? []).slice(0, 4)"
             :key="task.id"
             :draggable="editable"
-            class="calendar__chip text-caption text-truncate px-1 rounded cursor-pointer"
+            class="calendar__chip text-body-small text-truncate px-1 rounded cursor-pointer"
             :class="[
               task.completedAt ? 'bg-lightsuccess text-decoration-line-through' : day < today ? 'bg-lighterror' : 'bg-lightprimary',
               { 'font-weight-bold': task.kind === 'milestone' },
@@ -132,7 +133,7 @@ async function add(): Promise<void> {
             <v-icon v-if="task.kind === 'milestone'" icon="mdi-rhombus" size="x-small" color="warning" />
             {{ task.title }}
           </div>
-          <span v-if="(byDay.get(day) ?? []).length > 4" class="text-caption text-medium-emphasis px-1">
+          <span v-if="(byDay.get(day) ?? []).length > 4" class="text-body-small text-medium-emphasis px-1">
             {{ t('projects.calendar.more', { n: (byDay.get(day) ?? []).length - 4 }) }}
           </span>
         </div>
@@ -141,14 +142,14 @@ async function add(): Promise<void> {
 
     <v-dialog :model-value="!!addingOn" @update:model-value="addingOn = null">
       <v-card>
-        <v-card-title>{{ t('projects.calendar.addOn', { day: addingOn ? new Intl.DateTimeFormat(locale, { dateStyle: 'long' }).format(new Date(`${addingOn}T12:00:00`)) : '' }) }}</v-card-title>
+        <v-card-title>{{ t('projects.calendar.addOn', { day: formatDate(addingOn) }) }}</v-card-title>
         <v-card-text>
           <v-text-field v-model="draft" :label="t('projects.task.title')" autofocus @keyup.enter="add" />
         </v-card-text>
         <v-card-actions>
           <v-spacer />
           <v-btn variant="text" @click="addingOn = null">{{ t('common.close') }}</v-btn>
-          <v-btn color="primary" :disabled="!draft.trim()" @click="add">{{ t('projects.task.addTask') }}</v-btn>
+          <v-btn variant="flat" color="primary" :disabled="!draft.trim()" @click="add">{{ t('projects.task.addTask') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

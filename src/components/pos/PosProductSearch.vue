@@ -89,17 +89,17 @@ async function onEnter(): Promise<void> {
     <v-progress-linear v-if="loading" indeterminate class="mb-2" />
 
     <v-alert v-if="failed" type="error" class="mb-4">{{ $t('pos.search.error') }}</v-alert>
-    <p v-else-if="!loading && items.length === 0" class="text-body-2 text-medium-emphasis text-center pa-6">
+    <p v-else-if="!loading && items.length === 0" class="text-body-medium text-medium-emphasis text-center pa-6">
       {{ $t('pos.search.empty') }}
     </p>
 
-    <v-row dense>
+    <v-row density="compact">
       <v-col v-for="p in items" :key="p.id" cols="6" sm="4" xl="3">
         <v-card hover :disabled="p.priceCents <= 0" class="h-100" @click="pick(p)">
           <v-card-text class="d-flex flex-column ga-1">
-            <span class="text-subtitle-2">{{ p.name }}</span>
-            <span v-if="p.sku" class="text-caption text-medium-emphasis">{{ p.sku }}</span>
-            <span v-if="p.priceCents > 0" class="text-body-1 font-weight-medium text-primary">{{ money(p.priceCents) }}</span>
+            <span class="text-title-small">{{ p.name }}</span>
+            <span v-if="p.sku" class="text-body-small text-medium-emphasis">{{ p.sku }}</span>
+            <span v-if="p.priceCents > 0" class="text-body-large font-weight-medium text-primary">{{ money(p.priceCents) }}</span>
             <v-chip v-else size="x-small" color="warning" class="align-self-start">{{ $t('pos.search.noPrice') }}</v-chip>
           </v-card-text>
         </v-card>

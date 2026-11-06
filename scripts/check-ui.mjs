@@ -21,7 +21,7 @@ const files = execSync('git ls-files src', { encoding: 'utf8' })
  * atributos que contienen ">" (funciones flecha, comparaciones) y ese regex se
  * corta antes de tiempo, dejando pasar props redundantes sin avisar.
  */
-const FIELD_TAGS = /^v-(text-field|textarea|select|autocomplete|combobox|file-input)$/;
+const FIELD_TAGS = /^v-(text-field|textarea|select|autocomplete|combobox|file-input|date-input)$/;
 
 const REDUNDANT_BY_TAG = {
   __fields__: {
@@ -68,6 +68,8 @@ const EXCEPTIONS = {
   'src/views/invoices/InvoiceFormView.vue': ['titulo', 'estilo', 'color', 'media'],
 };
 
+
+
 const problems = [];
 
 function add(file, line, kind, msg) {
@@ -96,8 +98,37 @@ for (const file of files) {
     }
 
     // 2. Título de página escrito a mano en lugar de <PageHeader>
-    if (isView && /<h[12]\b[^>]*class="[^"]*text-h[1-6]/.test(line)) {
+    if (isView && /<h[12]\b[^>]*class="[^"]*text-(?:h[1-6]|display-|headline-|title-)/.test(line)) {
       add(file, n, 'titulo', 'título de página a mano: usa <PageHeader :title="…" />');
+    }
+
+    // 2b. Tipografía de Vuetify 3. En la 4 (Material Design 3) esas clases ya no existen: el texto sale sin estilo y nadie se entera.
+    const md2 = line.match(/\btext-(?:(?:sm|md|lg|xl|xxl)-)?(h[1-6]|subtitle-[12]|body-[12]|caption|overline|button)\b/);
+    if (md2) {
+      const MD3 = {
+        h5: 'headline-small', h6: 'title-large', 'subtitle-1': 'body-large', 'body-1': 'body-large', 'subtitle-2': 'title-small',
+        'body-2': 'body-medium', caption: 'body-small', button: 'label-large', overline: 'label-medium',
+      };
+      const hint = MD3[md2[1]] ? `, usa text-${MD3[md2[1]]}` : '';
+      add(file, n, 'tipografia', `clase de Vuetify 3 text-${md2[1]}: no existe en Vuetify 4${hint} (docs/UI-UX.md §5)`);
+    }
+
+    // 2c. Fecha con el control del navegador: su idioma y sus colores son los del sistema operativo, no los del CRM.
+    //     Desde el 2026-11-06 ninguna pantalla lo usa: sin excepciones.
+    if (/\btype="date"/.test(line) && !/^\s*(\*|\/\/|<!--)/.test(line)) {
+      add(file, n, 'fecha', 'type="date" dibuja el calendario del navegador: usa <DateField> (components/ui/DateField.vue, UI-UX.md §1)');
+    }
+
+    // 2d. Avisos: un solo snackbar, el de App.vue (useNotify). Desde el 2026-11-06 no queda ninguno más: sin excepciones.
+    if (/<v-snackbar\b(?!-queue)/.test(line) && file !== 'src/App.vue') {
+      add(file, n, 'aviso', '<v-snackbar> propio: usa notify.success/error/undoable (composable/useNotify.ts, REGLAS-FRONT.md R-31)');
+    }
+
+    // 2e. Confirmaciones: nunca window.confirm (no sigue tema ni idioma). Un `confirm(` suelto es el del navegador salvo que el
+    //     archivo tenga el suyo: el de useConfirm, o una función propia que se llama así (la caja: «confirmar el cobro»).
+    const ownConfirm = src.includes('useConfirm') || /function confirm\(|const confirm\s*=/.test(src);
+    if (/window\.confirm\(/.test(line) || (/(^|[^.\w])confirm\(/.test(line) && !ownConfirm)) {
+      add(file, n, 'confirmar', 'confirm() del navegador: usa useConfirm() (composable/useConfirm.ts, REGLAS-FRONT.md R-22)');
     }
 
     // 3. Colores fijos
@@ -128,6 +159,27 @@ for (const file of files) {
   if (isView && /<style\b/.test(src)) {
     add(file, src.split('\n').findIndex((l) => /<style\b/.test(l)) + 1, 'estilo',
       '<style> en una vista: casi siempre hay una utilidad o prop de Vuetify que lo cubre');
+  }
+
+  // 6. Acción principal de un pie de tarjeta o diálogo. `v-card-actions` pone a sus botones en `variant="text"` POR ENCIMA de los
+  //    defaults globales (no se puede cambiar en vuetify.ts), así que el botón con color —la acción principal— debe decir
+  //    `variant="flat"` o saldría como un enlace (REGLAS-FRONT.md R-10, R-21). Se recorre la etiqueta entera: suele ocupar varias líneas.
+  for (let a = src.indexOf('<v-card-actions'); a >= 0; a = src.indexOf('<v-card-actions', a + 1)) {
+    const end = src.indexOf('</v-card-actions>', a);
+    if (end < 0) break;
+    for (let k = src.indexOf('<v-btn', a); k >= 0 && k < end; k = src.indexOf('<v-btn', k + 1)) {
+      let q = null;
+      let e = k + 6;
+      for (; e < end; e++) {
+        const c = src[e];
+        if (q) { if (c === q) q = null; } else if (c === '"' || c === "'") q = c; else if (c === '>') break;
+      }
+      const tag = src.slice(k, e + 1);
+      if (/\s:?color=/.test(tag) && !/\svariant=/.test(tag)) {
+        add(file, src.slice(0, k).split('\n').length, 'dialogo',
+          'botón con color en v-card-actions sin variant: v-card-actions lo pinta como texto; la acción principal lleva variant="flat"');
+      }
+    }
   }
 }
 

@@ -151,11 +151,11 @@ async function remove(linkId: string): Promise<void> {
           @update:model-value="(v: Option | null) => pick(v)"
         >
           <template #item="{ props: item, item: option }">
-            <v-list-item v-bind="item" :subtitle="option.raw.subtitle" />
+            <v-list-item v-bind="item" :subtitle="option.subtitle" />
           </template>
         </v-autocomplete>
       </v-card>
     </v-menu>
-    <span v-if="!store.detail?.links.length && !(props.canEdit && available.length)" class="text-body-2 text-medium-emphasis">—</span>
+    <span v-if="!store.detail?.links.length && !(props.canEdit && available.length)" class="text-body-medium text-medium-emphasis">—</span>
   </div>
 </template>

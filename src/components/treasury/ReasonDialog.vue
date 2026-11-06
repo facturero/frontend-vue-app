@@ -28,13 +28,13 @@ const ok = computed(() => reason.value.trim().length >= 5);
       <v-card-title>{{ title }}</v-card-title>
       <v-card-text>
         <v-alert v-if="serverError" type="error" class="mb-4">{{ serverError }}</v-alert>
-        <div class="text-body-2 text-medium-emphasis mb-3">{{ hint }}</div>
+        <div class="text-body-medium text-medium-emphasis mb-3">{{ hint }}</div>
         <v-textarea v-model="reason" :label="label" :hint="$t('treasury.banking.reasonHint')" persistent-hint rows="2" auto-grow maxlength="300" />
       </v-card-text>
       <v-card-actions class="flex-wrap ga-2">
         <v-spacer />
         <v-btn variant="text" @click="emit('update:modelValue', false)">{{ $t('common.cancel') }}</v-btn>
-        <v-btn :color="confirmColor ?? 'primary'" :loading="saving" :disabled="!ok" @click="emit('confirm', reason.trim())">{{ confirmLabel }}</v-btn>
+        <v-btn variant="flat" :color="confirmColor ?? 'primary'" :loading="saving" :disabled="!ok" @click="emit('confirm', reason.trim())">{{ confirmLabel }}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

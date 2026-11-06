@@ -35,6 +35,8 @@ import AuditLogView from '@/views/audit/AuditLogView.vue';
 import RestaurantTablesView from '@/views/restaurant/TablesView.vue';
 import RestaurantFloorPlanView from '@/views/restaurant/FloorPlanView.vue';
 import RestaurantScheduleView from '@/views/restaurant/ScheduleView.vue';
+import RestaurantReservationsView from '@/views/restaurant/ReservationsView.vue';
+import RestaurantReservationSettingsView from '@/views/restaurant/ReservationSettingsView.vue';
 import AccountingAccountsView from '@/views/accounting/AccountsView.vue';
 import AccountingJournalView from '@/views/accounting/JournalEntriesView.vue';
 import AccountingEntryView from '@/views/accounting/JournalEntryView.vue';
@@ -78,6 +80,7 @@ import PurchasingReceiptsView from '@/views/purchasing/ReceiptsListView.vue';
 import PurchasingBillsView from '@/views/purchasing/BillsListView.vue';
 import PurchasingBillFormView from '@/views/purchasing/BillFormView.vue';
 import PurchasingBillView from '@/views/purchasing/BillView.vue';
+import PurchasingReceivedDocumentsView from '@/views/purchasing/ReceivedDocumentsView.vue';
 import TaxWithholdingsView from '@/views/taxDocuments/WithholdingsView.vue';
 import TaxWithholdingFormView from '@/views/taxDocuments/WithholdingFormView.vue';
 import TaxDeliveryGuidesView from '@/views/taxDocuments/DeliveryGuidesView.vue';
@@ -349,6 +352,19 @@ const router = createRouter({
       component: RestaurantScheduleView,
       meta: { requiresAuth: true, requiredPermission: 'restaurant:read', requiredPlugin: 'restaurant.floorplan' },
     },
+    {
+      // Reservas del cliente (entregable 2): módulo y permiso aparte del mapa. Lista del día y ajustes de la página pública.
+      path: '/restaurant/reservations',
+      name: 'restaurant-reservations',
+      component: RestaurantReservationsView,
+      meta: { requiresAuth: true, requiredPermission: 'reservation:read', requiredPlugin: 'restaurant.reservations' },
+    },
+    {
+      path: '/restaurant/reservations/settings',
+      name: 'restaurant-reservation-settings',
+      component: RestaurantReservationSettingsView,
+      meta: { requiresAuth: true, requiredPermission: 'reservation:read', requiredPlugin: 'restaurant.reservations' },
+    },
 
     {
       // Compras (módulos `inventory.suppliers` y `purchasing.purchase_orders`): órdenes, sus recepciones, las facturas de compra
@@ -425,6 +441,12 @@ const router = createRouter({
       name: 'purchasing-suppliers',
       component: PurchasingSuppliersView,
       meta: { requiresAuth: true, requiredPermission: 'supplier:read', requiredPlugin: 'inventory.suppliers' },
+    },
+    {
+      path: '/purchasing/received-documents',
+      name: 'purchasing-received-documents',
+      component: PurchasingReceivedDocumentsView,
+      meta: { requiresAuth: true, requiredPermission: 'purchase:approve', requiredPlugin: 'purchasing.purchase_orders' },
     },
 
     // Tesorería (Fase 3): cartera de cuentas por cobrar. Todas detrás del módulo y de su permiso; lo que escribe pide el suyo.

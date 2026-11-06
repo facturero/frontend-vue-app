@@ -77,7 +77,7 @@ function onKeydown(event: KeyboardEvent): void {
       <slot name="activator" :props="menuProps" :current="current">
         <v-btn v-bind="menuProps" variant="text" class="px-2" :aria-label="$t('common.language')">
           <span v-if="current" :class="`fi fi-${current.flag}`" class="rounded-sm elevation-1 mr-2" />
-          <span class="text-body-2 font-weight-medium">{{ current?.nativeName }}</span>
+          <span class="text-body-medium font-weight-medium">{{ current?.nativeName }}</span>
           <v-icon icon="mdi-chevron-down" size="18" class="ml-1 text-medium-emphasis" />
         </v-btn>
       </slot>

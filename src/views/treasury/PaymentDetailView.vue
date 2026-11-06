@@ -6,6 +6,8 @@
  * aplicación queda en la historia y contabilidad reversa el asiento.
  */
 import { computed, onMounted, ref } from 'vue';
+import { formatDate, formatDateTime } from '@/utils/format';
+import { notify } from '@/composable/useNotify';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
@@ -30,11 +32,10 @@ const actions = computed(() =>
 );
 /** Quien no gestiona el umbral no lo conoce: si el servidor ya dijo que falta la aprobación (o el pago está aprobado) se muestra el aviso. */
 const needsApprovalNotice = computed(() => payment.value?.status === 'draft' && (actions.value.awaitingApproval || route.query.approval === '1'));
-const snackbar = ref<string | null>(null);
 const actionError = ref<string | null>(null);
 
 const money = (cents: number) => formatMoney(cents, locale.value, payment.value?.currencyCode ?? 'USD');
-const dateTime = (iso: string | null) => (iso ? new Date(iso).toLocaleString(locale.value) : '—');
+const dateTime = (iso: string | null) => formatDateTime(iso) || '—';
 
 onMounted(async () => {
   await store.fetchPayment(paymentId.value);
@@ -56,7 +57,7 @@ async function run(work: () => Promise<unknown>, doneMessage: () => string): Pro
   actionError.value = null;
   try {
     await work();
-    snackbar.value = doneMessage();
+    notify.success(doneMessage());
     if (store.currentPayment) await store.fetchSupplier(store.currentPayment.supplierId);
   } catch {
     actionError.value = store.error;
@@ -82,7 +83,7 @@ async function confirmVoid(): Promise<void> {
   try {
     await store.voidPayment(paymentId.value, reason.value.trim());
     voidDialog.value = false;
-    snackbar.value = t('treasury.payments.voidedDone');
+    notify.success(t('treasury.payments.voidedDone'));
     if (store.currentPayment) await store.fetchSupplier(store.currentPayment.supplierId);
   } catch {
     voidError.value = store.error;
@@ -118,53 +119,53 @@ async function confirmVoid(): Promise<void> {
       <v-row class="mb-2">
         <v-col cols="6" md="3">
           <v-card><v-card-text>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.payments.paid') }}</div>
-            <div class="text-h6">{{ money(payment.totalCents) }}</div>
-            <div class="text-body-2 text-medium-emphasis">{{ $t(`treasury.payments.accounts.${payment.accountRole}`) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.payments.paid') }}</div>
+            <div class="text-title-large">{{ money(payment.totalCents) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t(`treasury.payments.accounts.${payment.accountRole}`) }}</div>
           </v-card-text></v-card>
         </v-col>
         <v-col cols="6" md="3">
           <v-card><v-card-text>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.payments.applied') }}</div>
-            <div class="text-h6">{{ money(payment.appliedCents) }}</div>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.payments.lines', { n: payment.lineCount }) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.payments.applied') }}</div>
+            <div class="text-title-large">{{ money(payment.appliedCents) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.payments.lines', { n: payment.lineCount }) }}</div>
           </v-card-text></v-card>
         </v-col>
         <v-col cols="6" md="3">
           <v-card><v-card-text>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.payments.advanceUsed') }}</div>
-            <div class="text-h6">{{ money(payment.advanceUsedCents) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.payments.advanceUsed') }}</div>
+            <div class="text-title-large">{{ money(payment.advanceUsedCents) }}</div>
           </v-card-text></v-card>
         </v-col>
         <v-col cols="6" md="3">
           <v-card><v-card-text>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.payments.excess') }}</div>
-            <div class="text-h6">{{ money(payment.advanceCents) }}</div>
-            <div v-if="payment.advanceCents > 0" class="text-body-2 text-medium-emphasis">{{ $t('treasury.payments.becameAdvance') }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.payments.excess') }}</div>
+            <div class="text-title-large">{{ money(payment.advanceCents) }}</div>
+            <div v-if="payment.advanceCents > 0" class="text-body-medium text-medium-emphasis">{{ $t('treasury.payments.becameAdvance') }}</div>
           </v-card-text></v-card>
         </v-col>
       </v-row>
 
       <v-card class="mb-4">
-        <v-card-title class="d-flex flex-wrap align-center ga-2 text-h6">
+        <v-card-title class="d-flex flex-wrap align-center ga-2 text-title-large">
           {{ $t('treasury.payments.data') }}
           <v-chip :color="PAYMENT_STATUS_COLOR[payment.status]" variant="flat" size="small">{{ $t(`treasury.payments.status.${payment.status}`) }}</v-chip>
         </v-card-title>
         <v-card-text>
           <div class="d-flex flex-wrap ga-6">
-            <div><div class="text-body-2 text-medium-emphasis">{{ $t('treasury.payments.date') }}</div>{{ payment.paymentDate }}</div>
-            <div><div class="text-body-2 text-medium-emphasis">{{ $t('treasury.payments.method') }}</div>{{ $t(`treasury.payments.methods.${payment.method}`) }}</div>
-            <div v-if="payment.reference"><div class="text-body-2 text-medium-emphasis">{{ $t('treasury.payments.reference') }}</div>{{ payment.reference }}</div>
-            <div v-if="payment.notes"><div class="text-body-2 text-medium-emphasis">{{ $t('treasury.payments.notes') }}</div>{{ payment.notes }}</div>
+            <div><div class="text-body-medium text-medium-emphasis">{{ $t('treasury.payments.date') }}</div>{{ formatDate(payment.paymentDate) }}</div>
+            <div><div class="text-body-medium text-medium-emphasis">{{ $t('treasury.payments.method') }}</div>{{ $t(`treasury.payments.methods.${payment.method}`) }}</div>
+            <div v-if="payment.reference"><div class="text-body-medium text-medium-emphasis">{{ $t('treasury.payments.reference') }}</div>{{ payment.reference }}</div>
+            <div v-if="payment.notes"><div class="text-body-medium text-medium-emphasis">{{ $t('treasury.payments.notes') }}</div>{{ payment.notes }}</div>
           </div>
-          <div class="text-body-2 text-medium-emphasis mt-3">
+          <div class="text-body-medium text-medium-emphasis mt-3">
             {{ $t('treasury.payments.history', { created: dateTime(payment.createdAt), posted: dateTime(payment.postedAt) }) }}
           </div>
         </v-card-text>
       </v-card>
 
       <v-card class="mb-4">
-        <v-card-title class="text-h6">{{ $t('treasury.payments.appliedTo') }}</v-card-title>
+        <v-card-title class="text-title-large">{{ $t('treasury.payments.appliedTo') }}</v-card-title>
         <v-card-text>
           <div v-if="payment.lines.length === 0" class="text-medium-emphasis">{{ $t('treasury.payments.noLines') }}</div>
           <v-table v-else density="comfortable">
@@ -180,7 +181,7 @@ async function confirmVoid(): Promise<void> {
       </v-card>
 
       <v-card v-if="payment.advanceUses.length > 0">
-        <v-card-title class="text-h6">{{ $t('treasury.payments.advancesConsumed') }}</v-card-title>
+        <v-card-title class="text-title-large">{{ $t('treasury.payments.advancesConsumed') }}</v-card-title>
         <v-card-text>
           <v-table density="comfortable">
             <tbody>
@@ -199,17 +200,16 @@ async function confirmVoid(): Promise<void> {
         <v-card-title>{{ $t('treasury.payments.voidTitle', { number: payment?.number }) }}</v-card-title>
         <v-card-text>
           <v-alert v-if="voidError" type="error" class="mb-4">{{ voidError }}</v-alert>
-          <div class="text-body-2 text-medium-emphasis mb-3">{{ $t('treasury.payments.voidHint') }}</div>
+          <div class="text-body-medium text-medium-emphasis mb-3">{{ $t('treasury.payments.voidHint') }}</div>
           <v-textarea v-model="reason" :label="$t('treasury.payments.voidReason')" :hint="$t('treasury.payments.voidReasonHint')" persistent-hint rows="2" auto-grow maxlength="300" />
         </v-card-text>
         <v-card-actions class="flex-wrap ga-2">
           <v-spacer />
           <v-btn variant="text" @click="voidDialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="error" :loading="store.saving" :disabled="!reasonOk" @click="confirmVoid">{{ $t('treasury.payments.void') }}</v-btn>
+          <v-btn variant="flat" color="error" :loading="store.saving" :disabled="!reasonOk" @click="confirmVoid">{{ $t('treasury.payments.void') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <v-snackbar :model-value="snackbar !== null" timeout="3500" @update:model-value="snackbar = null">{{ snackbar }}</v-snackbar>
   </v-container>
 </template>

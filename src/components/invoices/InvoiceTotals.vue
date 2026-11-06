@@ -29,16 +29,16 @@ const totalDisplay = computed(() => {
 <template>
   <div class="d-flex justify-end mb-6">
     <div class="totals-block">
-      <div class="d-flex justify-space-between text-body-2 text-medium-emphasis py-1">
+      <div class="d-flex justify-space-between text-body-medium text-medium-emphasis py-1">
         <span>{{ $t('invoices.subtotal') }}</span>
         <span class="mono">{{ currencySymbol }}{{ store.current?.subtotal ?? '0.00' }}</span>
       </div>
-      <div class="d-flex justify-space-between text-body-2 text-medium-emphasis py-1">
+      <div class="d-flex justify-space-between text-body-medium text-medium-emphasis py-1">
         <span>{{ $t('invoices.taxTotal') }}</span>
         <span class="mono">{{ currencySymbol }}{{ taxTotalDisplay }}</span>
       </div>
       <v-divider class="my-2" />
-      <div class="d-flex justify-space-between text-h6 font-weight-bold">
+      <div class="d-flex justify-space-between text-title-large font-weight-bold">
         <span>{{ $t('invoices.totalDue') }}</span>
         <span class="mono">{{ currencySymbol }}{{ totalDisplay }}</span>
       </div>

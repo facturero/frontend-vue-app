@@ -117,9 +117,9 @@ const changeHeaders = computed(() => [
         <v-col v-for="[key, value] in summary" :key="key" cols="12" sm="6" md="3">
           <v-card>
             <v-card-text>
-              <div class="text-body-2 text-medium-emphasis">{{ metricLabel(key) }}</div>
-              <div class="text-h6">{{ metricValue(key, key === 'saldoCents' ? Math.abs(value) : value) }}</div>
-              <div v-if="key === 'saldoCents' && settlement" class="text-body-2">{{ $t(`reporting.result.${settlement.resultado}`) }}</div>
+              <div class="text-body-medium text-medium-emphasis">{{ metricLabel(key) }}</div>
+              <div class="text-title-large">{{ metricValue(key, key === 'saldoCents' ? Math.abs(value) : value) }}</div>
+              <div v-if="key === 'saldoCents' && settlement" class="text-body-medium">{{ $t(`reporting.result.${settlement.resultado}`) }}</div>
             </v-card-text>
           </v-card>
         </v-col>
@@ -132,12 +132,12 @@ const changeHeaders = computed(() => [
 
         <v-col cols="12">
           <v-card>
-            <v-card-title class="text-h6">
+            <v-card-title class="text-title-large">
               {{ detail.previous ? $t('reporting.changes.title', { version: detail.previous.version }) : $t('reporting.summary.title') }}
             </v-card-title>
             <v-card-text>
-              <p v-if="!detail.previous" class="text-body-2 text-medium-emphasis">{{ $t('reporting.changes.first') }}</p>
-              <p v-else-if="detail.changes.length === 0" class="text-body-2 text-medium-emphasis">{{ $t('reporting.changes.none') }}</p>
+              <p v-if="!detail.previous" class="text-body-medium text-medium-emphasis">{{ $t('reporting.changes.first') }}</p>
+              <p v-else-if="detail.changes.length === 0" class="text-body-medium text-medium-emphasis">{{ $t('reporting.changes.none') }}</p>
               <v-data-table v-else :headers="changeHeaders" :items="detail.changes" :items-per-page="-1" hide-default-footer>
                 <template #item.key="{ item }">{{ metricLabel(item.key) }}</template>
                 <template #item.previous="{ item }">{{ metricValue(item.key, item.previous) }}</template>
@@ -161,7 +161,7 @@ const changeHeaders = computed(() => [
         </v-col>
       </v-row>
 
-      <p class="text-body-2 text-medium-emphasis mt-4">{{ $t('reporting.detail.hash') }}: {{ run.contentHash.slice(0, 16) }}…</p>
+      <p class="text-body-medium text-medium-emphasis mt-4">{{ $t('reporting.detail.hash') }}: {{ run.contentHash.slice(0, 16) }}…</p>
     </template>
   </v-container>
 </template>

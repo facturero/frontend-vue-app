@@ -12,6 +12,11 @@ import AssistantPanel from '@/components/AssistantPanel.vue';
 import AppNavigationDrawer from '@/layouts/AppNavigationDrawer.vue';
 import AppTopBar from '@/layouts/AppTopBar.vue';
 import ReportProblemDialog from '@/components/ReportProblemDialog.vue';
+import ConfirmDialog from '@/components/ui/ConfirmDialog.vue';
+import { useNoticeQueue } from '@/composable/useNotify';
+
+// Avisos breves de toda la app (useNotify): este es el ÚNICO snackbar del CRM.
+const notices = useNoticeQueue();
 
 const route = useRoute();
 const router = useRouter();
@@ -106,5 +111,14 @@ watch(
 
     <!-- Fuera de los dos casos de arriba: también se reporta desde el login, donde están los errores más difíciles de ver. -->
     <ReportProblemDialog />
+
+    <!-- Piezas compartidas (REGLAS-FRONT.md §1): las confirmaciones de useConfirm y los avisos de useNotify, para toda la app. -->
+    <ConfirmDialog />
+    <v-snackbar-queue v-model="notices" location="bottom center">
+      <template #actions="{ item, props }">
+        <v-btn v-if="item['data-action-text']" variant="text" @click="item.onAction?.(); props.onClick()">{{ item['data-action-text'] }}</v-btn>
+        <v-btn icon="mdi-close" variant="text" size="small" :aria-label="$t('common.close')" @click="props.onClick()" />
+      </template>
+    </v-snackbar-queue>
   </v-app>
 </template>

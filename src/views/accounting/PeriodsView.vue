@@ -5,6 +5,8 @@
  * abierto…).
  */
 import { computed, onMounted, ref } from 'vue';
+import { formatDate } from '@/utils/format';
+import { notify } from '@/composable/useNotify';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { useAccountingStore } from '@/stores/accounting';
@@ -20,7 +22,6 @@ const store = useAccountingStore();
 const canManage = computed(() => auth.can('period:manage'));
 const loadError = ref<string | null>(null);
 const actionError = ref<string | null>(null);
-const snackbar = ref<string | null>(null);
 const yearDialog = ref(false);
 const newYear = ref(new Date().getFullYear() + 1);
 
@@ -47,7 +48,7 @@ async function toggle(period: Period): Promise<void> {
   try {
     if (period.status === 'open') await store.closePeriod(period.id);
     else await store.reopenPeriod(period.id);
-    snackbar.value = period.status === 'open' ? t('accounting.periods.closedDone') : t('accounting.periods.reopenedDone');
+    notify.success(period.status === 'open' ? t('accounting.periods.closedDone') : t('accounting.periods.reopenedDone'));
   } catch {
     actionError.value = store.error;
   }
@@ -58,7 +59,7 @@ async function createYear(): Promise<void> {
   try {
     await store.createYear(newYear.value);
     yearDialog.value = false;
-    snackbar.value = t('accounting.periods.yearCreated');
+    notify.success(t('accounting.periods.yearCreated'));
   } catch {
     yearDialog.value = false;
     actionError.value = store.error;
@@ -102,7 +103,7 @@ async function createYear(): Promise<void> {
             <tbody>
               <tr v-for="p in fy.periods" :key="p.id">
                 <td>{{ monthLabel(p.startDate) }}</td>
-                <td class="text-medium-emphasis">{{ p.startDate }} – {{ p.endDate }}</td>
+                <td class="text-medium-emphasis">{{ formatDate(p.startDate) }} – {{ formatDate(p.endDate) }}</td>
                 <td>
                   <v-chip size="x-small" variant="flat" :color="p.status === 'open' ? 'lightsuccess' : 'lightsecondary'">
                     {{ p.status === 'open' ? $t('accounting.periods.open') : $t('accounting.periods.closed') }}
@@ -129,11 +130,10 @@ async function createYear(): Promise<void> {
         <v-card-actions class="flex-wrap ga-2">
           <v-spacer />
           <v-btn variant="text" @click="yearDialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="primary" :loading="store.saving" @click="createYear">{{ $t('common.create') }}</v-btn>
+          <v-btn variant="flat" color="primary" :loading="store.saving" @click="createYear">{{ $t('common.create') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <v-snackbar :model-value="!!snackbar" timeout="3000" @update:model-value="snackbar = null">{{ snackbar }}</v-snackbar>
   </v-container>
 </template>

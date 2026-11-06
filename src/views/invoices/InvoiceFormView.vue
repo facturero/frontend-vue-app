@@ -177,20 +177,20 @@ onMounted(async () => {
     </v-alert>
 
     <v-card v-if="!loadError">
-      <v-card-title class="text-h6 pa-6 pb-0">
+      <v-card-title class="text-title-large pa-6 pb-0">
         {{ $t('invoices.detailsTitle') }}
       </v-card-title>
 
       <v-card-text class="pa-6">
-        <div class="text-body-2 text-medium-emphasis mb-6">
+        <div class="text-body-medium text-medium-emphasis mb-6">
           {{ $t('invoices.folioLabel') }} {{ folioLabel }} · {{ $t('common.date') }}: {{ today }}
         </div>
 
         <!-- Emisor / cliente / estado -->
         <v-sheet color="grey100" rounded="lg" class="pa-4 mb-6">
-          <v-row dense>
+          <v-row density="compact">
             <v-col cols="12" md="4">
-              <div class="text-caption text-medium-emphasis mb-1">{{ $t('invoices.issuer') }}</div>
+              <div class="text-body-small text-medium-emphasis mb-1">{{ $t('invoices.issuer') }}</div>
               <div class="font-weight-medium">{{ issuerName }}</div>
             </v-col>
             <v-col cols="12" md="5">
@@ -215,11 +215,11 @@ onMounted(async () => {
         </v-sheet>
 
         <!-- Líneas -->
-        <div class="text-subtitle-2 font-weight-medium mb-2">{{ $t('invoices.lines') }}</div>
+        <div class="text-title-small font-weight-medium mb-2">{{ $t('invoices.lines') }}</div>
 
         <InvoiceLinesEditor :disabled="!hasCustomer" />
 
-        <p v-if="!hasCustomer" class="text-caption text-medium-emphasis mb-6">
+        <p v-if="!hasCustomer" class="text-body-small text-medium-emphasis mb-6">
           {{ $t('invoices.confirmCustomerFirst') }}
         </p>
 

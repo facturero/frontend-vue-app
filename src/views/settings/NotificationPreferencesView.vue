@@ -91,7 +91,7 @@ async function saveAll(): Promise<void> {
     <PageHeader v-if="!props.embedded" :title="$t('notificationPrefs.title')" />
 
     <v-sheet color="transparent" class="mb-2">
-      <p class="text-body-2 text-medium-emphasis">{{ $t('notificationPrefs.legend') }}</p>
+      <p class="text-body-medium text-medium-emphasis">{{ $t('notificationPrefs.legend') }}</p>
     </v-sheet>
 
     <v-alert v-if="store.error" type="error" class="mb-4">
@@ -108,7 +108,7 @@ async function saveAll(): Promise<void> {
     <v-card v-else-if="groups.length === 0" class="mb-4">
       <v-card-text class="pa-6 d-flex align-center ga-2">
         <v-icon icon="mdi-bell-off-outline" color="lightinfo" />
-        <span class="text-body-2 text-medium-emphasis">{{ $t('notificationPrefs.noProviders') }}</span>
+        <span class="text-body-medium text-medium-emphasis">{{ $t('notificationPrefs.noProviders') }}</span>
       </v-card-text>
     </v-card>
 
@@ -123,14 +123,14 @@ async function saveAll(): Promise<void> {
 
     <!-- Matriz por plugin: una tarjeta por grupo (Moodle). -->
     <v-card v-for="group in groups" :key="group.pluginCode" class="mb-4">
-      <v-card-title class="text-h6 py-2 px-4 d-flex align-center ga-2">
+      <v-card-title class="text-title-large py-2 px-4 d-flex align-center ga-2">
         <v-icon :icon="'mdi-puzzle'" color="lightprimary" size="x-small" />
         <span>{{ group.pluginName }}</span>
       </v-card-title>
       <v-divider />
       <v-list>
         <v-list-item v-for="p in group.providers" :key="p.code">
-          <v-list-item-title class="text-body-1">{{ $t(p.nameKey) }}</v-list-item-title>
+          <v-list-item-title class="text-body-large">{{ $t(p.nameKey) }}</v-list-item-title>
           <v-list-item-subtitle>{{ $t(p.descriptionKey) }}</v-list-item-subtitle>
 
           <template #append>

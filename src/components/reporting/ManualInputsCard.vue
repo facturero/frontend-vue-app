@@ -56,10 +56,10 @@ async function save(code: string): Promise<void> {
 
 <template>
   <v-card v-if="fields.length > 0">
-    <v-card-title class="text-h6">{{ $t('reporting.manual.title') }}</v-card-title>
+    <v-card-title class="text-title-large">{{ $t('reporting.manual.title') }}</v-card-title>
     <v-card-text>
-      <p class="text-body-2 text-medium-emphasis mb-4">{{ $t('reporting.manual.intro') }}</p>
-      <v-row v-for="code in fields" :key="code" align="start">
+      <p class="text-body-medium text-medium-emphasis mb-4">{{ $t('reporting.manual.intro') }}</p>
+      <v-row class="align-start" v-for="code in fields" :key="code">
         <v-col cols="12" md="7">
           <v-text-field
             v-model="texts[code]"

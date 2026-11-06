@@ -4,6 +4,8 @@
  * física contra la que se concilian las facturas; la recepción no se edita (si hubo error, se corrige con un ajuste de inventario).
  */
 import { computed, onMounted, ref, watch } from 'vue';
+import { formatDate } from '@/utils/format';
+import DateField from '@/components/ui/DateField.vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { usePurchasingStore } from '@/stores/purchasing';
@@ -24,7 +26,7 @@ const pages = computed(() => Math.max(1, Math.ceil(store.receiptsTotal / store.p
 
 const headers = computed(() => [
   { title: t('purchasing.receipts.number'), key: 'number', sortable: false, align: 'start' as const },
-  { title: t('purchasing.receipts.date'), key: 'receiptDate', sortable: false, align: 'start' as const },
+  { title: t('purchasing.receipts.date'), key: 'receiptDate', value: (item: Record<string, unknown>) => formatDate(item.receiptDate as string), sortable: false, align: 'start' as const },
   { title: t('purchasing.receipts.supplier'), key: 'supplierId', sortable: false, align: 'start' as const },
   { title: t('purchasing.receipts.ref'), key: 'supplierDeliveryRef', sortable: false, align: 'start' as const },
   { title: t('purchasing.receipts.lines'), key: 'lineCount', sortable: false, align: 'end' as const },
@@ -80,10 +82,10 @@ async function open(receipt: GoodsReceipt): Promise<void> {
             <v-autocomplete v-model="supplierId" :items="supplierItems" :label="$t('purchasing.receipts.supplier')" clearable />
           </v-col>
           <v-col cols="6" sm="3" md="2">
-            <v-text-field v-model="from" type="date" :label="$t('purchasing.orders.from')" />
+            <DateField v-model="from" :max="to" :label="$t('purchasing.orders.from')" />
           </v-col>
           <v-col cols="6" sm="3" md="2">
-            <v-text-field v-model="to" type="date" :label="$t('purchasing.orders.to')" />
+            <DateField v-model="to" :min="from" :label="$t('purchasing.orders.to')" />
           </v-col>
         </v-row>
 
@@ -125,19 +127,19 @@ async function open(receipt: GoodsReceipt): Promise<void> {
           <template v-if="store.currentReceipt">
             <v-row class="mb-2">
               <v-col cols="12" sm="4">
-                <div class="text-body-2 text-medium-emphasis">{{ $t('purchasing.receipts.number') }}</div>
+                <div class="text-body-medium text-medium-emphasis">{{ $t('purchasing.receipts.number') }}</div>
                 <div>{{ store.currentReceipt.number }}</div>
               </v-col>
               <v-col cols="6" sm="4">
-                <div class="text-body-2 text-medium-emphasis">{{ $t('purchasing.receipts.date') }}</div>
-                <div>{{ store.currentReceipt.receiptDate }}</div>
+                <div class="text-body-medium text-medium-emphasis">{{ $t('purchasing.receipts.date') }}</div>
+                <div>{{ formatDate(store.currentReceipt.receiptDate) }}</div>
               </v-col>
               <v-col cols="6" sm="4">
-                <div class="text-body-2 text-medium-emphasis">{{ $t('purchasing.receipts.ref') }}</div>
+                <div class="text-body-medium text-medium-emphasis">{{ $t('purchasing.receipts.ref') }}</div>
                 <div>{{ store.currentReceipt.supplierDeliveryRef ?? '—' }}</div>
               </v-col>
               <v-col v-if="store.currentReceipt.notes" cols="12">
-                <div class="text-body-2 text-medium-emphasis">{{ $t('common.notes') }}</div>
+                <div class="text-body-medium text-medium-emphasis">{{ $t('common.notes') }}</div>
                 <div>{{ store.currentReceipt.notes }}</div>
               </v-col>
             </v-row>

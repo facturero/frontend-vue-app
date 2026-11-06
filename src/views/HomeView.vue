@@ -126,7 +126,7 @@ onMounted(async () => {
       @click:close="plugins.lastBatchResults = null"
     >
       <template #title>{{ $t('home.batchResults.title') }}</template>
-      <div class="text-body-2">
+      <div class="text-body-medium">
         {{
           $t('home.batchResults.summary', {
             activated: plugins.lastBatchResults.filter((r) => r.result === 'activated').length,
@@ -134,7 +134,7 @@ onMounted(async () => {
           })
         }}
       </div>
-      <ul v-if="plugins.lastBatchResults.some((r) => r.result !== 'activated')" class="ml-4 text-caption">
+      <ul v-if="plugins.lastBatchResults.some((r) => r.result !== 'activated')" class="ml-4 text-body-small">
         <li v-for="r in plugins.lastBatchResults.filter((r) => r.result !== 'activated')" :key="r.code">
           {{ r.code }}
           — {{ $t(`home.batchResults.reasons.${r.result}`) }}
@@ -142,13 +142,13 @@ onMounted(async () => {
       </ul>
     </v-alert>
 
-    <v-row v-if="loading" dense>
+    <v-row v-if="loading" density="compact">
       <v-col cols="12" class="text-center py-12">
         <v-progress-circular indeterminate color="primary" />
       </v-col>
     </v-row>
 
-    <v-row v-else dense>
+    <v-row v-else density="compact">
       <v-col v-for="c in cards" :key="c.key" cols="12" sm="6" lg="3">
         <v-card class="fill-height">
           <v-card-text>
@@ -157,8 +157,8 @@ onMounted(async () => {
                 <v-icon :icon="c.icon" :color="c.fg" size="26" />
               </v-sheet>
               <div>
-                <div class="text-body-2 text-medium-emphasis">{{ c.label }}</div>
-                <div class="text-h5 font-weight-bold">{{ c.value }}</div>
+                <div class="text-body-medium text-medium-emphasis">{{ c.label }}</div>
+                <div class="text-headline-small font-weight-bold">{{ c.value }}</div>
               </div>
             </div>
           </v-card-text>
@@ -168,12 +168,12 @@ onMounted(async () => {
 
     <v-card class="mt-6">
       <v-card-text>
-        <div class="text-h6 font-weight-bold mb-1">
+        <div class="text-title-large font-weight-bold mb-1">
           <i18n-t keypath="home.welcome" tag="span">
             <template #org>{{ auth.user && 'orgName' in auth.user ? (auth.user.orgName || auth.user.email) : auth.user?.email }}</template>
           </i18n-t>
         </div>
-        <i18n-t keypath="home.today" tag="span" class="text-body-2 text-medium-emphasis">
+        <i18n-t keypath="home.today" tag="span" class="text-body-medium text-medium-emphasis">
           <template #date>{{ todayLabel }}</template>
         </i18n-t>
       </v-card-text>

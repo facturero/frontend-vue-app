@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { fileUrl } from '@/composable/useFileUrl';
+import { formatDate } from '@/utils/format';
+import { useConfirm } from '@/composable/useConfirm';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -10,7 +12,8 @@ import { productApi } from '@/api/products';
 import ImageUploader from '@/components/ImageUploader.vue';
 import PageHeader from '@/components/ui/PageHeader.vue';
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
+const confirm = useConfirm();
 const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
@@ -65,7 +68,7 @@ const uploading = ref(false);
 const uploadError = ref<string | null>(null);
 
 async function disable(): Promise<void> {
-  if (!confirm(t('products.deactivateConfirm'))) return;
+  if (!(await confirm({ title: t('products.deactivateConfirm'), destructive: true }))) return;
   disabling.value = true;
   try {
     await store.disable(productId.value);
@@ -98,7 +101,7 @@ async function uploadImages(): Promise<void> {
 }
 
 async function removeImage(imageId: string): Promise<void> {
-  if (!confirm(t('products.removeImageConfirm'))) return;
+  if (!(await confirm({ title: t('products.removeImageConfirm'), confirmText: t('common.delete'), destructive: true }))) return;
   try {
     await productApi.removeImage(productId.value, imageId);
     await store.fetchById(productId.value);
@@ -181,25 +184,25 @@ onMounted(async () => {
       <v-row>
         <v-col cols="12" md="8">
           <v-card class="mb-4">
-            <v-card-title class="text-h6">{{ $t('common.generalInfo') }}</v-card-title>
+            <v-card-title class="text-title-large">{{ $t('common.generalInfo') }}</v-card-title>
             <v-card-text>
               <v-row>
                 <v-col cols="6">
-                  <p class="text-caption text-medium-emphasis">{{ $t('common.name') }}</p>
-                  <p class="text-body-1 mb-3">{{ product.name }}</p>
+                  <p class="text-body-small text-medium-emphasis">{{ $t('common.name') }}</p>
+                  <p class="text-body-large mb-3">{{ product.name }}</p>
                 </v-col>
                 <v-col cols="6">
-                  <p class="text-caption text-medium-emphasis">SKU</p>
-                  <p class="text-body-1 mb-3">{{ product.sku || '—' }}</p>
+                  <p class="text-body-small text-medium-emphasis">SKU</p>
+                  <p class="text-body-large mb-3">{{ product.sku || '—' }}</p>
                 </v-col>
                 <v-col cols="6">
-                  <p class="text-caption text-medium-emphasis">{{ $t('common.type') }}</p>
+                  <p class="text-body-small text-medium-emphasis">{{ $t('common.type') }}</p>
                   <v-chip size="x-small" color="info" class="mb-3">
                     {{ product.type === 'good' ? $t('products.good') : $t('products.service') }}
                   </v-chip>
                 </v-col>
                 <v-col cols="6">
-                  <p class="text-caption text-medium-emphasis">{{ $t('common.status') }}</p>
+                  <p class="text-body-small text-medium-emphasis">{{ $t('common.status') }}</p>
                   <v-chip
                     size="x-small"
                     :color="product.status === 'active' ? 'success' : 'warning'"
@@ -209,31 +212,31 @@ onMounted(async () => {
                   </v-chip>
                 </v-col>
                 <v-col cols="6">
-                  <p class="text-caption text-medium-emphasis">{{ $t('products.price') }}</p>
-                  <p class="text-body-1 mb-3">
+                  <p class="text-body-small text-medium-emphasis">{{ $t('products.price') }}</p>
+                  <p class="text-body-large mb-3">
                     {{ product.currencyCode }} {{ product.price }}
-                    <span v-if="product.priceIncludesTax" class="text-caption text-medium-emphasis">{{
+                    <span v-if="product.priceIncludesTax" class="text-body-small text-medium-emphasis">{{
                       $t('products.priceIncludesTaxShort') }}</span>
                   </p>
                 </v-col>
                 <v-col cols="6">
-                  <p class="text-caption text-medium-emphasis">{{ $t('products.currency') }}</p>
-                  <p class="text-body-1 mb-3">{{ product.currencyCode }}</p>
+                  <p class="text-body-small text-medium-emphasis">{{ $t('products.currency') }}</p>
+                  <p class="text-body-large mb-3">{{ product.currencyCode }}</p>
                 </v-col>
                 <v-col cols="12">
-                  <p class="text-caption text-medium-emphasis">{{ $t('products.category') }}</p>
-                  <p class="text-body-1 mb-3">{{ product.categoryId || '—' }}</p>
+                  <p class="text-body-small text-medium-emphasis">{{ $t('products.category') }}</p>
+                  <p class="text-body-large mb-3">{{ product.categoryId || '—' }}</p>
                 </v-col>
                 <v-col cols="12">
-                  <p class="text-caption text-medium-emphasis">{{ $t('common.description') }}</p>
-                  <p class="text-body-1 mb-3">{{ product.description || $t('products.noDescription') }}</p>
+                  <p class="text-body-small text-medium-emphasis">{{ $t('common.description') }}</p>
+                  <p class="text-body-large mb-3">{{ product.description || $t('products.noDescription') }}</p>
                 </v-col>
               </v-row>
             </v-card-text>
           </v-card>
 
           <v-card class="mb-4">
-            <v-card-title class="text-h6">{{ $t('products.taxes') }}</v-card-title>
+            <v-card-title class="text-title-large">{{ $t('products.taxes') }}</v-card-title>
             <v-card-text>
               <v-table v-if="product.taxes.length > 0">
                 <thead>
@@ -253,12 +256,12 @@ onMounted(async () => {
                   </tr>
                 </tbody>
               </v-table>
-              <p v-else class="text-body-2 text-medium-emphasis">{{ $t('products.noTaxes') }}</p>
+              <p v-else class="text-body-medium text-medium-emphasis">{{ $t('products.noTaxes') }}</p>
             </v-card-text>
           </v-card>
 
           <v-card class="mb-4">
-            <v-card-title class="text-h6">{{ $t('products.establishments') }}</v-card-title>
+            <v-card-title class="text-title-large">{{ $t('products.establishments') }}</v-card-title>
             <v-card-text>
               <div v-if="productEstablishments.length > 0" class="d-flex flex-wrap ga-2">
                 <v-chip
@@ -271,12 +274,12 @@ onMounted(async () => {
                   {{ est.code }} — {{ est.name }}
                 </v-chip>
               </div>
-              <p v-else class="text-body-2 text-medium-emphasis">{{ $t('products.noEstablishments') }}</p>
+              <p v-else class="text-body-medium text-medium-emphasis">{{ $t('products.noEstablishments') }}</p>
             </v-card-text>
           </v-card>
 
           <v-card class="mb-4">
-            <v-card-title class="text-h6">{{ $t('common.images') }}</v-card-title>
+            <v-card-title class="text-title-large">{{ $t('common.images') }}</v-card-title>
             <v-card-text>
               <div v-if="product.images.length > 0" class="d-flex flex-wrap ga-3 mb-4">
                 <v-hover
@@ -338,11 +341,11 @@ onMounted(async () => {
                   </div>
                 </v-hover>
               </div>
-              <p v-else class="text-body-2 text-medium-emphasis mb-4">{{ $t('products.noImages') }}</p>
+              <p v-else class="text-body-medium text-medium-emphasis mb-4">{{ $t('products.noImages') }}</p>
 
               <v-divider class="mb-4" />
 
-              <p class="text-body-2 text-medium-emphasis mb-2">{{ $t('products.addImages') }}</p>
+              <p class="text-body-medium text-medium-emphasis mb-2">{{ $t('products.addImages') }}</p>
               <ImageUploader
                 ref="imageUploaderRef"
                 resource-type="product"
@@ -371,12 +374,12 @@ onMounted(async () => {
 
         <v-col cols="12" md="4">
           <v-card>
-            <v-card-title class="text-h6">{{ $t('common.metadata') }}</v-card-title>
+            <v-card-title class="text-title-large">{{ $t('common.metadata') }}</v-card-title>
             <v-card-text>
-              <p class="text-caption text-medium-emphasis">{{ $t('common.createdAt') }}</p>
-              <p class="text-body-2 mb-3">{{ new Date(product.createdAt).toLocaleDateString(locale) }}</p>
-              <p class="text-caption text-medium-emphasis">{{ $t('common.updatedAt') }}</p>
-              <p class="text-body-2">{{ new Date(product.updatedAt).toLocaleDateString(locale) }}</p>
+              <p class="text-body-small text-medium-emphasis">{{ $t('common.createdAt') }}</p>
+              <p class="text-body-medium mb-3">{{ formatDate(product.createdAt) }}</p>
+              <p class="text-body-small text-medium-emphasis">{{ $t('common.updatedAt') }}</p>
+              <p class="text-body-medium">{{ formatDate(product.updatedAt) }}</p>
             </v-card-text>
           </v-card>
         </v-col>

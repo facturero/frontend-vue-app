@@ -66,7 +66,7 @@ function toggleMode(): void {
           <v-avatar color="primary" size="38" rounded="lg">
             <v-icon icon="mdi-shield-lock-outline" size="22" />
           </v-avatar>
-          <span class="text-h6 font-weight-bold">CRM</span>
+          <span class="text-title-large font-weight-bold">CRM</span>
         </div>
 
         <v-img
@@ -89,8 +89,8 @@ function toggleMode(): void {
           <LocaleSwitcher />
         </div>
 
-        <h1 class="text-h5 font-weight-bold">{{ t('auth.welcomeTitle') }}</h1>
-        <p class="text-body-2 text-medium-emphasis mt-1 mb-6">
+        <h1 class="text-headline-small font-weight-bold">{{ t('auth.welcomeTitle') }}</h1>
+        <p class="text-body-medium text-medium-emphasis mt-1 mb-6">
           {{ t('auth.welcomeSubtitle') }}
         </p>
 
@@ -108,7 +108,7 @@ function toggleMode(): void {
 
         <v-form class="d-flex flex-column ga-6" @submit.prevent="submit">
           <div>
-            <v-label for="auth-email" class="text-body-2 font-weight-medium mb-2">
+            <v-label for="auth-email" class="text-body-medium font-weight-medium mb-2">
               {{ t('auth.email') }}
             </v-label>
             <v-text-field
@@ -120,14 +120,14 @@ function toggleMode(): void {
           </div>
 
           <div v-if="!isLogin">
-            <v-label for="auth-identification" class="text-body-2 font-weight-medium mb-2">
+            <v-label for="auth-identification" class="text-body-medium font-weight-medium mb-2">
               {{ t('auth.idNumberLabel') }}
             </v-label>
             <v-text-field id="auth-identification" v-model="identification" />
           </div>
 
           <div>
-            <v-label for="auth-password" class="text-body-2 font-weight-medium mb-2">
+            <v-label for="auth-password" class="text-body-medium font-weight-medium mb-2">
               {{ t('auth.password') }}
             </v-label>
             <v-text-field
@@ -141,7 +141,7 @@ function toggleMode(): void {
           </div>
 
           <div v-if="!isLogin">
-            <v-label for="auth-confirm-password" class="text-body-2 font-weight-medium mb-2">
+            <v-label for="auth-confirm-password" class="text-body-medium font-weight-medium mb-2">
               {{ t('auth.confirmPassword') }}
             </v-label>
             <v-text-field
@@ -158,7 +158,7 @@ function toggleMode(): void {
             <v-checkbox v-model="rememberDevice" :label="t('auth.rememberDevice')" />
             <a
               href="#"
-              class="text-primary text-body-2 font-weight-medium text-decoration-none ml-auto"
+              class="text-primary text-body-medium font-weight-medium text-decoration-none ml-auto"
               @click.prevent
             >
               {{ t('auth.forgotPassword') }}
@@ -171,7 +171,7 @@ function toggleMode(): void {
         </v-form>
 
         <div class="d-flex flex-wrap align-center ga-1 mt-6">
-          <span class="text-body-2 font-weight-medium">
+          <span class="text-body-medium font-weight-medium">
             {{ isLogin ? t('auth.notRegisteredYet') : t('auth.alreadyRegistered') }}
           </span>
           <v-btn variant="plain" color="primary" density="comfortable" @click="toggleMode">

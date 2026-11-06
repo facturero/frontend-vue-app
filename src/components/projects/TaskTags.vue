@@ -76,12 +76,12 @@ async function remove(tagId: string): Promise<void> {
         >
           <template #item="{ props: item, item: option }">
             <v-list-item v-bind="item">
-              <template #prepend><v-icon :color="option.raw.color" icon="mdi-tag" /></template>
+              <template #prepend><v-icon :color="option.color" icon="mdi-tag" /></template>
             </v-list-item>
           </template>
         </v-combobox>
       </v-card>
     </v-menu>
-    <span v-if="!current.length && !props.canEdit" class="text-body-2 text-medium-emphasis">—</span>
+    <span v-if="!current.length && !props.canEdit" class="text-body-medium text-medium-emphasis">—</span>
   </div>
 </template>

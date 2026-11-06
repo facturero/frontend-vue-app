@@ -157,7 +157,7 @@ function confirmDuplicate(): void {
   <v-sheet class="pa-4 d-flex flex-column ga-3 flex-shrink-0" style="min-width: 320px">
     <!-- Mesa -->
     <template v-if="kind === 'table' && store.selectedTable">
-      <div class="text-h6">{{ $t('restaurant.inspector.table') }}</div>
+      <div class="text-title-large">{{ $t('restaurant.inspector.table') }}</div>
       <v-text-field
         v-model="form.name"
         :label="$t('restaurant.inspector.name')"
@@ -218,7 +218,7 @@ function confirmDuplicate(): void {
           @change="patchTable({ heightCm: Number($event) })"
         />
       </div>
-      <div class="text-body-2 text-medium-emphasis">
+      <div class="text-body-medium text-medium-emphasis">
         {{ $t('restaurant.inspector.position') }}: {{ Math.round(store.selectedTable.xCm ?? 0) }},
         {{ Math.round(store.selectedTable.yCm ?? 0) }} cm · {{ $t('restaurant.inspector.rotation') }}:
         {{ store.selectedTable.rotationDeg }}°
@@ -241,14 +241,14 @@ function confirmDuplicate(): void {
 
     <!-- Zona -->
     <template v-else-if="kind === 'zone' && store.selectedZone">
-      <div class="text-h6">{{ $t('restaurant.inspector.zone') }}</div>
+      <div class="text-title-large">{{ $t('restaurant.inspector.zone') }}</div>
       <v-text-field
         v-model="form.name"
         :label="$t('restaurant.inspector.name')"
         :disabled="!canManage"
         @change="commitName"
       />
-      <div class="text-body-2 text-medium-emphasis">{{ $t('restaurant.inspector.color') }}</div>
+      <div class="text-body-medium text-medium-emphasis">{{ $t('restaurant.inspector.color') }}</div>
       <div class="d-flex ga-1 flex-wrap">
         <v-btn
           v-for="color in ZONE_COLORS"
@@ -267,7 +267,7 @@ function confirmDuplicate(): void {
 
     <!-- Elemento -->
     <template v-else-if="kind === 'element' && store.selectedElement">
-      <div class="text-h6">{{ $t('restaurant.inspector.element') }}</div>
+      <div class="text-title-large">{{ $t('restaurant.inspector.element') }}</div>
 
       <template v-if="store.selectedElement.type === 'door'">
         <v-text-field
@@ -299,7 +299,7 @@ function confirmDuplicate(): void {
       </template>
 
       <template v-else>
-        <div class="text-body-2 text-medium-emphasis">
+        <div class="text-body-medium text-medium-emphasis">
           {{ $t('restaurant.inspector.length') }}:
           {{
             formatMeters(
@@ -310,7 +310,7 @@ function confirmDuplicate(): void {
             )
           }}
         </div>
-        <div v-if="canManage" class="text-caption text-medium-emphasis">{{ $t('restaurant.inspector.wallDragHint') }}</div>
+        <div v-if="canManage" class="text-body-small text-medium-emphasis">{{ $t('restaurant.inspector.wallDragHint') }}</div>
       </template>
 
       <v-btn
@@ -326,12 +326,12 @@ function confirmDuplicate(): void {
 
     <!-- Nada seleccionado: se ofrecen las medidas del local. -->
     <template v-else>
-      <div class="text-body-2 text-medium-emphasis">{{ $t('restaurant.inspector.empty') }}</div>
+      <div class="text-body-medium text-medium-emphasis">{{ $t('restaurant.inspector.empty') }}</div>
       <!-- Las medidas del local: una tarjeta propia, con un campo debajo del otro (lado a lado quedaban apretados en 340 px). -->
       <v-sheet border class="pa-4 d-flex flex-column ga-4">
         <div>
-          <div class="text-h6">{{ $t('restaurant.inspector.floorSize') }}</div>
-          <div class="text-body-2 text-medium-emphasis">{{ $t('restaurant.inspector.floorSizeHint') }}</div>
+          <div class="text-title-large">{{ $t('restaurant.inspector.floorSize') }}</div>
+          <div class="text-body-medium text-medium-emphasis">{{ $t('restaurant.inspector.floorSizeHint') }}</div>
         </div>
         <v-text-field
           v-model.number="form.floorWidthM"
@@ -355,7 +355,7 @@ function confirmDuplicate(): void {
           :disabled="!canManage"
           @change="commitFloorSize"
         />
-        <div v-if="floorAreaM2 > 0" class="text-subtitle-1 font-weight-medium">
+        <div v-if="floorAreaM2 > 0" class="text-body-large font-weight-medium">
           {{ $t('restaurant.inspector.area', { area: floorAreaText }) }}
         </div>
       </v-sheet>
@@ -373,7 +373,7 @@ function confirmDuplicate(): void {
 
     <template v-if="issues.length">
       <v-divider />
-      <div class="text-subtitle-2">{{ $t('restaurant.plan.issues.title') }}</div>
+      <div class="text-title-small">{{ $t('restaurant.plan.issues.title') }}</div>
       <!-- Cada aviso va en su `div`: `v-alert` trae `flex: 1 1 0%` y, directo en una columna flex, se encoge a 0 o se estira a todo el alto. -->
       <div v-for="issue in issues" :key="issue.key">
         <v-alert type="warning">

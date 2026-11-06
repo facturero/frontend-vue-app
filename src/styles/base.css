@@ -1,0 +1,40 @@
+/*
+ * Estilos base de la app sobre Vuetify 4 (reemplazan a la compatibilidad con la 3 que hubo durante la migración, ver
+ * docs/MIGRACION-VUETIFY-4.md paso 5). Son decisiones, no parches: cada bloque dice por qué existe.
+ *
+ * Todo va en la capa `vuetify-core.reset`, la más baja: cualquier clase de Vuetify, utilidad o estilo propio sin capa le gana. Se
+ * importa en main.ts DESPUÉS de los estilos de Vuetify, para que la capa ya exista y estos bloques solo se sumen a ella.
+ */
+
+/* 1. Sin márgenes de navegador en títulos, párrafos y listas (el reset selectivo que recomienda la guía de Vuetify 4).
+ *    Las vistas se escribieron así: el espacio entre bloques lo ponen las utilidades (`mb-2`, `ga-4`…), nunca el navegador. */
+@layer vuetify-core.reset {
+  h1, h2, h3, h4, h5, h6, p, figure, details, summary {
+    margin: 0;
+  }
+
+  ul, ol {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* 2. La caja web (/pos) es HTML propio con <button>, <input> y <select> (UI-UX.md, «La caja web…»). Sin el reset de la 3, el
+   *    navegador les vuelve a poner borde y fondo; aquí se quitan SOLO dentro de la caja. Al estar en esta capa, las clases `pk-*`
+   *    de pos-kiosk.css (sin capa) siguen mandando sobre ellos. */
+  .pk button,
+  .pk input,
+  .pk select,
+  .pk textarea {
+    background-color: transparent;
+    border-style: none;
+    margin: 0;
+    padding: 0;
+    font: inherit;
+    color: inherit;
+  }
+
+  .pk select {
+    -moz-appearance: none;
+    -webkit-appearance: none;
+  }
+}

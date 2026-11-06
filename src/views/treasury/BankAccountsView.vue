@@ -6,6 +6,8 @@
  * alguien les asigne la suya.
  */
 import { computed, onMounted, ref } from 'vue';
+import { formatDate } from '@/utils/format';
+import { notify } from '@/composable/useNotify';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { useTreasuryBankingStore } from '@/stores/treasuryBanking';
@@ -26,7 +28,6 @@ const money = (cents: number, currency = 'USD') => formatMoney(cents, locale.val
 const dialog = ref(false);
 const editing = ref<BankAccountSummary | null>(null);
 const dialogError = ref<string | null>(null);
-const snackbar = ref<string | null>(null);
 
 onMounted(() => void store.fetchAccounts());
 
@@ -57,7 +58,7 @@ async function save(input: BankAccountInput, isActive: boolean): Promise<void> {
       await store.createAccount(input);
     }
     dialog.value = false;
-    snackbar.value = t('treasury.banking.saved');
+    notify.success(t('treasury.banking.saved'));
     await store.fetchAccounts();
   } catch {
     dialogError.value = store.error;
@@ -90,7 +91,7 @@ async function assign(movement: BankMovementView, bankAccountId: string | null):
 }
 
 const unassignedHeaders = computed(() => [
-  { title: t('treasury.banking.movements.date'), key: 'movementDate', sortable: false, align: 'start' as const },
+  { title: t('treasury.banking.movements.date'), key: 'movementDate', value: (item: Record<string, unknown>) => formatDate(item.movementDate as string), sortable: false, align: 'start' as const },
   { title: t('treasury.banking.movements.description'), key: 'description', sortable: false, align: 'start' as const },
   { title: t('treasury.banking.movements.amount'), key: 'amountCents', sortable: false, align: 'end' as const },
   { title: t('treasury.banking.movements.account'), key: 'account', sortable: false, align: 'start' as const },
@@ -122,23 +123,23 @@ const typeLabel = (a: BankAccount) => t(`treasury.banking.types.${a.accountType}
           <v-card-text>
             <div class="d-flex align-center ga-2 mb-1">
               <v-icon icon="mdi-bank-outline" />
-              <div class="text-h6 flex-grow-1">{{ account.name }}</div>
+              <div class="text-title-large flex-grow-1">{{ account.name }}</div>
               <v-chip v-if="!account.isActive" size="x-small" variant="flat" color="lightsecondary">{{ $t('treasury.banking.inactive') }}</v-chip>
             </div>
-            <div class="text-body-2 text-medium-emphasis mb-3">
+            <div class="text-body-medium text-medium-emphasis mb-3">
               {{ account.bankName }} · {{ typeLabel(account) }}<template v-if="account.accountLast4"> · ••{{ account.accountLast4 }}</template>
             </div>
-            <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.banking.registerBalance') }}</div>
-            <div class="text-h5 mb-3" :class="{ 'text-error': account.registerBalanceCents < 0 }">{{ money(account.registerBalanceCents, account.currencyCode) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.banking.registerBalance') }}</div>
+            <div class="text-headline-small mb-3" :class="{ 'text-error': account.registerBalanceCents < 0 }">{{ money(account.registerBalanceCents, account.currencyCode) }}</div>
             <div class="d-flex flex-wrap ga-2 mb-2">
               <v-chip size="small" variant="flat" :color="account.unmatchedLines > 0 ? 'lightwarning' : 'lightsuccess'">{{ $t('treasury.banking.unmatchedLines', { n: account.unmatchedLines }) }}</v-chip>
               <v-chip size="small" variant="flat" :color="account.unmatchedMovements > 0 ? 'lightinfo' : 'lightsuccess'">{{ $t('treasury.banking.unmatchedMovements', { n: account.unmatchedMovements }) }}</v-chip>
             </div>
-            <div class="text-body-2 text-medium-emphasis">
-              {{ account.lastReconciledOn ? $t('treasury.banking.lastReconciled', { date: account.lastReconciledOn }) : $t('treasury.banking.neverReconciled') }}
+            <div class="text-body-medium text-medium-emphasis">
+              {{ account.lastReconciledOn ? $t('treasury.banking.lastReconciled', { date: formatDate(account.lastReconciledOn) }) : $t('treasury.banking.neverReconciled') }}
             </div>
-            <div class="text-body-2 text-medium-emphasis">
-              {{ account.lastStatementDate ? $t('treasury.banking.lastStatement', { date: account.lastStatementDate }) : $t('treasury.banking.noStatement') }}
+            <div class="text-body-medium text-medium-emphasis">
+              {{ account.lastStatementDate ? $t('treasury.banking.lastStatement', { date: formatDate(account.lastStatementDate) }) : $t('treasury.banking.noStatement') }}
             </div>
           </v-card-text>
           <v-card-actions class="flex-wrap ga-2">
@@ -154,8 +155,8 @@ const typeLabel = (a: BankAccount) => t(`treasury.banking.types.${a.accountType}
     <v-card v-if="!store.loading && store.accounts.length === 0">
       <v-card-text class="text-center py-8">
         <v-icon icon="mdi-bank-outline" size="48" class="mb-2 text-medium-emphasis" />
-        <div class="text-h6">{{ $t('treasury.banking.emptyTitle') }}</div>
-        <div class="text-body-2 text-medium-emphasis mb-4">{{ $t('treasury.banking.empty') }}</div>
+        <div class="text-title-large">{{ $t('treasury.banking.emptyTitle') }}</div>
+        <div class="text-body-medium text-medium-emphasis mb-4">{{ $t('treasury.banking.empty') }}</div>
         <v-btn v-if="canManage" color="primary" prepend-icon="mdi-bank-plus" @click="openNew">{{ $t('treasury.banking.newAccount') }}</v-btn>
       </v-card-text>
     </v-card>
@@ -167,7 +168,7 @@ const typeLabel = (a: BankAccount) => t(`treasury.banking.types.${a.accountType}
         <v-card-title>{{ $t('treasury.banking.assignTitle') }}</v-card-title>
         <v-card-text>
           <v-alert v-if="assignError" type="error" class="mb-4">{{ assignError }}</v-alert>
-          <div class="text-body-2 text-medium-emphasis mb-3">{{ $t('treasury.banking.assignHint') }}</div>
+          <div class="text-body-medium text-medium-emphasis mb-3">{{ $t('treasury.banking.assignHint') }}</div>
           <v-data-table :headers="unassignedHeaders" :items="unassigned" :items-per-page="-1" hide-default-footer>
             <template #item.amountCents="{ item }">
               <span :class="item.amountCents < 0 ? 'text-error' : 'text-success'">{{ money(item.amountCents) }}</span>
@@ -181,6 +182,5 @@ const typeLabel = (a: BankAccount) => t(`treasury.banking.types.${a.accountType}
       </v-card>
     </v-dialog>
 
-    <v-snackbar :model-value="snackbar !== null" timeout="3500" @update:model-value="snackbar = null">{{ snackbar }}</v-snackbar>
   </v-container>
 </template>

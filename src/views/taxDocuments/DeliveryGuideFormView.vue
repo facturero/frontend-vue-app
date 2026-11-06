@@ -4,6 +4,7 @@
  * valores ni impuestos. Se emite ANTES de que salga la mercadería: el traslado no puede empezar antes de hoy.
  */
 import { computed, reactive, ref } from 'vue';
+import DateField from '@/components/ui/DateField.vue';
 import { useRouter } from 'vue-router';
 import { useTaxDocumentsStore } from '@/stores/taxDocuments';
 import { DOCUMENT_NUMBER_PATTERN, todayIso } from '@/utils/taxDocuments';
@@ -118,14 +119,14 @@ async function submit(): Promise<void> {
 
     <v-form @submit.prevent="submit">
       <v-card class="mb-4">
-        <v-card-title class="text-h6">{{ $t('taxDocuments.issuer') }}</v-card-title>
+        <v-card-title class="text-title-large">{{ $t('taxDocuments.issuer') }}</v-card-title>
         <v-card-text>
           <IssuerPicker v-model:establishment-id="establishmentId" v-model:emission-point-id="emissionPointId" />
         </v-card-text>
       </v-card>
 
       <v-card class="mb-4">
-        <v-card-title class="text-h6">{{ $t('taxDocuments.guides.transport') }}</v-card-title>
+        <v-card-title class="text-title-large">{{ $t('taxDocuments.guides.transport') }}</v-card-title>
         <v-card-text>
           <v-row>
             <v-col cols="12">
@@ -151,10 +152,10 @@ async function submit(): Promise<void> {
               <v-text-field v-model="carrier.rise" :label="$t('taxDocuments.guides.rise')" maxlength="40" />
             </v-col>
             <v-col cols="12" sm="3">
-              <v-text-field v-model="transportStart" :label="$t('taxDocuments.guides.start')" type="date" :min="todayIso()" />
+              <DateField v-model="transportStart" :label="$t('taxDocuments.guides.start')" :min="todayIso()" />
             </v-col>
             <v-col cols="12" sm="3">
-              <v-text-field v-model="transportEnd" :label="$t('taxDocuments.guides.end')" type="date" :min="transportStart" />
+              <DateField v-model="transportEnd" :label="$t('taxDocuments.guides.end')" :min="transportStart" />
             </v-col>
           </v-row>
         </v-card-text>
@@ -162,7 +163,7 @@ async function submit(): Promise<void> {
 
       <v-card v-for="(recipient, ri) in recipients" :key="ri" class="mb-4">
         <v-card-title class="d-flex align-center justify-space-between ga-2">
-          <span class="text-h6">{{ $t('taxDocuments.guides.recipient', { n: ri + 1 }) }}</span>
+          <span class="text-title-large">{{ $t('taxDocuments.guides.recipient', { n: ri + 1 }) }}</span>
           <v-btn
             v-if="recipients.length > 1"
             variant="text"
@@ -197,7 +198,7 @@ async function submit(): Promise<void> {
                 <v-text-field v-model="recipient.supportNumber" :label="$t('taxDocuments.guides.invoiceNumber')" placeholder="000-000-000000000" maxlength="17" />
               </v-col>
               <v-col cols="12" sm="4">
-                <v-text-field v-model="recipient.supportDate" :label="$t('taxDocuments.guides.invoiceDate')" type="date" :max="todayIso()" />
+                <DateField v-model="recipient.supportDate" :label="$t('taxDocuments.guides.invoiceDate')" :max="todayIso()" />
               </v-col>
               <v-col cols="12" sm="4">
                 <v-text-field v-model="recipient.supportAuthorization" :label="$t('taxDocuments.withholdings.authorization')" maxlength="49" />
@@ -205,7 +206,7 @@ async function submit(): Promise<void> {
             </template>
           </v-row>
 
-          <div class="text-subtitle-2 mb-2">{{ $t('taxDocuments.guides.items') }}</div>
+          <div class="text-title-small mb-2">{{ $t('taxDocuments.guides.items') }}</div>
           <v-row v-for="(item, ii) in recipient.items" :key="ii">
             <v-col cols="12" sm="2">
               <v-text-field v-model="item.internalCode" :label="$t('taxDocuments.guides.code')" maxlength="25" />

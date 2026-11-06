@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import { useConfirm } from '@/composable/useConfirm';
 import { useI18n } from 'vue-i18n';
 import { useProjectsStore } from '@/stores/projects';
 import { FIELD_ICON, PROJECT_COLORS } from '@/utils/projects';
@@ -15,6 +16,7 @@ import type { CustomField, FieldOptionInput, FieldType, ProjectColor } from '@/t
 const props = defineProps<{ modelValue: boolean }>();
 const emit = defineEmits<{ 'update:modelValue': [boolean] }>();
 const { t } = useI18n();
+const confirm = useConfirm();
 const store = useProjectsStore();
 
 const TYPES: FieldType[] = ['select', 'text', 'number', 'date', 'person'];
@@ -27,7 +29,6 @@ const drafts = ref<Record<string, Draft>>({});
 const newName = ref('');
 const newType = ref<FieldType>('select');
 const newOptions = ref<Array<{ id: null; label: string; color: ProjectColor }>>([]);
-const confirmDelete = ref<CustomField | null>(null);
 const busy = ref(false);
 
 function reset(): void {
@@ -81,10 +82,14 @@ function create(): Promise<void> {
   });
 }
 
-function remove(): Promise<void> {
-  const field = confirmDelete.value;
-  confirmDelete.value = null;
-  return field ? run(() => store.deleteField(field.id)) : Promise.resolve();
+async function remove(field: CustomField): Promise<void> {
+  const ok = await confirm({
+    title: t('projects.fields.deleteTitle', { name: field.name }),
+    text: t('projects.fields.deleteText'),
+    confirmText: t('common.delete'),
+    destructive: true,
+  });
+  if (ok) await run(() => store.deleteField(field.id));
 }
 </script>
 
@@ -93,7 +98,7 @@ function remove(): Promise<void> {
     <v-card>
       <v-card-title>{{ t('projects.fields.title') }}</v-card-title>
       <v-card-text class="d-flex flex-column ga-4">
-        <div class="text-body-2 text-medium-emphasis">{{ t('projects.fields.hint') }}</div>
+        <div class="text-body-medium text-medium-emphasis">{{ t('projects.fields.hint') }}</div>
 
         <v-card v-for="f in store.fields" :key="f.id" variant="outlined" class="pa-4">
           <div v-if="drafts[f.id]" class="d-flex flex-column ga-2">
@@ -101,7 +106,7 @@ function remove(): Promise<void> {
               <v-icon :icon="FIELD_ICON[f.type]" />
               <v-text-field v-model="drafts[f.id]!.name" :label="t('projects.fields.name')" :disabled="!store.canEdit" @blur="saveField(f)" @keyup.enter="saveField(f)" />
               <v-chip size="small">{{ t(`projects.fields.type.${f.type}`) }}</v-chip>
-              <v-btn v-if="store.canEdit" icon="mdi-trash-can-outline" variant="text" size="small" :aria-label="t('common.delete')" @click="confirmDelete = f" />
+              <v-btn v-if="store.canEdit" icon="mdi-trash-can-outline" variant="text" size="small" :aria-label="t('common.delete')" @click="remove(f)" />
             </div>
             <template v-if="f.type === 'select'">
               <div v-for="(o, i) in drafts[f.id]!.options" :key="o.id ?? i" class="d-flex align-center ga-2">
@@ -138,7 +143,7 @@ function remove(): Promise<void> {
         </v-card>
 
         <v-card v-if="store.canEdit" variant="tonal" class="pa-4 d-flex flex-column ga-2">
-          <div class="text-h6">{{ t('projects.fields.new') }}</div>
+          <div class="text-title-large">{{ t('projects.fields.new') }}</div>
           <div class="d-flex flex-column flex-sm-row ga-2">
             <v-text-field v-model="newName" :label="t('projects.fields.name')" :counter="60" />
             <v-select
@@ -163,18 +168,6 @@ function remove(): Promise<void> {
       <v-card-actions>
         <v-spacer />
         <v-btn variant="text" @click="emit('update:modelValue', false)">{{ t('common.close') }}</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
-
-  <v-dialog :model-value="!!confirmDelete" @update:model-value="(v) => !v && (confirmDelete = null)">
-    <v-card>
-      <v-card-title>{{ t('projects.fields.deleteTitle', { name: confirmDelete?.name }) }}</v-card-title>
-      <v-card-text>{{ t('projects.fields.deleteText') }}</v-card-text>
-      <v-card-actions class="flex-wrap ga-2">
-        <v-spacer />
-        <v-btn variant="text" @click="confirmDelete = null">{{ t('common.cancel') }}</v-btn>
-        <v-btn color="error" @click="remove">{{ t('common.delete') }}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

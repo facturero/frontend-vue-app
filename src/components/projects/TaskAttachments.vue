@@ -55,7 +55,7 @@ const canRemove = (a: TaskAttachment) => a.uploadedBy === auth.user?.id || !!sto
 <template>
   <div v-if="store.detail">
     <div class="d-flex align-center mb-2">
-      <span class="text-body-1 font-weight-medium">{{ t('projects.attachments.title') }}</span>
+      <span class="text-body-large font-weight-medium">{{ t('projects.attachments.title') }}</span>
       <v-spacer />
       <template v-if="store.detail.canComment">
         <input ref="input" type="file" multiple class="d-none" @change="picked" />
@@ -66,7 +66,7 @@ const canRemove = (a: TaskAttachment) => a.uploadedBy === auth.user?.id || !!sto
     </div>
     <v-list v-if="items.length" density="compact" class="pa-0">
       <v-list-item v-for="a in items" :key="a.id" :prepend-icon="icon(a)" class="px-0" @click="openFile(a.documentId)">
-        <v-list-item-title class="text-body-2">{{ a.fileName }}</v-list-item-title>
+        <v-list-item-title class="text-body-medium">{{ a.fileName }}</v-list-item-title>
         <v-list-item-subtitle>{{ size(a.sizeBytes) }}</v-list-item-subtitle>
         <template #append>
           <v-btn
@@ -80,6 +80,6 @@ const canRemove = (a: TaskAttachment) => a.uploadedBy === auth.user?.id || !!sto
         </template>
       </v-list-item>
     </v-list>
-    <div v-else class="text-caption text-medium-emphasis">{{ t('projects.attachments.empty') }}</div>
+    <div v-else class="text-body-small text-medium-emphasis">{{ t('projects.attachments.empty') }}</div>
   </div>
 </template>

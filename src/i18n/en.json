@@ -529,6 +529,9 @@
       "tax_identification_type_upserted": "Identification type saved",
       "tax_tax_rate_upserted": "Tax rate saved",
       "purchasing_supplier_upserted": "Supplier created or updated",
+      "purchasing_sri_document_imported": "SRI documents imported",
+      "purchasing_sri_document_downloaded": "SRI document downloaded",
+      "purchasing_sri_document_unavailable": "SRI document unavailable",
       "purchasing_order_created": "Purchase order created",
       "purchasing_order_updated": "Purchase order updated",
       "purchasing_order_submitted": "Purchase order submitted",
@@ -3793,7 +3796,8 @@
     "due": {
       "today": "Today",
       "tomorrow": "Tomorrow",
-      "yesterday": "Yesterday"
+      "yesterday": "Yesterday",
+      "overdue": "Overdue"
     },
     "myTasks": {
       "title": "My tasks",

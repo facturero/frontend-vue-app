@@ -101,8 +101,8 @@ function onColumnDrop(evt: DropEvent): void {
         class="flex-shrink-0 pa-2 border"
       >
         <div class="d-flex align-center ga-2 px-2 py-1" :class="{ 'column-drag': editable() }">
-          <span class="text-body-1 font-weight-bold text-truncate">{{ section.name }}</span>
-          <span class="text-caption text-medium-emphasis">{{ (store.columns[section.id] ?? []).length }}</span>
+          <span class="text-body-large font-weight-bold text-truncate">{{ section.name }}</span>
+          <span class="text-body-small text-medium-emphasis">{{ (store.columns[section.id] ?? []).length }}</span>
           <v-spacer />
           <v-btn
             v-if="editable()"
@@ -141,7 +141,7 @@ function onColumnDrop(evt: DropEvent): void {
                 :aria-label="t('projects.task.markComplete')"
                 @click.stop="toggle(task)"
               />
-              <span class="text-body-2 pt-1" :class="{ 'text-medium-emphasis text-decoration-line-through': task.completedAt }">
+              <span class="text-body-medium pt-1" :class="{ 'text-medium-emphasis text-decoration-line-through': task.completedAt }">
                 <v-icon v-if="task.kind === 'approval'" icon="mdi-thumbs-up-down-outline" size="x-small" color="info" class="mr-1" />
                 <v-icon v-else-if="task.kind === 'milestone'" icon="mdi-rhombus" size="x-small" color="warning" class="mr-1" />{{ task.title }}
               </span>
@@ -154,7 +154,7 @@ function onColumnDrop(evt: DropEvent): void {
               <UserAvatar :user-id="task.assigneeUserId" :size="24" />
               <DueDateChip :due-on="task.dueOn" :completed="!!task.completedAt" />
               <v-spacer />
-              <span v-if="task.subtasks.total" class="text-caption text-medium-emphasis d-flex align-center ga-1">
+              <span v-if="task.subtasks.total" class="text-body-small text-medium-emphasis d-flex align-center ga-1">
                 <v-icon icon="mdi-file-tree-outline" size="x-small" />{{ task.subtasks.completed }}/{{ task.subtasks.total }}
               </span>
             </div>

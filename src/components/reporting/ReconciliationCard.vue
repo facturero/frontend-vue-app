@@ -27,9 +27,9 @@ const check = (): Promise<void> => store.fetchReconciliation(props.annex, props.
 
 <template>
   <v-card>
-    <v-card-title class="text-h6">{{ $t('reporting.reconciliation.title') }}</v-card-title>
+    <v-card-title class="text-title-large">{{ $t('reporting.reconciliation.title') }}</v-card-title>
     <v-card-text>
-      <p class="text-body-2 text-medium-emphasis mb-4">{{ $t('reporting.reconciliation.intro') }}</p>
+      <p class="text-body-medium text-medium-emphasis mb-4">{{ $t('reporting.reconciliation.intro') }}</p>
       <v-btn variant="tonal" prepend-icon="mdi-scale-balance" :loading="store.loading" data-testid="reconciliation-check" @click="check">
         {{ result || store.reconciliationError ? $t('reporting.reconciliation.recheck') : $t('reporting.reconciliation.check') }}
       </v-btn>

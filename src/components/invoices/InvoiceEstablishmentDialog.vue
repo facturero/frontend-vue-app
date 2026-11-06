@@ -49,7 +49,7 @@ async function submit(): Promise<void> {
         <v-alert v-if="establishmentDialogError" type="error" class="mb-4">
           {{ establishmentDialogError }}
         </v-alert>
-        <p class="text-caption text-medium-emphasis mb-3">
+        <p class="text-body-small text-medium-emphasis mb-3">
           {{ $t('invoices.createEstablishmentHint') }}
         </p>
         <v-text-field
@@ -61,7 +61,7 @@ async function submit(): Promise<void> {
       <v-card-actions>
         <v-spacer />
         <v-btn variant="text" @click="close">{{ $t('common.cancel') }}</v-btn>
-        <v-btn color="primary" :loading="establishmentDialogSaving" :disabled="!quickEstablishmentName" @click="submit">
+        <v-btn variant="flat" color="primary" :loading="establishmentDialogSaving" :disabled="!quickEstablishmentName" @click="submit">
           {{ $t('common.create') }}
         </v-btn>
       </v-card-actions>

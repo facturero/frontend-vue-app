@@ -217,7 +217,7 @@ async function submit(): Promise<void> {
         <v-card>
           <v-card-text>
             <v-form @submit.prevent="submit">
-              <v-row dense>
+              <v-row density="compact">
                 <v-col cols="12" md="6">
                   <v-text-field
                     v-model="name"
@@ -256,7 +256,7 @@ async function submit(): Promise<void> {
                 rows="2"
               />
 
-              <v-row dense align="center">
+              <v-row class="align-center" density="compact">
                 <v-col cols="12" md="4">
                   <v-text-field
                     :model-value="price"
@@ -301,7 +301,7 @@ async function submit(): Promise<void> {
                 data-testid="product-track-stock"
               />
 
-              <v-row dense>
+              <v-row density="compact">
                 <v-col cols="12" md="6">
                   <v-select
                     v-model="categoryId"
@@ -352,7 +352,7 @@ async function submit(): Promise<void> {
               />
 
               <v-divider class="my-4" />
-              <p class="text-body-2 text-medium-emphasis mb-2">{{ $t('common.images') }}</p>
+              <p class="text-body-medium text-medium-emphasis mb-2">{{ $t('common.images') }}</p>
               <div v-if="isEdit && existingImages.length > 0" class="d-flex flex-wrap ga-2 mb-3">
                 <v-img
                   v-for="img in existingImages"

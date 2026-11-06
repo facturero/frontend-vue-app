@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { useConfirm } from '@/composable/useConfirm';
+import DateField from '@/components/ui/DateField.vue';
 import { useI18n } from 'vue-i18n';
 import { useProjectsStore } from '@/stores/projects';
 import { displayName } from '@/utils/projects';
@@ -13,19 +15,28 @@ import type { BulkAction } from '@/types/projects';
 const props = defineProps<{ taskIds: string[] }>();
 const emit = defineEmits<{ done: [] }>();
 const { t } = useI18n();
+const confirm = useConfirm();
 const store = useProjectsStore();
 
 const busy = ref(false);
-const confirmDelete = ref(false);
 const result = ref<string | null>(null);
-const dueOn = ref('');
+const dueOn = ref<string | null>(null);
 
 const people = computed(() => store.directory.map((u) => ({ value: u.id, title: displayName(u), subtitle: u.email })));
+
+async function removeAll(): Promise<void> {
+  const ok = await confirm({
+    title: t('projects.bulk.deleteTitle', props.taskIds.length),
+    text: t('projects.task.deleteText'),
+    confirmText: t('common.delete'),
+    destructive: true,
+  });
+  if (ok) await apply({ type: 'delete' });
+}
 
 async function apply(action: BulkAction): Promise<void> {
   if (!props.taskIds.length || busy.value) return;
   busy.value = true;
-  confirmDelete.value = false;
   try {
     const results = await store.bulk(props.taskIds, action);
     const failed = results.filter((r) => !r.ok).length;
@@ -55,7 +66,7 @@ async function tag(value: unknown): Promise<void> {
   <div>
     <v-alert v-if="result" type="warning" closable class="mb-2" @click:close="result = null">{{ result }}</v-alert>
     <v-toolbar v-if="props.taskIds.length" color="lightprimary" density="compact" rounded class="px-2">
-      <span class="text-body-2 font-weight-medium mr-2">{{ t('projects.bulk.selected', props.taskIds.length) }}</span>
+      <span class="text-body-medium font-weight-medium mr-2">{{ t('projects.bulk.selected', props.taskIds.length) }}</span>
       <div class="d-flex flex-wrap ga-2">
         <v-btn size="small" variant="text" prepend-icon="mdi-check" :loading="busy" @click="apply({ type: 'complete' })">{{ t('projects.bulk.complete') }}</v-btn>
 
@@ -78,7 +89,7 @@ async function tag(value: unknown): Promise<void> {
             <v-btn v-bind="menu" size="small" variant="text" prepend-icon="mdi-calendar-outline" :disabled="busy">{{ t('projects.task.dueOn') }}</v-btn>
           </template>
           <v-card min-width="240" class="pa-2 d-flex flex-column ga-2">
-            <v-text-field v-model="dueOn" type="date" :label="t('projects.task.dueOn')" />
+            <DateField v-model="dueOn" :label="t('projects.task.dueOn')" />
             <div class="d-flex ga-2">
               <v-btn size="small" color="primary" :disabled="!dueOn" @click="apply({ type: 'due', dueOn })">{{ t('common.save') }}</v-btn>
               <v-btn size="small" variant="text" @click="apply({ type: 'due', dueOn: null })">{{ t('projects.bulk.clearDue') }}</v-btn>
@@ -109,7 +120,7 @@ async function tag(value: unknown): Promise<void> {
           </v-card>
         </v-menu>
 
-        <v-btn size="small" variant="text" color="error" prepend-icon="mdi-trash-can-outline" :disabled="busy" @click="confirmDelete = true">
+        <v-btn size="small" variant="text" color="error" prepend-icon="mdi-trash-can-outline" :disabled="busy" @click="removeAll">
           {{ t('common.delete') }}
         </v-btn>
       </div>
@@ -117,16 +128,5 @@ async function tag(value: unknown): Promise<void> {
       <v-btn icon="mdi-close" size="small" variant="text" :aria-label="t('projects.bulk.clear')" @click="emit('done')" />
     </v-toolbar>
 
-    <v-dialog v-model="confirmDelete">
-      <v-card>
-        <v-card-title>{{ t('projects.bulk.deleteTitle', props.taskIds.length) }}</v-card-title>
-        <v-card-text>{{ t('projects.task.deleteText') }}</v-card-text>
-        <v-card-actions class="flex-wrap ga-2">
-          <v-spacer />
-          <v-btn variant="text" @click="confirmDelete = false">{{ t('common.cancel') }}</v-btn>
-          <v-btn color="error" @click="apply({ type: 'delete' })">{{ t('common.delete') }}</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
   </div>
 </template>

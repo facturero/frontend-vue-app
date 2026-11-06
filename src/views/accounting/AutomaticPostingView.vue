@@ -8,6 +8,8 @@
  * reintentas. Nada se pierde.
  */
 import { computed, onMounted, ref, watch } from 'vue';
+import DateField from '@/components/ui/DateField.vue';
+import { notify } from '@/composable/useNotify';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
@@ -27,7 +29,6 @@ const canManage = computed(() => auth.can('account:manage'));
 const canPost = computed(() => auth.can('journal:post'));
 const loadError = ref<string | null>(null);
 const actionError = ref<string | null>(null);
-const snackbar = ref<string | null>(null);
 
 // ── Ajustes ───────────────────────────────────────────────────────────────
 const autoPosting = ref(true);
@@ -62,7 +63,7 @@ async function saveSettings(): Promise<void> {
       paymentMethodRoles: Object.keys(overrides).length > 0 ? overrides : null,
     });
     syncSettings();
-    snackbar.value = t('accounting.auto.saved');
+    notify.success(t('accounting.auto.saved'));
   } catch {
     actionError.value = store.error;
   }
@@ -84,7 +85,7 @@ async function assignRole(role: SystemRole, accountId: string | null): Promise<v
       const current = holderOf(role);
       if (current) await store.updateAccount(current, { systemRole: null });
     }
-    snackbar.value = t('accounting.auto.roles.saved');
+    notify.success(t('accounting.auto.roles.saved'));
   } catch {
     actionError.value = store.error;
   }
@@ -146,7 +147,7 @@ async function retry(ids?: string[]): Promise<void> {
   actionError.value = null;
   try {
     const res = await store.retryPending(ids);
-    snackbar.value = t('accounting.auto.pending.retried', { posted: res.posted, still: res.stillPending, discarded: res.discarded });
+    notify.success(t('accounting.auto.pending.retried', { posted: res.posted, still: res.stillPending, discarded: res.discarded }));
     await loadPending();
   } catch {
     actionError.value = store.error;
@@ -197,7 +198,7 @@ function openEntry(id: string | null): void {
           </v-btn>
         </v-card-title>
         <v-card-text>
-          <p class="text-body-2 text-medium-emphasis mb-4">{{ $t('accounting.auto.pending.intro') }}</p>
+          <p class="text-body-medium text-medium-emphasis mb-4">{{ $t('accounting.auto.pending.intro') }}</p>
           <v-row>
             <v-col cols="12" sm="4"><v-select v-model="status" :items="statusOptions" :label="$t('common.status')" /></v-col>
             <v-col cols="12" sm="4" class="d-flex align-center"><v-switch v-model="showTechnical" color="primary" :label="$t('accounting.auto.pending.showDetail')" hide-details /></v-col>
@@ -214,15 +215,15 @@ function openEntry(id: string | null): void {
             <template #item.sourceType="{ item }">
               <!-- Un origen nuevo sin traducción se muestra tal cual en vez de dejar una clave técnica a la vista -->
               {{ $te(`accounting.auto.pending.sources.${item.sourceType}`) ? $t(`accounting.auto.pending.sources.${item.sourceType}`) : item.sourceType }}
-              <div v-if="showTechnical" class="text-caption text-medium-emphasis">{{ item.eventType }} · {{ item.sourceId }}</div>
+              <div v-if="showTechnical" class="text-body-small text-medium-emphasis">{{ item.eventType }} · {{ item.sourceId }}</div>
             </template>
             <template #item.reasonCode="{ item }">
               <div>{{ reasonLabel(item.reasonCode) }}</div>
-              <div class="text-caption text-medium-emphasis">{{ item.reasonMessage }}</div>
+              <div class="text-body-small text-medium-emphasis">{{ item.reasonMessage }}</div>
             </template>
             <template #item.status="{ item }">
               <v-chip size="x-small" variant="flat" :color="statusColor(item.status)">{{ $t(`accounting.auto.pending.status.${item.status}`) }}</v-chip>
-              <div v-if="item.attempts > 1" class="text-caption text-medium-emphasis">{{ $t('accounting.auto.pending.attempts', { n: item.attempts }) }}</div>
+              <div v-if="item.attempts > 1" class="text-body-small text-medium-emphasis">{{ $t('accounting.auto.pending.attempts', { n: item.attempts }) }}</div>
             </template>
             <template #item.actions="{ item }">
               <v-btn v-if="item.status === 'pending' && canPost" size="small" variant="text" prepend-icon="mdi-reload" @click="retry([item.id])">{{ $t('accounting.auto.pending.retry') }}</v-btn>
@@ -241,12 +242,12 @@ function openEntry(id: string | null): void {
             <v-card-title>{{ $t('accounting.auto.settings.title') }}</v-card-title>
             <v-card-text class="d-flex flex-column ga-4">
               <v-switch v-model="autoPosting" color="primary" :label="$t('accounting.auto.settings.enabled')" :hint="$t('accounting.auto.settings.enabledHint')" persistent-hint :disabled="!canManage" />
-              <v-text-field v-model="from" type="date" :label="$t('accounting.auto.settings.from')" :hint="$t('accounting.auto.settings.fromHint')" persistent-hint clearable :disabled="!canManage" />
+              <DateField v-model="from" :label="$t('accounting.auto.settings.from')" :hint="$t('accounting.auto.settings.fromHint')" persistent-hint clearable :disabled="!canManage" />
               <div>
-                <div class="text-h6 mb-1">{{ $t('accounting.auto.payment.title') }}</div>
-                <p class="text-body-2 text-medium-emphasis mb-3">{{ $t('accounting.auto.payment.intro') }}</p>
-                <v-row v-for="code in PAYMENT_CODES" :key="code" align="center" dense>
-                  <v-col cols="7" class="text-body-2">{{ code }} · {{ $t(`accounting.auto.payment.codes.${code}`) }}</v-col>
+                <div class="text-title-large mb-1">{{ $t('accounting.auto.payment.title') }}</div>
+                <p class="text-body-medium text-medium-emphasis mb-3">{{ $t('accounting.auto.payment.intro') }}</p>
+                <v-row class="align-center" v-for="code in PAYMENT_CODES" :key="code" density="compact">
+                  <v-col cols="7" class="text-body-medium">{{ code }} · {{ $t(`accounting.auto.payment.codes.${code}`) }}</v-col>
                   <v-col cols="5">
                     <v-select :model-value="effectiveRole(code)" :items="collectionOptions" :disabled="!canManage" @update:model-value="(v: CollectionRole) => (paymentRoles[code] = v)" />
                   </v-col>
@@ -255,7 +256,7 @@ function openEntry(id: string | null): void {
             </v-card-text>
             <v-card-actions v-if="canManage">
               <v-spacer />
-              <v-btn color="primary" :loading="store.saving" @click="saveSettings">{{ $t('common.save') }}</v-btn>
+              <v-btn variant="flat" color="primary" :loading="store.saving" @click="saveSettings">{{ $t('common.save') }}</v-btn>
             </v-card-actions>
           </v-card>
         </v-col>
@@ -265,11 +266,11 @@ function openEntry(id: string | null): void {
           <v-card>
             <v-card-title>{{ $t('accounting.auto.roles.title') }}</v-card-title>
             <v-card-text>
-              <p class="text-body-2 text-medium-emphasis mb-4">{{ $t('accounting.auto.roles.intro') }}</p>
-              <v-row v-for="role in ACTIVE_ROLES" :key="role" align="center">
+              <p class="text-body-medium text-medium-emphasis mb-4">{{ $t('accounting.auto.roles.intro') }}</p>
+              <v-row class="align-center" v-for="role in ACTIVE_ROLES" :key="role">
                 <v-col cols="12" sm="5">
                   <div class="font-weight-medium">{{ $t(`accounting.auto.roles.labels.${role}`) }}</div>
-                  <div class="text-caption text-medium-emphasis">{{ $t(`accounting.auto.roles.hints.${role}`) }}</div>
+                  <div class="text-body-small text-medium-emphasis">{{ $t(`accounting.auto.roles.hints.${role}`) }}</div>
                 </v-col>
                 <v-col cols="12" sm="7">
                   <v-autocomplete
@@ -286,8 +287,8 @@ function openEntry(id: string | null): void {
               <v-expansion-panels class="mt-4">
                 <v-expansion-panel :title="$t('accounting.auto.roles.future')">
                   <v-expansion-panel-text>
-                    <p class="text-body-2 text-medium-emphasis mb-3">{{ $t('accounting.auto.roles.futureIntro') }}</p>
-                    <v-row v-for="role in FUTURE_ROLES" :key="role" align="center">
+                    <p class="text-body-medium text-medium-emphasis mb-3">{{ $t('accounting.auto.roles.futureIntro') }}</p>
+                    <v-row class="align-center" v-for="role in FUTURE_ROLES" :key="role">
                       <v-col cols="12" sm="5" class="font-weight-medium">{{ $t(`accounting.auto.roles.labels.${role}`) }}</v-col>
                       <v-col cols="12" sm="7">
                         <v-autocomplete
@@ -313,17 +314,16 @@ function openEntry(id: string | null): void {
       <v-card>
         <v-card-title>{{ $t('accounting.auto.pending.discardTitle') }}</v-card-title>
         <v-card-text class="d-flex flex-column ga-4">
-          <p class="text-body-2 text-medium-emphasis">{{ $t('accounting.auto.pending.discardIntro') }}</p>
+          <p class="text-body-medium text-medium-emphasis">{{ $t('accounting.auto.pending.discardIntro') }}</p>
           <v-textarea v-model="discardReason" :label="$t('accounting.auto.pending.discardReason')" rows="2" maxlength="200" />
         </v-card-text>
         <v-card-actions class="flex-wrap ga-2">
           <v-spacer />
           <v-btn variant="text" @click="discardTarget = null">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="error" :disabled="discardReason.trim().length < 3" :loading="store.saving" @click="confirmDiscard">{{ $t('accounting.auto.pending.discard') }}</v-btn>
+          <v-btn variant="flat" color="error" :disabled="discardReason.trim().length < 3" :loading="store.saving" @click="confirmDiscard">{{ $t('accounting.auto.pending.discard') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <v-snackbar :model-value="!!snackbar" timeout="4000" @update:model-value="snackbar = null">{{ snackbar }}</v-snackbar>
   </v-container>
 </template>

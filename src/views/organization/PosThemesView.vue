@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { useConfirm } from '@/composable/useConfirm';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
@@ -11,6 +12,7 @@ import type { PosThemeSummaryDTO } from '@/types/posTheme';
 import PageHeader from '@/components/ui/PageHeader.vue';
 
 const { t } = useI18n();
+const confirm = useConfirm();
 const auth = useAuthStore();
 const store = usePosThemeStore();
 const router = useRouter();
@@ -98,12 +100,14 @@ async function saveAssignments(): Promise<void> {
 
 async function handleDelete(theme: PosThemeSummaryDTO): Promise<void> {
   if (
-    !confirm(
-      t('posThemes.deleteConfirm', {
+    !(await confirm({
+      title: t('posThemes.deleteConfirm', {
         name: theme.name,
         count: theme.assignedPointsCount,
       }),
-    )
+      confirmText: t('common.delete'),
+      destructive: true,
+    }))
   ) {
     return;
   }
@@ -167,7 +171,7 @@ onUnmounted(() => {
 
     <v-card>
       <v-card-title class="d-flex align-center justify-space-between">
-        <span class="text-body-1 font-weight-medium">{{ $t('posThemes.listTitle') }}</span>
+        <span class="text-body-large font-weight-medium">{{ $t('posThemes.listTitle') }}</span>
         <v-btn
           v-if="canManage && props.embedded"
           size="small"
@@ -188,13 +192,13 @@ onUnmounted(() => {
         >
           <template #prepend>
             <v-avatar :color="theme.isDefault ? 'lightprimary' : 'grey100'" size="small">
-              <span class="text-caption font-weight-bold">{{ theme.name.slice(0, 1).toUpperCase() }}</span>
+              <span class="text-body-small font-weight-bold">{{ theme.name.slice(0, 1).toUpperCase() }}</span>
             </v-avatar>
           </template>
 
           <v-list-item-title>{{ theme.name }}</v-list-item-title>
           <v-list-item-subtitle class="d-flex align-center ga-2">
-            <span class="text-caption">{{ $t('posThemes.version', { version: theme.version }) }}</span>
+            <span class="text-body-small">{{ $t('posThemes.version', { version: theme.version }) }}</span>
             <v-chip
               v-if="theme.isDefault"
               size="x-small"
@@ -263,7 +267,7 @@ onUnmounted(() => {
           {{ $t('posThemes.assignTitle', { name: assignTarget?.name ?? '' }) }}
         </v-card-title>
         <v-card-text>
-          <p class="text-body-2 text-medium-emphasis mb-4">
+          <p class="text-body-medium text-medium-emphasis mb-4">
             {{ $t('posThemes.assignHint') }}
           </p>
 
@@ -280,10 +284,10 @@ onUnmounted(() => {
               class="d-flex flex-column flex-sm-row align-sm-center justify-space-between ga-2"
             >
               <div>
-                <div class="text-body-2 font-weight-medium">
+                <div class="text-body-medium font-weight-medium">
                   {{ point.name || $t('posThemes.pointFallback', { code: point.code }) }}
                 </div>
-                <div class="text-caption text-medium-emphasis">
+                <div class="text-body-small text-medium-emphasis">
                   {{ $t('posThemes.currentTheme', {
                     name: point.posThemeName ?? $t('posThemes.organizationDefault'),
                   }) }}
@@ -306,7 +310,7 @@ onUnmounted(() => {
         <v-card-actions>
           <v-spacer />
           <v-btn variant="text" @click="closeAssignDialog">{{ $t('common.cancel') }}</v-btn>
-          <v-btn
+          <v-btn variant="flat"
             color="primary"
             :loading="store.saving"
             :disabled="assignmentChanges.length === 0"

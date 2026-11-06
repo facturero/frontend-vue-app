@@ -71,7 +71,7 @@ const profilePending = computed(() => store.myProfile?.status === 'pending');
     >
       <div class="d-flex flex-wrap align-center ga-2">
         <v-icon :icon="currentProfile.icon" />
-        <span class="text-body-2">
+        <span class="text-body-medium">
           {{ $t('plugins.profileBand', { name: currentProfile.name }) }}
         </span>
         <v-btn
@@ -87,7 +87,7 @@ const profilePending = computed(() => store.myProfile?.status === 'pending');
 
     <v-alert v-else-if="profilePending" type="warning" class="mb-4">
       <div class="d-flex flex-wrap align-center ga-2">
-        <span class="text-body-2">{{ $t('plugins.profilePending') }}</span>
+        <span class="text-body-medium">{{ $t('plugins.profilePending') }}</span>
         <v-btn
           variant="text"
           size="small"

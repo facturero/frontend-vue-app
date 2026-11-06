@@ -51,7 +51,7 @@ async function submit(): Promise<void> {
       <v-card-title>{{ $t('employees.restorePassword') }}</v-card-title>
       <v-card-text>
         <i18n-t v-if="employee" keypath="employees.restoreIntro" tag="p"
-          class="text-body-2 text-medium-emphasis mb-3">
+          class="text-body-medium text-medium-emphasis mb-3">
           <template #email><strong>{{ employee.email }}</strong></template>
           <template #name>
             <strong>{{ employee.fullName || employee.username || $t('employees.theEmployee') }}</strong>

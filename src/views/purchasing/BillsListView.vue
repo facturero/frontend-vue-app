@@ -4,6 +4,8 @@
  * resultado de la conciliación; el detalle abre la conciliación a tres vías. Registrar una factura pide `purchase_bill:create`.
  */
 import { computed, onMounted, ref, watch } from 'vue';
+import { formatDate } from '@/utils/format';
+import DateField from '@/components/ui/DateField.vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
@@ -33,7 +35,7 @@ const headers = computed(() => [
   { title: t('purchasing.bills.number'), key: 'internalNumber', sortable: false, align: 'start' as const },
   { title: t('purchasing.bills.supplierDocument'), key: 'document', sortable: false, align: 'start' as const },
   { title: t('purchasing.orders.supplier'), key: 'supplier', sortable: false, align: 'start' as const },
-  { title: t('common.date'), key: 'issueDate', sortable: false, align: 'start' as const },
+  { title: t('common.date'), key: 'issueDate', value: (item: Record<string, unknown>) => formatDate(item.issueDate as string), sortable: false, align: 'start' as const },
   { title: t('invoices.total'), key: 'totalCents', sortable: false, align: 'end' as const },
   { title: t('common.status'), key: 'status', sortable: false, align: 'start' as const },
   { title: t('purchasing.bills.matchLabel'), key: 'matchStatus', sortable: false, align: 'start' as const },
@@ -98,11 +100,11 @@ const document = (bill: PurchaseBill) => `${bill.establishment}-${bill.emissionP
           <v-col cols="12" sm="6" md="3">
             <v-autocomplete v-model="supplierId" :items="supplierItems" :label="$t('purchasing.orders.supplier')" clearable />
           </v-col>
-          <v-col cols="6" sm="3" md="1">
-            <v-text-field v-model="from" type="date" :label="$t('purchasing.orders.from')" />
+          <v-col cols="6" sm="3" md="2">
+            <DateField v-model="from" :max="to" :label="$t('purchasing.orders.from')" />
           </v-col>
-          <v-col cols="6" sm="3" md="1">
-            <v-text-field v-model="to" type="date" :label="$t('purchasing.orders.to')" />
+          <v-col cols="6" sm="3" md="2">
+            <DateField v-model="to" :min="from" :label="$t('purchasing.orders.to')" />
           </v-col>
         </v-row>
 
@@ -120,7 +122,7 @@ const document = (bill: PurchaseBill) => `${bill.establishment}-${bill.emissionP
           <template #item.document="{ item }">{{ document(item) }}</template>
           <template #item.supplier="{ item }">
             {{ item.supplier?.legalName ?? '—' }}
-            <div v-if="item.supplier" class="text-body-2 text-medium-emphasis">{{ item.supplier.identification }}</div>
+            <div v-if="item.supplier" class="text-body-medium text-medium-emphasis">{{ item.supplier.identification }}</div>
           </template>
           <template #item.totalCents="{ item }">{{ formatMoney(item.totalCents, locale, item.currencyCode) }}</template>
           <template #item.status="{ item }">

@@ -57,7 +57,7 @@ async function copyCode(): Promise<void> {
       <v-card-title>{{ $t('report.title') }}</v-card-title>
 
       <v-card-text v-if="!result">
-        <p class="text-body-2 text-medium-emphasis mb-4">{{ $t('report.intro') }}</p>
+        <p class="text-body-medium text-medium-emphasis mb-4">{{ $t('report.intro') }}</p>
 
         <v-textarea
           v-model="message"
@@ -69,10 +69,10 @@ async function copyCode(): Promise<void> {
           auto-grow
           autofocus
         />
-        <p class="text-caption text-medium-emphasis mt-1 mb-3">{{ $t('report.privacy') }}</p>
+        <p class="text-body-small text-medium-emphasis mt-1 mb-3">{{ $t('report.privacy') }}</p>
 
         <v-checkbox v-model="includeActivity" :label="$t('report.includeActivity')" />
-        <p class="text-caption text-medium-emphasis ml-8">{{ $t('report.includeActivityHint') }}</p>
+        <p class="text-body-small text-medium-emphasis ml-8">{{ $t('report.includeActivityHint') }}</p>
 
         <v-alert v-if="error" type="error" class="mt-4">{{ error }}</v-alert>
       </v-card-text>
@@ -83,8 +83,8 @@ async function copyCode(): Promise<void> {
         </v-alert>
         <div v-if="result.sent" class="d-flex align-center ga-2 mt-4">
           <div class="flex-grow-1">
-            <div class="text-caption text-medium-emphasis">{{ $t('report.code') }}</div>
-            <code class="text-body-2 text-break">{{ result.id }}</code>
+            <div class="text-body-small text-medium-emphasis">{{ $t('report.code') }}</div>
+            <code class="text-body-medium text-break">{{ result.id }}</code>
           </div>
           <v-btn
             variant="tonal"

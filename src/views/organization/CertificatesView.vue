@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
+import { formatDate } from '@/utils/format';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { useFiscalStore } from '@/stores/fiscal';
 import PageHeader from '@/components/ui/PageHeader.vue';
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const auth = useAuthStore();
 const store = useFiscalStore();
 
@@ -81,7 +82,7 @@ onMounted(() => {
 
     <v-card>
       <v-card-title v-if="props.embedded" class="d-flex align-center justify-space-between">
-        <span class="text-body-1 font-weight-medium">{{ $t('certificates.title') }}</span>
+        <span class="text-body-large font-weight-medium">{{ $t('certificates.title') }}</span>
         <v-btn v-if="canManage" size="small" variant="tonal" color="primary" prepend-icon="mdi-upload"
           @click="showUploadDialog = true">
           {{ $t('invoices.uploadCertificate') }}
@@ -105,8 +106,8 @@ onMounted(() => {
           </v-list-item-title>
           <v-list-item-subtitle>
             {{ $t('certificates.validRange', {
-              from: new Date(cert.valid_from).toLocaleDateString(locale),
-              to: new Date(cert.valid_until).toLocaleDateString(locale),
+              from: formatDate(cert.valid_from),
+              to: formatDate(cert.valid_until),
             }) }}
           </v-list-item-subtitle>
           <template #append v-if="canManage && cert.status === 'active'">
@@ -128,7 +129,7 @@ onMounted(() => {
           <v-alert v-if="uploadError" type="error" class="mb-4">
             {{ uploadError }}
           </v-alert>
-          <p class="text-caption text-medium-emphasis mb-3">
+          <p class="text-body-small text-medium-emphasis mb-3">
             {{ $t('certificates.encryptedHint') }}
           </p>
           <v-file-input
@@ -152,7 +153,7 @@ onMounted(() => {
         <v-card-actions>
           <v-spacer />
           <v-btn variant="text" @click="showUploadDialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="primary" :loading="store.saving" :disabled="!selectedFile || !password" @click="submit">
+          <v-btn variant="flat" color="primary" :loading="store.saving" :disabled="!selectedFile || !password" @click="submit">
             {{ $t('common.upload') }}
           </v-btn>
         </v-card-actions>

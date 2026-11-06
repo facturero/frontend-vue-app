@@ -7,6 +7,8 @@
  * importes salen como «Deudor»/«Acreedor» (el saldo neto con su signo en columnas separadas).
  */
 import { computed, onMounted, ref, watch } from 'vue';
+import { formatDate } from '@/utils/format';
+import DateField from '@/components/ui/DateField.vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { todayLocal, useAccountingStore } from '@/stores/accounting';
@@ -51,7 +53,7 @@ const headers = computed(() => [
   { title: t('accounting.reports.closingCredit'), key: 'cc', sortable: false, align: 'end' as const },
 ]);
 const ledgerHeaders = computed(() => [
-  { title: t('common.date'), key: 'entryDate', sortable: false, align: 'start' as const },
+  { title: t('common.date'), key: 'entryDate', value: (item: Record<string, unknown>) => formatDate(item.entryDate as string), sortable: false, align: 'start' as const },
   { title: t('accounting.journal.number'), key: 'entryNumber', sortable: false, align: 'start' as const },
   { title: t('common.description'), key: 'description', sortable: false, align: 'start' as const },
   { title: t('accounting.entry.debit'), key: 'debitCents', sortable: false, align: 'end' as const },
@@ -136,8 +138,8 @@ function closeLedger(): void {
       <v-card class="mb-4">
         <v-card-text>
           <v-row>
-            <v-col cols="6" sm="2"><v-text-field v-model="from" type="date" :label="$t('accounting.journal.from')" /></v-col>
-            <v-col cols="6" sm="2"><v-text-field v-model="to" type="date" :label="$t('accounting.journal.to')" /></v-col>
+            <v-col cols="6" sm="2"><DateField v-model="from" :max="to" :label="$t('accounting.journal.from')" /></v-col>
+            <v-col cols="6" sm="2"><DateField v-model="to" :min="from" :label="$t('accounting.journal.to')" /></v-col>
             <template v-if="!accountId">
               <v-col cols="12" sm="3"><v-select v-model="costCenterId" :items="costCenterOptions" :label="$t('accounting.entry.costCenter')" clearable /></v-col>
               <v-col cols="12" sm="2"><v-select v-model="level" :items="levelOptions" :label="$t('accounting.reports.level')" /></v-col>
@@ -151,7 +153,7 @@ function closeLedger(): void {
       <v-card v-if="accountId">
         <v-card-title>{{ ledgerAccount ? `${ledgerAccount.code}  ${ledgerAccount.name}` : '' }}</v-card-title>
         <v-card-text>
-          <p class="text-body-2 text-medium-emphasis mb-4">
+          <p class="text-body-medium text-medium-emphasis mb-4">
             {{ $t('accounting.reports.opening') }}:
             <span class="font-weight-medium">{{ formatMoney(store.ledger?.openingCents ?? 0, locale, store.currency) }}</span>
           </p>

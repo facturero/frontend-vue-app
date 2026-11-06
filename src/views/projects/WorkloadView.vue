@@ -128,8 +128,8 @@ async function saveCapacity(): Promise<void> {
               <div class="d-flex align-center ga-2 py-2">
                 <UserAvatar :user-id="p.userId" :size="28" :tooltip="false" />
                 <div>
-                  <div class="text-body-2">{{ displayName(store.users.get(p.userId)) || t('projects.share.unknownUser') }}</div>
-                  <div class="text-caption text-medium-emphasis">
+                  <div class="text-body-medium">{{ displayName(store.users.get(p.userId)) || t('projects.share.unknownUser') }}</div>
+                  <div class="text-body-small text-medium-emphasis">
                     {{ t('projects.workload.capacity', { amount: formatMinutes(p.weeklyMinutes) }) }}
                     <v-btn v-if="canEditCapacity" icon="mdi-pencil-outline" size="x-small" variant="text" :aria-label="t('projects.workload.editCapacity')" @click="editCapacity(p)" />
                   </div>
@@ -138,9 +138,9 @@ async function saveCapacity(): Promise<void> {
             </td>
             <td v-for="(w, i) in data.weekStarts" :key="w" class="text-center" style="min-width: 120px">
               <div v-if="load_(p, i).taskCount" class="cursor-pointer py-2" @click="cell = { person: p, weekStart: w }">
-                <div class="text-body-2 font-weight-medium" :class="`text-${load_(p, i).color}`">{{ formatMinutes(load_(p, i).minutes) }}</div>
+                <div class="text-body-medium font-weight-medium" :class="`text-${load_(p, i).color}`">{{ formatMinutes(load_(p, i).minutes) }}</div>
                 <v-progress-linear :model-value="Math.min(100, load_(p, i).percent)" :color="load_(p, i).color" rounded height="6" class="my-1" />
-                <div class="text-caption text-medium-emphasis">{{ t('projects.workload.tasks', load_(p, i).taskCount) }}</div>
+                <div class="text-body-small text-medium-emphasis">{{ t('projects.workload.tasks', load_(p, i).taskCount) }}</div>
               </div>
               <span v-else class="text-medium-emphasis">—</span>
             </td>
@@ -151,7 +151,7 @@ async function saveCapacity(): Promise<void> {
         </tbody>
       </v-table>
     </v-card>
-    <div class="text-body-2 text-medium-emphasis mt-2">{{ t('projects.workload.hint') }}</div>
+    <div class="text-body-medium text-medium-emphasis mt-2">{{ t('projects.workload.hint') }}</div>
 
     <v-dialog :model-value="!!cell" max-width="560" scrollable @update:model-value="(v) => !v && (cell = null)">
       <v-card v-if="cell">
@@ -183,13 +183,13 @@ async function saveCapacity(): Promise<void> {
       <v-card v-if="capacityFor">
         <v-card-title>{{ t('projects.workload.editCapacity') }}</v-card-title>
         <v-card-text class="d-flex flex-column ga-2">
-          <div class="text-body-2">{{ displayName(store.users.get(capacityFor.userId)) }}</div>
+          <div class="text-body-medium">{{ displayName(store.users.get(capacityFor.userId)) }}</div>
           <v-text-field v-model="capacityText" :label="t('projects.workload.hoursPerWeek')" :hint="t('projects.workload.capacityHint')" persistent-hint autofocus @keyup.enter="saveCapacity" />
         </v-card-text>
         <v-card-actions class="flex-wrap ga-2">
           <v-spacer />
           <v-btn variant="text" @click="capacityFor = null">{{ t('common.cancel') }}</v-btn>
-          <v-btn color="primary" :disabled="capacityParsed === null" @click="saveCapacity">{{ t('common.save') }}</v-btn>
+          <v-btn variant="flat" color="primary" :disabled="capacityParsed === null" @click="saveCapacity">{{ t('common.save') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

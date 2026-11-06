@@ -6,6 +6,7 @@
  * agrupación suman a sus hijas. Una cuenta con asientos no cambia de código ni de tipo: solo se renombra o se desactiva.
  */
 import { computed, onMounted, ref } from 'vue';
+import { notify } from '@/composable/useNotify';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { useAccountingStore } from '@/stores/accounting';
@@ -21,7 +22,6 @@ const store = useAccountingStore();
 
 const canManage = computed(() => auth.can('account:manage'));
 const loadError = ref<string | null>(null);
-const snackbar = ref<string | null>(null);
 const tab = ref<'accounts' | 'costCenters'>('accounts');
 const search = ref('');
 const showInactive = ref(false);
@@ -120,7 +120,7 @@ async function saveAccount(): Promise<void> {
       });
     }
     accountDialog.value = false;
-    snackbar.value = t('accounting.accounts.saved');
+    notify.success(t('accounting.accounts.saved'));
   } catch {
     dialogError.value = store.error;
   }
@@ -130,7 +130,7 @@ async function toggleAccount(account: Account): Promise<void> {
   try {
     await store.updateAccount(account.id, { status: account.status === 'active' ? 'inactive' : 'active' });
   } catch {
-    snackbar.value = store.error;
+    notify.error(store.error);
   }
 }
 
@@ -152,7 +152,7 @@ async function saveCostCenter(): Promise<void> {
     if (ccEditing.value) await store.updateCostCenter(ccEditing.value.id, { name: ccForm.value.name });
     else await store.createCostCenter(ccForm.value);
     ccDialog.value = false;
-    snackbar.value = t('accounting.accounts.saved');
+    notify.success(t('accounting.accounts.saved'));
   } catch {
     dialogError.value = store.error;
   }
@@ -162,7 +162,7 @@ async function toggleCostCenter(cc: CostCenter): Promise<void> {
   try {
     await store.updateCostCenter(cc.id, { status: cc.status === 'active' ? 'inactive' : 'active' });
   } catch {
-    snackbar.value = store.error;
+    notify.error(store.error);
   }
 }
 </script>
@@ -240,7 +240,7 @@ async function toggleCostCenter(cc: CostCenter): Promise<void> {
       </v-card-text>
 
       <v-card-text v-else>
-        <p class="text-body-2 text-medium-emphasis mb-4">{{ $t('accounting.costCenters.intro') }}</p>
+        <p class="text-body-medium text-medium-emphasis mb-4">{{ $t('accounting.costCenters.intro') }}</p>
         <v-data-table :headers="costCenterHeaders" :items="store.costCenters" :items-per-page="-1" hide-default-footer>
           <template #item.status="{ item }">
             <v-chip size="x-small" variant="flat" :color="item.status === 'active' ? 'lightsuccess' : 'lightwarning'">
@@ -286,7 +286,7 @@ async function toggleCostCenter(cc: CostCenter): Promise<void> {
         <v-card-actions class="flex-wrap ga-2">
           <v-spacer />
           <v-btn variant="text" @click="accountDialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="primary" :loading="store.saving" :disabled="!accountForm.code || !accountForm.name" @click="saveAccount">{{ $t('common.save') }}</v-btn>
+          <v-btn variant="flat" color="primary" :loading="store.saving" :disabled="!accountForm.code || !accountForm.name" @click="saveAccount">{{ $t('common.save') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -302,11 +302,10 @@ async function toggleCostCenter(cc: CostCenter): Promise<void> {
         <v-card-actions class="flex-wrap ga-2">
           <v-spacer />
           <v-btn variant="text" @click="ccDialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="primary" :loading="store.saving" :disabled="!ccForm.code || !ccForm.name" @click="saveCostCenter">{{ $t('common.save') }}</v-btn>
+          <v-btn variant="flat" color="primary" :loading="store.saving" :disabled="!ccForm.code || !ccForm.name" @click="saveCostCenter">{{ $t('common.save') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <v-snackbar :model-value="!!snackbar" timeout="3000" @update:model-value="snackbar = null">{{ snackbar }}</v-snackbar>
   </v-container>
 </template>

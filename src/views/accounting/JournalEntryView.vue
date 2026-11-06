@@ -7,6 +7,8 @@
  * lectura: se corrige con una reversa, que deja ambos a la vista.
  */
 import { computed, onMounted, ref } from 'vue';
+import DateField from '@/components/ui/DateField.vue';
+import { notify } from '@/composable/useNotify';
 import { useRoute, useRouter } from 'vue-router';
 import { useDisplay } from 'vuetify';
 import { useI18n } from 'vue-i18n';
@@ -38,7 +40,6 @@ const entryId = computed(() => (typeof route.params.id === 'string' ? route.para
 const entry = ref<JournalEntry | null>(null);
 const loadError = ref<string | null>(null);
 const actionError = ref<string | null>(null);
-const snackbar = ref<string | null>(null);
 
 const entryDate = ref(todayLocal());
 const description = ref('');
@@ -150,10 +151,10 @@ async function saveDraft(): Promise<void> {
   try {
     if (entryId.value) {
       entry.value = await store.updateEntry(entryId.value, payload());
-      snackbar.value = t('accounting.entry.saved');
+      notify.success(t('accounting.entry.saved'));
     } else {
       const created = await store.createEntry({ ...payload(), post: false });
-      snackbar.value = t('accounting.entry.saved');
+      notify.success(t('accounting.entry.saved'));
       await router.replace({ name: 'accounting-entry', params: { id: created.id } });
       entry.value = created;
     }
@@ -172,7 +173,7 @@ async function post(): Promise<void> {
     } else {
       saved = await store.createEntry({ ...payload(), post: true });
     }
-    snackbar.value = t('accounting.entry.posted', { number: saved.number ?? '' });
+    notify.success(t('accounting.entry.posted', { number: saved.number ?? '' }));
     await router.replace({ name: 'accounting-entry', params: { id: saved.id } });
     entry.value = await store.getEntry(saved.id);
     fromEntry(entry.value);
@@ -204,7 +205,7 @@ async function reverse(): Promise<void> {
   try {
     const res = await store.reverseEntry(entryId.value, { reason: reverseReason.value.trim(), entryDate: reverseDate.value || undefined });
     reverseDialog.value = false;
-    snackbar.value = t('accounting.entry.reversedDone', { number: res.reversal.number ?? '' });
+    notify.success(t('accounting.entry.reversedDone', { number: res.reversal.number ?? '' }));
     entry.value = await store.getEntry(entryId.value);
   } catch {
     reverseDialog.value = false;
@@ -252,7 +253,7 @@ const money = (c: number): string => formatMoney(c, locale.value, store.currency
     <v-card>
       <v-card-text class="d-flex flex-column ga-4">
         <v-row>
-          <v-col cols="12" sm="3"><v-text-field v-model="entryDate" type="date" :label="$t('accounting.entry.date')" :readonly="readonly" /></v-col>
+          <v-col cols="12" sm="3"><DateField v-model="entryDate" :label="$t('accounting.entry.date')" :readonly="readonly" /></v-col>
           <v-col cols="12" sm="6"><v-text-field v-model="description" :label="$t('common.description')" :readonly="readonly" maxlength="255" /></v-col>
           <v-col cols="12" sm="3"><v-text-field v-model="reference" :label="$t('accounting.entry.reference')" :readonly="readonly" maxlength="60" /></v-col>
         </v-row>
@@ -310,7 +311,7 @@ const money = (c: number): string => formatMoney(c, locale.value, store.currency
           <v-sheet v-for="line in lines" :key="line.key" border rounded class="pa-3 d-flex flex-column ga-3">
             <template v-if="readonly">
               <div class="font-weight-medium">{{ accountLabel(line.accountId) }}</div>
-              <div v-if="line.description" class="text-body-2 text-medium-emphasis">{{ line.description }}</div>
+              <div v-if="line.description" class="text-body-medium text-medium-emphasis">{{ line.description }}</div>
               <div class="d-flex justify-space-between">
                 <span>{{ $t('accounting.entry.debit') }}: {{ money(parseMoneyToCents(line.debit) ?? 0) }}</span>
                 <span>{{ $t('accounting.entry.credit') }}: {{ money(parseMoneyToCents(line.credit) ?? 0) }}</span>
@@ -340,7 +341,7 @@ const money = (c: number): string => formatMoney(c, locale.value, store.currency
         <div v-if="!readonly" class="d-flex flex-wrap align-center ga-2">
           <v-chip v-if="totals.balanced" variant="flat" color="lightsuccess">{{ $t('accounting.entry.balanced') }}</v-chip>
           <v-chip v-else variant="flat" color="lightwarning">{{ $t('accounting.entry.difference', { amount: money(Math.abs(totals.difference)) }) }}</v-chip>
-          <span v-if="hasInvalidAmount" class="text-body-2 text-error">{{ $t('accounting.entry.invalidAmount') }}</span>
+          <span v-if="hasInvalidAmount" class="text-body-medium text-error">{{ $t('accounting.entry.invalidAmount') }}</span>
         </div>
       </v-card-text>
 
@@ -348,7 +349,7 @@ const money = (c: number): string => formatMoney(c, locale.value, store.currency
         <v-btn v-if="isDraft" color="error" variant="text" prepend-icon="mdi-delete-outline" @click="deleteDialog = true">{{ $t('accounting.entry.deleteDraft') }}</v-btn>
         <v-spacer />
         <v-btn variant="text" :disabled="!canSave" :loading="store.saving" @click="saveDraft">{{ $t('accounting.entry.saveDraft') }}</v-btn>
-        <v-btn v-if="canPost" color="primary" :disabled="!canPostNow" :loading="store.saving" @click="post">{{ $t('accounting.entry.post') }}</v-btn>
+        <v-btn variant="flat" v-if="canPost" color="primary" :disabled="!canPostNow" :loading="store.saving" @click="post">{{ $t('accounting.entry.post') }}</v-btn>
       </v-card-actions>
     </v-card>
 
@@ -359,7 +360,7 @@ const money = (c: number): string => formatMoney(c, locale.value, store.currency
         <v-card-actions class="flex-wrap ga-2">
           <v-spacer />
           <v-btn variant="text" @click="deleteDialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="error" :loading="store.saving" @click="remove">{{ $t('common.delete') }}</v-btn>
+          <v-btn variant="flat" color="error" :loading="store.saving" @click="remove">{{ $t('common.delete') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -368,18 +369,17 @@ const money = (c: number): string => formatMoney(c, locale.value, store.currency
       <v-card>
         <v-card-title>{{ $t('accounting.entry.reverse') }}</v-card-title>
         <v-card-text class="d-flex flex-column ga-4">
-          <p class="text-body-2 text-medium-emphasis">{{ $t('accounting.entry.reverseIntro') }}</p>
+          <p class="text-body-medium text-medium-emphasis">{{ $t('accounting.entry.reverseIntro') }}</p>
           <v-textarea v-model="reverseReason" :label="$t('accounting.entry.reverseReason')" rows="2" maxlength="200" />
-          <v-text-field v-model="reverseDate" type="date" :label="$t('accounting.entry.reverseDate')" :hint="$t('accounting.entry.reverseDateHint')" persistent-hint />
+          <DateField v-model="reverseDate" :label="$t('accounting.entry.reverseDate')" :hint="$t('accounting.entry.reverseDateHint')" persistent-hint />
         </v-card-text>
         <v-card-actions class="flex-wrap ga-2">
           <v-spacer />
           <v-btn variant="text" @click="reverseDialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="warning" :disabled="reverseReason.trim().length < 3" :loading="store.saving" @click="reverse">{{ $t('accounting.entry.reverse') }}</v-btn>
+          <v-btn variant="flat" color="warning" :disabled="reverseReason.trim().length < 3" :loading="store.saving" @click="reverse">{{ $t('accounting.entry.reverse') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <v-snackbar :model-value="!!snackbar" timeout="4000" @update:model-value="snackbar = null">{{ snackbar }}</v-snackbar>
   </v-container>
 </template>

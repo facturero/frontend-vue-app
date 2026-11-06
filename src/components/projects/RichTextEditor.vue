@@ -159,7 +159,7 @@ onBeforeUnmount(() => editor.value?.destroy());
       se desliza con `transform`, un `position: fixed` se mide desde el panel y no desde la ventana, y la lista salía fuera de pantalla.
     -->
     <Teleport to="body">
-      <v-card v-if="mention.open && mention.items.length" class="rte-suggestions" :style="{ left: `${mention.x}px`, top: `${mention.y}px` }" elevation="8">
+      <v-card v-if="mention.open && mention.items.length" class="rte-suggestions" :style="{ left: `${mention.x}px`, top: `${mention.y}px` }" elevation="3">
         <v-list density="compact">
           <v-list-item
             v-for="(u, i) in mention.items"

@@ -179,7 +179,7 @@ onMounted(async () => {
                 <v-radio :label="$t('customers.company')" value="company" />
               </v-radio-group>
 
-              <v-row dense>
+              <v-row density="compact">
                 <v-col :cols="type === 'company' ? 'md-8' : '12'">
                   <v-text-field v-model="businessName" :label="type === 'company' ? $t('customers.legalName') : $t('customers.fullName')" required class="mb-4" />
                 </v-col>
@@ -188,7 +188,7 @@ onMounted(async () => {
                 </v-col>
               </v-row>
 
-              <v-row dense>
+              <v-row density="compact">
                 <v-col cols="12" md="4">
                   <v-select v-model="identificationTypeId" :items="idTypes" item-title="name" item-value="id"
                     :label="$t('customers.idType')" clearable
@@ -202,7 +202,7 @@ onMounted(async () => {
                 </v-col>
               </v-row>
 
-              <v-row dense>
+              <v-row density="compact">
                 <v-col cols="12" md="6">
                   <v-text-field v-model="email" :label="$t('common.email')" type="email" class="mb-4" />
                 </v-col>
@@ -227,7 +227,7 @@ onMounted(async () => {
 
       <v-col cols="12" md="4">
         <v-card>
-          <v-card-title class="text-h6">{{ $t('customers.avatar') }}</v-card-title>
+          <v-card-title class="text-title-large">{{ $t('customers.avatar') }}</v-card-title>
           <v-card-text>
             <ImageUploader
               ref="imageUploaderRef"

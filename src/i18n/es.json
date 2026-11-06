@@ -529,6 +529,9 @@
       "tax_identification_type_upserted": "Tipo de identificación guardado",
       "tax_tax_rate_upserted": "Tasa de impuesto guardada",
       "purchasing_supplier_upserted": "Proveedor registrado o modificado",
+      "purchasing_sri_document_imported": "Comprobantes del SRI importados",
+      "purchasing_sri_document_downloaded": "Comprobante del SRI descargado",
+      "purchasing_sri_document_unavailable": "Comprobante del SRI no disponible",
       "purchasing_order_created": "Orden de compra creada",
       "purchasing_order_updated": "Orden de compra modificada",
       "purchasing_order_submitted": "Orden de compra enviada",
@@ -3793,7 +3796,8 @@
     "due": {
       "today": "Hoy",
       "tomorrow": "Mañana",
-      "yesterday": "Ayer"
+      "yesterday": "Ayer",
+      "overdue": "Vencida"
     },
     "myTasks": {
       "title": "Mis tareas",

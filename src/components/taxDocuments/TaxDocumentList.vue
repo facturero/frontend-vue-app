@@ -4,6 +4,7 @@
  * el mismo cuadro de estado de las facturas (reintento, XML, RIDE), porque el comprobante sigue el mismo camino hacia el SRI.
  */
 import { computed, onMounted, ref, watch } from 'vue';
+import { formatDate as fmtDate } from '@/utils/format';
 import { useI18n } from 'vue-i18n';
 import { useTaxDocumentsStore } from '@/stores/taxDocuments';
 import { fromCents } from '@/utils/taxDocuments';
@@ -12,7 +13,7 @@ import FiscalStatusCard from '@/components/invoices/FiscalStatusCard.vue';
 
 const props = defineProps<{ documentType: Extract<FiscalDocumentType, '06' | '07'> }>();
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const store = useTaxDocumentsStore();
 
 const status = ref<FiscalInvoiceStatus | null>(null);
@@ -52,13 +53,12 @@ const STATUS_COLOR: Record<FiscalInvoiceStatus, string> = {
 };
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString(locale.value, { dateStyle: 'medium' });
+  return fmtDate(iso);
 }
 
 /** `AAAA-MM-DD` → fecha legible, sin pasar por la zona horaria (es una fecha de calendario). */
 function formatDay(day: string): string {
-  const [y, m, d] = day.split('-').map(Number);
-  return new Date(y, m - 1, d).toLocaleDateString(locale.value, { dateStyle: 'medium' });
+  return fmtDate(day);
 }
 
 function load(page = 1): Promise<void> {
@@ -105,17 +105,17 @@ defineExpose({ reload: () => load(store.page) });
         <template #item.party="{ item }">
           <template v-if="item.summary?.kind === 'withholding'">
             {{ item.summary.subject_name }}
-            <div class="text-body-2 text-medium-emphasis">{{ item.summary.subject_identification }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ item.summary.subject_identification }}</div>
           </template>
           <template v-else-if="item.summary?.kind === 'delivery_guide'">
             {{ item.summary.carrier_name }}
-            <div class="text-body-2 text-medium-emphasis">{{ item.summary.plate }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ item.summary.plate }}</div>
           </template>
         </template>
         <template #item.support="{ item }">
           <template v-if="item.summary?.kind === 'withholding'">
             {{ item.summary.support_number }}
-            <div class="text-body-2 text-medium-emphasis">{{ $t('taxDocuments.withholdings.period') }} {{ item.summary.fiscal_period }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ $t('taxDocuments.withholdings.period') }} {{ item.summary.fiscal_period }}</div>
           </template>
           <template v-else-if="item.summary?.kind === 'delivery_guide'">
             {{ formatDay(item.summary.transport_start) }} – {{ formatDay(item.summary.transport_end) }}

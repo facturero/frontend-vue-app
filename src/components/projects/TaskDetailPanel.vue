@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { formatDateTime } from '@/utils/format';
+import { useConfirm } from '@/composable/useConfirm';
 import { useI18n } from 'vue-i18n';
 import { useDisplay } from 'vuetify';
+import DateField from '@/components/ui/DateField.vue';
 import { useAuthStore } from '@/stores/auth';
 import { useProjectsStore } from '@/stores/projects';
 import { FIELD_ICON, displayName } from '@/utils/projects';
@@ -21,7 +24,8 @@ import UserAvatar from './UserAvatar.vue';
  * (blur, Enter o al elegir), con la versión de la tarea: si otra persona la cambió entretanto, el servidor responde 409 y el store
  * recarga la tarea, así nadie pisa el cambio de otro sin verlo.
  */
-const { t, locale } = useI18n();
+const { t } = useI18n();
+const confirm = useConfirm();
 const { smAndDown } = useDisplay();
 const store = useProjectsStore();
 const auth = useAuthStore();
@@ -48,7 +52,6 @@ function docFromText(text: string | null): RichDoc | null {
   return { type: 'doc', content: text.split('\n').map((line) => (line ? { type: 'paragraph', content: [{ type: 'text', text: line }] } : { type: 'paragraph' })) };
 }
 const newSubtask = ref('');
-const confirmDelete = ref(false);
 const subtaskInput = ref<{ focus: () => void } | null>(null);
 
 watch(
@@ -190,7 +193,8 @@ async function addSubtask(): Promise<void> {
 
 async function remove(): Promise<void> {
   if (!task.value) return;
-  confirmDelete.value = false;
+  const ok = await confirm({ title: t('projects.task.deleteTitle'), text: t('projects.task.deleteText'), confirmText: t('common.delete'), destructive: true });
+  if (!ok || !task.value) return;
   try {
     await store.deleteTask(task.value.id);
   } catch {
@@ -201,7 +205,7 @@ async function remove(): Promise<void> {
 const createdLine = computed(() => {
   if (!task.value) return '';
   const who = displayName(store.users.get(task.value.createdBy)) || t('projects.share.unknownUser');
-  const when = new Intl.DateTimeFormat(locale.value, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(task.value.createdAt));
+  const when = formatDateTime(task.value.createdAt);
   return t('projects.detail.createdBy', { who, when });
 });
 </script>
@@ -252,7 +256,7 @@ const createdLine = computed(() => {
             />
           </v-list>
         </v-menu>
-        <v-btn v-if="task.canEdit" icon="mdi-trash-can-outline" variant="text" size="small" :aria-label="t('common.delete')" @click="confirmDelete = true" />
+        <v-btn v-if="task.canEdit" icon="mdi-trash-can-outline" variant="text" size="small" :aria-label="t('common.delete')" @click="remove" />
         <v-btn icon="mdi-close" variant="text" size="small" :aria-label="t('common.close')" @click="store.closeTask()" />
       </div>
 
@@ -264,7 +268,7 @@ const createdLine = computed(() => {
         <v-text-field
           v-model="title"
           variant="plain"
-          class="text-h6"
+          class="text-title-large"
           :readonly="readOnly"
           :aria-label="t('projects.task.title')"
           @blur="saveTitle"
@@ -282,7 +286,7 @@ const createdLine = computed(() => {
             </v-btn>
             <v-btn color="error" size="small" variant="text" prepend-icon="mdi-close" @click="decide('rejected')">{{ t('projects.approval.reject') }}</v-btn>
           </div>
-          <div v-else-if="task.approvalStatus === 'pending' && !task.assigneeUserId" class="text-caption mt-1">{{ t('projects.approval.needsAssignee') }}</div>
+          <div v-else-if="task.approvalStatus === 'pending' && !task.assigneeUserId" class="text-body-small mt-1">{{ t('projects.approval.needsAssignee') }}</div>
         </v-alert>
 
         <v-table density="compact">
@@ -316,27 +320,25 @@ const createdLine = computed(() => {
               <td class="text-medium-emphasis text-no-wrap">{{ t('projects.task.dueOn') }}</td>
               <td>
                 <div class="d-flex align-center ga-2">
-                  <v-text-field
+                  <DateField
                     ref="dueInput"
-                    :model-value="task.dueOn ?? ''"
-                    type="date"
+                    :model-value="task.dueOn"
                     variant="plain"
                     :readonly="readOnly"
-                    @change="(e: Event) => saveDate('dueOn', (e.target as HTMLInputElement).value)"
+                    @update:model-value="(v) => saveDate('dueOn', v ?? '')"
                   />
-                  <DueDateChip :due-on="task.dueOn" :completed="!!task.completedAt" />
+                  <DueDateChip :due-on="task.dueOn" :completed="!!task.completedAt" relative-only />
                 </div>
               </td>
             </tr>
             <tr>
               <td class="text-medium-emphasis text-no-wrap">{{ t('projects.task.startOn') }}</td>
               <td>
-                <v-text-field
-                  :model-value="task.startOn ?? ''"
-                  type="date"
+                <DateField
+                  :model-value="task.startOn"
                   variant="plain"
                   :readonly="readOnly"
-                  @change="(e: Event) => saveDate('startOn', (e.target as HTMLInputElement).value)"
+                  @update:model-value="(v) => saveDate('startOn', v ?? '')"
                 />
               </td>
             </tr>
@@ -354,7 +356,7 @@ const createdLine = computed(() => {
                   >
                     {{ p.name }}<template v-if="p.sectionName"> · {{ p.sectionName }}</template>
                   </v-chip>
-                  <span v-if="!task.projects.length" class="text-body-2 text-medium-emphasis">
+                  <span v-if="!task.projects.length" class="text-body-medium text-medium-emphasis">
                     {{ task.parent ? t('projects.task.subtaskOf', { title: task.parent.title }) : t('projects.task.personal') }}
                   </span>
                 </div>
@@ -402,7 +404,7 @@ const createdLine = computed(() => {
                       />
                     </v-card>
                   </v-menu>
-                  <span v-if="!task.blockedBy.length && !(task.canEdit && dependencyCandidates.length)" class="text-body-2 text-medium-emphasis">—</span>
+                  <span v-if="!task.blockedBy.length && !(task.canEdit && dependencyCandidates.length)" class="text-body-medium text-medium-emphasis">—</span>
                 </div>
               </td>
             </tr>
@@ -448,7 +450,7 @@ const createdLine = computed(() => {
         </v-table>
 
         <div>
-          <div class="text-body-2 text-medium-emphasis mb-1">{{ t('projects.task.description') }}</div>
+          <div class="text-body-medium text-medium-emphasis mb-1">{{ t('projects.task.description') }}</div>
           <RichTextEditor
             :key="task.id"
             v-model="descriptionDoc"
@@ -460,7 +462,7 @@ const createdLine = computed(() => {
         </div>
 
         <div v-if="!task.parent">
-          <div class="text-body-1 font-weight-medium mb-2">{{ t('projects.task.subtasks') }}</div>
+          <div class="text-body-large font-weight-medium mb-2">{{ t('projects.task.subtasks') }}</div>
           <v-list density="compact" class="pa-0">
             <v-list-item v-for="s in task.subtasks" :key="s.id" class="px-0" @click="store.openTask(s.id)">
               <template #prepend>
@@ -497,20 +499,9 @@ const createdLine = computed(() => {
         <TaskAttachments />
         <v-divider />
         <TaskConversation ref="conversation" />
-        <div class="text-caption text-medium-emphasis">{{ createdLine }}</div>
+        <div class="text-body-small text-medium-emphasis">{{ createdLine }}</div>
       </div>
     </template>
   </v-navigation-drawer>
 
-  <v-dialog v-model="confirmDelete">
-    <v-card>
-      <v-card-title>{{ t('projects.task.deleteTitle') }}</v-card-title>
-      <v-card-text>{{ t('projects.task.deleteText') }}</v-card-text>
-      <v-card-actions class="flex-wrap ga-2">
-        <v-spacer />
-        <v-btn variant="text" @click="confirmDelete = false">{{ t('common.cancel') }}</v-btn>
-        <v-btn color="error" @click="remove">{{ t('common.delete') }}</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
 </template>

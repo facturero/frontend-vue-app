@@ -397,7 +397,7 @@ defineExpose({ fit });
 
     <v-chip
       v-if="zoomedIn"
-      class="position-absolute text-caption"
+      class="position-absolute text-body-small"
       style="top: 8px; right: 8px; pointer-events: none"
       color="lightprimary"
       size="small"

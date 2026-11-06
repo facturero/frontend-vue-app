@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
+import { useConfirm } from '@/composable/useConfirm';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
@@ -13,6 +14,7 @@ import { fileUrl } from '@/composable/useFileUrl';
 
 
 const { t } = useI18n();
+const confirm = useConfirm();
 const route = useRoute();
 const router = useRouter();
 const auth = useAuthStore();
@@ -75,7 +77,7 @@ async function submitContact(): Promise<void> {
 }
 
 async function removeContact(id: string): Promise<void> {
-  if (!confirm(t('customers.removeContactConfirm'))) return;
+  if (!(await confirm({ title: t('customers.removeContactConfirm'), confirmText: t('common.delete'), destructive: true }))) return;
   await customerApi.removeContact(id);
   await store.fetchById(customerId.value);
 }
@@ -126,7 +128,7 @@ async function submitAddress(): Promise<void> {
 }
 
 async function removeAddress(id: string): Promise<void> {
-  if (!confirm(t('customers.removeAddressConfirm'))) return;
+  if (!(await confirm({ title: t('customers.removeAddressConfirm'), confirmText: t('common.delete'), destructive: true }))) return;
   await customerApi.removeAddress(id);
   await store.fetchById(customerId.value);
 }
@@ -156,7 +158,7 @@ async function removeTag(tagId: string): Promise<void> {
 
 // --------- Acciones principales ---------
 async function disable(): Promise<void> {
-  if (!confirm(t('customers.deactivateConfirm'))) return;
+  if (!(await confirm({ title: t('customers.deactivateConfirm'), confirmText: t('customers.disable'), destructive: true }))) return;
   disabling.value = true;
   try {
     await store.disable(customerId.value);
@@ -211,48 +213,48 @@ onMounted(async () => {
         <v-col cols="12" md="8">
           <!-- Información general -->
           <v-card class="mb-4">
-            <v-card-title class="text-h6">{{ $t('common.generalInfo') }}</v-card-title>
+            <v-card-title class="text-title-large">{{ $t('common.generalInfo') }}</v-card-title>
             <v-card-text>
               <v-row>
                 <v-col cols="6">
-                  <p class="text-caption text-medium-emphasis">{{ $t('customers.headers.businessName') }}</p>
-                  <p class="text-body-1 mb-3">{{ customer.businessName }}</p>
+                  <p class="text-body-small text-medium-emphasis">{{ $t('customers.headers.businessName') }}</p>
+                  <p class="text-body-large mb-3">{{ customer.businessName }}</p>
                 </v-col>
                 <v-col cols="6">
-                  <p class="text-caption text-medium-emphasis">{{ $t('customers.tradeName') }}</p>
-                  <p class="text-body-1 mb-3">{{ customer.tradeName || '—' }}</p>
+                  <p class="text-body-small text-medium-emphasis">{{ $t('customers.tradeName') }}</p>
+                  <p class="text-body-large mb-3">{{ customer.tradeName || '—' }}</p>
                 </v-col>
                 <v-col cols="6">
-                  <p class="text-caption text-medium-emphasis">{{ $t('common.type') }}</p>
+                  <p class="text-body-small text-medium-emphasis">{{ $t('common.type') }}</p>
                   <v-chip size="x-small"
                     :color="customer.type === 'company' ? 'primary' : 'info'" class="mb-3">
                     {{ customer.type === 'company' ? $t('customers.company') : $t('customers.person') }}
                   </v-chip>
                 </v-col>
                 <v-col cols="6">
-                  <p class="text-caption text-medium-emphasis">{{ $t('common.status') }}</p>
+                  <p class="text-body-small text-medium-emphasis">{{ $t('common.status') }}</p>
                   <v-chip size="x-small" :color="customer.status === 'active' ? 'success' : 'warning'" class="mb-3">
                     {{ customer.status === 'active' ? $t('common.active') : $t('common.inactive') }}
                   </v-chip>
                 </v-col>
                 <v-col cols="6">
-                  <p class="text-caption text-medium-emphasis">{{ $t('customers.headers.identification') }}</p>
-                  <p class="text-body-1 mb-3">
+                  <p class="text-body-small text-medium-emphasis">{{ $t('customers.headers.identification') }}</p>
+                  <p class="text-body-large mb-3">
                     {{ customer.identification || '—' }}
-                    <span class="text-caption text-medium-emphasis">({{ idTypeName }})</span>
+                    <span class="text-body-small text-medium-emphasis">({{ idTypeName }})</span>
                   </p>
                 </v-col>
                 <v-col cols="6">
-                  <p class="text-caption text-medium-emphasis">{{ $t('common.country') }}</p>
-                  <p class="text-body-1 mb-3">{{ customer.countryCode }}</p>
+                  <p class="text-body-small text-medium-emphasis">{{ $t('common.country') }}</p>
+                  <p class="text-body-large mb-3">{{ customer.countryCode }}</p>
                 </v-col>
                 <v-col cols="6">
-                  <p class="text-caption text-medium-emphasis">{{ $t('common.email') }}</p>
-                  <p class="text-body-1 mb-3">{{ customer.email || '—' }}</p>
+                  <p class="text-body-small text-medium-emphasis">{{ $t('common.email') }}</p>
+                  <p class="text-body-large mb-3">{{ customer.email || '—' }}</p>
                 </v-col>
                 <v-col cols="6">
-                  <p class="text-caption text-medium-emphasis">{{ $t('common.phone') }}</p>
-                  <p class="text-body-1 mb-3">{{ customer.phone || '—' }}</p>
+                  <p class="text-body-small text-medium-emphasis">{{ $t('common.phone') }}</p>
+                  <p class="text-body-large mb-3">{{ customer.phone || '—' }}</p>
                 </v-col>
               </v-row>
             </v-card-text>
@@ -260,7 +262,7 @@ onMounted(async () => {
 
           <!-- Contactos -->
           <v-card v-if="customer.type === 'company'" class="mb-4">
-            <v-card-title class="text-h6 d-flex align-center">
+            <v-card-title class="text-title-large d-flex align-center">
               {{ $t('customers.contacts') }}
               <v-spacer />
               <v-btn v-if="canUpdate" size="small" variant="tonal" color="primary" prepend-icon="mdi-plus"
@@ -294,13 +296,13 @@ onMounted(async () => {
                   </tr>
                 </tbody>
               </v-table>
-              <p v-else class="text-body-2 text-medium-emphasis">{{ $t('customers.noContacts') }}</p>
+              <p v-else class="text-body-medium text-medium-emphasis">{{ $t('customers.noContacts') }}</p>
             </v-card-text>
           </v-card>
 
           <!-- Direcciones -->
           <v-card v-if="customer.type === 'company'" class="mb-4">
-            <v-card-title class="text-h6 d-flex align-center">
+            <v-card-title class="text-title-large d-flex align-center">
               {{ $t('customers.addresses') }}
               <v-spacer />
               <v-btn v-if="canUpdate" size="small" variant="tonal" color="primary" prepend-icon="mdi-plus"
@@ -321,9 +323,9 @@ onMounted(async () => {
                           {{ $t('common.primary') }}
                         </v-chip>
                       </div>
-                      <p class="text-body-2 mb-1">{{ a.line1 }}</p>
-                      <p v-if="a.line2" class="text-body-2 mb-1">{{ a.line2 }}</p>
-                      <p class="text-caption text-medium-emphasis">
+                      <p class="text-body-medium mb-1">{{ a.line1 }}</p>
+                      <p v-if="a.line2" class="text-body-medium mb-1">{{ a.line2 }}</p>
+                      <p class="text-body-small text-medium-emphasis">
                         {{ [a.city, a.province, a.countryCode].filter(Boolean).join(', ') || '—' }}
                         <span v-if="a.postalCode">· {{ $t('customers.postalCodeShort') }} {{ a.postalCode }}</span>
                       </p>
@@ -337,7 +339,7 @@ onMounted(async () => {
                   </div>
                 </v-card>
               </div>
-              <p v-else class="text-body-2 text-medium-emphasis">{{ $t('customers.noAddresses') }}</p>
+              <p v-else class="text-body-medium text-medium-emphasis">{{ $t('customers.noAddresses') }}</p>
             </v-card-text>
           </v-card>
         </v-col>
@@ -345,7 +347,7 @@ onMounted(async () => {
         <!-- Sidebar: avatar + etiquetas + metadatos -->
         <v-col cols="12" md="4">
           <v-card v-if="customer.imageFileId" class="mb-4">
-            <v-card-title class="text-h6">{{ $t('customers.avatar') }}</v-card-title>
+            <v-card-title class="text-title-large">{{ $t('customers.avatar') }}</v-card-title>
             <v-card-text class="d-flex justify-center">
               <v-avatar size="150" rounded="lg">
                 <v-img :src="fileUrl(customer.imageFileId)" alt="avatar" cover />
@@ -354,13 +356,13 @@ onMounted(async () => {
           </v-card>
 
           <v-card class="mb-4">
-            <v-card-title class="text-h6">{{ $t('customers.tags') }}</v-card-title>
+            <v-card-title class="text-title-large">{{ $t('customers.tags') }}</v-card-title>
             <v-card-text>
               <div class="d-flex flex-wrap ga-2 mb-3">
                 <v-chip v-for="tag in customer.tags" :key="tag.id" size="small" :color="tag.color || 'default'" closable @click:close="removeTag(tag.id)">
                   {{ tag.name }}
                 </v-chip>
-                <p v-if="customer.tags.length === 0" class="text-body-2 text-medium-emphasis">
+                <p v-if="customer.tags.length === 0" class="text-body-medium text-medium-emphasis">
                   {{ $t('customers.noTags') }}
                 </p>
               </div>
@@ -406,7 +408,7 @@ onMounted(async () => {
       <v-card>
         <v-card-title>{{ editingAddressId ? $t('customers.editAddress') : $t('customers.newAddress') }}</v-card-title>
         <v-card-text>
-          <v-row dense>
+          <v-row density="compact">
             <v-col cols="12" md="6">
               <v-select v-model="addressForm.type" :items="[
                 { title: $t('customers.addressType.billing'), value: 'billing' },
@@ -421,7 +423,7 @@ onMounted(async () => {
           </v-row>
           <v-text-field v-model="addressForm.line1" :label="$t('customers.line1')" required class="mb-3" />
           <v-text-field v-model="addressForm.line2" :label="$t('customers.line2')" class="mb-3" />
-          <v-row dense>
+          <v-row density="compact">
             <v-col cols="12" md="6">
               <v-text-field v-model="addressForm.city" :label="$t('customers.city')"
                 class="mb-3" />

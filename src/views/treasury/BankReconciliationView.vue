@@ -10,6 +10,10 @@
  * (una venta cobrada con tarjeta que ya está en el mayor). Solo se cierra con diferencia cero y nada sin resolver; cerrar congela.
  */
 import { computed, onMounted, ref, watch } from 'vue';
+import { localIsoDate } from '@/utils/isoDate';
+import { formatDate } from '@/utils/format';
+import DateField from '@/components/ui/DateField.vue';
+import { notify } from '@/composable/useNotify';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
@@ -40,7 +44,7 @@ const canReconcile = computed(() => auth.can('reconciliation:manage'));
 const canImport = computed(() => auth.can('bank_account:manage'));
 const currency = computed(() => account.value?.currencyCode ?? 'USD');
 const money = (cents: number) => formatMoney(cents, locale.value, currency.value);
-const today = () => new Date().toLocaleDateString('en-CA');
+const today = () => localIsoDate(new Date());
 
 const cutoff = ref(today());
 const balanceText = ref('');
@@ -48,7 +52,6 @@ const lineFilter = ref<BankLineStatus | 'all'>('unmatched');
 const selectedLineId = ref<string | null>(null);
 const selectedMovementIds = ref<string[]>([]);
 const actionError = ref<string | null>(null);
-const snackbar = ref<string | null>(null);
 
 const preview = computed(() => store.preview);
 const result = computed(() => preview.value?.result ?? null);
@@ -105,7 +108,7 @@ async function act(work: () => Promise<unknown>, done: string): Promise<boolean>
   actionError.value = null;
   try {
     await work();
-    snackbar.value = done;
+    notify.success(done);
     selectedMovementIds.value = [];
     await refreshAll();
     return true;
@@ -132,7 +135,7 @@ async function confirmSuggestions(): Promise<void> {
   actionError.value = null;
   try {
     const out = await store.matchMany(pairs);
-    snackbar.value = out.failed.length > 0 ? t('treasury.banking.reconcile.suggestionsPartial', { ok: out.matched.length, failed: out.failed.length }) : t('treasury.banking.reconcile.suggestionsDone', { n: out.matched.length });
+    notify.success(out.failed.length > 0 ? t('treasury.banking.reconcile.suggestionsPartial', { ok: out.matched.length, failed: out.failed.length }) : t('treasury.banking.reconcile.suggestionsDone', { n: out.matched.length }));
     suggestionsDialog.value = false;
   } catch {
     actionError.value = store.error;
@@ -171,7 +174,7 @@ async function doAdjust(): Promise<void> {
       lineId: line.id,
     });
     adjustDialog.value = false;
-    snackbar.value = t('treasury.banking.adjustments.posted');
+    notify.success(t('treasury.banking.adjustments.posted'));
     await refreshAll();
   } catch {
     adjustError.value = store.error;
@@ -199,7 +202,7 @@ async function confirmReason(reason: string): Promise<void> {
     else if (kind === 'voidAdjustment') await store.voidAdjustment(target, reason);
     else await store.reopenReconciliation(target, reason);
     reasonKind.value = null;
-    snackbar.value = t(`treasury.banking.reasons.${kind}.done`);
+    notify.success(t(`treasury.banking.reasons.${kind}.done`));
     selectedMovementIds.value = [];
     await refreshAll();
   } catch {
@@ -219,7 +222,7 @@ async function doClose(): Promise<void> {
     await store.closeReconciliation(accountId.value, { cutoffDate: cutoff.value, statementBalanceCents: preview.value.statementBalanceCents, notes: closeNotes.value.trim() || null });
     closeDialog.value = false;
     closeNotes.value = '';
-    snackbar.value = t('treasury.banking.reconcile.closed');
+    notify.success(t('treasury.banking.reconcile.closed'));
     await refreshAll();
   } catch {
     closeError.value = store.error;
@@ -248,20 +251,20 @@ const filterItems = computed(() => (['unmatched', 'matched', 'external', 'all'] 
       <v-card-text>
         <v-row>
           <v-col cols="12" sm="4" md="3">
-            <v-text-field v-model="cutoff" type="date" :label="$t('treasury.banking.reconcile.cutoff')" :hint="latestClosed ? $t('treasury.banking.reconcile.cutoffAfter', { date: latestClosed.cutoffDate }) : undefined" persistent-hint />
+            <DateField v-model="cutoff" :label="$t('treasury.banking.reconcile.cutoff')" :hint="latestClosed ? $t('treasury.banking.reconcile.cutoffAfter', { date: formatDate(latestClosed.cutoffDate) }) : undefined" persistent-hint />
           </v-col>
           <v-col cols="12" sm="4" md="3">
             <v-text-field
               v-model="balanceText"
               :label="$t('treasury.banking.reconcile.statementBalance')"
               :error-messages="balanceInvalid ? $t('treasury.banking.errors.opening') : undefined"
-              :hint="preview?.suggestedStatementBalance ? $t('treasury.banking.reconcile.suggestedBalance', { date: preview.suggestedStatementBalance.date }) : $t('treasury.banking.reconcile.balanceHint')"
+              :hint="preview?.suggestedStatementBalance ? $t('treasury.banking.reconcile.suggestedBalance', { date: formatDate(preview.suggestedStatementBalance.date) }) : $t('treasury.banking.reconcile.balanceHint')"
               persistent-hint
               inputmode="decimal"
             />
           </v-col>
           <v-col cols="12" md="6" class="d-flex flex-wrap align-center justify-md-end ga-2">
-            <v-btn v-if="lastClosedRow && canReconcile" variant="text" prepend-icon="mdi-lock-open-outline" @click="askReason('reopen', lastClosedRow.id)">{{ $t('treasury.banking.reconcile.reopenLast', { date: lastClosedRow.cutoffDate }) }}</v-btn>
+            <v-btn v-if="lastClosedRow && canReconcile" variant="text" prepend-icon="mdi-lock-open-outline" @click="askReason('reopen', lastClosedRow.id)">{{ $t('treasury.banking.reconcile.reopenLast', { date: formatDate(lastClosedRow.cutoffDate) }) }}</v-btn>
             <v-btn v-if="canReconcile" color="primary" prepend-icon="mdi-lock-check-outline" :disabled="!canClose" @click="closeDialog = true">{{ $t('treasury.banking.reconcile.close') }}</v-btn>
           </v-col>
         </v-row>
@@ -271,28 +274,28 @@ const filterItems = computed(() => (['unmatched', 'matched', 'external', 'all'] 
     <v-row v-if="result" class="mb-2">
       <v-col cols="6" md="3">
         <v-card><v-card-text>
-          <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.banking.reconcile.statementBalance') }}</div>
-          <div class="text-h6">{{ money(preview!.statementBalanceCents ?? 0) }}</div>
+          <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.banking.reconcile.statementBalance') }}</div>
+          <div class="text-title-large">{{ money(preview!.statementBalanceCents ?? 0) }}</div>
         </v-card-text></v-card>
       </v-col>
       <v-col cols="6" md="3">
         <v-card><v-card-text>
-          <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.banking.registerBalance') }}</div>
-          <div class="text-h6">{{ money(result.registerBalanceCents) }}</div>
+          <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.banking.registerBalance') }}</div>
+          <div class="text-title-large">{{ money(result.registerBalanceCents) }}</div>
         </v-card-text></v-card>
       </v-col>
       <v-col cols="6" md="3">
         <v-card><v-card-text>
-          <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.banking.reconcile.pending', { n: result.pendingCount }) }}</div>
-          <div class="text-h6">{{ money(result.pendingCents) }}</div>
-          <div class="text-body-2 text-medium-emphasis">{{ $t('treasury.banking.reconcile.pendingHint') }}</div>
+          <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.banking.reconcile.pending', { n: result.pendingCount }) }}</div>
+          <div class="text-title-large">{{ money(result.pendingCents) }}</div>
+          <div class="text-body-medium text-medium-emphasis">{{ $t('treasury.banking.reconcile.pendingHint') }}</div>
         </v-card-text></v-card>
       </v-col>
       <v-col cols="6" md="3">
         <v-card :color="result.differenceCents === 0 ? 'lightsuccess' : 'lighterror'" variant="flat"><v-card-text>
-          <div class="text-body-2">{{ $t('treasury.banking.reconcile.difference') }}</div>
-          <div class="text-h6">{{ money(result.differenceCents) }}</div>
-          <div class="text-body-2">{{ result.unresolvedLines > 0 ? $t('treasury.banking.reconcile.unresolved', { n: result.unresolvedLines }) : $t('treasury.banking.reconcile.allResolved') }}</div>
+          <div class="text-body-medium">{{ $t('treasury.banking.reconcile.difference') }}</div>
+          <div class="text-title-large">{{ money(result.differenceCents) }}</div>
+          <div class="text-body-medium">{{ result.unresolvedLines > 0 ? $t('treasury.banking.reconcile.unresolved', { n: result.unresolvedLines }) : $t('treasury.banking.reconcile.allResolved') }}</div>
         </v-card-text></v-card>
       </v-col>
     </v-row>
@@ -312,7 +315,7 @@ const filterItems = computed(() => (['unmatched', 'matched', 'external', 'all'] 
       <v-col cols="12" lg="7">
         <v-card>
           <v-card-title class="d-flex flex-wrap align-center ga-2">
-            <span class="text-h6 flex-grow-1">{{ $t('treasury.banking.reconcile.linesTitle') }}</span>
+            <span class="text-title-large flex-grow-1">{{ $t('treasury.banking.reconcile.linesTitle') }}</span>
             <v-btn-toggle v-model="lineFilter" mandatory density="compact" variant="outlined" divided>
               <v-btn v-for="f in filterItems" :key="f.value" :value="f.value" size="small">{{ f.title }}</v-btn>
             </v-btn-toggle>
@@ -325,7 +328,7 @@ const filterItems = computed(() => (['unmatched', 'matched', 'external', 'all'] 
                 </template>
                 <v-list-item-title>{{ line.description }}</v-list-item-title>
                 <v-list-item-subtitle>
-                  {{ line.lineDate }}<template v-if="line.reference"> · {{ line.reference }}</template>
+                  {{ formatDate(line.lineDate) }}<template v-if="line.reference"> · {{ line.reference }}</template>
                   <template v-if="line.status === 'external' && line.externalReason"> · {{ line.externalReason }}</template>
                   <template v-if="line.reconciled"> · <v-icon icon="mdi-lock-outline" size="x-small" /> {{ $t('treasury.banking.reconcile.locked') }}</template>
                 </v-list-item-subtitle>
@@ -334,17 +337,17 @@ const filterItems = computed(() => (['unmatched', 'matched', 'external', 'all'] 
                 </template>
               </v-list-item>
             </v-list>
-            <div v-else class="text-body-2 text-medium-emphasis py-4 text-center">{{ $t('treasury.banking.reconcile.noLines') }}</div>
-            <div v-if="store.linesTotal > store.lines.length" class="text-body-2 text-medium-emphasis mt-2">{{ $t('treasury.banking.reconcile.onlyFirst', { n: store.lines.length }) }}</div>
+            <div v-else class="text-body-medium text-medium-emphasis py-4 text-center">{{ $t('treasury.banking.reconcile.noLines') }}</div>
+            <div v-if="store.linesTotal > store.lines.length" class="text-body-medium text-medium-emphasis mt-2">{{ $t('treasury.banking.reconcile.onlyFirst', { n: store.lines.length }) }}</div>
           </v-card-text>
 
           <!-- Qué se hace con el renglón elegido -->
           <v-divider v-if="selectedLine" />
           <v-card-text v-if="selectedLine">
-            <div class="text-subtitle-1 mb-1">{{ selectedLine.description }} · <span :class="amountClass(selectedLine.amountCents)">{{ money(selectedLine.amountCents) }}</span></div>
+            <div class="text-body-large mb-1">{{ selectedLine.description }} · <span :class="amountClass(selectedLine.amountCents)">{{ money(selectedLine.amountCents) }}</span></div>
 
             <template v-if="selectedLine.status === 'unmatched'">
-              <div v-if="summary" class="text-body-2 mb-2" :class="summary.exact ? 'text-success' : 'text-medium-emphasis'">
+              <div v-if="summary" class="text-body-medium mb-2" :class="summary.exact ? 'text-success' : 'text-medium-emphasis'">
                 {{ $t('treasury.banking.reconcile.selection', { n: selectedMovements.length, sum: money(summary.sumCents), remaining: money(summary.remainingCents) }) }}
               </div>
               <div v-if="canReconcile" class="d-flex flex-wrap ga-2">
@@ -352,18 +355,18 @@ const filterItems = computed(() => (['unmatched', 'matched', 'external', 'all'] 
                 <v-btn variant="tonal" prepend-icon="mdi-bank-transfer" @click="openAdjust">{{ $t('treasury.banking.reconcile.registerAdjustment') }}</v-btn>
                 <v-btn variant="tonal" prepend-icon="mdi-check-decagram-outline" @click="askReason('external', selectedLine.id)">{{ $t('treasury.banking.reconcile.markExternal') }}</v-btn>
               </div>
-              <div class="text-body-2 text-medium-emphasis mt-2">{{ $t('treasury.banking.reconcile.pickHint') }}</div>
+              <div class="text-body-medium text-medium-emphasis mt-2">{{ $t('treasury.banking.reconcile.pickHint') }}</div>
             </template>
 
             <template v-else-if="selectedLine.status === 'matched'">
-              <div v-for="m in selectedLine.movements" :key="m.id" class="text-body-2 mb-1">
-                <v-icon :icon="sourceIcon(m)" size="small" class="mr-1" />{{ m.description }}<template v-if="m.reference"> · {{ m.reference }}</template> · {{ m.movementDate }} · {{ money(m.amountCents) }}
+              <div v-for="m in selectedLine.movements" :key="m.id" class="text-body-medium mb-1">
+                <v-icon :icon="sourceIcon(m)" size="small" class="mr-1" />{{ m.description }}<template v-if="m.reference"> · {{ m.reference }}</template> · {{ formatDate(m.movementDate) }} · {{ money(m.amountCents) }}
               </div>
               <v-btn v-if="canReconcile && !selectedLine.reconciled" variant="tonal" prepend-icon="mdi-link-variant-off" :loading="store.saving" @click="doUnmatch(selectedLine)">{{ $t('treasury.banking.reconcile.unmatch') }}</v-btn>
             </template>
 
             <template v-else>
-              <div class="text-body-2 mb-2">{{ selectedLine.externalReason }}</div>
+              <div class="text-body-medium mb-2">{{ selectedLine.externalReason }}</div>
               <v-btn v-if="canReconcile && !selectedLine.reconciled" variant="tonal" prepend-icon="mdi-undo" :loading="store.saving" @click="doUnexternal(selectedLine)">{{ $t('treasury.banking.reconcile.unmarkExternal') }}</v-btn>
             </template>
           </v-card-text>
@@ -373,9 +376,9 @@ const filterItems = computed(() => (['unmatched', 'matched', 'external', 'all'] 
       <!-- Registro de tesorería: lo pendiente -->
       <v-col cols="12" lg="5">
         <v-card>
-          <v-card-title class="text-h6">{{ $t('treasury.banking.reconcile.movementsTitle') }}</v-card-title>
+          <v-card-title class="text-title-large">{{ $t('treasury.banking.reconcile.movementsTitle') }}</v-card-title>
           <v-card-text>
-            <div class="text-body-2 text-medium-emphasis mb-2">{{ $t('treasury.banking.reconcile.movementsHint') }}</div>
+            <div class="text-body-medium text-medium-emphasis mb-2">{{ $t('treasury.banking.reconcile.movementsHint') }}</div>
             <v-list v-if="movementChoices.length > 0" lines="two" class="pa-0">
               <v-list-item v-for="m in movementChoices" :key="m.id" rounded @click="selectedLine?.status === 'unmatched' && toggleMovement(m)">
                 <template #prepend>
@@ -384,7 +387,7 @@ const filterItems = computed(() => (['unmatched', 'matched', 'external', 'all'] 
                 </template>
                 <v-list-item-title>{{ m.description }}</v-list-item-title>
                 <v-list-item-subtitle>
-                  {{ m.movementDate }}<template v-if="m.reference"> · {{ m.reference }}</template> · {{ $t(`treasury.banking.sources.${m.sourceType}`) }}
+                  {{ formatDate(m.movementDate) }}<template v-if="m.reference"> · {{ m.reference }}</template> · {{ $t(`treasury.banking.sources.${m.sourceType}`) }}
                 </v-list-item-subtitle>
                 <template #append>
                   <span class="font-weight-medium" :class="amountClass(m.amountCents)">{{ money(m.amountCents) }}</span>
@@ -392,7 +395,7 @@ const filterItems = computed(() => (['unmatched', 'matched', 'external', 'all'] 
                 </template>
               </v-list-item>
             </v-list>
-            <div v-else class="text-body-2 text-medium-emphasis py-4 text-center">{{ $t('treasury.banking.reconcile.noMovements') }}</div>
+            <div v-else class="text-body-medium text-medium-emphasis py-4 text-center">{{ $t('treasury.banking.reconcile.noMovements') }}</div>
           </v-card-text>
         </v-card>
       </v-col>
@@ -400,7 +403,7 @@ const filterItems = computed(() => (['unmatched', 'matched', 'external', 'all'] 
 
     <!-- Historial -->
     <v-card v-if="store.reconciliations.length > 0" class="mt-4">
-      <v-card-title class="text-h6">{{ $t('treasury.banking.reconcile.history') }}</v-card-title>
+      <v-card-title class="text-title-large">{{ $t('treasury.banking.reconcile.history') }}</v-card-title>
       <v-card-text>
         <v-table density="comfortable">
           <thead>
@@ -414,13 +417,13 @@ const filterItems = computed(() => (['unmatched', 'matched', 'external', 'all'] 
           </thead>
           <tbody>
             <tr v-for="r in store.reconciliations" :key="r.id">
-              <td>{{ r.cutoffDate }}</td>
+              <td>{{ formatDate(r.cutoffDate) }}</td>
               <td class="text-right">{{ money(r.statementBalanceCents) }}</td>
               <td class="text-right">{{ money(r.registerBalanceCents) }}</td>
               <td class="text-right">{{ money(r.pendingCents) }}</td>
               <td>
                 <v-chip size="small" variant="flat" :color="r.status === 'closed' ? 'lightsuccess' : 'lightsecondary'">{{ $t(`treasury.banking.reconcile.statuses.${r.status}`) }}</v-chip>
-                <div v-if="r.status === 'reopened' && r.notes" class="text-body-2 text-medium-emphasis">{{ r.notes }}</div>
+                <div v-if="r.status === 'reopened' && r.notes" class="text-body-medium text-medium-emphasis">{{ r.notes }}</div>
               </td>
             </tr>
           </tbody>
@@ -433,16 +436,16 @@ const filterItems = computed(() => (['unmatched', 'matched', 'external', 'all'] 
       <v-card>
         <v-card-title>{{ $t('treasury.banking.reconcile.suggestionsTitle') }}</v-card-title>
         <v-card-text>
-          <div class="text-body-2 text-medium-emphasis mb-3">{{ $t('treasury.banking.reconcile.suggestionsHint') }}</div>
+          <div class="text-body-medium text-medium-emphasis mb-3">{{ $t('treasury.banking.reconcile.suggestionsHint') }}</div>
           <v-list class="pa-0">
             <v-list-item v-for="s in store.suggestions" :key="s.line.id" lines="three">
               <template #prepend>
                 <v-checkbox-btn v-model="acceptedSuggestions" :value="s.line.id" class="mr-2" />
               </template>
               <v-list-item-title>{{ s.line.description }} · {{ money(s.line.amountCents) }}</v-list-item-title>
-              <v-list-item-subtitle>{{ s.line.lineDate }}<template v-if="s.line.reference"> · {{ s.line.reference }}</template></v-list-item-subtitle>
+              <v-list-item-subtitle>{{ formatDate(s.line.lineDate) }}<template v-if="s.line.reference"> · {{ s.line.reference }}</template></v-list-item-subtitle>
               <v-list-item-subtitle>
-                <v-icon icon="mdi-arrow-right" size="x-small" /> {{ s.movement.description }} · {{ s.movement.movementDate }}<template v-if="s.movement.reference"> · {{ s.movement.reference }}</template>
+                <v-icon icon="mdi-arrow-right" size="x-small" /> {{ s.movement.description }} · {{ formatDate(s.movement.movementDate) }}<template v-if="s.movement.reference"> · {{ s.movement.reference }}</template>
                 <v-chip size="x-small" variant="flat" color="lightinfo" class="ml-2">{{ $t(`treasury.banking.reconcile.reasons.${s.reason}`) }}</v-chip>
               </v-list-item-subtitle>
             </v-list-item>
@@ -451,7 +454,7 @@ const filterItems = computed(() => (['unmatched', 'matched', 'external', 'all'] 
         <v-card-actions class="flex-wrap ga-2">
           <v-spacer />
           <v-btn variant="text" @click="suggestionsDialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="primary" :disabled="acceptedSuggestions.length === 0" :loading="store.saving" @click="confirmSuggestions">{{ $t('treasury.banking.reconcile.confirmSuggestions', { n: acceptedSuggestions.length }) }}</v-btn>
+          <v-btn variant="flat" color="primary" :disabled="acceptedSuggestions.length === 0" :loading="store.saving" @click="confirmSuggestions">{{ $t('treasury.banking.reconcile.confirmSuggestions', { n: acceptedSuggestions.length }) }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -462,16 +465,16 @@ const filterItems = computed(() => (['unmatched', 'matched', 'external', 'all'] 
         <v-card-title>{{ $t('treasury.banking.adjustments.title') }}</v-card-title>
         <v-card-text>
           <v-alert v-if="adjustError" type="error" class="mb-4">{{ adjustError }}</v-alert>
-          <div class="text-body-2 text-medium-emphasis mb-3">{{ $t('treasury.banking.adjustments.hint') }}</div>
+          <div class="text-body-medium text-medium-emphasis mb-3">{{ $t('treasury.banking.adjustments.hint') }}</div>
           <v-select v-model="adjustKind" :items="adjustKindItems" :label="$t('treasury.banking.adjustments.kind')" />
           <v-text-field v-model="adjustDescription" :label="$t('treasury.banking.adjustments.description')" :hint="$t('treasury.banking.adjustments.descriptionHint')" persistent-hint maxlength="200" />
           <v-text-field v-model="adjustReference" :label="$t('treasury.banking.lines.reference')" maxlength="100" class="mt-2" />
-          <div v-if="selectedLine" class="text-body-2 mt-2">{{ $t('treasury.banking.adjustments.amountDate', { amount: money(Math.abs(selectedLine.amountCents)), date: selectedLine.lineDate }) }}</div>
+          <div v-if="selectedLine" class="text-body-medium mt-2">{{ $t('treasury.banking.adjustments.amountDate', { amount: money(Math.abs(selectedLine.amountCents)), date: selectedLine.lineDate }) }}</div>
         </v-card-text>
         <v-card-actions class="flex-wrap ga-2">
           <v-spacer />
           <v-btn variant="text" @click="adjustDialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="primary" :loading="store.saving" :disabled="adjustDescription.trim().length < 3" @click="doAdjust">{{ $t('treasury.banking.adjustments.post') }}</v-btn>
+          <v-btn variant="flat" color="primary" :loading="store.saving" :disabled="adjustDescription.trim().length < 3" @click="doAdjust">{{ $t('treasury.banking.adjustments.post') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -479,16 +482,16 @@ const filterItems = computed(() => (['unmatched', 'matched', 'external', 'all'] 
     <!-- Cerrar -->
     <v-dialog v-model="closeDialog" max-width="520">
       <v-card>
-        <v-card-title>{{ $t('treasury.banking.reconcile.closeTitle', { date: cutoff }) }}</v-card-title>
+        <v-card-title>{{ $t('treasury.banking.reconcile.closeTitle', { date: formatDate(cutoff) }) }}</v-card-title>
         <v-card-text>
           <v-alert v-if="closeError" type="error" class="mb-4">{{ closeError }}</v-alert>
-          <div class="text-body-2 mb-3">{{ $t('treasury.banking.reconcile.closeHint') }}</div>
+          <div class="text-body-medium mb-3">{{ $t('treasury.banking.reconcile.closeHint') }}</div>
           <v-textarea v-model="closeNotes" :label="$t('treasury.banking.reconcile.notes')" rows="2" auto-grow maxlength="500" />
         </v-card-text>
         <v-card-actions class="flex-wrap ga-2">
           <v-spacer />
           <v-btn variant="text" @click="closeDialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="primary" :loading="store.saving" @click="doClose">{{ $t('treasury.banking.reconcile.close') }}</v-btn>
+          <v-btn variant="flat" color="primary" :loading="store.saving" @click="doClose">{{ $t('treasury.banking.reconcile.close') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -506,6 +509,5 @@ const filterItems = computed(() => (['unmatched', 'matched', 'external', 'all'] 
       @confirm="confirmReason"
     />
 
-    <v-snackbar :model-value="snackbar !== null" timeout="3500" @update:model-value="snackbar = null">{{ snackbar }}</v-snackbar>
   </v-container>
 </template>

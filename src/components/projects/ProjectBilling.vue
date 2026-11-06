@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
+import { formatDate, formatNumber } from '@/utils/format';
+import { notify } from '@/composable/useNotify';
+import DateField from '@/components/ui/DateField.vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { customerApi } from '@/api/customers';
@@ -31,7 +34,6 @@ const orgStore = useOrganizationStore();
 const project = computed(() => store.current);
 const summary = ref<BillingSummary | null>(null);
 const failure = ref<string | null>(null);
-const notice = ref<string | null>(null);
 const loading = ref(false);
 const money = (cents: number) => formatMoney(cents, locale.value);
 
@@ -120,7 +122,7 @@ async function saveSettings(): Promise<void> {
       serviceProductLabel: product.value?.title ?? null,
       groupBy: groupBy.value,
     });
-    notice.value = t('projects.billing.saved');
+    notify.success(t('projects.billing.saved'));
     await load();
   } catch (err) {
     failure.value = extractError(err);
@@ -150,8 +152,8 @@ async function saveMilestone(taskId: string): Promise<void> {
 }
 
 // ── Preparar la factura ──
-const from = ref('');
-const to = ref('');
+const from = ref<string | null>(null);
+const to = ref<string | null>(null);
 const includeHours = ref(true);
 const selectedMilestones = ref<string[]>([]);
 const preview = ref<BillingPreview | null>(null);
@@ -233,7 +235,6 @@ async function release(i: ProjectInvoice): Promise<void> {
   }
 }
 
-const dateFmt = computed(() => new Intl.DateTimeFormat(locale.value, { dateStyle: 'medium' }));
 </script>
 
 <template>
@@ -245,30 +246,30 @@ const dateFmt = computed(() => new Intl.DateTimeFormat(locale.value, { dateStyle
       <v-row>
         <v-col cols="12" sm="4">
           <v-card class="pa-4 h-100">
-            <div class="text-body-2 text-medium-emphasis">{{ t('projects.billing.unbilledHours') }}</div>
-            <div class="text-h6">{{ formatMinutes(summary.unbilledMinutes) }}</div>
-            <div class="text-body-2 text-medium-emphasis">{{ t('projects.billing.entries', summary.unbilledEntries) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ t('projects.billing.unbilledHours') }}</div>
+            <div class="text-title-large">{{ formatMinutes(summary.unbilledMinutes) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ t('projects.billing.entries', summary.unbilledEntries) }}</div>
           </v-card>
         </v-col>
         <v-col cols="12" sm="4">
           <v-card class="pa-4 h-100">
-            <div class="text-body-2 text-medium-emphasis">{{ t('projects.billing.unbilledAmount') }}</div>
-            <div class="text-h6 text-success">{{ money(summary.unbilledAmountCents) }}</div>
-            <div class="text-body-2 text-medium-emphasis">{{ t('projects.billing.beforeTax') }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ t('projects.billing.unbilledAmount') }}</div>
+            <div class="text-title-large text-success">{{ money(summary.unbilledAmountCents) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ t('projects.billing.beforeTax') }}</div>
           </v-card>
         </v-col>
         <v-col cols="12" sm="4">
           <v-card class="pa-4 h-100">
-            <div class="text-body-2 text-medium-emphasis">{{ t('projects.billing.milestonesReady') }}</div>
-            <div class="text-h6">{{ billableMilestones.length }}</div>
-            <div class="text-body-2 text-medium-emphasis">{{ money(billableMilestones.reduce((n, m) => n + (m.amountCents ?? 0), 0)) }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ t('projects.billing.milestonesReady') }}</div>
+            <div class="text-title-large">{{ billableMilestones.length }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ money(billableMilestones.reduce((n, m) => n + (m.amountCents ?? 0), 0)) }}</div>
           </v-card>
         </v-col>
       </v-row>
 
       <v-card class="pa-6">
-        <div class="text-h6 mb-2">{{ t('projects.billing.settings') }}</div>
-        <div class="text-body-2 text-medium-emphasis mb-4">{{ t('projects.billing.settingsHint') }}</div>
+        <div class="text-title-large mb-2">{{ t('projects.billing.settings') }}</div>
+        <div class="text-body-medium text-medium-emphasis mb-4">{{ t('projects.billing.settingsHint') }}</div>
         <v-row>
           <v-col cols="12" md="6">
             <v-autocomplete
@@ -307,8 +308,8 @@ const dateFmt = computed(() => new Intl.DateTimeFormat(locale.value, { dateStyle
       </v-card>
 
       <v-card v-if="summary.milestones.length" class="pa-6">
-        <div class="text-h6 mb-2">{{ t('projects.billing.milestones') }}</div>
-        <div class="text-body-2 text-medium-emphasis mb-4">{{ t('projects.billing.milestonesHint') }}</div>
+        <div class="text-title-large mb-2">{{ t('projects.billing.milestones') }}</div>
+        <div class="text-body-medium text-medium-emphasis mb-4">{{ t('projects.billing.milestonesHint') }}</div>
         <v-table density="compact">
           <tbody>
             <tr v-for="m in summary.milestones" :key="m.taskId">
@@ -336,15 +337,15 @@ const dateFmt = computed(() => new Intl.DateTimeFormat(locale.value, { dateStyle
       </v-card>
 
       <v-card class="pa-6">
-        <div class="text-h6 mb-2">{{ t('projects.billing.prepare') }}</div>
+        <div class="text-title-large mb-2">{{ t('projects.billing.prepare') }}</div>
         <v-alert v-if="!configured" type="info" class="mb-4">{{ t('projects.billing.configureFirst') }}</v-alert>
         <v-row>
           <v-col cols="12" sm="4"><v-switch v-model="includeHours" :label="t('projects.billing.includeHours')" /></v-col>
-          <v-col cols="6" sm="4"><v-text-field v-model="from" type="date" :label="t('projects.time.from')" :disabled="!includeHours" clearable /></v-col>
-          <v-col cols="6" sm="4"><v-text-field v-model="to" type="date" :label="t('projects.time.to')" :disabled="!includeHours" clearable /></v-col>
+          <v-col cols="6" sm="4"><DateField v-model="from" :max="to" :label="t('projects.time.from')" :disabled="!includeHours" clearable /></v-col>
+          <v-col cols="6" sm="4"><DateField v-model="to" :min="from" :label="t('projects.time.to')" :disabled="!includeHours" clearable /></v-col>
         </v-row>
         <div v-if="billableMilestones.length" class="mb-4">
-          <div class="text-body-2 mb-2">{{ t('projects.billing.milestonesToBill') }}</div>
+          <div class="text-body-medium mb-2">{{ t('projects.billing.milestonesToBill') }}</div>
           <v-checkbox
             v-for="m in billableMilestones"
             :key="m.taskId"
@@ -376,7 +377,7 @@ const dateFmt = computed(() => new Intl.DateTimeFormat(locale.value, { dateStyle
             <tbody>
               <tr v-for="(line, i) in toInvoiceLines(preview.groups, summary.settings.serviceProductId ?? '', lineCtx)" :key="i">
                 <td>{{ line.description }}</td>
-                <td class="text-right">{{ line.quantity.toLocaleString(locale) }}</td>
+                <td class="text-right">{{ formatNumber(line.quantity) }}</td>
                 <td class="text-right d-none d-sm-table-cell">{{ money(preview.groups[i]!.unitPriceCents) }}</td>
                 <td class="text-right">{{ money(preview.groups[i]!.amountCents) }}</td>
               </tr>
@@ -391,12 +392,12 @@ const dateFmt = computed(() => new Intl.DateTimeFormat(locale.value, { dateStyle
       </v-card>
 
       <v-card class="pa-6">
-        <div class="text-h6 mb-2">{{ t('projects.billing.invoices') }}</div>
-        <div v-if="!summary.invoices.length" class="text-body-2 text-medium-emphasis">{{ t('projects.billing.noInvoices') }}</div>
+        <div class="text-title-large mb-2">{{ t('projects.billing.invoices') }}</div>
+        <div v-if="!summary.invoices.length" class="text-body-medium text-medium-emphasis">{{ t('projects.billing.noInvoices') }}</div>
         <v-table v-else density="compact">
           <tbody>
             <tr v-for="i in summary.invoices" :key="i.id">
-              <td class="text-no-wrap">{{ dateFmt.format(new Date(i.createdAt)) }}</td>
+              <td class="text-no-wrap">{{ formatDate(i.createdAt) }}</td>
               <td>
                 <v-chip size="small" :color="STATUS_COLOR[i.status]">{{ t(`projects.billing.status.${i.status}`) }}</v-chip>
                 <v-chip v-if="i.conflicts" size="small" color="error" prepend-icon="mdi-alert-outline" class="ml-1">{{ t('projects.billing.conflicts', i.conflicts) }}</v-chip>
@@ -421,11 +422,10 @@ const dateFmt = computed(() => new Intl.DateTimeFormat(locale.value, { dateStyle
         <v-card-actions class="flex-wrap ga-2">
           <v-spacer />
           <v-btn variant="text" @click="confirmRelease = null">{{ t('common.cancel') }}</v-btn>
-          <v-btn color="error" @click="release(confirmRelease!)">{{ t('projects.billing.release') }}</v-btn>
+          <v-btn variant="flat" color="error" @click="release(confirmRelease!)">{{ t('projects.billing.release') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <v-snackbar :model-value="!!notice" timeout="3000" @update:model-value="notice = null">{{ notice }}</v-snackbar>
   </div>
 </template>

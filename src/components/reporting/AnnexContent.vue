@@ -52,7 +52,7 @@ const numberOf = (d: { establecimiento: string; puntoEmision: string; secuencial
 <template>
   <!-- Formulario 103 -->
   <v-card v-if="f103">
-    <v-card-title class="text-h6">{{ $t('reporting.f103.title') }}</v-card-title>
+    <v-card-title class="text-title-large">{{ $t('reporting.f103.title') }}</v-card-title>
     <v-card-text>
       <v-data-table :headers="conceptHeaders" :items="concepts" :items-per-page="-1" hide-default-footer>
         <template #item.porcentajes="{ item }">{{ item.porcentajes.map(rate).join(' / ') }}</template>
@@ -65,8 +65,8 @@ const numberOf = (d: { establecimiento: string; puntoEmision: string; secuencial
         </template>
         <template #no-data>{{ $t('reporting.f103.empty') }}</template>
       </v-data-table>
-      <p class="text-body-2 text-medium-emphasis mt-4">{{ $t('reporting.f103.casilleroNote') }}</p>
-      <p v-if="f103.retencionesIvaEIsdNoIncluidasCents > 0" class="text-body-2 text-medium-emphasis">
+      <p class="text-body-medium text-medium-emphasis mt-4">{{ $t('reporting.f103.casilleroNote') }}</p>
+      <p v-if="f103.retencionesIvaEIsdNoIncluidasCents > 0" class="text-body-medium text-medium-emphasis">
         {{ $t('reporting.f103.otherTaxes', { amount: money(f103.retencionesIvaEIsdNoIncluidasCents) }) }}
       </p>
     </v-card-text>
@@ -77,7 +77,7 @@ const numberOf = (d: { establecimiento: string; puntoEmision: string; secuencial
     <v-row>
       <v-col cols="12" md="6">
         <v-card>
-          <v-card-title class="text-h6">{{ $t('reporting.f104.sales') }}</v-card-title>
+          <v-card-title class="text-title-large">{{ $t('reporting.f104.sales') }}</v-card-title>
           <v-card-text>
             <v-data-table :headers="rateHeaders" :items="tariffs(f104.ventas.porTarifa)" :items-per-page="-1" hide-default-footer>
               <template #item.ratePercent="{ item }">{{ rate(item.ratePercent) }}</template>
@@ -90,7 +90,7 @@ const numberOf = (d: { establecimiento: string; puntoEmision: string; secuencial
       </v-col>
       <v-col cols="12" md="6">
         <v-card>
-          <v-card-title class="text-h6">{{ $t('reporting.f104.purchases') }}</v-card-title>
+          <v-card-title class="text-title-large">{{ $t('reporting.f104.purchases') }}</v-card-title>
           <v-card-text>
             <v-data-table :headers="rateHeaders" :items="tariffs(f104.compras.porTarifa)" :items-per-page="-1" hide-default-footer>
               <template #item.ratePercent="{ item }">{{ rate(item.ratePercent) }}</template>
@@ -103,7 +103,7 @@ const numberOf = (d: { establecimiento: string; puntoEmision: string; secuencial
       </v-col>
     </v-row>
     <v-card class="mt-4">
-      <v-card-title class="text-h6">{{ $t('reporting.f104.settlement') }}</v-card-title>
+      <v-card-title class="text-title-large">{{ $t('reporting.f104.settlement') }}</v-card-title>
       <v-card-text>
         <v-table>
           <tbody>
@@ -118,7 +118,7 @@ const numberOf = (d: { establecimiento: string; puntoEmision: string; secuencial
             </tr>
           </tbody>
         </v-table>
-        <p class="text-body-2 text-medium-emphasis mt-4">
+        <p class="text-body-medium text-medium-emphasis mt-4">
           {{ $t('reporting.f104.withheldSuppliers') }}: <strong>{{ money(f104.ivaRetenidoPracticadoCents) }}</strong>
         </p>
       </v-card-text>
@@ -128,10 +128,10 @@ const numberOf = (d: { establecimiento: string; puntoEmision: string; secuencial
   <!-- ATS -->
   <template v-else-if="ats">
     <v-alert v-if="!ats.informante" type="warning" class="mb-4">{{ $t('reporting.ats.noInformant') }}</v-alert>
-    <p v-else class="text-body-2 text-medium-emphasis mb-4">{{ $t('reporting.ats.informant') }}: {{ ats.informante.legalName }} · {{ ats.informante.ruc }}</p>
+    <p v-else class="text-body-medium text-medium-emphasis mb-4">{{ $t('reporting.ats.informant') }}: {{ ats.informante.legalName }} · {{ ats.informante.ruc }}</p>
 
     <v-card class="mb-4">
-      <v-card-title class="text-h6">{{ $t('reporting.ats.purchases') }}</v-card-title>
+      <v-card-title class="text-title-large">{{ $t('reporting.ats.purchases') }}</v-card-title>
       <v-card-text>
         <v-data-table :headers="purchaseHeaders" :items="ats.compras" :items-per-page="10">
           <template #item.tipoComprobante="{ item }">{{ item.tipoComprobante }}</template>
@@ -146,7 +146,7 @@ const numberOf = (d: { establecimiento: string; puntoEmision: string; secuencial
     </v-card>
 
     <v-card class="mb-4">
-      <v-card-title class="text-h6">{{ $t('reporting.ats.salesByCustomer') }}</v-card-title>
+      <v-card-title class="text-title-large">{{ $t('reporting.ats.salesByCustomer') }}</v-card-title>
       <v-card-text>
         <v-data-table :headers="salesHeaders" :items="ats.ventasPorCliente" :items-per-page="10">
           <template #item.base0Cents="{ item }">{{ money(item.base0Cents) }}</template>
@@ -158,7 +158,7 @@ const numberOf = (d: { establecimiento: string; puntoEmision: string; secuencial
     </v-card>
 
     <v-card class="mb-4">
-      <v-card-title class="text-h6">{{ $t('reporting.ats.voided') }}</v-card-title>
+      <v-card-title class="text-title-large">{{ $t('reporting.ats.voided') }}</v-card-title>
       <v-card-text>
         <v-data-table :headers="voidedHeaders" :items="ats.anulados" :items-per-page="10">
           <template #item.numero="{ item }">{{ numberOf(item) }}</template>
@@ -169,7 +169,7 @@ const numberOf = (d: { establecimiento: string; puntoEmision: string; secuencial
     </v-card>
 
     <v-card>
-      <v-card-title class="text-h6">{{ $t('reporting.ats.withholdingsWithoutPurchase') }}</v-card-title>
+      <v-card-title class="text-title-large">{{ $t('reporting.ats.withholdingsWithoutPurchase') }}</v-card-title>
       <v-card-text>
         <v-data-table :headers="orphanHeaders" :items="ats.retencionesSinCompra" :items-per-page="10">
           <template #no-data>{{ $t('reporting.ats.emptyWithholdings') }}</template>

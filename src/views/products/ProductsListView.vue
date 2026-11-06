@@ -110,7 +110,7 @@ onMounted(async () => {
 
     <v-card class="mb-4">
       <v-card-text>
-        <v-row dense align="end">
+        <v-row class="align-end" density="compact">
           <v-col cols="12" sm="5">
             <v-text-field v-model="search" :label="$t('products.searchLabel')"
               hide-details prepend-inner-icon="mdi-magnify" clearable @keyup.enter="doSearch" />
@@ -153,7 +153,7 @@ onMounted(async () => {
           { title: '100', value: 100 },
         ]" @update:options="onTableOptions">
         <template #item.sku="{ item }">
-          <span class="text-caption font-weight-medium">{{ item.sku || '—' }}</span>
+          <span class="text-body-small font-weight-medium">{{ item.sku || '—' }}</span>
         </template>
 
         <template #item.type="{ item }">

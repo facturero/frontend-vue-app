@@ -32,7 +32,7 @@ async function submit(): Promise<void> {
   <v-card>
     <v-card-title>{{ $t('accounting.setup.title') }}</v-card-title>
     <v-card-text class="d-flex flex-column ga-4">
-      <p class="text-body-2 text-medium-emphasis">{{ $t('accounting.setup.intro') }}</p>
+      <p class="text-body-medium text-medium-emphasis">{{ $t('accounting.setup.intro') }}</p>
       <v-alert v-if="!canManage" type="info">{{ $t('accounting.setup.needAdmin') }}</v-alert>
       <template v-else>
         <v-alert v-if="error" type="error" closable @click:close="error = null">{{ error }}</v-alert>
@@ -45,7 +45,7 @@ async function submit(): Promise<void> {
     </v-card-text>
     <v-card-actions v-if="canManage">
       <v-spacer />
-      <v-btn color="primary" :loading="store.saving" @click="submit">{{ $t('accounting.setup.start') }}</v-btn>
+      <v-btn variant="flat" color="primary" :loading="store.saving" @click="submit">{{ $t('accounting.setup.start') }}</v-btn>
     </v-card-actions>
   </v-card>
 </template>

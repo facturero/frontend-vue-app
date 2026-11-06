@@ -6,6 +6,7 @@
  * mismo total. El servidor comprueba que cada cliente exista en la organización.
  */
 import { computed, onMounted, ref, watch } from 'vue';
+import DateField from '@/components/ui/DateField.vue';
 import { useI18n } from 'vue-i18n';
 import { useTreasuryStore } from '@/stores/treasury';
 import { customerApi } from '@/api/customers';
@@ -104,14 +105,14 @@ function again(): void {
 
         <v-row>
           <v-col cols="12" sm="4">
-            <v-text-field v-model="form.cutoffDate" type="date" :label="$t('treasury.opening.cutoff')" :hint="$t('treasury.opening.cutoffHint')" persistent-hint :error-messages="err('cutoffDate')" />
+            <DateField v-model="form.cutoffDate" :label="$t('treasury.opening.cutoff')" :hint="$t('treasury.opening.cutoffHint')" persistent-hint :error-messages="err('cutoffDate')" />
           </v-col>
           <v-col cols="12" sm="8">
             <v-text-field v-model="form.reason" :label="$t('treasury.opening.reason')" maxlength="300" :error-messages="err('reason')" />
           </v-col>
         </v-row>
 
-        <div class="text-h6 mb-2">{{ $t('treasury.opening.lines') }}</div>
+        <div class="text-title-large mb-2">{{ $t('treasury.opening.lines') }}</div>
         <v-alert v-if="errors.rows" type="error" class="mb-2">{{ err('rows') }}</v-alert>
 
         <v-row v-for="(row, index) in form.rows" :key="index" class="align-start">
@@ -128,10 +129,10 @@ function again(): void {
             <v-text-field v-model="row.documentNumber" :label="$t('treasury.receivables.document')" maxlength="60" />
           </v-col>
           <v-col cols="6" md="2">
-            <v-text-field v-model="row.issueDate" type="date" :label="$t('treasury.receivables.issueDate')" :error-messages="err(`rows[${index}].issueDate`)" />
+            <DateField v-model="row.issueDate" :label="$t('treasury.receivables.issueDate')" :error-messages="err(`rows[${index}].issueDate`)" />
           </v-col>
           <v-col cols="6" md="2">
-            <v-text-field v-model="row.dueDate" type="date" :label="$t('treasury.receivables.dueDate')" :hint="$t('treasury.opening.dueHint')" persistent-hint :error-messages="err(`rows[${index}].dueDate`)" />
+            <DateField v-model="row.dueDate" :label="$t('treasury.receivables.dueDate')" :hint="$t('treasury.opening.dueHint')" persistent-hint :error-messages="err(`rows[${index}].dueDate`)" />
           </v-col>
           <v-col cols="5" md="2">
             <v-text-field v-model="row.amount" :label="$t('treasury.opening.amount')" inputmode="decimal" :error-messages="err(`rows[${index}].amount`)" />
@@ -144,12 +145,12 @@ function again(): void {
         <div class="d-flex flex-wrap align-center ga-4 mt-2">
           <v-btn variant="tonal" prepend-icon="mdi-plus" :disabled="form.rows.length >= 500" @click="addRow">{{ $t('treasury.opening.addLine') }}</v-btn>
           <v-spacer />
-          <div class="text-h6">{{ $t('treasury.opening.total', { amount: formatMoney(total, locale) }) }}</div>
+          <div class="text-title-large">{{ $t('treasury.opening.total', { amount: formatMoney(total, locale) }) }}</div>
         </div>
       </v-card-text>
       <v-card-actions class="flex-wrap ga-2">
         <v-spacer />
-        <v-btn color="primary" :loading="store.saving" @click="review">{{ $t('treasury.opening.load') }}</v-btn>
+        <v-btn variant="flat" color="primary" :loading="store.saving" @click="review">{{ $t('treasury.opening.load') }}</v-btn>
       </v-card-actions>
     </v-card>
 
@@ -160,7 +161,7 @@ function again(): void {
         <v-card-actions class="flex-wrap ga-2">
           <v-spacer />
           <v-btn variant="text" @click="confirm = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="primary" :loading="store.saving" @click="submit">{{ $t('treasury.opening.confirmLoad') }}</v-btn>
+          <v-btn variant="flat" color="primary" :loading="store.saving" @click="submit">{{ $t('treasury.opening.confirmLoad') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

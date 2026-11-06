@@ -5,6 +5,8 @@
  * uno por documento y semana. Aquí se configura, se ve a quién se avisaría hoy (sin enviar nada) y, si se quiere, se envía ahora.
  */
 import { computed, onMounted, ref } from 'vue';
+import { formatDate } from '@/utils/format';
+import { notify } from '@/composable/useNotify';
 import { useI18n } from 'vue-i18n';
 import { useTreasuryStore } from '@/stores/treasury';
 import { formatMoney } from '@/utils/accounting';
@@ -19,7 +21,6 @@ const store = useTreasuryStore();
 const form = ref({ enabled: false, firstAfterDays: '3', repeatEveryDays: '7' });
 const errors = ref<Record<string, string>>({});
 const serverError = ref<string | null>(null);
-const snackbar = ref<string | null>(null);
 const lastRun = ref<ReminderRun | null>(null);
 
 const settings = computed(() => store.reminderSettings);
@@ -76,7 +77,7 @@ async function persist(): Promise<void> {
   if (!result.input) return;
   try {
     await store.saveReminderSettings({ enabled: form.value.enabled, ...result.input });
-    snackbar.value = t(form.value.enabled ? 'treasury.reminders.savedOn' : 'treasury.reminders.savedOff');
+    notify.success(t(form.value.enabled ? 'treasury.reminders.savedOn' : 'treasury.reminders.savedOff'));
     await store.fetchReminders();
     fill();
   } catch {
@@ -93,7 +94,7 @@ async function runNow(): Promise<void> {
   runError.value = null;
   try {
     lastRun.value = await store.runReminders();
-    snackbar.value = t('treasury.reminders.sent', { n: lastRun.value.customersReminded });
+    notify.success(t('treasury.reminders.sent', { n: lastRun.value.customersReminded }));
   } catch {
     runError.value = store.error;
   }
@@ -108,7 +109,7 @@ async function runNow(): Promise<void> {
     <v-alert v-if="store.error && !serverError && !runError" type="error" closable class="mb-4">{{ store.error }}</v-alert>
 
     <v-card class="mb-4">
-      <v-card-title class="d-flex flex-wrap align-center ga-2 text-h6">
+      <v-card-title class="d-flex flex-wrap align-center ga-2 text-title-large">
         {{ $t('treasury.reminders.settings') }}
         <v-chip :color="settings?.enabled ? 'success' : undefined" variant="flat" size="small">
           {{ $t(settings?.enabled ? 'treasury.reminders.on' : 'treasury.reminders.off') }}
@@ -141,19 +142,19 @@ async function runNow(): Promise<void> {
             />
           </v-col>
         </v-row>
-        <div v-if="settings?.lastRunOn" class="text-body-2 text-medium-emphasis mt-4">{{ $t('treasury.reminders.lastRun', { date: settings.lastRunOn }) }}</div>
+        <div v-if="settings?.lastRunOn" class="text-body-medium text-medium-emphasis mt-4">{{ $t('treasury.reminders.lastRun', { date: formatDate(settings.lastRunOn) }) }}</div>
       </v-card-text>
       <v-card-actions class="flex-wrap ga-2">
         <v-spacer />
         <v-btn variant="text" :disabled="!dirty" @click="fill">{{ $t('common.cancel') }}</v-btn>
-        <v-btn color="primary" :loading="store.saving" :disabled="!dirty" @click="save">{{ $t('common.save') }}</v-btn>
+        <v-btn variant="flat" color="primary" :loading="store.saving" :disabled="!dirty" @click="save">{{ $t('common.save') }}</v-btn>
       </v-card-actions>
     </v-card>
 
     <v-card>
-      <v-card-title class="d-flex flex-wrap align-center ga-2 text-h6">
+      <v-card-title class="d-flex flex-wrap align-center ga-2 text-title-large">
         {{ $t('treasury.reminders.todayTitle') }}
-        <span v-if="preview" class="text-body-2 text-medium-emphasis">{{ $t('treasury.reminders.asOf', { date: preview.asOf }) }}</span>
+        <span v-if="preview" class="text-body-medium text-medium-emphasis">{{ $t('treasury.reminders.asOf', { date: formatDate(preview.asOf) }) }}</span>
         <v-spacer />
         <v-btn variant="text" size="small" prepend-icon="mdi-refresh" :loading="store.loading" @click="store.fetchReminders().then(fill)">{{ $t('treasury.reminders.refresh') }}</v-btn>
         <v-btn
@@ -169,7 +170,7 @@ async function runNow(): Promise<void> {
         </v-btn>
       </v-card-title>
       <v-card-text>
-        <div class="text-body-2 text-medium-emphasis mb-4">{{ $t('treasury.reminders.todayHint') }}</div>
+        <div class="text-body-medium text-medium-emphasis mb-4">{{ $t('treasury.reminders.todayHint') }}</div>
         <v-alert v-if="runError" type="error" closable class="mb-4" @click:close="runError = null">{{ runError }}</v-alert>
         <v-alert v-if="lastRun" type="success" closable class="mb-4" @click:close="lastRun = null">
           {{ $t('treasury.reminders.runResult', { customers: lastRun.customersReminded, documents: lastRun.receivablesReminded }) }}
@@ -199,7 +200,7 @@ async function runNow(): Promise<void> {
         <v-card-actions class="flex-wrap ga-2">
           <v-spacer />
           <v-btn variant="text" @click="confirmEnable = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="primary" :loading="store.saving" @click="persist">{{ $t('treasury.reminders.confirmEnable') }}</v-btn>
+          <v-btn variant="flat" color="primary" :loading="store.saving" @click="persist">{{ $t('treasury.reminders.confirmEnable') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -211,11 +212,10 @@ async function runNow(): Promise<void> {
         <v-card-actions class="flex-wrap ga-2">
           <v-spacer />
           <v-btn variant="text" @click="confirmRun = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="primary" @click="runNow">{{ $t('treasury.reminders.sendNow') }}</v-btn>
+          <v-btn variant="flat" color="primary" @click="runNow">{{ $t('treasury.reminders.sendNow') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <v-snackbar :model-value="snackbar !== null" timeout="3500" @update:model-value="snackbar = null">{{ snackbar }}</v-snackbar>
   </v-container>
 </template>

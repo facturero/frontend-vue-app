@@ -2,6 +2,7 @@
 import { onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
+import EmptyState from '@/components/ui/EmptyState.vue';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import ProjectFormDialog from '@/components/projects/ProjectFormDialog.vue';
 import ProjectSearchDialog from '@/components/projects/ProjectSearchDialog.vue';
@@ -51,13 +52,15 @@ function opened(id: string): void {
 
     <v-progress-linear v-if="store.loading" indeterminate color="primary" class="mb-4" />
 
-    <v-card v-if="!store.loading && store.projects.length === 0" class="pa-6 text-center">
-      <v-icon icon="mdi-folder-star-outline" size="48" color="primary" class="mb-2" />
-      <div class="text-h6 mb-2">{{ status === 'active' ? t('projects.empty.title') : t('projects.empty.archived') }}</div>
-      <div v-if="status === 'active'" class="text-body-2 text-medium-emphasis mb-4">{{ t('projects.empty.text') }}</div>
-      <v-btn v-if="status === 'active' && auth.can('project:create')" color="primary" prepend-icon="mdi-plus" @click="choosing = true">
-        {{ t('projects.new') }}
-      </v-btn>
+    <v-card v-if="!store.loading && store.projects.length === 0">
+      <EmptyState
+        :icon="status === 'active' ? 'mdi-folder-star-outline' : 'mdi-archive-outline'"
+        :title="status === 'active' ? t('projects.empty.title') : t('projects.empty.archived')"
+        :text="status === 'active' ? t('projects.empty.text') : undefined"
+        :action-text="status === 'active' && auth.can('project:create') ? t('projects.new') : undefined"
+        action-icon="mdi-plus"
+        @action="choosing = true"
+      />
     </v-card>
 
     <v-row v-else>
@@ -75,7 +78,7 @@ function opened(id: string): void {
               {{ p.visibility === 'members' ? t('projects.visibility.members') : t('projects.visibility.organization') }}
             </v-card-subtitle>
           </v-card-item>
-          <v-card-text v-if="p.description" class="text-body-2 text-medium-emphasis">{{ p.description }}</v-card-text>
+          <v-card-text v-if="p.description" class="text-body-medium text-medium-emphasis">{{ p.description }}</v-card-text>
           <v-card-actions>
             <v-chip size="small">{{ t(`projects.roles.${p.myRole}`) }}</v-chip>
             <v-chip v-if="p.latestStatus" :color="HEALTH_COLOR[p.latestStatus.status]" size="small" prepend-icon="mdi-circle">

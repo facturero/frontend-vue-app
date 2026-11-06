@@ -9,6 +9,11 @@ export default createVuetify({
   components,
   directives,
   icons: { defaultSet: 'mdi' },
+  // Breakpoints de Vuetify 3 (md 960, lg 1280…). La 4 los bajó (md 840, lg 1145); se mantienen los de la 3 hasta decidir si se
+  // adoptan, porque las 224 columnas `md=`/`lg=` y los `useDisplay()` están pensados para estos cortes (MIGRACION-VUETIFY-4.md).
+  display: {
+    thresholds: { md: 960, lg: 1280, xl: 1920, xxl: 2560 },
+  },
   locale: {
     locale: 'es',
     messages: { es, en, fr },
@@ -44,6 +49,11 @@ export default createVuetify({
     VAutocomplete: { variant: 'outlined', density: 'compact', hideDetails: 'auto' },
     VCombobox: { variant: 'outlined', density: 'compact', hideDetails: 'auto' },
     VFileInput: { variant: 'outlined', density: 'compact', hideDetails: 'auto' },
+    // Fecha (siempre a través de components/ui/DateField.vue). El icono del calendario va DENTRO del campo: el default de Vuetify
+    // lo pone fuera, a la izquierda, y descuadra el campo respecto a los demás de una fila o un formulario.
+    // `inputFormat`: las fechas se escriben y se ven dd/mm/yyyy en CUALQUIER idioma (decisión del dueño, 2026-11-06; igual que
+    // utils/format.ts). Sin él, Vuetify lo deduce del idioma y en inglés saldría mm/dd/yyyy.
+    VDateInput: { variant: 'outlined', density: 'compact', hideDetails: 'auto', prependIcon: '', prependInnerIcon: '$calendar', inputFormat: 'dd/mm/yyyy' },
     VCheckbox: { color: 'primary', density: 'compact', hideDetails: 'auto' },
     VSwitch: { color: 'primary', density: 'compact', hideDetails: 'auto' },
     VRadioGroup: { color: 'primary', density: 'compact', hideDetails: 'auto' },

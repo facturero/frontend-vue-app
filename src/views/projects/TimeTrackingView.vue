@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
+import { formatDate } from '@/utils/format';
+import DateField from '@/components/ui/DateField.vue';
 import { useI18n } from 'vue-i18n';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import RunningTimerChip from '@/components/projects/RunningTimerChip.vue';
@@ -25,8 +27,8 @@ const store = useProjectsStore();
 
 const canReadAll = computed(() => auth.can('time_entry:read_all'));
 const preset = ref<RangePreset>('thisWeek');
-const from = ref('');
-const to = ref('');
+const from = ref<string | null>(null);
+const to = ref<string | null>(null);
 const userId = ref<string | null>(null);
 const projectId = ref<string | null>(null);
 const billable = ref<'all' | 'yes' | 'no'>('all');
@@ -81,10 +83,8 @@ const projectItems = computed(() => store.projects.map((p) => ({ value: p.id, ti
 const presetItems = computed(() => RANGE_PRESETS.map((p) => ({ value: p, title: t(`projects.time.range.${p}`) })));
 const billableItems = computed(() => (['all', 'yes', 'no'] as const).map((v) => ({ value: v, title: t(`projects.time.billableFilter.${v}`) })));
 
-const dateFmt = computed(() => new Intl.DateTimeFormat(locale.value, { weekday: 'short', day: 'numeric', month: 'short' }));
 function day(iso: string): string {
-  const [y, m, d] = iso.split('-').map(Number);
-  return dateFmt.value.format(new Date(y!, m! - 1, d!));
+  return formatDate(iso);
 }
 
 function exportCsv(): void {
@@ -113,7 +113,7 @@ function exportCsv(): void {
 // ── Corregir un registro ──
 const editing = ref<TimeReportRow | null>(null);
 const editDuration = ref('');
-const editDate = ref('');
+const editDate = ref<string | null>(null);
 const editBillable = ref(true);
 const editNote = ref('');
 const editParsed = computed(() => parseDuration(editDuration.value));
@@ -128,7 +128,7 @@ function startEdit(e: TimeReportRow): void {
 
 async function saveEdit(): Promise<void> {
   const e = editing.value;
-  if (!e || !editParsed.value) return;
+  if (!e || !editParsed.value || !editDate.value) return;
   try {
     await projectsApi.updateTime(e.id, { minutes: editParsed.value, workedOn: editDate.value, billable: editBillable.value, note: editNote.value.trim() || null });
     editing.value = null;
@@ -161,8 +161,12 @@ async function remove(e: TimeReportRow): Promise<void> {
       <v-row>
         <v-col cols="12" sm="6" md="3"><v-select v-model="preset" :items="presetItems" :label="t('projects.time.period')" /></v-col>
         <template v-if="preset === 'custom'">
-          <v-col cols="6" md="2"><v-text-field v-model="from" type="date" :label="t('projects.time.from')" @change="load" /></v-col>
-          <v-col cols="6" md="2"><v-text-field v-model="to" type="date" :label="t('projects.time.to')" @change="load" /></v-col>
+          <v-col cols="6" md="2">
+            <DateField :model-value="from" :max="to" :label="t('projects.time.from')" @update:model-value="(v) => { from = v; load(); }" />
+          </v-col>
+          <v-col cols="6" md="2">
+            <DateField :model-value="to" :min="from" :label="t('projects.time.to')" @update:model-value="(v) => { to = v; load(); }" />
+          </v-col>
         </template>
         <v-col v-if="canReadAll" cols="12" sm="6" md="3">
           <v-autocomplete v-model="userId" :items="people" :label="t('projects.time.person')" clearable />
@@ -179,20 +183,20 @@ async function remove(e: TimeReportRow): Promise<void> {
     <v-row v-if="report" class="mb-2">
       <v-col cols="12" sm="4">
         <v-card class="pa-4">
-          <div class="text-body-2 text-medium-emphasis">{{ t('projects.time.total') }}</div>
-          <div class="text-h6">{{ formatMinutes(report.totalMinutes) }}</div>
+          <div class="text-body-medium text-medium-emphasis">{{ t('projects.time.total') }}</div>
+          <div class="text-title-large">{{ formatMinutes(report.totalMinutes) }}</div>
         </v-card>
       </v-col>
       <v-col cols="12" sm="4">
         <v-card class="pa-4">
-          <div class="text-body-2 text-medium-emphasis">{{ t('projects.time.billableTotal') }}</div>
-          <div class="text-h6 text-success">{{ formatMinutes(report.billableMinutes) }}</div>
+          <div class="text-body-medium text-medium-emphasis">{{ t('projects.time.billableTotal') }}</div>
+          <div class="text-title-large text-success">{{ formatMinutes(report.billableMinutes) }}</div>
         </v-card>
       </v-col>
       <v-col cols="12" sm="4">
         <v-card class="pa-4">
-          <div class="text-body-2 text-medium-emphasis">{{ t('projects.time.nonBillableTotal') }}</div>
-          <div class="text-h6">{{ formatMinutes(report.totalMinutes - report.billableMinutes) }}</div>
+          <div class="text-body-medium text-medium-emphasis">{{ t('projects.time.nonBillableTotal') }}</div>
+          <div class="text-title-large">{{ formatMinutes(report.totalMinutes - report.billableMinutes) }}</div>
         </v-card>
       </v-col>
     </v-row>
@@ -200,7 +204,7 @@ async function remove(e: TimeReportRow): Promise<void> {
     <v-row v-if="items.length" class="mb-2">
       <v-col v-if="canReadAll" cols="12" md="6">
         <v-card class="pa-4 h-100">
-          <div class="text-h6 mb-2">{{ t('projects.time.byPerson') }}</div>
+          <div class="text-title-large mb-2">{{ t('projects.time.byPerson') }}</div>
           <v-table density="compact">
             <tbody>
               <tr v-for="p in byPerson" :key="p.key">
@@ -214,7 +218,7 @@ async function remove(e: TimeReportRow): Promise<void> {
       </v-col>
       <v-col cols="12" :md="canReadAll ? 6 : 12">
         <v-card class="pa-4 h-100">
-          <div class="text-h6 mb-2">{{ t('projects.time.byProject') }}</div>
+          <div class="text-title-large mb-2">{{ t('projects.time.byProject') }}</div>
           <v-table density="compact">
             <tbody>
               <tr v-for="p in byProject" :key="p.key">
@@ -248,7 +252,7 @@ async function remove(e: TimeReportRow): Promise<void> {
             <td>
               <a class="text-primary cursor-pointer" @click="store.openTask(e.taskId)">{{ e.taskTitle }}</a>
               <v-chip v-if="e.taskDeleted" size="x-small" class="ml-1">{{ t('projects.time.inTrash') }}</v-chip>
-              <div v-if="e.note" class="text-body-2 text-medium-emphasis">{{ e.note }}</div>
+              <div v-if="e.note" class="text-body-medium text-medium-emphasis">{{ e.note }}</div>
             </td>
             <td class="d-none d-md-table-cell">{{ e.projectName ?? t('projects.time.noProject') }}</td>
             <td class="text-right text-no-wrap" :title="hoursDecimal(e.minutes, locale) + ' h'">
@@ -277,14 +281,14 @@ async function remove(e: TimeReportRow): Promise<void> {
         <v-card-title>{{ t('projects.time.editTitle') }}</v-card-title>
         <v-card-text class="d-flex flex-column ga-4">
           <v-text-field v-model="editDuration" :label="t('projects.time.duration')" :hint="t('projects.time.durationHint')" persistent-hint />
-          <v-text-field v-model="editDate" type="date" :label="t('projects.time.workedOn')" />
+          <DateField v-model="editDate" :label="t('projects.time.workedOn')" />
           <v-text-field v-model="editNote" :label="t('projects.time.note')" :counter="500" />
           <v-switch v-model="editBillable" :label="t('projects.time.billable')" />
         </v-card-text>
         <v-card-actions class="flex-wrap ga-2">
           <v-spacer />
           <v-btn variant="text" @click="editing = null">{{ t('common.cancel') }}</v-btn>
-          <v-btn color="primary" :disabled="!editParsed" @click="saveEdit">{{ t('common.save') }}</v-btn>
+          <v-btn variant="flat" color="primary" :disabled="!editParsed || !editDate" @click="saveEdit">{{ t('common.save') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>

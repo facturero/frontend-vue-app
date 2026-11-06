@@ -87,8 +87,8 @@ async function onPick(picked: File | File[] | null): Promise<void> {
 
 <template>
   <div>
-    <div class="text-body-2 font-weight-medium mb-1">{{ label }}</div>
-    <p v-if="hint" class="text-caption text-medium-emphasis mb-2">{{ hint }}</p>
+    <div class="text-body-medium font-weight-medium mb-1">{{ label }}</div>
+    <p v-if="hint" class="text-body-small text-medium-emphasis mb-2">{{ hint }}</p>
 
     <div v-if="modelValue" class="d-flex align-center ga-4 mb-2">
       <v-img v-if="currentUrl" :src="currentUrl" max-height="48" max-width="160" width="160" alt="" />

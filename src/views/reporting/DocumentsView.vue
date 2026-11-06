@@ -4,6 +4,7 @@
  * encontrar el comprobante al que apunta un hallazgo: llegar con `?id=` filtra por ese comprobante.
  */
 import { computed, onMounted, ref, watch } from 'vue';
+import { formatDate } from '@/utils/format';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { useReportingStore } from '@/stores/reporting';
@@ -54,7 +55,7 @@ const headers = computed(() => [
   { title: t('reporting.documents.number'), key: 'number', sortable: false },
   { title: t('reporting.documents.direction'), key: 'direction', sortable: false },
   { title: t('reporting.documents.type'), key: 'documentTypeCode', sortable: false },
-  { title: t('reporting.documents.date'), key: 'issueDate', sortable: false },
+  { title: t('reporting.documents.date'), key: 'issueDate', value: (item: Record<string, unknown>) => formatDate(item.issueDate as string), sortable: false },
   { title: t('reporting.documents.party'), key: 'partyName', sortable: false },
   { title: t('reporting.documents.total'), key: 'totalCents', sortable: false, align: 'end' as const },
   { title: t('reporting.documents.status'), key: 'status', sortable: false },
@@ -93,7 +94,7 @@ const headers = computed(() => [
         >
           <template #item.direction="{ item }">{{ $t(`reporting.documents.directions.${item.direction}`) }}</template>
           <template #item.partyName="{ item }">
-            {{ item.partyName ?? '—' }}<div v-if="item.partyIdentification" class="text-body-2 text-medium-emphasis">{{ item.partyIdentification }}</div>
+            {{ item.partyName ?? '—' }}<div v-if="item.partyIdentification" class="text-body-medium text-medium-emphasis">{{ item.partyIdentification }}</div>
           </template>
           <template #item.totalCents="{ item }">{{ money(item.totalCents) }}</template>
           <template #item.status="{ item }">

@@ -1,6 +1,8 @@
 import { createApp } from 'vue';
 import { registerPlugins } from '@/plugins';
 import App from './App.vue';
+// Estilos base sobre Vuetify 4 (reset selectivo y controles de la caja web): después de los estilos de Vuetify.
+import '@/styles/base.css';
 import 'driver.js/dist/driver.css';
 import 'flag-icons/css/flag-icons.min.css';
 import '@/styles/tour.css';

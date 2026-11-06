@@ -529,6 +529,9 @@
       "tax_identification_type_upserted": "Type d'identification enregistré",
       "tax_tax_rate_upserted": "Taux de taxe enregistré",
       "purchasing_supplier_upserted": "Fournisseur créé ou modifié",
+      "purchasing_sri_document_imported": "Documents du SRI importés",
+      "purchasing_sri_document_downloaded": "Document du SRI téléchargé",
+      "purchasing_sri_document_unavailable": "Document du SRI indisponible",
       "purchasing_order_created": "Bon de commande créé",
       "purchasing_order_updated": "Bon de commande modifié",
       "purchasing_order_submitted": "Bon de commande soumis",
@@ -3793,7 +3796,8 @@
     "due": {
       "today": "Aujourd'hui",
       "tomorrow": "Demain",
-      "yesterday": "Hier"
+      "yesterday": "Hier",
+      "overdue": "En retard"
     },
     "myTasks": {
       "title": "Mes tâches",

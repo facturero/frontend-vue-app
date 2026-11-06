@@ -5,6 +5,8 @@
  * aparecen depende del estado y de los permisos (`receivingActions`); el servidor vuelve a comprobarlo: ocultar un botón no es seguridad.
  */
 import { computed, onMounted, ref } from 'vue';
+import DateField from '@/components/ui/DateField.vue';
+import { notify } from '@/composable/useNotify';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
@@ -60,7 +62,6 @@ const receiptDate = ref(todayIso());
 const deliveryRef = ref('');
 const quantities = ref<Record<string, string>>({});
 const receiveError = ref<string | null>(null);
-const snackbar = ref<string | null>(null);
 
 const entered = (line: OrderReceivingLine) => parseQuantityMicros(quantities.value[line.lineId] ?? '') ?? 0n;
 const pendingOf = (line: OrderReceivingLine) => parseQuantityMicros(line.pending) ?? 0n;
@@ -100,7 +101,7 @@ async function confirmReceive(): Promise<void> {
         .map((line) => ({ orderLineId: line.lineId, quantity: (quantities.value[line.lineId] ?? '').trim().replace(',', '.') })),
     });
     receiveDialog.value = false;
-    snackbar.value = t('purchasing.receiving.done', { number: result.receiptNumber });
+    notify.success(t('purchasing.receiving.done', { number: result.receiptNumber }));
     await Promise.all([store.fetchOrder(id.value), store.fetchReceiving(id.value)]);
   } catch {
     receiveError.value = store.error;
@@ -125,7 +126,7 @@ async function confirmClose(): Promise<void> {
   try {
     await store.closeOrder(id.value, closeReason.value.trim());
     closeDialog.value = false;
-    snackbar.value = t('purchasing.receiving.closed');
+    notify.success(t('purchasing.receiving.closed'));
     await store.fetchOrder(id.value);
   } catch {
     closeError.value = store.error;
@@ -167,12 +168,12 @@ async function confirmClose(): Promise<void> {
           {{ order.number ?? $t('purchasing.orders.draft') }}
           <v-chip :color="ORDER_STATUS_COLOR[order.status]" variant="flat" size="small">{{ $t(`purchasing.status.${order.status}`) }}</v-chip>
           <v-spacer />
-          <span class="text-body-2 text-medium-emphasis">{{ $t('purchasing.receiving.toleranceLabel', { pct: tolerancePct }) }}</span>
+          <span class="text-body-medium text-medium-emphasis">{{ $t('purchasing.receiving.toleranceLabel', { pct: tolerancePct }) }}</span>
         </v-card-title>
         <v-card-text>
           <v-alert v-if="order.status === 'closed'" type="info" class="mb-4">{{ $t('purchasing.receiving.closedHint') }}</v-alert>
           <v-alert v-else-if="nothingPending" type="success" class="mb-4">{{ $t('purchasing.receiving.nothingPending') }}</v-alert>
-          <p class="text-body-2 text-medium-emphasis mb-4">{{ $t('purchasing.receiving.intro') }}</p>
+          <p class="text-body-medium text-medium-emphasis mb-4">{{ $t('purchasing.receiving.intro') }}</p>
 
           <v-data-table :headers="headers" :items="rows" :loading="store.loading" :items-per-page="-1" hide-default-footer>
             <template #no-data>{{ $t('purchasing.receiving.noLines') }}</template>
@@ -186,10 +187,10 @@ async function confirmClose(): Promise<void> {
         <v-card-title>{{ $t('purchasing.receiving.dialogTitle') }}</v-card-title>
         <v-card-text>
           <v-alert v-if="receiveError" type="error" class="mb-4">{{ receiveError }}</v-alert>
-          <p class="text-body-2 text-medium-emphasis mb-4">{{ $t('purchasing.receiving.dialogIntro') }}</p>
+          <p class="text-body-medium text-medium-emphasis mb-4">{{ $t('purchasing.receiving.dialogIntro') }}</p>
           <v-row class="mb-2">
             <v-col cols="12" sm="6">
-              <v-text-field v-model="receiptDate" type="date" :label="$t('purchasing.receiving.receiptDate')" />
+              <DateField v-model="receiptDate" :label="$t('purchasing.receiving.receiptDate')" />
             </v-col>
             <v-col cols="12" sm="6">
               <v-text-field v-model="deliveryRef" :label="$t('purchasing.receiving.deliveryRef')" />
@@ -227,7 +228,7 @@ async function confirmClose(): Promise<void> {
         <v-card-actions class="flex-wrap ga-2">
           <v-spacer />
           <v-btn variant="text" @click="receiveDialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="primary" :loading="store.saving" :disabled="!receiveValid" @click="confirmReceive">{{ $t('common.confirm') }}</v-btn>
+          <v-btn variant="flat" color="primary" :loading="store.saving" :disabled="!receiveValid" @click="confirmReceive">{{ $t('common.confirm') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -237,17 +238,16 @@ async function confirmClose(): Promise<void> {
         <v-card-title>{{ $t('purchasing.receiving.closeTitle') }}</v-card-title>
         <v-card-text>
           <v-alert v-if="closeError" type="error" class="mb-4">{{ closeError }}</v-alert>
-          <p class="text-body-2 text-medium-emphasis mb-4">{{ $t('purchasing.receiving.closeHint') }}</p>
+          <p class="text-body-medium text-medium-emphasis mb-4">{{ $t('purchasing.receiving.closeHint') }}</p>
           <v-textarea v-model="closeReason" :label="$t('purchasing.receiving.closeReason')" :hint="$t('purchasing.receiving.reasonMin')" persistent-hint rows="3" auto-grow maxlength="300" />
         </v-card-text>
         <v-card-actions class="flex-wrap ga-2">
           <v-spacer />
           <v-btn variant="text" @click="closeDialog = false">{{ $t('common.cancel') }}</v-btn>
-          <v-btn color="error" :loading="store.saving" :disabled="!closeValid" @click="confirmClose">{{ $t('common.confirm') }}</v-btn>
+          <v-btn variant="flat" color="error" :loading="store.saving" :disabled="!closeValid" @click="confirmClose">{{ $t('common.confirm') }}</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
-    <v-snackbar :model-value="snackbar !== null" timeout="3000" @update:model-value="snackbar = null">{{ snackbar }}</v-snackbar>
   </v-container>
 </template>

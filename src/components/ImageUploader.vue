@@ -265,7 +265,7 @@ watch(() => props.existingImages, () => {
           :color="dragOver ? 'primary' : 'grey'"
           class="mb-2"
         />
-        <span class="text-body-2 text-medium-emphasis">{{ $t('uploader.dropHint') }}</span>
+        <span class="text-body-medium text-medium-emphasis">{{ $t('uploader.dropHint') }}</span>
       </template>
     </div>
 
@@ -346,7 +346,7 @@ watch(() => props.existingImages, () => {
         height="6"
         rounded
       />
-      <span class="text-caption text-medium-emphasis mt-1 d-block">
+      <span class="text-body-small text-medium-emphasis mt-1 d-block">
         Subiendo... {{ completed }} / {{ total }}
       </span>
     </div>
@@ -371,7 +371,7 @@ watch(() => props.existingImages, () => {
     <!-- DONE (multiple mode) -->
     <div v-if="state === 'done' && multiple" class="mt-2 d-flex align-center ga-2">
       <v-icon icon="mdi-check-circle" color="success" />
-      <span class="text-body-2 text-success">
+      <span class="text-body-medium text-success">
         {{ uploadedIds.length > 1 ? $t('uploader.uploaded', { count: uploadedIds.length }) : $t('uploader.uploadedOne') }}
       </span>
       <v-btn size="small" variant="text" prepend-icon="mdi-refresh" @click="reset">
@@ -382,12 +382,12 @@ watch(() => props.existingImages, () => {
     <!-- ERROR -->
     <div v-if="state === 'error'" class="mt-2 d-flex align-center ga-2">
       <v-icon icon="mdi-alert-circle" color="error" />
-      <span class="text-body-2 text-error flex-grow-1">{{ uploadError }}</span>
+      <span class="text-body-medium text-error flex-grow-1">{{ uploadError }}</span>
       <v-btn size="small" variant="text" @click="reset">Reintentar</v-btn>
     </div>
 
     <div v-if="uploadError && state !== 'error' && state !== 'uploading'" class="mt-1">
-      <span class="text-caption text-error">{{ uploadError }}</span>
+      <span class="text-body-small text-error">{{ uploadError }}</span>
     </div>
     </v-card-text>
   </v-card>

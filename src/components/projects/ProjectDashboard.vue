@@ -49,20 +49,20 @@ const person = (id: string | null) => (id ? displayName(store.users.get(id)) || 
       <v-row>
         <v-col v-for="k in (['open', 'completed', 'overdue', 'dueThisWeek', 'unassigned'] as const)" :key="k" cols="6" sm="4" md>
           <v-card class="pa-4 h-100">
-            <div class="text-body-2 text-medium-emphasis">{{ t(`projects.dashboard.${k}`) }}</div>
-            <div class="text-h6" :class="{ 'text-error': k === 'overdue' && data.totals.overdue > 0, 'text-success': k === 'completed' }">{{ data.totals[k] }}</div>
+            <div class="text-body-medium text-medium-emphasis">{{ t(`projects.dashboard.${k}`) }}</div>
+            <div class="text-title-large" :class="{ 'text-error': k === 'overdue' && data.totals.overdue > 0, 'text-success': k === 'completed' }">{{ data.totals[k] }}</div>
           </v-card>
         </v-col>
       </v-row>
 
       <v-card class="pa-6">
         <div class="d-flex align-center mb-2">
-          <span class="text-h6">{{ t('projects.dashboard.progress') }}</span>
+          <span class="text-title-large">{{ t('projects.dashboard.progress') }}</span>
           <v-spacer />
-          <span class="text-body-2 text-medium-emphasis">{{ t('projects.dashboard.progressText', { done: data.totals.completed, total: data.totals.total }) }}</span>
+          <span class="text-body-medium text-medium-emphasis">{{ t('projects.dashboard.progressText', { done: data.totals.completed, total: data.totals.total }) }}</span>
         </div>
         <v-progress-linear :model-value="percentDone" color="success" height="10" rounded />
-        <div v-if="data.time.estimatedMinutes || data.time.actualMinutes" class="text-body-2 text-medium-emphasis mt-2">
+        <div v-if="data.time.estimatedMinutes || data.time.actualMinutes" class="text-body-medium text-medium-emphasis mt-2">
           {{ t('projects.dashboard.time', { estimated: formatMinutes(data.time.estimatedMinutes), actual: formatMinutes(data.time.actualMinutes) }) }}
         </div>
       </v-card>
@@ -70,9 +70,9 @@ const person = (id: string | null) => (id ? displayName(store.users.get(id)) || 
       <v-row>
         <v-col cols="12" md="6">
           <v-card class="pa-6 h-100">
-            <div class="text-h6 mb-4">{{ t('projects.dashboard.bySection') }}</div>
+            <div class="text-title-large mb-4">{{ t('projects.dashboard.bySection') }}</div>
             <div v-for="s in data.bySection" :key="s.sectionId" class="mb-2">
-              <div class="d-flex text-body-2">
+              <div class="d-flex text-body-medium">
                 <span>{{ s.name }}</span>
                 <v-spacer />
                 <span class="text-medium-emphasis">{{ t('projects.dashboard.openDone', { open: s.open, done: s.completed }) }}</span>
@@ -83,32 +83,32 @@ const person = (id: string | null) => (id ? displayName(store.users.get(id)) || 
         </v-col>
         <v-col cols="12" md="6">
           <v-card class="pa-6 h-100">
-            <div class="text-h6 mb-4">{{ t('projects.dashboard.byAssignee') }}</div>
-            <div v-if="!data.byAssignee.length" class="text-body-2 text-medium-emphasis">{{ t('projects.dashboard.nothingOpen') }}</div>
+            <div class="text-title-large mb-4">{{ t('projects.dashboard.byAssignee') }}</div>
+            <div v-if="!data.byAssignee.length" class="text-body-medium text-medium-emphasis">{{ t('projects.dashboard.nothingOpen') }}</div>
             <div v-for="a in data.byAssignee" :key="a.userId ?? 'none'" class="d-flex align-center ga-2 mb-2">
               <UserAvatar :user-id="a.userId" :size="26" :tooltip="false" />
-              <span class="text-body-2 flex-grow-1 text-truncate">{{ person(a.userId) }}</span>
+              <span class="text-body-medium flex-grow-1 text-truncate">{{ person(a.userId) }}</span>
               <v-chip v-if="a.overdue" size="x-small" color="error">{{ t('projects.dashboard.overdueCount', a.overdue) }}</v-chip>
-              <span class="text-body-2 font-weight-medium">{{ a.open }}</span>
+              <span class="text-body-medium font-weight-medium">{{ a.open }}</span>
             </div>
           </v-card>
         </v-col>
         <v-col cols="12" md="6">
           <v-card class="pa-6 h-100">
-            <div class="text-h6 mb-4">{{ t('projects.dashboard.completedByWeek') }}</div>
+            <div class="text-title-large mb-4">{{ t('projects.dashboard.completedByWeek') }}</div>
             <div class="d-flex align-end ga-2" style="height: 140px">
               <div v-for="w in data.completedByWeek" :key="w.weekStart" class="flex-grow-1 d-flex flex-column align-center justify-end h-100">
-                <span class="text-caption">{{ w.count || '' }}</span>
+                <span class="text-body-small">{{ w.count || '' }}</span>
                 <div class="bg-primary rounded w-100" :style="{ height: `${(w.count / maxWeek) * 100}px`, minHeight: w.count ? '4px' : '0' }" />
-                <span class="text-caption text-medium-emphasis text-no-wrap">{{ weekLabel(w.weekStart) }}</span>
+                <span class="text-body-small text-medium-emphasis text-no-wrap">{{ weekLabel(w.weekStart) }}</span>
               </div>
             </div>
           </v-card>
         </v-col>
         <v-col cols="12" md="6">
           <v-card class="pa-6 h-100">
-            <div class="text-h6 mb-4">{{ t('projects.dashboard.milestones') }}</div>
-            <div v-if="!data.milestones.length" class="text-body-2 text-medium-emphasis">{{ t('projects.overview.noMilestones') }}</div>
+            <div class="text-title-large mb-4">{{ t('projects.dashboard.milestones') }}</div>
+            <div v-if="!data.milestones.length" class="text-body-medium text-medium-emphasis">{{ t('projects.overview.noMilestones') }}</div>
             <v-list density="compact" class="pa-0">
               <v-list-item
                 v-for="m in data.milestones"

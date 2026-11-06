@@ -66,4 +66,10 @@ export const purchasingApi = {
   postBill: (id: string) => http.post<PurchaseBill>(`/purchasing/bills/${id}/post`).then((r) => r.data),
   overrideBill: (id: string, reason: string) => http.post<PurchaseBill>(`/purchasing/bills/${id}/override`, { reason }).then((r) => r.data),
   voidBill: (id: string, reason: string) => http.post<PurchaseBill>(`/purchasing/bills/${id}/void`, { reason }).then((r) => r.data),
+
+  // ── Sincronización portal SRI ───────────────────────────────────────────────
+  getSriPortalConfig: () => http.get<any>('/purchasing/sri-portal/config').then((r) => r.data),
+  saveSriPortalCredentials: (body: { username: string; password: string }) => http.post('/purchasing/sri-portal/credentials', body).then((r) => r.data),
+  enableSriPortal: () => http.post('/purchasing/sri-portal/enable').then((r) => r.data),
+  disableSriPortal: () => http.post('/purchasing/sri-portal/disable').then((r) => r.data),
 };

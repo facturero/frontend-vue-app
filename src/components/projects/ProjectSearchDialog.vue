@@ -66,9 +66,9 @@ function go(path: string, query?: Record<string, string>): void {
       <v-card-text class="d-flex flex-column ga-2">
         <v-text-field v-model="q" :label="t('projects.search.placeholder')" prepend-inner-icon="mdi-magnify" :loading="loading" autofocus clearable />
         <v-alert v-if="failure" type="error">{{ failure }}</v-alert>
-        <div v-if="q.trim().length < 2" class="text-body-2 text-medium-emphasis">{{ t('projects.search.hint') }}</div>
+        <div v-if="q.trim().length < 2" class="text-body-medium text-medium-emphasis">{{ t('projects.search.hint') }}</div>
         <template v-else-if="result">
-          <div v-if="!result.tasks.length && !result.projects.length" class="text-body-2 text-medium-emphasis">{{ t('projects.search.none') }}</div>
+          <div v-if="!result.tasks.length && !result.projects.length" class="text-body-medium text-medium-emphasis">{{ t('projects.search.none') }}</div>
           <v-list v-if="result.projects.length" density="compact">
             <v-list-subheader>{{ t('projects.title') }}</v-list-subheader>
             <v-list-item v-for="p in result.projects" :key="p.id" :title="p.name" @click="go(`/projects/${p.id}`)">

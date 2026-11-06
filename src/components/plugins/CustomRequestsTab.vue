@@ -66,8 +66,8 @@ async function submitRequest(): Promise<void> {
           <template #prepend>
             <v-icon icon="mdi-file-document-edit-outline" />
           </template>
-          <v-list-item-title class="text-body-2">{{ r.description }}</v-list-item-title>
-          <v-list-item-subtitle class="text-caption">
+          <v-list-item-title class="text-body-medium">{{ r.description }}</v-list-item-title>
+          <v-list-item-subtitle class="text-body-small">
             {{ $t('plugins.requestLabel', { id: r.id.slice(0, 8) }) }}
             <template v-if="r.rejectionReason"> · {{ $t('plugins.requestReason') }}: {{ r.rejectionReason }}</template>
             <template v-if="r.quotedPriceCents != null">

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
+import { formatDateTime } from '@/utils/format';
 import { useI18n } from 'vue-i18n';
 import { useProjectsStore } from '@/stores/projects';
 import { displayName, HEALTH_COLOR, localIsoDate } from '@/utils/projects';
@@ -14,7 +15,7 @@ import UserAvatar from './UserAvatar.vue';
  * historial, el avance, los próximos hitos y quién está en el proyecto. Publicar el estado avisa a los miembros.
  */
 const emit = defineEmits<{ share: [] }>();
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const store = useProjectsStore();
 
 const HEALTHS: ProjectHealth[] = ['on_track', 'at_risk', 'off_track', 'complete'];
@@ -53,7 +54,7 @@ const milestones = computed(() =>
     .slice(0, 5),
 );
 const latest = computed(() => store.statusUpdates[0] ?? null);
-const when = (iso: string) => new Intl.DateTimeFormat(locale.value, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(iso));
+const when = (iso: string) => formatDateTime(iso);
 
 function open(): void {
   status.value = latest.value?.status ?? 'on_track';
@@ -88,13 +89,13 @@ async function post(): Promise<void> {
           <template v-if="latest">
             <div class="d-flex align-center flex-wrap ga-2 mb-2">
               <v-chip :color="HEALTH_COLOR[latest.status]" prepend-icon="mdi-circle" size="small">{{ t(`projects.health.${latest.status}`) }}</v-chip>
-              <span class="text-caption text-medium-emphasis">
+              <span class="text-body-small text-medium-emphasis">
                 {{ displayName(store.users.get(latest.authorUserId)) || t('projects.share.unknownUser') }} · {{ when(latest.createdAt) }}
               </span>
             </div>
-            <RichTextView v-if="latest.bodyDoc" :doc="latest.bodyDoc" class="text-body-2" />
+            <RichTextView v-if="latest.bodyDoc" :doc="latest.bodyDoc" class="text-body-medium" />
           </template>
-          <div v-else class="text-body-2 text-medium-emphasis">{{ t('projects.overview.noStatus') }}</div>
+          <div v-else class="text-body-medium text-medium-emphasis">{{ t('projects.overview.noStatus') }}</div>
 
           <v-expansion-panels v-if="store.statusUpdates.length > 1" variant="accordion" class="mt-4">
             <v-expansion-panel :title="t('projects.overview.history', { n: store.statusUpdates.length - 1 })">
@@ -102,9 +103,9 @@ async function post(): Promise<void> {
                 <div v-for="u in store.statusUpdates.slice(1)" :key="u.id" class="mb-4">
                   <div class="d-flex align-center flex-wrap ga-2 mb-1">
                     <v-chip :color="HEALTH_COLOR[u.status]" size="x-small">{{ t(`projects.health.${u.status}`) }}</v-chip>
-                    <span class="text-caption text-medium-emphasis">{{ displayName(store.users.get(u.authorUserId)) }} · {{ when(u.createdAt) }}</span>
+                    <span class="text-body-small text-medium-emphasis">{{ displayName(store.users.get(u.authorUserId)) }} · {{ when(u.createdAt) }}</span>
                   </div>
-                  <RichTextView v-if="u.bodyDoc" :doc="u.bodyDoc" class="text-body-2" />
+                  <RichTextView v-if="u.bodyDoc" :doc="u.bodyDoc" class="text-body-medium" />
                 </div>
               </v-expansion-panel-text>
             </v-expansion-panel>
@@ -114,7 +115,7 @@ async function post(): Promise<void> {
 
       <v-card v-if="store.current?.description">
         <v-card-title>{{ t('projects.overview.about') }}</v-card-title>
-        <v-card-text class="text-body-2">{{ store.current.description }}</v-card-text>
+        <v-card-text class="text-body-medium">{{ store.current.description }}</v-card-text>
       </v-card>
     </v-col>
 
@@ -124,10 +125,10 @@ async function post(): Promise<void> {
         <v-card-text>
           <div class="d-flex align-center ga-2 mb-2">
             <v-progress-linear :model-value="stats.percent" color="success" height="8" rounded />
-            <span class="text-body-2 font-weight-medium">{{ stats.percent }}%</span>
+            <span class="text-body-medium font-weight-medium">{{ stats.percent }}%</span>
           </div>
-          <div class="text-body-2">{{ t('projects.overview.doneOf', { done: stats.done, total: stats.total }) }}</div>
-          <div v-if="stats.overdue" class="text-body-2 text-error">{{ t('projects.overview.overdue', { n: stats.overdue }) }}</div>
+          <div class="text-body-medium">{{ t('projects.overview.doneOf', { done: stats.done, total: stats.total }) }}</div>
+          <div v-if="stats.overdue" class="text-body-medium text-error">{{ t('projects.overview.overdue', { n: stats.overdue }) }}</div>
         </v-card-text>
       </v-card>
 
@@ -135,11 +136,11 @@ async function post(): Promise<void> {
         <v-card-title>{{ t('projects.overview.milestones') }}</v-card-title>
         <v-list v-if="milestones.length" density="compact">
           <v-list-item v-for="m in milestones" :key="m.id" prepend-icon="mdi-rhombus-outline" @click="store.openTask(m.id)">
-            <v-list-item-title class="text-body-2">{{ m.title }}</v-list-item-title>
+            <v-list-item-title class="text-body-medium">{{ m.title }}</v-list-item-title>
             <template #append><DueDateChip :due-on="m.dueOn" /></template>
           </v-list-item>
         </v-list>
-        <v-card-text v-else class="text-body-2 text-medium-emphasis">{{ t('projects.overview.noMilestones') }}</v-card-text>
+        <v-card-text v-else class="text-body-medium text-medium-emphasis">{{ t('projects.overview.noMilestones') }}</v-card-text>
       </v-card>
 
       <v-card>
@@ -152,8 +153,8 @@ async function post(): Promise<void> {
         <v-list density="compact">
           <v-list-item v-for="m in store.current?.members ?? []" :key="m.userId">
             <template #prepend><UserAvatar :user-id="m.userId" :size="28" :tooltip="false" class="mr-2" /></template>
-            <v-list-item-title class="text-body-2">{{ displayName(store.users.get(m.userId)) || t('projects.share.unknownUser') }}</v-list-item-title>
-            <template #append><span class="text-caption text-medium-emphasis">{{ t(`projects.roles.${m.role}`) }}</span></template>
+            <v-list-item-title class="text-body-medium">{{ displayName(store.users.get(m.userId)) || t('projects.share.unknownUser') }}</v-list-item-title>
+            <template #append><span class="text-body-small text-medium-emphasis">{{ t(`projects.roles.${m.role}`) }}</span></template>
           </v-list-item>
         </v-list>
       </v-card>
@@ -172,7 +173,7 @@ async function post(): Promise<void> {
       <v-card-actions class="flex-wrap ga-2">
         <v-spacer />
         <v-btn variant="text" @click="posting = false">{{ t('common.cancel') }}</v-btn>
-        <v-btn color="primary" :loading="saving" @click="post">{{ t('projects.overview.publish') }}</v-btn>
+        <v-btn variant="flat" color="primary" :loading="saving" @click="post">{{ t('projects.overview.publish') }}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>

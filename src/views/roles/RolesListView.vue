@@ -93,7 +93,7 @@ onMounted(() => {
             </v-card-item>
 
             <v-card-text>
-              <div class="text-caption text-medium-emphasis mb-2">
+              <div class="text-body-small text-medium-emphasis mb-2">
                 {{ $t('roles.permissionsCount', { count: r.permissions.length }) }}
               </div>
               <div class="d-flex flex-wrap ga-1">
