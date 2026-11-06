@@ -146,12 +146,13 @@ async function remove(): Promise<void> {
             </v-avatar>
           </v-avatar-group>
           <RunningTimerChip />
-          <v-btn color="primary" prepend-icon="mdi-account-plus-outline" @click="sharing = true">{{ t('projects.share.button') }}</v-btn>
           <v-menu>
             <template #activator="{ props: menu }">
               <v-btn v-bind="menu" icon="mdi-dots-horizontal" variant="text" :aria-label="t('projects.menu')" />
             </template>
-            <v-list>
+            <!-- Ancho mínimo: sin él el menú mide lo justo y el atajo y el interruptor quedan pegados a su texto. -->
+            <v-list min-width="300">
+              <v-list-item prepend-icon="mdi-account-plus-outline" :title="t('projects.share.button')" @click="sharing = true" />
               <v-list-item v-if="store.canManage" prepend-icon="mdi-pencil-outline" :title="t('projects.edit')" @click="editing = true" />
               <v-list-item prepend-icon="mdi-form-select" :title="t('projects.fields.title')" @click="managingFields = true" />
               <v-list-item prepend-icon="mdi-lightning-bolt-outline" :title="t('projects.rules.title')" @click="managingRules = true" />
@@ -169,12 +170,12 @@ async function remove(): Promise<void> {
               <v-list-item prepend-icon="mdi-keyboard-outline" :title="t('projects.shortcuts.title')" @click="helpOpen = true">
                 <template #append><v-hotkey keys="shift+slash" /></template>
               </v-list-item>
-              <v-list-item>
-                <v-switch
-                  :model-value="celebration.enabled.value"
-                  :label="t('projects.celebrations')"
-                  @update:model-value="(v) => celebration.setEnabled(!!v)"
-                />
+              <!-- Una opción del menú con su interruptor al final (el patrón de Vuetify para un ajuste en una lista): toda la fila
+                   alterna; el interruptor es `readonly` para que el clic no cuente dos veces. -->
+              <v-list-item prepend-icon="mdi-party-popper" :title="t('projects.celebrations')" @click="celebration.setEnabled(!celebration.enabled.value)">
+                <template #append>
+                  <v-switch :model-value="celebration.enabled.value" readonly tabindex="-1" aria-hidden="true" />
+                </template>
               </v-list-item>
             </v-list>
           </v-menu>

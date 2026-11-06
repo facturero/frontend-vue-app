@@ -113,10 +113,11 @@ async function save(): Promise<void> {
           </div>
           <div>
             <div class="text-body-medium mb-2">{{ t('projects.form.defaultView') }}</div>
-            <v-btn-toggle v-model="defaultView" mandatory density="compact" color="primary" variant="outlined" divided>
-              <v-btn value="list" prepend-icon="mdi-format-list-checkbox">{{ t('projects.views.list') }}</v-btn>
-              <v-btn value="board" prepend-icon="mdi-view-column-outline">{{ t('projects.views.board') }}</v-btn>
-            </v-btn-toggle>
+            <!-- Chips de elección y no `v-btn-toggle`: el grupo de botones va pegado por diseño y aquí son dos opciones sueltas. -->
+            <v-chip-group v-model="defaultView" mandatory color="primary">
+              <v-chip value="list" prepend-icon="mdi-format-list-checkbox">{{ t('projects.views.list') }}</v-chip>
+              <v-chip value="board" prepend-icon="mdi-view-column-outline">{{ t('projects.views.board') }}</v-chip>
+            </v-chip-group>
           </div>
         </div>
       </v-card-text>
