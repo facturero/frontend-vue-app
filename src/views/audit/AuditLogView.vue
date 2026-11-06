@@ -85,6 +85,18 @@ function eventLabel(entry: AuditLogEntry): string {
   return te(key) ? t(key) : entry.summary;
 }
 
+/**
+ * «Por la regla "Cerrar al terminar"». El actor de la fila es quien DISPARÓ la automatización; esto dice cuál la ejecutó, para que
+ * «Ana asignó la tarea a Beto» no se lea como algo que Ana hizo a mano.
+ */
+function viaLabel(entry: AuditLogEntry): string | null {
+  const via = entry.via;
+  if (!via) return null;
+  const name = via.name || via.id || '—';
+  if (via.type === 'rule' || via.type === 'form') return t(`audit.via.${via.type}`, { name });
+  return t('audit.via.other', { type: via.type });
+}
+
 function iconFor(entry: AuditLogEntry): string {
   const a = entry.action;
   if (a.includes('deleted') || a.includes('removed')) return 'mdi-delete-outline';
@@ -456,6 +468,9 @@ onMounted(load);
           </div>
           <!-- Sin actor = lo hizo el sistema, o el emisor aún no lo propaga. -->
           <v-chip v-else size="x-small">{{ $t('audit.system') }}</v-chip>
+          <v-chip v-if="viaLabel(item)" size="x-small" color="warning" prepend-icon="mdi-lightning-bolt-outline" class="mt-1">
+            {{ viaLabel(item) }}
+          </v-chip>
         </template>
 
         <template #item.targetId="{ item }">
@@ -499,6 +514,12 @@ onMounted(load);
               <v-list-item
                 :title="$t('audit.headers.actor')"
                 :subtitle="store.current.userEmail || store.current.userId || $t('audit.system')"
+              />
+              <v-list-item
+                v-if="viaLabel(store.current)"
+                prepend-icon="mdi-lightning-bolt-outline"
+                :title="viaLabel(store.current)!"
+                :subtitle="$t('audit.via.hint')"
               />
               <v-list-item :title="$t('audit.headers.target')" :subtitle="store.current.targetId || '—'" />
               <v-list-item :title="$t('audit.headers.ip')" :subtitle="store.current.ip || '—'" />

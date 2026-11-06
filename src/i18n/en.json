@@ -662,7 +662,13 @@
     },
     "subtitle": "Who did what, when and from where. Read-only.",
     "system": "System",
-    "title": "Audit log"
+    "title": "Audit log",
+    "via": {
+      "rule": "By rule “{name}”",
+      "form": "Via form “{name}”",
+      "other": "Automatic ({type})",
+      "hint": "An automation ran it; the person shown is who triggered it."
+    }
   },
   "auth": {
     "acceptAndContinue": "Accept and continue",

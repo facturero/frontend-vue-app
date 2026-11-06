@@ -662,7 +662,13 @@
     },
     "subtitle": "Qui a fait quoi, quand et d'où. Lecture seule.",
     "system": "Système",
-    "title": "Journal d'audit"
+    "title": "Journal d'audit",
+    "via": {
+      "rule": "Par la règle « {name} »",
+      "form": "Par le formulaire « {name} »",
+      "other": "Automatique ({type})",
+      "hint": "Une automatisation l’a exécuté ; la personne indiquée est celle qui l’a déclenchée."
+    }
   },
   "auth": {
     "acceptAndContinue": "Accepter et continuer",

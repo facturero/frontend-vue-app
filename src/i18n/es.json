@@ -662,7 +662,13 @@
     },
     "subtitle": "Quién hizo qué, cuándo y desde dónde. Solo lectura.",
     "system": "Sistema",
-    "title": "Bitácora de auditoría"
+    "title": "Bitácora de auditoría",
+    "via": {
+      "rule": "Por la regla «{name}»",
+      "form": "Por el formulario «{name}»",
+      "other": "Automático ({type})",
+      "hint": "Lo ejecutó una automatización; quien figura arriba es quien la disparó."
+    }
   },
   "auth": {
     "acceptAndContinue": "Aceptar y continuar",

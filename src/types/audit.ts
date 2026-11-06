@@ -22,6 +22,15 @@ export interface AuditLogEntry {
   /** Resumen en inglés que arma el backend (`invoice issued`). Se usa solo
    *  como respaldo cuando el evento no tiene traducción propia. */
   summary: string;
+  /** Automatización que ejecutó el cambio en nombre de `userId` (una regla o un formulario de Proyectos). null = lo hizo la
+   *  persona. Opcional: un audit-log-service anterior no lo manda. */
+  via?: AuditOrigin | null;
+}
+
+export interface AuditOrigin {
+  type: string;
+  id: string | null;
+  name: string | null;
 }
 
 export interface AuditLogDetail extends AuditLogEntry {
