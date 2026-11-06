@@ -63,6 +63,10 @@ export default createVuetify({
     VAlert: { variant: 'tonal', density: 'compact', rounded: 'lg' },
     VChip: { variant: 'tonal' },
     VDialog: { maxWidth: 480 },
+    // Un menú (y el desplegable de un select/autocomplete, que es un VMenu por dentro) se CIERRA al hacer scroll. El default de
+    // Vuetify, `reposition`, lo mantiene dentro de la pantalla aunque su campo ya no se vea: en el panel de una tarea, al scrollear,
+    // las listas quedaban flotando lejos de su campo y encima de otras filas (2026-11-06).
+    VMenu: { scrollStrategy: 'close' },
 
     // Datos
     VDataTable: { hover: true },

@@ -412,6 +412,9 @@ propios van en `src/styles/base.css`, dentro de `@layer vuetify-core.reset`.
   menú, `v-bind="mergeProps(menu, tip)"`.
 - `v-btn variant="outlined"` no se usa (REGLAS-FRONT R-10, `lint:ui` kind `boton`); `v-btn-toggle` sí puede ir con borde.
 - El tema por defecto de la 4 es `system`; aquí está fijo en `light` (`vuetify.ts`).
+- Un `v-menu` (y la lista de un `v-select`/`v-autocomplete`/`v-combobox`, que es un `v-menu` por dentro) usa por defecto
+  `scroll-strategy="reposition"`: al hacer scroll se queda dentro de la pantalla aunque su campo ya no se vea, y flota encima de
+  otras filas. Aquí el default es `close` (`vuetify.ts`): al hacer scroll, el menú se cierra. No lo sobreescribas en una vista.
 
 ## 8. Tour guiado (driver.js)
 

@@ -511,7 +511,7 @@ const moveTargets = computed(() => {
         <TaskAttachments />
         <v-divider />
         <TaskConversation ref="conversation" />
-        <!-- El historial va al final del panel, aparte de los comentarios (que tapaba) y plegable. -->
+        <!-- El historial va al final del panel, aparte de los comentarios (que tapaba); siempre visible, sin plegar. -->
         <TaskActivity />
       </div>
     </template>

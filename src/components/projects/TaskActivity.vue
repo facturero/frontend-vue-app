@@ -9,7 +9,7 @@ import type { TaskActivity } from '@/types/projects';
 
 /**
  * El historial de la tarea (quién cambió qué y cuándo), al final del panel y separado de los comentarios: mezclado con ellos tapaba
- * la conversación. Siempre visible, pero corto: las últimas `MIN` líneas. «Ver todo» muestra el resto; si es mucho, «Ver más» lo
+ * la conversación. Sin título (las líneas con su icono ya dicen qué son). Siempre visible, pero corto: las últimas `MIN` líneas. «Ver todo» muestra el resto; si es mucho, «Ver más» lo
  * va soltando de `STEP` en `STEP` para no alargar el panel de golpe. Cierra con quién creó la tarea.
  */
 const { t } = useI18n();
@@ -89,7 +89,6 @@ function describe(a: TaskActivity): string {
 
 <template>
   <div v-if="store.detail">
-    <div class="text-body-large font-weight-medium mb-2">{{ t('projects.activity.title') }} ({{ items.length }})</div>
     <div class="d-flex flex-column ga-2">
       <div class="d-flex flex-wrap ga-2">
         <v-btn v-if="hidden" variant="text" size="small" class="px-0" prepend-icon="mdi-history" @click="showMore">
