@@ -10,7 +10,7 @@ import { useUiStore } from '@/stores/ui';
 /**
  * Tours guiados de la aplicación con driver.js (https://driverjs.com).
  *
- * Hay tres, y se encadenan en el orden en que un usuario nuevo los encuentra:
+ * Hay tres de la aplicación, y se encadenan en el orden en que un usuario nuevo los encuentra:
  *
  *   'welcome'       (/profile)               da la bienvenida y explica los
  *                                            datos personales que hay que dar.
@@ -24,6 +24,9 @@ import { useUiStore } from '@/stores/ui';
  * highlight una vez que la vista nueva montó su `PageHeader`. Los dos del alta
  * ocurren dentro de una sola vista, y los lanza la propia vista cuando ya tiene
  * el formulario pintado (ver ProfileView y OrganizationSettingsView).
+ *
+ * Y uno por cada módulo complejo (`PLUGIN_TOURS`): sale solo justo después de comprarlo en el catálogo (ver PluginCartDialog) y
+ * se puede pedir otra vez desde el menú ⋯ del módulo. Hoy: 'projects' (Proyectos y tareas). Es multi-pantalla como el 'app'.
  *
  * Reglas que respeta:
  * - Filtra pasos por permiso (`auth.can`) y plugin activo (`plugins.isActive`),
@@ -42,7 +45,19 @@ import { useUiStore } from '@/stores/ui';
 const STORAGE_PREFIX = 'crm:tour:v1';
 const DISABLED_KEY = 'crm:tour:disabled';
 
-export type TourName = 'app' | 'welcome' | 'organization';
+export type TourName = 'app' | 'welcome' | 'organization' | 'projects';
+
+/**
+ * Módulos que traen recorrido propio al comprarlos: los que no se entienden de un vistazo. Un módulo nuevo se suma aquí con su
+ * función de pasos en `buildConfig`.
+ */
+export const PLUGIN_TOURS: Readonly<Record<string, TourName>> = { 'projects.tasks_kanban': 'projects' };
+
+/** El recorrido que toca enseñar tras activar estos módulos (el primero que tenga uno), o `null`. */
+export function tourForPlugins(codes: readonly string[]): TourName | null {
+  for (const code of codes) if (PLUGIN_TOURS[code]) return PLUGIN_TOURS[code]!;
+  return null;
+}
 
 let _driver: Driver | null = null;
 let _activeTour: TourName = 'app';
@@ -115,11 +130,13 @@ export function useAppTour(): { startTour: (tour?: TourName) => void } {
   /** `router.afterEach` se registra una sola vez por sesión. */
   if (!_unregisterAfterEach) {
     _unregisterAfterEach = router.afterEach(async () => {
-      if (_pendingStep !== null && _driver?.isActive()) {
+      if (_pendingStep !== null && _driver) {
         const target = _pendingStep;
         _pendingStep = null;
         await nextTick();
-        _driver.moveTo(target);
+        // Si el recorrido arranca en otra pantalla (el de un módulo, recién comprado en el catálogo), todavía no está activo.
+        if (_driver.isActive()) _driver.moveTo(target);
+        else _driver.drive(target);
       }
     });
   }
@@ -366,6 +383,34 @@ export function useAppTour(): { startTour: (tour?: TourName) => void } {
     return steps;
   }
 
+  /**
+   * Proyectos y tareas, recién comprado: qué es, cómo empezar y dónde está cada cosa. Recorre /projects y /my-tasks (y Horas y
+   * Carga de trabajo si también se compraron). Lo de dentro de un proyecto se cuenta sin señalar nada: recién comprado no hay
+   * ninguno que abrir.
+   */
+  function projectsSteps(): DriveStep[] {
+    const auth = useAuthStore();
+    const plugins = usePluginsStore();
+    const step = (route: string, key: string, element?: string): DriveStep => ({
+      ...(element ? { element: q(element) } : {}),
+      data: { route },
+      popover: {
+        title: t(`tour.projects.${key}.title`),
+        description: t(`tour.projects.${key}.desc`),
+        ...(element ? { side: 'bottom' as const, align: 'start' as const } : {}),
+      },
+    });
+
+    const steps: DriveStep[] = [step('projects', 'welcome')];
+    if (auth.can('project:create')) steps.push(step('projects', 'create', '[data-tour="projects-new"]'));
+    steps.push(step('projects', 'inside'), step('projects', 'detail'));
+    steps.push(step('my-tasks', 'myTasks', 'main h1'), step('my-tasks', 'quickAdd', '[data-tour="my-tasks-quick"]'));
+    if (plugins.isActive('projects.time_tracking')) steps.push(step('time-tracking', 'time', 'main h1'));
+    if (plugins.isActive('projects.resource_allocation')) steps.push(step('workload', 'workload', 'main h1'));
+    steps.push(step('my-tasks', 'finish'));
+    return steps;
+  }
+
   function buildConfig(tour: TourName): Config {
     const auth = useAuthStore();
 
@@ -374,6 +419,8 @@ export function useAppTour(): { startTour: (tour?: TourName) => void } {
       steps = welcomeSteps();
     } else if (tour === 'organization') {
       steps = organizationSteps(!auth.user?.id || !isTourSeen(auth.user.id, 'welcome'));
+    } else if (tour === 'projects') {
+      steps = projectsSteps();
     } else {
       steps = appSteps();
     }
@@ -402,7 +449,7 @@ export function useAppTour(): { startTour: (tour?: TourName) => void } {
       progressText: t('tour.progress', { current: '{{current}}', total: '{{total}}' }),
       nextBtnText: t('tour.next'),
       prevBtnText: t('tour.prev'),
-      doneBtnText: tour === 'app' ? t('tour.done') : t('tour.gotIt'),
+      doneBtnText: tour === 'app' || tour === 'projects' ? t('tour.done') : t('tour.gotIt'),
       onHighlightStarted: () => applyTheme(),
       onNextClick: (_el, _step, opts) => goTo((opts.index ?? 0) + 1),
       onPrevClick: (_el, _step, opts) => goTo((opts.index ?? 0) - 1),
@@ -437,8 +484,17 @@ export function useAppTour(): { startTour: (tour?: TourName) => void } {
       ui.rail = false;
     }
 
-    _driver = driver(buildConfig(tour));
-    _driver.drive(0);
+    const config = buildConfig(tour);
+    _driver = driver(config);
+    // Un recorrido multi-pantalla pedido desde otra (el de un módulo, al terminar la compra en el catálogo) arranca en la pantalla
+    // de su primer paso: el `afterEach` de arriba lo empieza cuando la vista montó.
+    const firstRoute = config.steps?.[0]?.data?.route as string | undefined;
+    if (firstRoute && firstRoute !== router.currentRoute.value.name) {
+      _pendingStep = 0;
+      void router.push({ name: firstRoute });
+    } else {
+      _driver.drive(0);
+    }
   }
 
   return { startTour };

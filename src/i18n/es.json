@@ -2424,7 +2424,14 @@
     "stock": "Inventario",
     "taxDocuments": "Retenciones y guías",
     "timeTracking": "Horas",
-    "workload": "Carga de trabajo"
+    "workload": "Carga de trabajo",
+    "groups": {
+      "sales": "Ventas",
+      "inventory": "Compras y stock",
+      "finance": "Finanzas",
+      "projects": "Proyectos",
+      "admin": "Administración"
+    }
   },
   "notificationPrefs": {
     "app": "App",
@@ -3530,6 +3537,44 @@
     "finish": {
       "title": "¡Listo!",
       "desc": "Ya conoces lo esencial. Si algo se te escapa, pulsa el icono de ayuda arriba a la derecha para volver a ver la guía."
+    },
+    "projects": {
+      "welcome": {
+        "title": "Bienvenido a Proyectos y tareas",
+        "desc": "Organiza el trabajo del equipo como en Asana: proyectos con lista, tablero, calendario y cronograma, y «Mis tareas» con lo que le toca a cada persona. Te enseñamos dónde está cada cosa en un minuto."
+      },
+      "create": {
+        "title": "Empieza por un proyecto",
+        "desc": "Crea uno en blanco o desde una plantilla (cierre contable, obra, lanzamiento, contratación…), que ya trae secciones, fechas e hitos. Puede ser de toda la organización o privado: solo lo ven sus miembros."
+      },
+      "inside": {
+        "title": "Dentro de un proyecto",
+        "desc": "Arriba tienes las pestañas: Lista y Tablero para trabajar el día a día, Calendario y Cronograma para las fechas y dependencias, y Panel para ver cómo va. Arrastra las tareas entre secciones o con el teclado (Alt y las flechas)."
+      },
+      "detail": {
+        "title": "El detalle de una tarea",
+        "desc": "Haz clic en una tarea y se abre a la derecha: responsable, fechas, subtareas, comentarios con {'@'}menciones, adjuntos, aprobaciones y el historial. Quien sigue una tarea recibe los avisos en la campana y, si quiere, por correo."
+      },
+      "myTasks": {
+        "title": "Mis tareas",
+        "desc": "Todo lo que te asignaron, de todos los proyectos, agrupado por fecha: recién asignadas, hoy, próximas y más tarde. Es la pantalla para empezar el día."
+      },
+      "quickAdd": {
+        "title": "Anota sin pensar",
+        "desc": "Escribe aquí y pulsa Enter: queda como tarea personal (solo tú la ves). Después la puedes mover a un proyecto desde su detalle."
+      },
+      "time": {
+        "title": "Horas",
+        "desc": "Registra el tiempo de cada tarea, a mano o con el cronómetro, y míralo por persona y proyecto. Las horas facturables se pueden facturar desde el proyecto."
+      },
+      "workload": {
+        "title": "Carga de trabajo",
+        "desc": "Cuántas horas tiene asignadas cada persona por semana frente a su capacidad, para repartir mejor."
+      },
+      "finish": {
+        "title": "Listo",
+        "desc": "Ctrl+K busca proyectos y tareas desde cualquier pantalla y «?» muestra los atajos de teclado. Puedes volver a ver este recorrido desde el menú ⋯ de Mis tareas o de un proyecto."
+      }
     }
   },
   "uploader": {
@@ -4208,6 +4253,7 @@
         "members": "Miembros",
         "role": "Tu rol"
       }
-    }
+    },
+    "tourAgain": "Ver el recorrido de Proyectos"
   }
 }

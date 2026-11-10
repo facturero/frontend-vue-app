@@ -10,6 +10,7 @@ import ShortcutsDialog from '@/components/projects/ShortcutsDialog.vue';
 import TaskDetailPanel from '@/components/projects/TaskDetailPanel.vue';
 import { useViewShortcuts } from '@/composable/useViewShortcuts';
 import { useCelebration } from '@/composable/useCelebration';
+import { useAppTour } from '@/composable/useAppTour';
 import { useAuthStore } from '@/stores/auth';
 import RunningTimerChip from '@/components/projects/RunningTimerChip.vue';
 import { useProjectsStore } from '@/stores/projects';
@@ -21,6 +22,7 @@ import type { MyTask } from '@/types/projects';
  * Arriba, una caja para anotar algo rápido: queda como tarea personal mía (sin proyecto), con Enter y sin soltar el teclado.
  */
 const { t } = useI18n();
+const { startTour } = useAppTour();
 const auth = useAuthStore();
 const store = useProjectsStore();
 const celebration = useCelebration();
@@ -101,6 +103,7 @@ async function toggle(task: MyTask): Promise<void> {
             <v-btn v-bind="menu" icon="mdi-dots-horizontal" variant="text" :aria-label="t('projects.menu')" />
           </template>
           <v-list min-width="300">
+            <v-list-item prepend-icon="mdi-map-marker-path" :title="t('projects.tourAgain')" @click="startTour('projects')" />
             <v-list-item prepend-icon="mdi-keyboard-outline" :title="t('projects.shortcuts.title')" @click="helpOpen = true">
               <template #append><v-hotkey keys="shift+slash" /></template>
             </v-list-item>
@@ -122,6 +125,7 @@ async function toggle(task: MyTask): Promise<void> {
       <v-text-field
         ref="quickInput"
         v-model="quick"
+        data-tour="my-tasks-quick"
         :placeholder="t('projects.myTasks.quickAdd')"
         prepend-inner-icon="mdi-plus"
         class="flex-grow-1"

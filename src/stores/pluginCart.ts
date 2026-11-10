@@ -26,6 +26,8 @@ export const usePluginCartStore = defineStore('pluginCart', () => {
   const dropped = ref<string[]>([]);
   /** Cuántos módulos activó la última compra; la pantalla lo muestra una vez. */
   const lastActivated = ref<number | null>(null);
+  /** Los módulos que eligió la última compra (no los que arrastró): deciden si hay un recorrido que enseñar. */
+  const lastActivatedCodes = ref<string[]>([]);
 
   const count = computed(() => codes.value.length);
   const has = (code: string): boolean => codes.value.includes(code);
@@ -154,8 +156,10 @@ export const usePluginCartStore = defineStore('pluginCart', () => {
     error.value = null;
     try {
       // El servidor saca del carrito guardado lo que activa, en la misma operación.
-      const done = await pluginApi.cartActivate(codes.value, quote.value?.discount?.code);
+      const chosen = [...codes.value];
+      const done = await pluginApi.cartActivate(chosen, quote.value?.discount?.code);
       lastActivated.value = done.length;
+      lastActivatedCodes.value = chosen;
       const plugins = usePluginsStore();
       await Promise.all([plugins.fetchMy(), plugins.fetchCatalog()]);
       resetLocal();
@@ -180,6 +184,7 @@ export const usePluginCartStore = defineStore('pluginCart', () => {
     error,
     dropped,
     lastActivated,
+    lastActivatedCodes,
     count,
     has,
     load,

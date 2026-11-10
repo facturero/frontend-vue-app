@@ -24,6 +24,7 @@ import TaskDetailPanel from '@/components/projects/TaskDetailPanel.vue';
 import UserAvatar from '@/components/projects/UserAvatar.vue';
 import RunningTimerChip from '@/components/projects/RunningTimerChip.vue';
 import { useCelebration } from '@/composable/useCelebration';
+import { useAppTour } from '@/composable/useAppTour';
 import { useAuthStore } from '@/stores/auth';
 import { usePluginsStore } from '@/stores/plugins';
 import { useProjectsStore } from '@/stores/projects';
@@ -35,6 +36,7 @@ const TABS: Tab[] = ['overview', 'list', 'board', 'calendar', 'timeline', 'dashb
 
 /** Un proyecto: Lista o Tablero (como las pestañas de Asana), «Compartir», y el detalle de la tarea en el panel derecho. */
 const { t } = useI18n();
+const { startTour } = useAppTour();
 const confirm = useConfirm();
 const route = useRoute();
 const router = useRouter();
@@ -187,6 +189,7 @@ async function remove(): Promise<void> {
             <!-- Ancho mínimo: sin él el menú mide lo justo y el atajo y el interruptor quedan pegados a su texto. -->
             <v-list min-width="300">
               <v-list-item prepend-icon="mdi-account-plus-outline" :title="t('projects.share.button')" @click="sharing = true" />
+              <v-list-item prepend-icon="mdi-map-marker-path" :title="t('projects.tourAgain')" @click="startTour('projects')" />
               <v-list-item v-if="store.canManage" prepend-icon="mdi-pencil-outline" :title="t('projects.edit')" @click="editing = true" />
               <v-list-item prepend-icon="mdi-form-select" :title="t('projects.fields.title')" @click="managingFields = true" />
               <v-list-item prepend-icon="mdi-lightning-bolt-outline" :title="t('projects.rules.title')" @click="managingRules = true" />

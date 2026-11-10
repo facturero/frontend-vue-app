@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { getNavigationItems, isNavItemActive, type NavItem } from './navigation';
+import { getNavigationItems, getNavigationTree, isNavGroup, isNavItemActive, type NavItem } from './navigation';
 
 const item = (to: string): NavItem => getNavigationItems().find((i) => i.to === to) as NavItem;
 
@@ -48,5 +48,26 @@ describe('el ítem del menú sigue marcado en las pantallas internas', () => {
       const marcados = getNavigationItems().filter((i) => isNavItemActive(i, path));
       expect(marcados, path).toHaveLength(1);
     }
+  });
+});
+
+describe('menú agrupado por áreas', () => {
+  const tree = getNavigationTree();
+  const leaves = tree.flatMap((e) => (isNavGroup(e) ? e.items : [e]));
+
+  it('cada pantalla del menú está exactamente una vez en el árbol', () => {
+    const flat = getNavigationItems().map((i) => i.titleKey).sort();
+    expect(leaves.map((i) => i.titleKey).sort()).toEqual(flat);
+  });
+
+  it('los grupos tienen identificador único y al menos dos pantallas', () => {
+    const groups = tree.filter(isNavGroup);
+    expect(new Set(groups.map((g) => g.id)).size).toBe(groups.length);
+    for (const g of groups) expect(g.items.length, g.id).toBeGreaterThanOrEqual(2);
+  });
+
+  it('Administración va al final', () => {
+    const last = tree.at(-1)!;
+    expect(isNavGroup(last) && last.id).toBe('admin');
   });
 });

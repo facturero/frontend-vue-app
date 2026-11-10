@@ -431,6 +431,21 @@ arrastre nativo, no como eventos de `v-calendar` (sus fichas no se mueven de dí
   `scroll-strategy="reposition"`: al hacer scroll se queda dentro de la pantalla aunque su campo ya no se vea, y flota encima de
   otras filas. Aquí el default es `close` (`vuetify.ts`): al hacer scroll, el menú se cierra. No lo sobreescribas en una vista.
 
+### Menú lateral por áreas (2026-11-10)
+
+El menú se define en `src/menus/navigation.ts`: la lista plana de pantallas (`getNavigationItems`, que también usan la búsqueda
+global y los tests) y el árbol por áreas (`getNavigationTree`): Inicio, Ventas, Compras y stock, Finanzas, Proyectos, Restaurante y
+Administración, esta última al pie y separada. Con 22 pantallas sueltas, el menú colapsado era una columna de iconos indistinguibles.
+
+- **Colapsado** (rail): un icono por área y ningún grupo abierto; el área de la pantalla actual se marca como píldora.
+- **Expandido** (al pasar el ratón, o en el teléfono): `v-list-group`; queda abierta el área de la pantalla actual más las que la
+  persona abrió (se recuerdan en `localStorage`, `crm:nav:opened`).
+- Un área sin pantallas visibles (permisos y módulos activos) no sale; una con una sola se pinta como esa pantalla, sin desplegable.
+- Pantalla nueva: entra en la lista plana **y** en un área del árbol. `navigation.test.ts` falla si queda fuera o repetida.
+- No repitas el icono de un área en una de sus pantallas (por eso Roles dejó el escudo a Administración).
+
+---
+
 ## 8. Tour guiado (driver.js)
 
 El tour de la aplicación vive en `src/composable/useAppTour.ts` y su estilo en
@@ -449,6 +464,14 @@ El tour de la aplicación vive en `src/composable/useAppTour.ts` y su estilo en
 - **Navegación:** entre pasos de rutas distintas el tour empuja la ruta con
   vue-router y reanuda el highlight al montar la vista (ver hooks
   `onNextClick`/`onPrevClick` y la reanudación en `router.afterEach`).
+- **Recorrido de un módulo complejo** (2026-11-10): `PLUGIN_TOURS` asocia un
+  módulo con su recorrido (hoy `projects.tasks_kanban` → `projects`). Sale solo
+  justo después de comprarlo en el carrito (`PluginCartDialog`), la primera vez
+  (`shouldAutoStartTour`), y arranca en la pantalla de su primer paso. Se
+  relanza desde el menú ⋯ del módulo. Para un módulo nuevo: sus pasos en
+  `useAppTour`, sus anclas `data-tour="…"`, sus textos en `tour.<módulo>.*`
+  (es/en/fr; una `@` en un texto va como `{'@'}`, o vue-i18n la toma por un
+  enlace y el mensaje no compila) y la entrada en `PLUGIN_TOURS`.
 
 ---
 

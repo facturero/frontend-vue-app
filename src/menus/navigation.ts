@@ -20,7 +20,7 @@ export interface NavItem {
 const items: NavItem[] = [
   { titleKey: 'nav.home', icon: 'mdi-view-dashboard-outline', to: '/' },
   { titleKey: 'nav.employees', icon: 'mdi-account-multiple-outline', to: '/employees', permission: 'user:read' },
-  { titleKey: 'nav.roles', icon: 'mdi-shield-account-outline', to: '/roles', permission: 'user:read' },
+  { titleKey: 'nav.roles', icon: 'mdi-badge-account-horizontal-outline', to: '/roles', permission: 'user:read' },
   { titleKey: 'nav.customers', icon: 'mdi-account-group-outline', to: '/customers', permission: 'customer:read', plugin: 'crm.contacts' },
   // Caja web: vender y facturar desde el navegador. Va con el módulo del POS; el permiso es el de crear facturas (billing exige también emitir).
   { titleKey: 'nav.pos', icon: 'mdi-point-of-sale', to: '/pos', permission: 'invoice:create', plugin: 'pos.core' },
@@ -45,6 +45,47 @@ const items: NavItem[] = [
   { titleKey: 'nav.plugins', icon: 'mdi-puzzle-outline', to: '/plugins', permission: 'plugins:read' },
   { titleKey: 'nav.audit', icon: 'mdi-clipboard-text-clock-outline', to: '/audit-logs', permission: 'audit:read' },
 ];
+
+/** Un área del menú: agrupa las pantallas de un mismo tema bajo un solo icono. */
+export interface NavGroup {
+  /** Identificador estable (se guarda qué grupos dejó abiertos cada persona). */
+  id: string;
+  titleKey: string;
+  icon: string;
+  items: NavItem[];
+}
+
+export type NavEntry = NavItem | NavGroup;
+
+export function isNavGroup(entry: NavEntry): entry is NavGroup {
+  return 'items' in entry;
+}
+
+const byTo = (to: string): NavItem => {
+  const found = items.find((i) => i.to === to);
+  if (!found) throw new Error(`navigation: no hay ítem con to=${to}`);
+  return found;
+};
+
+/**
+ * El menú por áreas, como en Odoo o Zoho. Con 22 pantallas sueltas, el menú colapsado era una columna de iconos que nadie
+ * distinguía; agrupadas son 7 (uno por área), y al pasar el ratón se ven los nombres. Administración va al final y aparte: se usa
+ * poco y se mezclaba con lo del día a día. Cada pantalla está en un solo grupo (lo comprueba navigation.test.ts).
+ */
+const tree: NavEntry[] = [
+  byTo('/'),
+  { id: 'sales', titleKey: 'nav.groups.sales', icon: 'mdi-storefront-outline', items: [byTo('/customers'), byTo('/pos'), byTo('/invoices'), byTo('/tax-documents/withholdings')] },
+  { id: 'inventory', titleKey: 'nav.groups.inventory', icon: 'mdi-package-variant', items: [byTo('/products'), byTo('/purchasing/orders'), byTo('/stock')] },
+  { id: 'finance', titleKey: 'nav.groups.finance', icon: 'mdi-bank-outline', items: [byTo('/treasury/receivables'), byTo('/accounting/accounts'), byTo('/reporting/annexes')] },
+  { id: 'projects', titleKey: 'nav.groups.projects', icon: 'mdi-briefcase-outline', items: [byTo('/my-tasks'), byTo('/projects'), byTo('/time-tracking'), byTo('/workload')] },
+  byTo('/restaurant/tables'),
+  { id: 'admin', titleKey: 'nav.groups.admin', icon: 'mdi-shield-account-outline', items: [byTo('/employees'), byTo('/roles'), byTo('/plugins'), byTo('/audit-logs'), byTo('/settings')] },
+];
+
+/** El menú agrupado, sin filtrar: el cajón descarta lo que el usuario no puede abrir y aplana los grupos que quedan con uno. */
+export function getNavigationTree(): NavEntry[] {
+  return tree;
+}
 
 /**
  * ¿La ruta actual pertenece a este ítem del menú? Es la ruta del ítem o cualquiera que cuelgue de ella por prefijo

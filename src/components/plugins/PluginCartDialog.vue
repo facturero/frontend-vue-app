@@ -3,10 +3,25 @@ import { computed } from 'vue';
 import { formatDate as fmtDate } from '@/utils/format';
 import { useI18n } from 'vue-i18n';
 import { usePluginCartStore } from '@/stores/pluginCart';
+import { useAuthStore } from '@/stores/auth';
+import { shouldAutoStartTour, tourForPlugins, useAppTour } from '@/composable/useAppTour';
 import type { CartQuoteItem } from '@/types/plugins';
 
 const { t, te, locale } = useI18n();
 const cart = usePluginCartStore();
+const auth = useAuthStore();
+const { startTour } = useAppTour();
+
+/**
+ * Activa el carrito y, si trae un módulo complejo (Proyectos…), abre su recorrido guiado: quien acaba de comprarlo no sabe por
+ * dónde empezar. Solo la primera vez (si ya lo vio, por ejemplo al reactivarlo, no se repite); desde el menú ⋯ del módulo se puede
+ * volver a pedir.
+ */
+async function confirm(): Promise<void> {
+  if (!(await cart.checkout())) return;
+  const tour = tourForPlugins(cart.lastActivatedCodes);
+  if (tour && auth.user?.id && shouldAutoStartTour(auth.user.id, tour)) startTour(tour);
+}
 
 const selected = computed(() => cart.quote?.items.filter((i) => i.kind === 'selected') ?? []);
 const extras = computed(() => cart.quote?.items.filter((i) => i.kind !== 'selected') ?? []);
@@ -162,7 +177,7 @@ function discountErrorText(error: { code: string; message: string }): string {
           variant="tonal"
           :disabled="!canConfirm"
           :loading="cart.activating"
-          @click="cart.checkout()"
+          @click="confirm"
         >
           {{ $t('plugins.cart.confirm', { count: selected.length }, selected.length) }}
         </v-btn>

@@ -2424,7 +2424,14 @@
     "stock": "Inventaire",
     "taxDocuments": "Retenues et bons",
     "timeTracking": "Heures",
-    "workload": "Charge de travail"
+    "workload": "Charge de travail",
+    "groups": {
+      "sales": "Ventes",
+      "inventory": "Achats et stock",
+      "finance": "Finances",
+      "projects": "Projets",
+      "admin": "Administration"
+    }
   },
   "notificationPrefs": {
     "app": "App",
@@ -3530,6 +3537,44 @@
     "finish": {
       "title": "C'est tout !",
       "desc": "Vous connaissez l'essentiel. Si besoin, appuyez sur l'icône d'aide en haut à droite pour revoir le guide."
+    },
+    "projects": {
+      "welcome": {
+        "title": "Bienvenue dans Projets et tâches",
+        "desc": "Organisez le travail de l'équipe comme dans Asana : projets en liste, tableau, calendrier et chronologie, et « Mes tâches » avec ce que chacun doit faire. On vous fait le tour en une minute."
+      },
+      "create": {
+        "title": "Commencez par un projet",
+        "desc": "Créez-en un vide ou à partir d'un modèle (clôture mensuelle, chantier, lancement, recrutement…) avec sections, dates et jalons déjà prêts. Il peut être partagé avec toute l'organisation ou privé : seuls ses membres le voient."
+      },
+      "inside": {
+        "title": "Dans un projet",
+        "desc": "Les onglets sont en haut : Liste et Tableau pour le quotidien, Calendrier et Chronologie pour les dates et dépendances, et Tableau de bord pour suivre l'avancement. Glissez les tâches entre sections, ou déplacez-les au clavier (Alt et les flèches)."
+      },
+      "detail": {
+        "title": "Le détail d'une tâche",
+        "desc": "Cliquez sur une tâche : elle s'ouvre à droite avec responsable, dates, sous-tâches, commentaires avec {'@'}mentions, pièces jointes, validations et historique. Ceux qui la suivent sont avertis dans la cloche et, s'ils le souhaitent, par e-mail."
+      },
+      "myTasks": {
+        "title": "Mes tâches",
+        "desc": "Tout ce qui vous est assigné, dans tous les projets, regroupé par date : récemment assignées, aujourd'hui, à venir et plus tard. C'est l'écran pour commencer la journée."
+      },
+      "quickAdd": {
+        "title": "Notez sans réfléchir",
+        "desc": "Écrivez ici et appuyez sur Entrée : cela devient une tâche personnelle (vous seul la voyez). Vous pourrez la déplacer dans un projet depuis son détail."
+      },
+      "time": {
+        "title": "Heures",
+        "desc": "Enregistrez le temps passé sur chaque tâche, à la main ou au chronomètre, et consultez-le par personne et par projet. Les heures facturables se facturent depuis le projet."
+      },
+      "workload": {
+        "title": "Charge de travail",
+        "desc": "Combien d'heures chaque personne a par semaine face à sa capacité, pour mieux répartir le travail."
+      },
+      "finish": {
+        "title": "C'est prêt",
+        "desc": "Ctrl+K recherche projets et tâches depuis n'importe quel écran et « ? » affiche les raccourcis clavier. Vous pouvez revoir cette visite depuis le menu ⋯ de Mes tâches ou d'un projet."
+      }
     }
   },
   "uploader": {
@@ -4208,6 +4253,7 @@
         "members": "Membres",
         "role": "Votre rôle"
       }
-    }
+    },
+    "tourAgain": "Revoir la visite des Projets"
   }
 }

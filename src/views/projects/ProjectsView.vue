@@ -106,7 +106,7 @@ function opened(id: string): void {
       <template #actions>
         <v-btn variant="text" prepend-icon="mdi-magnify" @click="searching = true">{{ t('projects.search.button') }}</v-btn>
         <v-btn variant="text" prepend-icon="mdi-check-circle-outline" to="/my-tasks">{{ t('projects.myTasks.title') }}</v-btn>
-        <v-btn v-if="auth.can('project:create')" color="primary" prepend-icon="mdi-plus" @click="choosing = true">
+        <v-btn v-if="auth.can('project:create')" color="primary" prepend-icon="mdi-plus" data-tour="projects-new" @click="choosing = true">
           {{ t('projects.new') }}
         </v-btn>
       </template>

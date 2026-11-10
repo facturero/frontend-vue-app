@@ -2424,7 +2424,14 @@
     "stock": "Inventory",
     "taxDocuments": "Withholdings & guides",
     "timeTracking": "Time",
-    "workload": "Workload"
+    "workload": "Workload",
+    "groups": {
+      "sales": "Sales",
+      "inventory": "Purchasing & stock",
+      "finance": "Finance",
+      "projects": "Projects",
+      "admin": "Administration"
+    }
   },
   "notificationPrefs": {
     "app": "App",
@@ -3530,6 +3537,44 @@
     "finish": {
       "title": "All set!",
       "desc": "You know the essentials now. If anything slips your mind, press the help icon at the top right to see the guide again."
+    },
+    "projects": {
+      "welcome": {
+        "title": "Welcome to Projects and tasks",
+        "desc": "Organize your team's work the way you do in Asana: projects with list, board, calendar and timeline, and \"My tasks\" with what each person has to do. We'll show you around in a minute."
+      },
+      "create": {
+        "title": "Start with a project",
+        "desc": "Create a blank one or start from a template (month-end close, construction, launch, hiring…) that already has sections, dates and milestones. It can be shared with the whole organization or private: only its members see it."
+      },
+      "inside": {
+        "title": "Inside a project",
+        "desc": "The tabs are at the top: List and Board for day-to-day work, Calendar and Timeline for dates and dependencies, and Dashboard to see how it is going. Drag tasks between sections, or move them with the keyboard (Alt and the arrows)."
+      },
+      "detail": {
+        "title": "Task details",
+        "desc": "Click a task and it opens on the right: assignee, dates, subtasks, comments with {'@'}mentions, attachments, approvals and history. Followers get notified in the bell and, if they want, by email."
+      },
+      "myTasks": {
+        "title": "My tasks",
+        "desc": "Everything assigned to you across all projects, grouped by date: recently assigned, today, upcoming and later. It's the screen to start your day."
+      },
+      "quickAdd": {
+        "title": "Jot it down",
+        "desc": "Type here and press Enter: it becomes a personal task (only you see it). You can move it to a project later from its details."
+      },
+      "time": {
+        "title": "Time",
+        "desc": "Log time on each task, by hand or with the timer, and review it by person and project. Billable hours can be invoiced from the project."
+      },
+      "workload": {
+        "title": "Workload",
+        "desc": "How many hours each person has assigned per week against their capacity, so work is shared better."
+      },
+      "finish": {
+        "title": "All set",
+        "desc": "Ctrl+K searches projects and tasks from any screen and \"?\" shows the keyboard shortcuts. You can see this tour again from the ⋯ menu in My tasks or in a project."
+      }
     }
   },
   "uploader": {
@@ -4208,6 +4253,7 @@
         "members": "Members",
         "role": "Your role"
       }
-    }
+    },
+    "tourAgain": "Show the Projects tour"
   }
 }
