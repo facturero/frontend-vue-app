@@ -48,12 +48,23 @@ http.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 
 let refreshing: Promise<string> | null = null;
 
-async function doRefresh(): Promise<string> {
-  const refreshToken = getRefreshToken();
-  if (!refreshToken) throw new Error('sin refresh token');
-  const { data } = await axios.post(`${baseURL}/auth/refresh`, { refreshToken });
-  setTokens(data.accessToken, data.refreshToken);
-  return data.accessToken;
+/**
+ * Renueva el access token. El refresh token se rota (auth-service revoca el viejo al emitir el nuevo) y las pestañas comparten
+ * localStorage: si dos pestañas recibían 401 a la vez, las dos mandaban el mismo refresh token, una ganaba y la otra recibía 401 y
+ * cerraba la sesión en TODAS. Por eso la renovación va bajo un candado entre pestañas (Web Locks) y, ya dentro, si otra pestaña
+ * renovó mientras se esperaba (el access token guardado no es el que falló), se usa ese sin volver a refrescar.
+ */
+async function doRefresh(staleAccess: string | null): Promise<string> {
+  const run = async (): Promise<string> => {
+    const current = getAccessToken();
+    if (current && current !== staleAccess) return current;
+    const refreshToken = getRefreshToken();
+    if (!refreshToken) throw new Error('sin refresh token');
+    const { data } = await axios.post(`${baseURL}/auth/refresh`, { refreshToken });
+    setTokens(data.accessToken, data.refreshToken);
+    return data.accessToken;
+  };
+  return typeof navigator !== 'undefined' && navigator.locks ? navigator.locks.request('crm:auth-refresh', run) : run();
 }
 
 http.interceptors.response.use(
@@ -74,9 +85,10 @@ http.interceptors.response.use(
 
     if (status === 401 && original && !original._retry && !isAuthCall) {
       original._retry = true;
+      const staleAccess = String(original.headers.Authorization ?? '').replace(/^Bearer /, '') || null;
       try {
         if (!refreshing) {
-          refreshing = doRefresh().finally(() => {
+          refreshing = doRefresh(staleAccess).finally(() => {
             refreshing = null;
           });
         }
@@ -91,6 +103,13 @@ http.interceptors.response.use(
         original.headers.Authorization = `Bearer ${newToken}`;
         return http(original);
       } catch {
+        // Sin Web Locks (navegador viejo) la carrera sigue posible: si el refresco falló pero otra pestaña ya guardó un token
+        // nuevo, se reintenta con ese en vez de cerrar la sesión.
+        const fresh = getAccessToken();
+        if (fresh && fresh !== staleAccess) {
+          original.headers.Authorization = `Bearer ${fresh}`;
+          return http(original);
+        }
         clearTokens();
         if (window.location.pathname !== '/login') {
           window.location.href = '/login';
