@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
+import { useDisplay } from 'vuetify';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import PageHeader from '@/components/ui/PageHeader.vue';
@@ -53,6 +54,19 @@ watch(showCompleted, (v) => store.fetchMyTasks(v));
 
 const groups = computed(() => groupMyTasks(store.myTasks, localIsoDate(new Date())));
 
+/**
+ * Teléfono: deslizar hacia abajo recarga la lista, como cualquier app de tareas. En escritorio está apagado (con el ratón no hay
+ * gesto, y la rueda no debe disparar una recarga).
+ */
+const { smAndDown } = useDisplay();
+async function refresh({ done }: { done: () => void }): Promise<void> {
+  try {
+    await store.fetchMyTasks(showCompleted.value);
+  } finally {
+    done();
+  }
+}
+
 async function addQuick(): Promise<void> {
   const title = quick.value.trim();
   if (!title || !auth.user) return;
@@ -85,16 +99,15 @@ async function toggle(task: MyTask): Promise<void> {
           <template #activator="{ props: menu }">
             <v-btn v-bind="menu" icon="mdi-dots-horizontal" variant="text" :aria-label="t('projects.menu')" />
           </template>
-          <v-list>
+          <v-list min-width="300">
             <v-list-item prepend-icon="mdi-keyboard-outline" :title="t('projects.shortcuts.title')" @click="helpOpen = true">
               <template #append><v-hotkey keys="shift+slash" /></template>
             </v-list-item>
-            <v-list-item>
-              <v-switch
-                :model-value="celebration.enabled.value"
-                :label="t('projects.celebrations')"
-                @update:model-value="(v) => celebration.setEnabled(!!v)"
-              />
+            <!-- Igual que en el menú del proyecto: toda la fila alterna y el interruptor es `readonly` para no contar el clic dos veces. -->
+            <v-list-item prepend-icon="mdi-party-popper" :title="t('projects.celebrations')" @click="celebration.setEnabled(!celebration.enabled.value)">
+              <template #append>
+                <v-switch :model-value="celebration.enabled.value" readonly tabindex="-1" aria-hidden="true" />
+              </template>
             </v-list-item>
           </v-list>
         </v-menu>
@@ -103,7 +116,8 @@ async function toggle(task: MyTask): Promise<void> {
 
     <v-alert v-if="store.error" type="error" closable class="mb-4">{{ store.error }}</v-alert>
 
-    <div class="d-flex align-center flex-wrap ga-4 mb-4">
+    <!-- En el teléfono, el campo a todo el ancho y el interruptor debajo: lado a lado el campo quedaba en «Anota una ta». -->
+    <div class="d-flex flex-column flex-sm-row align-sm-center ga-2 ga-sm-4 mb-4">
       <v-text-field
         ref="quickInput"
         v-model="quick"
@@ -117,6 +131,7 @@ async function toggle(task: MyTask): Promise<void> {
 
     <v-progress-linear v-if="store.loading" indeterminate color="primary" class="mb-4" />
 
+    <v-pull-to-refresh :disabled="!smAndDown" @load="refresh">
     <v-card>
       <div v-for="group in MY_TASKS_GROUPS" :key="group">
         <div class="d-flex align-center ga-2 px-2 py-2 border-b">
@@ -136,7 +151,7 @@ async function toggle(task: MyTask): Promise<void> {
           <div
             v-for="task in groups[group]"
             :key="task.id"
-            class="d-flex align-center flex-wrap ga-2 px-2 py-1 border-b cursor-pointer"
+            class="d-flex align-center ga-2 px-2 py-1 border-b cursor-pointer"
             :class="{ 'bg-lightprimary': store.detail?.id === task.id }"
             @click="store.openTask(task.id)"
           >
@@ -147,25 +162,32 @@ async function toggle(task: MyTask): Promise<void> {
               size="small"
               :aria-label="t('projects.task.markComplete')"
               @click.stop="toggle(task)" /></template></v-tooltip>
-            <div class="flex-grow-1">
-              <div :class="{ 'text-decoration-line-through text-medium-emphasis': task.completedAt }">{{ task.title }}</div>
-              <div v-if="task.parent" class="text-body-small text-medium-emphasis">{{ t('projects.task.subtaskOf', { title: task.parent.title }) }}</div>
+            <!-- Teléfono: título arriba y proyecto y fecha en su propia fila (antes cada pieza saltaba de línea por su cuenta).
+                 Desde `md`, todo en una línea con proyecto y fecha a la derecha. -->
+            <div class="d-flex flex-column flex-md-row align-md-center flex-grow-1 ga-1 ga-md-2">
+              <div class="flex-grow-1">
+                <div :class="{ 'text-decoration-line-through text-medium-emphasis': task.completedAt }">{{ task.title }}</div>
+                <div v-if="task.parent" class="text-body-small text-medium-emphasis">{{ t('projects.task.subtaskOf', { title: task.parent.title }) }}</div>
+              </div>
+              <div class="d-flex align-center flex-wrap ga-2">
+                <v-chip
+                  v-for="p in task.projects"
+                  :key="p.projectId"
+                  size="x-small"
+                  :color="p.color"
+                  :to="`/projects/${p.projectId}?task=${task.id}`"
+                  @click.stop
+                >
+                  {{ p.name }}
+                </v-chip>
+                <DueDateChip :due-on="task.dueOn" :completed="!!task.completedAt" />
+              </div>
             </div>
-            <v-chip
-              v-for="p in task.projects"
-              :key="p.projectId"
-              size="x-small"
-              :color="p.color"
-              :to="`/projects/${p.projectId}?task=${task.id}`"
-              @click.stop
-            >
-              {{ p.name }}
-            </v-chip>
-            <DueDateChip :due-on="task.dueOn" :completed="!!task.completedAt" class="ml-2" />
           </div>
         </div>
       </div>
     </v-card>
+    </v-pull-to-refresh>
 
     <TaskDetailPanel />
     <TaskCelebration />

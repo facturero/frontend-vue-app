@@ -152,5 +152,22 @@ resuelve. Sin librerías nuevas; lo marcado *labs* necesita decisión del dueño
   normal / 640 / 880; `mdi-trash-can-outline`; rótulos de calendario, cronograma, carga y adjuntos con `utils/format.ts`
   (`formatDayMonth`, `formatMonthYear`, `weekdayLabels`, `formatBytes`, `formatRelative`): ya no queda `new Intl.` en Proyectos.
 
-Pendiente: calendario en el teléfono como agenda (P1.6), `v-fab` y `v-pull-to-refresh` en el teléfono, asa de arrastre enfocable
-(punto 12), *labs* (`v-command-palette`, `v-pie`), decidir `v-calendar` (P2) y los totales de la lista de proyectos (P4, backend).
+### Hecho el 2026-11-09
+
+- **Lista de proyectos** (P4): `GET /projects` trae `summary` por proyecto (tareas de primer nivel, terminadas, vencidas con la fecha
+  de `ORG_TIMEZONE`, próxima entrega y hasta 5 miembros, administradores primero) en una sola consulta agrupada. Las tarjetas muestran
+  avance, vencidas, próxima entrega, salud y caras; arriba, filtrar, ordenar (nombre, próxima entrega, avance, vencidas) y alternar
+  tarjetas o tabla (`v-data-table`, la fila abre el proyecto). Filtro, orden y vista van en la URL (R-54). En el teléfono, siempre
+  tarjetas. De paso, el panel del proyecto contaba «vencidas» con la fecha de UTC (desde las 19:00 de Ecuador, lo de mañana).
+- **Teléfono** (P1.6, P2): el calendario es una agenda (días con tareas, título entero); «Agregar tarea» como `v-fab` abajo a la
+  izquierda en lista, tablero y calendario (crea y abre el detalle); «Mis tareas» con `v-pull-to-refresh` y filas en dos líneas
+  (título; proyecto y fecha debajo).
+- **Teclado** (punto 12, R-90): el asa de la lista es un botón; ↑ ↓ mueven la tarea (en el borde, a la sección vecina, saltando las
+  finalizadas ocultas). En el tablero, las tarjetas son enfocables, Enter abre y Alt+flechas mueven. Cada movimiento se anuncia por
+  `aria-live` y el foco sigue a la tarea. En el diálogo de atajos.
+- **429 en ráfagas** (P4): no hay reintentos. Con todas las llamadas en 429 durante 15 s, el cliente no repite ninguna (solo la
+  telemetría, por lotes). Las 860 respuestas eran el volumen de la herramienta de capturas (4 navegadores recargando páginas
+  enteras desde la misma IP). El límite del gateway es por IP (120/min en producción): una oficina detrás de una sola IP lo
+  comparte; queda como decisión (ver abajo). Se quitó un `/auth/me` repetido en cada carga (`AppTopBar`).
+
+Pendiente: *labs* (`v-command-palette`, `v-pie`), decidir `v-calendar` (P2) y el límite del gateway por usuario en vez de por IP.

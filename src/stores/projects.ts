@@ -308,6 +308,57 @@ export const useProjectsStore = defineStore('projects', () => {
     await moveTask(taskId, sectionId);
   }
 
+  /**
+   * Mover con el teclado (REGLAS-FRONT R-90): lo mismo que arrastrar, un paso cada vez. `direction` -1 sube (o va a la izquierda), 1
+   * baja. Dentro de la sección salta las tareas que la vista no muestra (`visible`: las finalizadas ocultas), para que cada tecla
+   * se note; en el borde pasa a la sección vecina (bajando, al principio de la siguiente; subiendo, al final de la anterior).
+   * `across` mueve directo a la sección de al lado, al final (las flechas izquierda y derecha del tablero). Devuelve dónde quedó,
+   * para anunciarlo a quien usa lector de pantalla, o `null` si no había adónde ir.
+   */
+  async function moveTaskBy(
+    taskId: string,
+    direction: -1 | 1,
+    opts: { across?: boolean; visible?: (t: BoardTask) => boolean } = {},
+  ): Promise<{ sectionName: string; position: number; total: number } | null> {
+    const order = sections.value.map((sec) => sec.id);
+    const from = order.find((id) => (columns.value[id] ?? []).some((t) => t.id === taskId));
+    if (!from) return null;
+    const visible = opts.visible ?? (() => true);
+    const list = [...(columns.value[from] ?? [])];
+    const index = list.findIndex((t) => t.id === taskId);
+    const card = list[index]!;
+    const where = (sectionId: string) => {
+      const shown = (columns.value[sectionId] ?? []).filter(visible);
+      return {
+        sectionName: sections.value.find((sec) => sec.id === sectionId)?.name ?? '',
+        position: shown.findIndex((t) => t.id === taskId) + 1,
+        total: shown.length,
+      };
+    };
+
+    if (!opts.across) {
+      let j = index + direction;
+      while (j >= 0 && j < list.length && !visible(list[j]!)) j += direction;
+      if (j >= 0 && j < list.length) {
+        // Quitar y volver a poner en `j`: bajando, queda justo después de la vecina; subiendo, justo antes.
+        list.splice(index, 1);
+        list.splice(j, 0, card);
+        columns.value = { ...columns.value, [from]: list };
+        await moveTask(taskId, from);
+        return where(from);
+      }
+    }
+
+    const target = order[order.indexOf(from) + direction];
+    if (!target) return null;
+    const dest = [...(columns.value[target] ?? [])];
+    if (direction > 0 && !opts.across) dest.unshift(card);
+    else dest.push(card);
+    columns.value = { ...columns.value, [from]: list.filter((t) => t.id !== taskId), [target]: dest };
+    await moveTask(taskId, target);
+    return where(target);
+  }
+
   async function toggleComplete(task: Task): Promise<Task> {
     const done = !task.completedAt;
     const updated = await write(() => (done ? projectsApi.completeTask(task.id) : projectsApi.reopenTask(task.id)));
@@ -645,6 +696,7 @@ export const useProjectsStore = defineStore('projects', () => {
     updateTask,
     moveTaskToSection,
     moveTask,
+    moveTaskBy,
     toggleComplete,
     deleteTask,
     openTask,

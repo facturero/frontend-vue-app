@@ -34,6 +34,18 @@ export interface ProjectWithRole extends Project {
   myRole: ProjectRole;
   isMember: boolean;
   latestStatus: StatusUpdate | null;
+  /** Solo en la lista (`GET /projects`): lo que muestra la tarjeta. Tareas de primer nivel; «vencida» con la fecha de la organización. */
+  summary?: ProjectSummary;
+}
+
+export interface ProjectSummary {
+  total: number;
+  completed: number;
+  overdue: number;
+  nextDueOn: string | null;
+  memberCount: number;
+  /** Hasta 5, los administradores primero. */
+  memberUserIds: string[];
 }
 
 export interface Member {

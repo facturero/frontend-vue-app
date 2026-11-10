@@ -3557,7 +3557,8 @@
     "calendar": {
       "undated": "{n} task without a due date | {n} tasks without a due date",
       "more": "+{n} more",
-      "addOn": "New task for {day}"
+      "addOn": "New task for {day}",
+      "agendaEmpty": "No tasks with a due date this month."
     },
     "overview": {
       "status": "Project status",
@@ -3688,7 +3689,9 @@
       "comment": "Write a comment",
       "send": "Send the comment",
       "mention": "Mention someone",
-      "help": "Show this list"
+      "help": "Show this list",
+      "moveUpDown": "Move the task up or down (on the list handle, ↑ ↓ alone)",
+      "moveColumn": "Move the card to the next column (board, Alt+← →)"
     },
     "title": "Projects",
     "subtitle": "Organize your team's work in lists and boards.",
@@ -3795,7 +3798,12 @@
       "deleteText": "It will be moved to the trash together with its subtasks.",
       "addTask": "Add task",
       "newTaskPlaceholder": "Type a name and press Enter",
-      "open": "Open task"
+      "open": "Open task",
+      "section": "Section",
+      "reorder": "Move “{title}”",
+      "reorderHint": "Drag to move, or use ↑ ↓ on the keyboard",
+      "movedTo": "“{title}”: position {position} of {total} in {section}",
+      "boardCardLabel": "{title}. Alt and arrows to move it"
     },
     "detail": {
       "createdBy": "Created by {who} on {when}"
@@ -4164,6 +4172,33 @@
         "accomplished": "What got done",
         "risks": "Risks",
         "nextSteps": "What is next"
+      }
+    },
+    "list": {
+      "filter": "Filter projects",
+      "sort": {
+        "label": "Sort by",
+        "name": "Name",
+        "nextDue": "Next due date",
+        "progress": "Progress",
+        "overdue": "Overdue"
+      },
+      "cards": "Cards",
+      "table": "Table",
+      "progress": "{done} of {total} tasks",
+      "noTasks": "No tasks yet",
+      "overdue": "{n} overdue | {n} overdue",
+      "nextDue": "Next due:",
+      "noMatch": "No project matches “{q}”",
+      "clear": "Clear filter",
+      "columns": {
+        "name": "Project",
+        "health": "Status",
+        "progress": "Progress",
+        "overdue": "Overdue",
+        "nextDue": "Next due date",
+        "members": "Members",
+        "role": "Your role"
       }
     }
   }

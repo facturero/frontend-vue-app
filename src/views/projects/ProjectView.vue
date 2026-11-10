@@ -2,6 +2,7 @@
 import { computed, onMounted, ref, watch } from 'vue';
 import { useConfirm } from '@/composable/useConfirm';
 import { useI18n } from 'vue-i18n';
+import { useDisplay } from 'vuetify';
 import { useRoute, useRouter } from 'vue-router';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import ProjectBilling from '@/components/projects/ProjectBilling.vue';
@@ -55,6 +56,39 @@ const managingForms = ref(false);
 const duplicating = ref(false);
 const copyName = ref('');
 const list = ref<InstanceType<typeof ProjectTaskList> | null>(null);
+
+/**
+ * Teléfono: «Agregar tarea» como botón flotante en lista, tablero y calendario. Allí la fila «Agregar tarea» del final de cada
+ * sección queda fuera de la pantalla (y en el calendario no hay «+» por día: se ve al pasar el ratón). El botón pide el título y la
+ * sección, crea la tarea y abre su detalle para ponerle fecha o responsable.
+ */
+const { smAndDown } = useDisplay();
+const quickAdd = ref(false);
+const quickTitle = ref('');
+const quickSection = ref<string | null>(null);
+const quickSaving = ref(false);
+const canQuickAdd = computed(
+  () => smAndDown.value && store.canEdit && !archived.value && ['list', 'board', 'calendar'].includes(view.value),
+);
+watch(quickAdd, (open) => {
+  if (!open) return;
+  quickTitle.value = '';
+  quickSection.value = store.sections[0]?.id ?? null;
+});
+async function addQuick(): Promise<void> {
+  const title = quickTitle.value.trim();
+  if (!title || !store.current) return;
+  quickSaving.value = true;
+  try {
+    const task = await store.createTask({ title, projectId: store.current.id, sectionId: quickSection.value });
+    quickAdd.value = false;
+    void store.openTask(task.id);
+  } catch {
+    // El aviso lo deja el store; el diálogo sigue abierto con lo escrito.
+  } finally {
+    quickSaving.value = false;
+  }
+}
 const board = ref<InstanceType<typeof ProjectBoard> | null>(null);
 // Tab+Q: agregar una tarea en la primera sección, en la vista que esté abierta.
 const { helpOpen } = useViewShortcuts({
@@ -232,6 +266,24 @@ async function remove(): Promise<void> {
       </v-card>
     </v-dialog>
     <ShareDialog v-model="sharing" @left="router.push('/projects')" />
+
+    <!-- Abajo a la IZQUIERDA: la derecha es del botón del asistente, y dos `v-fab app` en la misma esquina no se apilan, se montan
+         uno encima del otro (probado a 375 px). En el teléfono la izquierda está libre: el menú lateral va oculto. -->
+    <v-fab v-if="canQuickAdd" app appear location="bottom start" extended color="primary" prepend-icon="mdi-plus" :text="t('projects.task.addTask')" @click="quickAdd = true" />
+    <v-dialog v-model="quickAdd">
+      <v-card>
+        <v-card-title>{{ t('projects.task.addTask') }}</v-card-title>
+        <v-card-text class="d-flex flex-column ga-4">
+          <v-text-field v-model="quickTitle" :label="t('projects.task.title')" autofocus @keyup.enter="addQuick" />
+          <v-select v-if="store.sections.length > 1" v-model="quickSection" :items="store.sections" item-title="name" item-value="id" :label="t('projects.task.section')" />
+        </v-card-text>
+        <v-card-actions class="flex-wrap ga-2">
+          <v-spacer />
+          <v-btn variant="text" @click="quickAdd = false">{{ t('common.cancel') }}</v-btn>
+          <v-btn variant="flat" color="primary" :loading="quickSaving" :disabled="!quickTitle.trim()" @click="addQuick">{{ t('projects.task.addTask') }}</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
 
   </v-container>

@@ -3557,7 +3557,8 @@
     "calendar": {
       "undated": "{n} tâche sans échéance | {n} tâches sans échéance",
       "more": "+{n} de plus",
-      "addOn": "Nouvelle tâche pour le {day}"
+      "addOn": "Nouvelle tâche pour le {day}",
+      "agendaEmpty": "Aucune tâche avec échéance ce mois-ci."
     },
     "overview": {
       "status": "État du projet",
@@ -3688,7 +3689,9 @@
       "comment": "Écrire un commentaire",
       "send": "Envoyer le commentaire",
       "mention": "Mentionner quelqu’un",
-      "help": "Afficher cette liste"
+      "help": "Afficher cette liste",
+      "moveUpDown": "Monter ou descendre la tâche (sur la poignée de la liste, ↑ ↓ seules)",
+      "moveColumn": "Passer la carte à la colonne voisine (tableau, Alt+← →)"
     },
     "title": "Projets",
     "subtitle": "Organisez le travail de l'équipe en listes et en tableaux.",
@@ -3795,7 +3798,12 @@
       "deleteText": "Elle sera placée dans la corbeille avec ses sous-tâches.",
       "addTask": "Ajouter une tâche",
       "newTaskPlaceholder": "Saisissez un nom et appuyez sur Entrée",
-      "open": "Ouvrir la tâche"
+      "open": "Ouvrir la tâche",
+      "section": "Section",
+      "reorder": "Déplacer « {title} »",
+      "reorderHint": "Glissez pour déplacer, ou utilisez ↑ ↓ au clavier",
+      "movedTo": "« {title} » : position {position} sur {total} dans {section}",
+      "boardCardLabel": "{title}. Alt et flèches pour la déplacer"
     },
     "detail": {
       "createdBy": "Créée par {who} le {when}"
@@ -4164,6 +4172,33 @@
         "accomplished": "Ce qui a été fait",
         "risks": "Risques",
         "nextSteps": "La suite"
+      }
+    },
+    "list": {
+      "filter": "Filtrer les projets",
+      "sort": {
+        "label": "Trier par",
+        "name": "Nom",
+        "nextDue": "Prochaine échéance",
+        "progress": "Avancement",
+        "overdue": "En retard"
+      },
+      "cards": "Cartes",
+      "table": "Tableau",
+      "progress": "{done} sur {total} tâches",
+      "noTasks": "Aucune tâche pour l’instant",
+      "overdue": "{n} en retard | {n} en retard",
+      "nextDue": "Prochaine échéance :",
+      "noMatch": "Aucun projet ne correspond à « {q} »",
+      "clear": "Retirer le filtre",
+      "columns": {
+        "name": "Projet",
+        "health": "Statut",
+        "progress": "Avancement",
+        "overdue": "En retard",
+        "nextDue": "Prochaine échéance",
+        "members": "Membres",
+        "role": "Votre rôle"
       }
     }
   }

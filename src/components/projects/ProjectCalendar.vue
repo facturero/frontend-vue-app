@@ -1,15 +1,21 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { formatDate, weekdayLabels, formatMonthYear } from '@/utils/format';
+import { useDisplay } from 'vuetify';
+import { formatDate, formatLongDay, weekdayLabels, formatMonthYear } from '@/utils/format';
 import { useI18n } from 'vue-i18n';
 import { useProjectsStore } from '@/stores/projects';
 import { localIsoDate } from '@/utils/projects';
 import { daysBetween, monthGrid, shiftDay } from '@/utils/timeline';
 import type { BoardTask } from '@/types/projects';
+import EmptyState from '@/components/ui/EmptyState.vue';
+import UserAvatar from './UserAvatar.vue';
 
 /**
  * Vista Calendario, como la de Asana: el mes con las tareas en su fecha de entrega. Arrastrar una tarea a otro día la reprograma
  * (si tenía inicio, se desplaza igual: la duración no cambia). «+» en un día crea ahí una tarea. Clic en una tarea abre el detalle.
+ *
+ * En el teléfono, agenda: la rejilla de siete columnas dejaba cada tarea en dos letras («Re…»). Allí van solo los días del mes que
+ * tienen tareas, uno debajo de otro y con el título entero; no se arrastra (no hay dónde soltar) y se crea con el botón flotante.
  */
 const { t } = useI18n();
 const store = useProjectsStore();
@@ -18,6 +24,7 @@ const today = localIsoDate(new Date());
 const cursor = ref({ year: Number(today.slice(0, 4)), month: Number(today.slice(5, 7)) });
 const days = computed(() => monthGrid(cursor.value.year, cursor.value.month));
 const editable = computed(() => store.canEdit && store.current?.status === 'active');
+const { smAndDown } = useDisplay();
 
 const byDay = computed(() => {
   const out = new Map<string, BoardTask[]>();
@@ -30,6 +37,15 @@ const byDay = computed(() => {
 const undated = computed(() => Object.values(store.columns).flat().filter((t) => !t.dueOn && !t.completedAt).length);
 
 const weekdays = computed(() => weekdayLabels());
+
+/** Agenda del teléfono: los días del mes en pantalla que tienen tareas, en orden. */
+const agenda = computed(() => {
+  const prefix = `${cursor.value.year}-${String(cursor.value.month).padStart(2, '0')}-`;
+  return [...byDay.value.entries()]
+    .filter(([day]) => day.startsWith(prefix))
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([day, tasks]) => ({ day, tasks }));
+});
 const title = computed(() => formatMonthYear(new Date(cursor.value.year, cursor.value.month - 1, 1)));
 
 function move(delta: number): void {
@@ -79,7 +95,32 @@ async function add(): Promise<void> {
       <span v-if="undated" class="text-body-small text-medium-emphasis">{{ t('projects.calendar.undated', undated) }}</span>
     </div>
 
-    <div class="calendar">
+    <div v-if="smAndDown">
+      <EmptyState v-if="!agenda.length" compact icon="mdi-calendar-blank-outline" :title="t('projects.calendar.agendaEmpty')" />
+      <div v-for="entry in agenda" :key="entry.day" class="border-b">
+        <div class="d-flex align-center ga-2 px-4 pt-2">
+          <span class="text-body-medium font-weight-medium" :class="{ 'text-primary': entry.day === today }">{{ formatLongDay(entry.day) }}</span>
+          <v-chip v-if="entry.day === today" color="primary" size="x-small">{{ t('projects.due.today') }}</v-chip>
+        </div>
+        <v-list density="compact" class="py-0">
+          <v-list-item v-for="task in entry.tasks" :key="task.id" @click="store.openTask(task.id)">
+            <template #prepend>
+              <v-icon
+                :icon="task.kind === 'milestone' ? 'mdi-rhombus-outline' : task.completedAt ? 'mdi-check-circle' : 'mdi-check-circle-outline'"
+                :color="task.completedAt ? 'success' : entry.day < today ? 'error' : undefined"
+                size="small"
+              />
+            </template>
+            <v-list-item-title :class="{ 'text-decoration-line-through text-medium-emphasis': task.completedAt }">{{ task.title }}</v-list-item-title>
+            <template #append>
+              <UserAvatar v-if="task.assigneeUserId" :user-id="task.assigneeUserId" :size="24" />
+            </template>
+          </v-list-item>
+        </v-list>
+      </div>
+    </div>
+
+    <div v-else class="calendar">
       <div v-for="w in weekdays" :key="w" class="text-body-small text-medium-emphasis text-center py-1 border-b text-capitalize">{{ w }}</div>
       <div
         v-for="day in days"

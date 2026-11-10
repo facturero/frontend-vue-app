@@ -72,6 +72,14 @@ export function formatMonthYear(value: DateInput): string {
   return text.charAt(0).toLocaleUpperCase(currentLocale()) + text.slice(1);
 }
 
+/** `Lunes, 9 de noviembre` — cabecera de un día en una agenda (el calendario del teléfono). */
+export function formatLongDay(value: DateInput): string {
+  const d = toDate(value);
+  if (!d) return '';
+  const text = new Intl.DateTimeFormat(currentLocale(), { weekday: 'long', day: 'numeric', month: 'long' }).format(d);
+  return text.charAt(0).toLocaleUpperCase(currentLocale()) + text.slice(1);
+}
+
 /** `['lun', 'mar', …, 'dom']` — cabecera de un calendario que empieza en lunes. */
 export function weekdayLabels(): string[] {
   // 2026-11-02 fue lunes: siete días seguidos dan la semana en el idioma activo.

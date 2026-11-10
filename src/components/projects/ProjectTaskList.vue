@@ -92,6 +92,20 @@ async function toggle(task: BoardTask): Promise<void> {
   }
 }
 
+/**
+ * Mover con el teclado (REGLAS-FRONT R-90, R-91): el asa es un botón enfocable; ↑/↓ sube o baja la tarea un puesto visible y en el
+ * borde la pasa a la sección vecina. El foco sigue al asa de la tarea movida y la región `aria-live` dice dónde quedó, para quien no
+ * ve la pantalla.
+ */
+const announcement = ref('');
+async function keyMove(task: BoardTask, direction: -1 | 1): Promise<void> {
+  const result = await store.moveTaskBy(task.id, direction, { visible: (x) => !x.completedAt || props.showCompleted });
+  if (!result) return;
+  announcement.value = t('projects.task.movedTo', { title: task.title, position: result.position, total: result.total, section: result.sectionName });
+  await nextTick();
+  document.querySelector<HTMLElement>(`[data-handle="${task.id}"]`)?.focus();
+}
+
 function onDrop(evt: { item: HTMLElement; to: HTMLElement; from: HTMLElement; oldIndex?: number; newIndex?: number }): void {
   if (evt.from === evt.to && evt.oldIndex === evt.newIndex) return;
   const taskId = evt.item.dataset.taskId;
@@ -116,6 +130,7 @@ defineExpose({
 
 <template>
   <TaskBulkBar v-if="editable()" :task-ids="selectedIds" class="mb-2" @done="selected = new Set()" />
+  <div class="d-sr-only" aria-live="polite">{{ announcement }}</div>
   <v-card class="overflow-x-auto">
     <div class="d-none d-md-flex align-center px-4 py-2 border-b text-body-medium text-medium-emphasis">
       <div class="flex-grow-1 pl-16" :style="{ minWidth: COL.title }">{{ t('projects.task.title') }}</div>
@@ -156,8 +171,24 @@ defineExpose({
             :class="{ 'd-none': task.completedAt && !props.showCompleted, 'bg-lightprimary': store.detail?.id === task.id }"
             @click="store.openTask(task.id)"
           >
-            <!-- En el teléfono no hay asa: arrastrar con el dedo choca con el scroll, y la fila gana sitio para el título. -->
-            <v-icon v-if="editable() && !mobile" icon="mdi-drag-vertical" size="small" class="task-drag text-medium-emphasis" @click.stop />
+            <!-- En el teléfono no hay asa: arrastrar con el dedo choca con el scroll, y la fila gana sitio para el título (allí se mueve
+                 con «Mover a» del detalle). En escritorio es un botón: se arrastra con el ratón o se mueve con ↑ ↓ (R-90). -->
+            <v-tooltip v-if="editable() && !mobile" location="top" :text="t('projects.task.reorderHint')">
+              <template #activator="{ props: tip }">
+                <v-btn
+                  v-bind="tip"
+                  icon="mdi-drag-vertical"
+                  variant="text"
+                  size="x-small"
+                  class="task-drag text-medium-emphasis"
+                  :data-handle="task.id"
+                  :aria-label="t('projects.task.reorder', { title: task.title })"
+                  @click.stop
+                  @keydown.up.prevent.stop="keyMove(task, -1)"
+                  @keydown.down.prevent.stop="keyMove(task, 1)"
+                />
+              </template>
+            </v-tooltip>
             <v-checkbox-btn
               v-if="editable()"
               :model-value="selected.has(task.id)"

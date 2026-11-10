@@ -61,7 +61,8 @@ async function loadAvatar(): Promise<void> {
 
 onMounted(async () => {
   try {
-    await auth.fetchMe();
+    // El guard del router ya lo trajo antes de montar la barra; pedirlo otra vez era un `/auth/me` de más en cada carga.
+    if (!auth.user) await auth.fetchMe();
     await loadAvatar();
   } catch {
     // ignora

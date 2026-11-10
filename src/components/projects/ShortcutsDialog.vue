@@ -18,6 +18,8 @@ const SHORTCUTS: Array<[string, string]> = [
   ['tab+l', 'like'],
   ['tab+k', 'comment'],
   ['ctrl+enter', 'send'],
+  ['alt+arrowup', 'moveUpDown'],
+  ['alt+arrowright', 'moveColumn'],
   ['@', 'mention'],
   ['shift+slash', 'help'],
 ];

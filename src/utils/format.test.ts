@@ -9,7 +9,7 @@ vi.hoisted(() => {
 });
 
 import i18n from '@/plugins/i18n';
-import { formatDate, formatDateTime, formatMoney, formatNumber } from './format';
+import { formatDate, formatDateTime, formatLongDay, formatMoney, formatNumber } from './format';
 
 const setLocale = (l: string) => {
   const g = i18n.global.locale as unknown as string | { value: string };
@@ -55,5 +55,15 @@ describe('formatMoney / formatNumber', () => {
     expect(formatNumber(2.5)).toBe('2.5');
     expect(formatNumber(1234.567)).toBe('1,234.57');
     expect(formatNumber(null)).toBe('');
+  });
+});
+
+describe('formatLongDay', () => {
+  it('día de la agenda con día de la semana y mes, con mayúscula inicial, leyendo la fecha como día local', () => {
+    setLocale('es');
+    expect(formatLongDay('2026-11-09')).toBe('Lunes, 9 de noviembre');
+    setLocale('en');
+    expect(formatLongDay('2026-11-09')).toBe('Monday, November 9');
+    expect(formatLongDay(null)).toBe('');
   });
 });

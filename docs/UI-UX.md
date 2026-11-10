@@ -415,6 +415,10 @@ propios van en `src/styles/base.css`, dentro de `@layer vuetify-core.reset`.
 - En un diálogo, Vuetify 4 pone el `v-card-text` a 24 px de los lados pero deja el `v-card-title` suelto a 15 px y el
   `v-card-actions` a 8 px: título, campos y botones quedaban desalineados. `src/styles/base.css` (bloque 4) los pone a los tres a
   24 px del borde. No le pongas `pa-*` al título ni al pie de un diálogo.
+- Dos `v-fab app` en la misma esquina no se apilan: se montan uno sobre otro. La esquina inferior derecha es del botón del
+  asistente (`App.vue`); un botón flotante de una vista va abajo a la izquierda (`location="bottom start"`, ver `ProjectView.vue`).
+- Un `v-card` con `@click` se ve como enlace (`v-card--link`) pero Vuetify no le pone `tabindex`: con el teclado no se llega a él.
+  Si la tarjeta abre algo, `tabindex="0"` y `@keydown.enter.self` con la misma acción (REGLAS-FRONT R-90; ver `ProjectBoard.vue`).
 - Un `v-menu` (y la lista de un `v-select`/`v-autocomplete`/`v-combobox`, que es un `v-menu` por dentro) usa por defecto
   `scroll-strategy="reposition"`: al hacer scroll se queda dentro de la pantalla aunque su campo ya no se vea, y flota encima de
   otras filas. Aquí el default es `close` (`vuetify.ts`): al hacer scroll, el menú se cierra. No lo sobreescribas en una vista.

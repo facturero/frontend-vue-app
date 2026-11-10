@@ -3557,7 +3557,8 @@
     "calendar": {
       "undated": "{n} tarea sin fecha de entrega | {n} tareas sin fecha de entrega",
       "more": "+{n} más",
-      "addOn": "Nueva tarea para el {day}"
+      "addOn": "Nueva tarea para el {day}",
+      "agendaEmpty": "No hay tareas con fecha este mes."
     },
     "overview": {
       "status": "Estado del proyecto",
@@ -3688,7 +3689,9 @@
       "comment": "Escribir un comentario",
       "send": "Enviar el comentario",
       "mention": "Mencionar a alguien",
-      "help": "Ver esta lista"
+      "help": "Ver esta lista",
+      "moveUpDown": "Subir o bajar la tarea (en el asa de la lista, ↑ ↓ solas)",
+      "moveColumn": "Pasar la tarjeta a la columna de al lado (tablero, Alt+← →)"
     },
     "title": "Proyectos",
     "subtitle": "Organiza el trabajo del equipo en listas y tableros.",
@@ -3795,7 +3798,12 @@
       "deleteText": "Se enviará a la papelera junto con sus subtareas.",
       "addTask": "Agregar tarea",
       "newTaskPlaceholder": "Escribe el nombre y pulsa Enter",
-      "open": "Abrir tarea"
+      "open": "Abrir tarea",
+      "section": "Sección",
+      "reorder": "Mover «{title}»",
+      "reorderHint": "Arrastra para mover, o usa ↑ ↓ con el teclado",
+      "movedTo": "«{title}»: puesto {position} de {total} en {section}",
+      "boardCardLabel": "{title}. Alt y flechas para moverla"
     },
     "detail": {
       "createdBy": "Creada por {who} el {when}"
@@ -4164,6 +4172,33 @@
         "accomplished": "Lo que se hizo",
         "risks": "Riesgos",
         "nextSteps": "Lo que viene"
+      }
+    },
+    "list": {
+      "filter": "Filtrar proyectos",
+      "sort": {
+        "label": "Ordenar por",
+        "name": "Nombre",
+        "nextDue": "Próxima entrega",
+        "progress": "Avance",
+        "overdue": "Vencidas"
+      },
+      "cards": "Tarjetas",
+      "table": "Tabla",
+      "progress": "{done} de {total} tareas",
+      "noTasks": "Sin tareas todavía",
+      "overdue": "{n} vencida | {n} vencidas",
+      "nextDue": "Próxima entrega:",
+      "noMatch": "Ningún proyecto coincide con «{q}»",
+      "clear": "Quitar el filtro",
+      "columns": {
+        "name": "Proyecto",
+        "health": "Estado",
+        "progress": "Avance",
+        "overdue": "Vencidas",
+        "nextDue": "Próxima entrega",
+        "members": "Miembros",
+        "role": "Tu rol"
       }
     }
   }

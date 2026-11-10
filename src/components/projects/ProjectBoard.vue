@@ -14,6 +14,23 @@ import UserAvatar from './UserAvatar.vue';
  * entre sí, «+ Agregar tarea» al pie de cada columna y «+ Agregar sección» al final. Un clic en la tarjeta abre el detalle.
  */
 const { t } = useI18n();
+
+/**
+ * La tarjeta es enfocable (`tabindex="0"`) y Enter la abre: un `v-card` con `@click` se ve como enlace pero Vuetify no le da
+ * `tabindex`, así que con el teclado no se llegaba a ninguna tarjeta.
+ *
+ * Mover tarjetas con el teclado (REGLAS-FRONT R-90): con la tarjeta enfocada, Alt+↑/↓ la sube o baja y Alt+←/→ la pasa a la
+ * columna de al lado. Alt porque las flechas solas ya desplazan el tablero. El foco sigue a la tarjeta y `aria-live` dice dónde quedó.
+ */
+const announcement = ref('');
+async function keyMove(task: BoardTask, direction: -1 | 1, across = false): Promise<void> {
+  if (!editable()) return;
+  const result = await store.moveTaskBy(task.id, direction, { across });
+  if (!result) return;
+  announcement.value = t('projects.task.movedTo', { title: task.title, position: result.position, total: result.total, section: result.sectionName });
+  await nextTick();
+  document.querySelector<HTMLElement>(`.board-card[data-task-id="${task.id}"]`)?.focus();
+}
 const store = useProjectsStore();
 
 const adding = reactive<Record<string, boolean>>({});
@@ -85,6 +102,7 @@ function onColumnDrop(evt: DropEvent): void {
 
 <template>
   <div class="d-flex align-start ga-4 overflow-x-auto pb-4">
+    <div class="d-sr-only" aria-live="polite">{{ announcement }}</div>
     <VueDraggable
       v-model="store.sections"
       handle=".column-drag"
@@ -131,7 +149,14 @@ function onColumnDrop(evt: DropEvent): void {
             :data-task-id="task.id"
             class="pa-3 board-card"
             :class="{ 'border-primary border-md': store.detail?.id === task.id }"
+            :aria-label="editable() ? t('projects.task.boardCardLabel', { title: task.title }) : task.title"
+            tabindex="0"
             @click="store.openTask(task.id)"
+            @keydown.enter.self="store.openTask(task.id)"
+            @keydown.alt.up.prevent="keyMove(task, -1)"
+            @keydown.alt.down.prevent="keyMove(task, 1)"
+            @keydown.alt.left.prevent="keyMove(task, -1, true)"
+            @keydown.alt.right.prevent="keyMove(task, 1, true)"
           >
             <div class="d-flex align-start ga-1">
               <v-tooltip location="top" :text="t('projects.task.markComplete')"><template #activator="{ props: tip }"><v-btn v-bind="tip"
