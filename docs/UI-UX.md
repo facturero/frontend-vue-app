@@ -439,8 +439,8 @@ Administración, esta última al pie y separada. Con 22 pantallas sueltas, el me
 
 - **Colapsado** (rail): un icono por área y ningún grupo abierto; el área de la pantalla actual se marca como píldora.
 - **Expandido** (al pasar el ratón, o en el teléfono): `v-list-group` en **acordeón**, un área abierta a la vez (con todas
-  abiertas el menú volvía a medir lo mismo que antes). Al entrar a una pantalla se abre su área; la que se abra a mano se recuerda
-  (`localStorage`, `crm:nav:opened`) hasta cambiar de área.
+  abiertas el menú volvía a medir lo mismo que antes). Al entrar a una pantalla se abre su área; la que se abra a mano manda hasta cambiar
+  de área. No se guarda entre recargas: guardada, al volver a entrar ganaba sobre el área de la pantalla actual.
 - **Desplazamiento:** se desplaza solo la parte principal (`flex-grow-1`, `overflow-y-auto` y `min-height: 0`) y Administración queda
   fija al pie. No pongas el scroll en el contenedor de la columna: `v-list` trae `overflow: hidden` y las listas se encogen para
   caber, así que lo último quedaba fuera de la pantalla sin forma de llegar.

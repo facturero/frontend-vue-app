@@ -47,24 +47,10 @@ const activeGroupId = computed(() => {
 
 // ── Grupos abiertos ─────────────────────────────────────────────────────────
 // Colapsado (rail sin el ratón encima) se ve un icono por grupo y ninguno abierto: si no, las pantallas del grupo abierto volvían a
-// llenar la columna de iconos. Expandido, queda abierto el grupo de la pantalla actual más los que la persona abrió (se recuerdan).
-const OPENED_KEY = 'crm:nav:opened';
-function loadOpened(): string[] {
-  try {
-    const raw = localStorage.getItem(OPENED_KEY);
-    return raw ? (JSON.parse(raw) as string[]) : [];
-  } catch {
-    return [];
-  }
-}
-const userOpened = ref<string[]>(loadOpened());
-watch(userOpened, (value) => {
-  try {
-    localStorage.setItem(OPENED_KEY, JSON.stringify(value));
-  } catch {
-    // Sin almacenamiento (ventana privada): el menú funciona igual, solo no recuerda.
-  }
-});
+// llenar la columna de iconos. Expandido, queda abierto el grupo de la pantalla actual o el que la persona abrió.
+// Lo abierto a mano no se guarda entre recargas: se guardaba en localStorage y, al recargar o volver a entrar, ganaba sobre el área
+// de la pantalla (en Mis tareas se abría Administración y Proyectos quedaba cerrado). Con acordeón, recordarlo no aportaba nada.
+const userOpened = ref<string[]>([]);
 
 // Al llegar a una pantalla de otra área, se abre esa área: lo que se abrió a mano era para buscar, no para quedarse.
 watch(activeGroupId, (id, previous) => {
