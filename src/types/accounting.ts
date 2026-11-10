@@ -121,6 +121,7 @@ export interface EntryLine {
   creditCents: number;
   description: string | null;
   costCenterId: string | null;
+  projectId?: string | null;
 }
 
 export interface JournalEntry {
@@ -149,7 +150,7 @@ export interface EntryInput {
   entryDate: string;
   description: string;
   reference: string | null;
-  lines: { accountId: string; debitCents: number; creditCents: number; description: string | null; costCenterId: string | null }[];
+  lines: { accountId: string; debitCents: number; creditCents: number; description: string | null; costCenterId: string | null; projectId: string | null }[];
 }
 
 export interface EntryFilters {

@@ -179,4 +179,17 @@ resuelve. Sin librerías nuevas; lo marcado *labs* necesita decisión del dueño
   se mueve con el teclado (si no, se reabría en cada pulsación y viajaba con la fila).
 - **Nombres** (P4): `displayName` ya usa `fullName` y solo cae al correo si la persona no tiene nombre (el usuario de la semilla).
 
-Pendiente: *labs* (`v-command-palette`, `v-pie`) y decidir `v-calendar` (P2).
+### Hecho el 2026-11-10 (tarde)
+
+- **Correo de los avisos**: los 10 avisos de Proyectos también salen por correo, a quien tenga el canal activo en sus preferencias
+  (por defecto: asignada, mención, vence pronto, aprobación pedida y decidida, te añadieron a un proyecto). notification-service pide
+  los correos a auth (`GET /internal/organizations/:id/contacts`, con el secreto interno, acotado a la organización del evento);
+  nunca escribe a quien causó el aviso.
+- **Dimensión «proyecto» en contabilidad**: la factura creada desde un proyecto se contabiliza con ese proyecto en todas sus líneas
+  (y su costo de ventas y su reversa); los asientos manuales eligen proyecto por línea; balance de comprobación, balance general y
+  estado de resultados filtran por proyecto.
+- **Ctrl+K** (`v-command-palette`): la búsqueda global encuentra también proyectos y tareas; la tarea se abre en su proyecto.
+- **Panel**: anillo de tareas por estado (`v-pie`: terminadas, vencidas, abiertas a tiempo).
+- **Calendario** sobre `v-calendar` (decidido: sí, con las tareas en el hueco `day` para no perder el arrastre entre días).
+
+Pendiente: nada de esta revisión.

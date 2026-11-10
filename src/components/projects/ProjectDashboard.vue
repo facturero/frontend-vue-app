@@ -9,6 +9,7 @@ import { extractError } from '@/utils/error';
 import { displayName } from '@/utils/projects';
 import type { ProjectDashboard } from '@/types/projects';
 import EmptyState from '@/components/ui/EmptyState.vue';
+import PieChart, { type PieSlice } from '@/components/ui/PieChart.vue';
 import DueDateChip from './DueDateChip.vue';
 import UserAvatar from './UserAvatar.vue';
 
@@ -35,6 +36,13 @@ watch(() => store.columns, () => void load(), { deep: true });
 
 const percentDone = computed(() => (data.value?.totals.total ? Math.round((data.value.totals.completed / data.value.totals.total) * 100) : 0));
 const maxSection = computed(() => Math.max(1, ...(data.value?.bySection ?? []).map((s) => s.open + s.completed)));
+/** Abiertas que aún no vencen: el resto del anillo, para que terminadas + vencidas + esto = todas. */
+const openOnTime = computed(() => Math.max(0, (data.value?.totals.open ?? 0) - (data.value?.totals.overdue ?? 0)));
+const statusSlices = computed<PieSlice[]>(() => [
+  { key: 'completed', title: t('projects.dashboard.completed'), value: data.value?.totals.completed ?? 0, color: 'success' },
+  { key: 'overdue', title: t('projects.dashboard.overdue'), value: data.value?.totals.overdue ?? 0, color: 'error' },
+  { key: 'open', title: t('projects.dashboard.openOnTime'), value: openOnTime.value, color: 'primary' },
+]);
 const completedTotal = computed(() => (data.value?.completedByWeek ?? []).reduce((sum, w) => sum + w.count, 0));
 const person = (id: string | null) => (id ? displayName(store.users.get(id)) || t('projects.share.unknownUser') : t('projects.task.unassigned'));
 </script>
@@ -56,14 +64,27 @@ const person = (id: string | null) => (id ? displayName(store.users.get(id)) || 
       </v-row>
 
       <v-card class="pa-6">
-        <div class="d-flex align-center mb-2">
-          <span class="text-title-large">{{ t('projects.dashboard.progress') }}</span>
-          <v-spacer />
-          <span class="text-body-medium text-medium-emphasis">{{ t('projects.dashboard.progressText', { done: data.totals.completed, total: data.totals.total }) }}</span>
-        </div>
-        <v-progress-linear :model-value="percentDone" color="success" height="10" rounded />
-        <div v-if="data.time.estimatedMinutes || data.time.actualMinutes" class="text-body-medium text-medium-emphasis mt-2">
-          {{ t('projects.dashboard.time', { estimated: formatMinutes(data.time.estimatedMinutes), actual: formatMinutes(data.time.actualMinutes) }) }}
+        <div class="d-flex flex-wrap align-center ga-6">
+          <!-- Tareas por estado de un vistazo (como el gráfico de anillo de Asana): terminadas, vencidas y el resto abiertas. -->
+          <PieChart :items="statusSlices" :label="t('projects.dashboard.byStatusLabel', { done: data.totals.completed, overdue: data.totals.overdue, open: openOnTime })">
+            <template #center>
+              <div class="text-center">
+                <div class="text-title-large">{{ percentDone }} %</div>
+                <div class="text-body-small text-medium-emphasis">{{ t('projects.dashboard.done') }}</div>
+              </div>
+            </template>
+          </PieChart>
+          <div class="flex-grow-1">
+            <div class="d-flex align-center mb-2">
+              <span class="text-title-large">{{ t('projects.dashboard.progress') }}</span>
+              <v-spacer />
+              <span class="text-body-medium text-medium-emphasis">{{ t('projects.dashboard.progressText', { done: data.totals.completed, total: data.totals.total }) }}</span>
+            </div>
+            <v-progress-linear :model-value="percentDone" color="success" height="10" rounded />
+            <div v-if="data.time.estimatedMinutes || data.time.actualMinutes" class="text-body-medium text-medium-emphasis mt-2">
+              {{ t('projects.dashboard.time', { estimated: formatMinutes(data.time.estimatedMinutes), actual: formatMinutes(data.time.actualMinutes) }) }}
+            </div>
+          </div>
         </div>
       </v-card>
 

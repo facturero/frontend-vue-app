@@ -69,11 +69,11 @@ export const accountingApi = {
     http.post<{ posted: number; stillPending: number; discarded: number }>('/accounting/pending-postings/retry', ids ? { ids } : {}).then((r) => r.data),
   discardPending: (id: string, reason: string) => http.post<PendingPosting>(`/accounting/pending-postings/${id}/discard`, { reason }).then((r) => r.data),
 
-  trialBalance: (params: { from: string; to: string; costCenterId?: string; includeZero?: boolean; maxLevel?: number }) =>
+  trialBalance: (params: { from: string; to: string; costCenterId?: string; projectId?: string; includeZero?: boolean; maxLevel?: number }) =>
     http.get<TrialBalance>('/accounting/reports/trial-balance', { params }).then((r) => r.data),
-  balanceSheet: (params: { asOf: string; compareAsOf?: string; costCenterId?: string; includeZero?: boolean; maxLevel?: number }) =>
+  balanceSheet: (params: { asOf: string; compareAsOf?: string; costCenterId?: string; projectId?: string; includeZero?: boolean; maxLevel?: number }) =>
     http.get<BalanceSheet>('/accounting/reports/balance-sheet', { params }).then((r) => r.data),
-  incomeStatement: (params: { from: string; to: string; compareFrom?: string; compareTo?: string; costCenterId?: string; includeZero?: boolean; maxLevel?: number }) =>
+  incomeStatement: (params: { from: string; to: string; compareFrom?: string; compareTo?: string; costCenterId?: string; projectId?: string; includeZero?: boolean; maxLevel?: number }) =>
     http.get<IncomeStatement>('/accounting/reports/income-statement', { params }).then((r) => r.data),
   ledger: (params: { accountId: string; from: string; to: string; page: number; pageSize: number }) =>
     http.get<Ledger>('/accounting/reports/ledger', { params }).then((r) => r.data),

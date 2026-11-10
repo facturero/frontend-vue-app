@@ -1,16 +1,26 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { usePluginsStore } from '@/stores/plugins';
 import { useAssistantStore } from '@/stores/assistant';
 import { getSearchEntries, scoreMatch, type SearchEntry } from '@/menus/search';
+import { projectsApi } from '@/api/projects';
+import CommandPalette, { type PaletteItem } from '@/components/ui/CommandPalette.vue';
 import type { CatalogPlugin } from '@/types/plugins';
+import type { SearchResult as ProjectSearchResult } from '@/types/projects';
+
+/**
+ * Búsqueda global (Ctrl+K / ⌘K, o «/» fuera de un campo): pantallas, acciones rápidas, plugins y, si la organización usa Proyectos,
+ * proyectos y tareas (como la barra de Asana). Va sobre la paleta de comandos de Vuetify (`CommandPalette`); el orden y la
+ * puntuación son nuestros, y lo de Proyectos lo busca el servidor, que solo devuelve lo que quien busca puede ver.
+ */
+type Section = 'pages' | 'actions' | 'plugins' | 'projects' | 'tasks' | 'assistant';
 
 interface SearchResult {
   key: string;
-  section: 'pages' | 'actions' | 'plugins' | 'assistant';
+  section: Section;
   title: string;
   subtitle?: string;
   icon: string;
@@ -31,13 +41,12 @@ const assistant = useAssistantStore();
 
 const open = ref(false);
 const query = ref('');
-const activeIndex = ref(0);
-const searchField = ref<{ focus: () => void } | null>(null);
 
 const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform);
 const shortcutLabel = isMac ? '⌘K' : 'Ctrl K';
 
 const canBrowsePlugins = computed(() => auth.can('plugins:read'));
+const canSearchProjects = computed(() => plugins.isActive('projects.tasks_kanban') && auth.can('project:read') && !auth.needsOrgSetup);
 
 /** Lo que este usuario puede abrir ahora mismo: mismo filtro que el menú lateral. */
 const entries = computed(() =>
@@ -52,7 +61,7 @@ function keywords(entry: SearchEntry): string {
   return te(key) ? t(key) : '';
 }
 
-function go(to: string): void {
+function go(to: string | { path: string; query?: Record<string, string> }): void {
   open.value = false;
   void router.push(to);
 }
@@ -81,6 +90,61 @@ function askAssistant(text: string): void {
   if (!assistant.open) assistant.toggle();
   void assistant.send(text);
 }
+
+// ── Proyectos y tareas: los busca el servidor, con una pausa para no preguntar en cada tecla ──
+const projectHits = ref<ProjectSearchResult | null>(null);
+const searchingProjects = ref(false);
+let projectTimer: ReturnType<typeof setTimeout> | undefined;
+
+watch(query, (value) => {
+  clearTimeout(projectTimer);
+  const q = value.trim();
+  if (!canSearchProjects.value || q.length < 2) {
+    projectHits.value = null;
+    searchingProjects.value = false;
+    return;
+  }
+  searchingProjects.value = true;
+  projectTimer = setTimeout(async () => {
+    try {
+      const out = await projectsApi.search(q);
+      // Si mientras tanto se siguió escribiendo, esta respuesta ya no vale.
+      if (query.value.trim() === q) projectHits.value = out;
+    } catch {
+      // Sin Proyectos la búsqueda sigue sirviendo para lo demás.
+      projectHits.value = null;
+    } finally {
+      if (query.value.trim() === q) searchingProjects.value = false;
+    }
+  }, 250);
+});
+
+const projectResults = computed<SearchResult[]>(() => {
+  const hits = projectHits.value;
+  if (!hits) return [];
+  const projects = hits.projects.slice(0, MAX_PER_SECTION).map((p) => ({
+    key: `project:${p.id}`,
+    section: 'projects' as const,
+    title: p.name,
+    icon: p.icon || 'mdi-folder-outline',
+    score: 1,
+    run: () => go(`/projects/${p.id}`),
+  }));
+  const tasks = hits.tasks.slice(0, MAX_PER_SECTION).map((task) => {
+    const first = task.projects[0];
+    return {
+      key: `task:${task.id}`,
+      section: 'tasks' as const,
+      title: task.title,
+      subtitle: task.projects.map((p) => p.name).join(' · ') || t('projects.task.personal'),
+      icon: task.completedAt ? 'mdi-check-circle' : 'mdi-check-circle-outline',
+      score: 1,
+      // La tarea se abre en su proyecto (`?task=` abre el panel); si no tiene, desde «Mis tareas».
+      run: () => go(first ? { path: `/projects/${first.projectId}`, query: { task: task.id } } : { path: '/my-tasks', query: { task: task.id } }),
+    };
+  });
+  return [...projects, ...tasks];
+});
 
 const results = computed<SearchResult[]>(() => {
   const q = query.value.trim();
@@ -115,7 +179,7 @@ const results = computed<SearchResult[]>(() => {
       }))
       .filter((r) => r.score > 0);
 
-  const bySection = (section: SearchResult['section'], list: SearchResult[]) =>
+  const bySection = (section: Section, list: SearchResult[]) =>
     list
       .filter((r) => r.section === section)
       .sort((a, b) => b.score - a.score)
@@ -124,6 +188,7 @@ const results = computed<SearchResult[]>(() => {
   const list = [
     ...bySection('pages', entryResults),
     ...bySection('actions', entryResults),
+    ...projectResults.value,
     ...bySection('plugins', pluginResults),
   ];
 
@@ -141,24 +206,20 @@ const results = computed<SearchResult[]>(() => {
   return list;
 });
 
-const sections = computed(() => {
-  const order: SearchResult['section'][] = ['pages', 'actions', 'plugins', 'assistant'];
-  let index = 0;
-  return order
-    .map((section) => ({
-      section,
-      items: results.value
-        .filter((r) => r.section === section)
-        .map((r) => ({ ...r, index: index++ })),
-    }))
-    .filter((s) => s.items.length > 0);
+/** Lo que pinta la paleta: un subtítulo por grupo y sus filas, en el orden de `results`. */
+const paletteItems = computed<PaletteItem[]>(() => {
+  const order: Section[] = ['pages', 'actions', 'projects', 'tasks', 'plugins', 'assistant'];
+  const items: PaletteItem[] = [];
+  for (const section of order) {
+    const rows = results.value.filter((r) => r.section === section);
+    if (rows.length === 0) continue;
+    items.push({ type: 'subheader', title: t(`search.sections.${section}`) });
+    for (const r of rows) items.push({ title: r.title, subtitle: r.subtitle, prependIcon: r.icon, value: r.key, chip: r.chip, onClick: r.run });
+  }
+  return items;
 });
 
-const hasMatches = computed(() => results.value.some((r) => r.section !== 'assistant'));
-
-watch(query, () => {
-  activeIndex.value = 0;
-});
+const placeholder = computed(() => (canSearchProjects.value ? t('search.placeholderWithProjects') : t('search.placeholder')));
 
 watch(open, (isOpen) => {
   if (!isOpen) {
@@ -169,28 +230,6 @@ watch(open, (isOpen) => {
     void plugins.fetchCatalog();
   }
 });
-
-function moveActive(delta: number): void {
-  const total = results.value.length;
-  if (total === 0) return;
-  activeIndex.value = (activeIndex.value + delta + total) % total;
-  void nextTick(() => {
-    document.getElementById(`global-search-item-${activeIndex.value}`)?.scrollIntoView({ block: 'nearest' });
-  });
-}
-
-function onKeydown(event: KeyboardEvent): void {
-  if (event.key === 'ArrowDown') {
-    event.preventDefault();
-    moveActive(1);
-  } else if (event.key === 'ArrowUp') {
-    event.preventDefault();
-    moveActive(-1);
-  } else if (event.key === 'Enter') {
-    event.preventDefault();
-    results.value[activeIndex.value]?.run();
-  }
-}
 
 /** Ctrl+K / ⌘K desde cualquier sitio, y "/" cuando no se está escribiendo en un campo. */
 function onGlobalKeydown(event: KeyboardEvent): void {
@@ -208,23 +247,18 @@ function onGlobalKeydown(event: KeyboardEvent): void {
 }
 
 onMounted(() => window.addEventListener('keydown', onGlobalKeydown));
-onBeforeUnmount(() => window.removeEventListener('keydown', onGlobalKeydown));
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onGlobalKeydown);
+  clearTimeout(projectTimer);
+});
 </script>
 
 <template>
-  <!-- Como en Modernize: lupa suelta junto a la hamburguesa que despliega el buscador debajo. -->
-  <v-menu
-    v-model="open"
-    :close-on-content-click="false"
-    location="bottom start"
-    :offset="8"
-    width="420"
-    max-width="calc(100vw - 24px)"
-    @after-enter="searchField?.focus()"
-  >
-    <template #activator="{ props: menuProps }">
+  <!-- La lupa junto a la hamburguesa abre la paleta; Ctrl+K y «/» también. -->
+  <CommandPalette v-model="open" v-model:search="query" :items="paletteItems" :placeholder="placeholder">
+    <template #activator="{ props: activatorProps }">
       <v-btn
-        v-bind="menuProps"
+        v-bind="activatorProps"
         icon
         :title="`${$t('search.open')} (${shortcutLabel})`"
         :aria-label="$t('search.open')"
@@ -232,53 +266,10 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onGlobalKeydown));
         <v-icon icon="mdi-magnify" />
       </v-btn>
     </template>
-
-    <v-card>
-      <v-text-field
-        ref="searchField"
-        v-model="query"
-        :placeholder="$t('search.placeholder')"
-        prepend-inner-icon="mdi-magnify"
-        variant="solo"
-        density="comfortable"
-        flat
-        clearable
-        hide-details
-        @keydown="onKeydown"
-      />
-      <v-divider />
-
-      <v-list nav density="compact" max-height="420" class="overflow-y-auto">
-        <template v-for="block in sections" :key="block.section">
-          <v-list-subheader>{{ $t(`search.sections.${block.section}`) }}</v-list-subheader>
-          <v-list-item
-            v-for="item in block.items"
-            :id="`global-search-item-${item.index}`"
-            :key="item.key"
-            :active="item.index === activeIndex"
-            :prepend-icon="item.icon"
-            :title="item.title"
-            :subtitle="item.subtitle"
-            color="primary"
-            rounded="lg"
-            @click="item.run()"
-            @mousemove="activeIndex = item.index"
-          >
-            <template v-if="item.chip" #append>
-              <v-chip size="x-small" variant="flat" :color="item.chip.color">{{ item.chip.label }}</v-chip>
-            </template>
-          </v-list-item>
-        </template>
-
-        <v-list-item v-if="query.trim() && !hasMatches" :title="$t('search.noResults', { query: query.trim() })" disabled />
-      </v-list>
-
-      <v-divider />
-      <div class="d-flex ga-4 px-4 py-2 text-body-small text-medium-emphasis">
-        <span>↑↓ {{ $t('search.hintNavigate') }}</span>
-        <span>↵ {{ $t('search.hintOpen') }}</span>
-        <span>Esc {{ $t('search.hintClose') }}</span>
+    <template #no-data>
+      <div class="pa-4 text-body-medium text-medium-emphasis">
+        {{ searchingProjects ? $t('search.searching') : $t('search.noResults', { query: query.trim() }) }}
       </div>
-    </v-card>
-  </v-menu>
+    </template>
+  </CommandPalette>
 </template>

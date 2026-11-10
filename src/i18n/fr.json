@@ -124,7 +124,8 @@
         "bank_adjustment": "un ajustement bancaire",
         "bank_adjustment_void": "l'annulation d'un ajustement bancaire",
         "other": "un autre document"
-      }
+      },
+      "project": "Projet"
     },
     "periods": {
       "intro": "Clôturer une période empêche de comptabiliser avec une date à l'intérieur. Elles se clôturent dans l'ordre et se rouvrent de la dernière vers la première.",
@@ -3041,7 +3042,9 @@
       "pages": "Écrans",
       "actions": "Actions rapides",
       "plugins": "Plugins",
-      "assistant": "Assistant"
+      "assistant": "Assistant",
+      "projects": "Projets",
+      "tasks": "Tâches"
     },
     "askAssistant": "Demander à l’assistant : « {query} »",
     "noResults": "Aucun résultat pour « {query} »",
@@ -3072,7 +3075,9 @@
       "newProduct": "créer produit ajouter article service",
       "inviteEmployee": "inviter utilisateur ajouter employé courriel",
       "newRole": "créer rôle permissions accès"
-    }
+    },
+    "placeholderWithProjects": "Rechercher des écrans, actions, projets ou tâches…",
+    "searching": "Recherche…"
   },
   "report": {
     "menu": "Signaler un problème",
@@ -4060,7 +4065,10 @@
       "nothingOpen": "Aucune tâche ouverte.",
       "overdueCount": "{n} en retard | {n} en retard",
       "completedByWeek": "Terminées par semaine",
-      "milestones": "Jalons"
+      "milestones": "Jalons",
+      "done": "terminé",
+      "openOnTime": "Ouvertes, dans les délais",
+      "byStatusLabel": "Tâches par statut : {done} terminées, {overdue} en retard et {open} ouvertes dans les délais"
     },
     "rules": {
       "title": "Règles",

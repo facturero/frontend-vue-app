@@ -18,6 +18,7 @@ import { centsToInput, formatMoney, isLineComplete, lineTotals, parseMoneyToCent
 import type { JournalEntry } from '@/types/accounting';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import AccountingTabs from '@/components/accounting/AccountingTabs.vue';
+import { useProjectOptions } from '@/composable/useProjectOptions';
 
 interface FormLine {
   key: number;
@@ -26,6 +27,7 @@ interface FormLine {
   credit: string;
   description: string;
   costCenterId: string | null;
+  projectId: string | null;
 }
 
 const { t, locale } = useI18n();
@@ -45,7 +47,7 @@ const entryDate = ref(todayLocal());
 const description = ref('');
 const reference = ref('');
 let seq = 0;
-const newLine = (): FormLine => ({ key: (seq += 1), accountId: '', debit: '', credit: '', description: '', costCenterId: null });
+const newLine = (): FormLine => ({ key: (seq += 1), accountId: '', debit: '', credit: '', description: '', costCenterId: null, projectId: null });
 const lines = ref<FormLine[]>([newLine(), newLine()]);
 
 const readonly = computed(() => entry.value?.status === 'posted');
@@ -60,6 +62,12 @@ const accountOptions = computed(() =>
   postableAccounts(store.accounts).map((a) => ({ value: a.id, title: `${a.code}  ${a.name}` })),
 );
 const costCenterOptions = computed(() => store.costCenters.filter((c) => c.status === 'active').map((c) => ({ value: c.id, title: `${c.code}  ${c.name}` })));
+/** Dimensión «proyecto»: solo si la organización usa Proyectos. Las facturas de un proyecto ya llegan con él (asiento automático). */
+const projects = useProjectOptions();
+const projectOptions = projects.activeOptions;
+/** Columnas de dimensión visibles: en un asiento contabilizado, solo las que alguna línea usa. */
+const showCostCenter = computed(() => (readonly.value ? lines.value.some((l) => l.costCenterId) : costCenterOptions.value.length > 0));
+const showProject = computed(() => (readonly.value ? lines.value.some((l) => l.projectId) : projectOptions.value.length > 0));
 
 const parsed = computed(() =>
   lines.value.map((l) => ({ ...l, debitCents: parseMoneyToCents(l.debit), creditCents: parseMoneyToCents(l.credit) })),
@@ -84,6 +92,7 @@ function fromEntry(e: JournalEntry): void {
     credit: centsToInput(l.creditCents),
     description: l.description ?? '',
     costCenterId: l.costCenterId,
+    projectId: l.projectId ?? null,
   }));
 }
 
@@ -95,7 +104,7 @@ async function load(): Promise<void> {
       await router.replace({ name: 'accounting-accounts' });
       return;
     }
-    await Promise.all([store.fetchAccounts(), store.fetchCostCenters()]);
+    await Promise.all([store.fetchAccounts(), store.fetchCostCenters(), projects.load()]);
     if (entryId.value) {
       entry.value = await store.getEntry(entryId.value);
       fromEntry(entry.value);
@@ -142,6 +151,7 @@ function payload() {
       creditCents: l.creditCents,
       description: l.description.trim() || null,
       costCenterId: l.costCenterId,
+      projectId: l.projectId,
     })),
   };
 }
@@ -263,7 +273,8 @@ const money = (c: number): string => formatMoney(c, locale.value, store.currency
             <tr>
               <th>{{ $t('accounting.entry.account') }}</th>
               <th>{{ $t('common.description') }}</th>
-              <th v-if="costCenterOptions.length > 0 || readonly">{{ $t('accounting.entry.costCenter') }}</th>
+              <th v-if="showCostCenter">{{ $t('accounting.entry.costCenter') }}</th>
+              <th v-if="showProject">{{ $t('accounting.entry.project') }}</th>
               <th class="text-end">{{ $t('accounting.entry.debit') }}</th>
               <th class="text-end">{{ $t('accounting.entry.credit') }}</th>
               <th v-if="!readonly" />
@@ -274,14 +285,16 @@ const money = (c: number): string => formatMoney(c, locale.value, store.currency
               <template v-if="readonly">
                 <td>{{ accountLabel(line.accountId) }}</td>
                 <td>{{ line.description }}</td>
-                <td>{{ costCenterLabel(line.costCenterId) }}</td>
+                <td v-if="showCostCenter">{{ costCenterLabel(line.costCenterId) }}</td>
+                <td v-if="showProject">{{ projects.nameOf(line.projectId) }}</td>
                 <td class="text-end">{{ line.debit ? money(parseMoneyToCents(line.debit) ?? 0) : '' }}</td>
                 <td class="text-end">{{ line.credit ? money(parseMoneyToCents(line.credit) ?? 0) : '' }}</td>
               </template>
               <template v-else>
                 <td class="py-1"><v-autocomplete v-model="line.accountId" :items="accountOptions" :label="$t('accounting.entry.account')" /></td>
                 <td class="py-1"><v-text-field v-model="line.description" :label="$t('common.description')" maxlength="255" /></td>
-                <td v-if="costCenterOptions.length > 0" class="py-1"><v-select v-model="line.costCenterId" :items="costCenterOptions" :label="$t('accounting.entry.costCenter')" clearable /></td>
+                <td v-if="showCostCenter" class="py-1"><v-select v-model="line.costCenterId" :items="costCenterOptions" :label="$t('accounting.entry.costCenter')" clearable /></td>
+                <td v-if="showProject" class="py-1"><v-autocomplete v-model="line.projectId" :items="projectOptions" :label="$t('accounting.entry.project')" clearable /></td>
                 <td class="py-1">
                   <v-text-field :model-value="line.debit" inputmode="decimal" class="text-end" :label="$t('accounting.entry.debit')" :error="parseMoneyToCents(line.debit) === null" @update:model-value="setSide(line, 'debit', $event)" />
                 </td>
@@ -297,7 +310,7 @@ const money = (c: number): string => formatMoney(c, locale.value, store.currency
           </tbody>
           <tfoot>
             <tr>
-              <td :colspan="costCenterOptions.length > 0 || readonly ? 3 : 2">
+              <td :colspan="2 + (showCostCenter ? 1 : 0) + (showProject ? 1 : 0)">
                 <v-btn v-if="!readonly" variant="text" prepend-icon="mdi-plus" @click="addLine">{{ $t('accounting.entry.addLine') }}</v-btn>
               </td>
               <td class="text-end font-weight-medium">{{ money(totals.debit) }}</td>
@@ -312,6 +325,7 @@ const money = (c: number): string => formatMoney(c, locale.value, store.currency
             <template v-if="readonly">
               <div class="font-weight-medium">{{ accountLabel(line.accountId) }}</div>
               <div v-if="line.description" class="text-body-medium text-medium-emphasis">{{ line.description }}</div>
+              <div v-if="line.projectId" class="text-body-small text-medium-emphasis">{{ $t('accounting.entry.project') }}: {{ projects.nameOf(line.projectId) }}</div>
               <div class="d-flex justify-space-between">
                 <span>{{ $t('accounting.entry.debit') }}: {{ money(parseMoneyToCents(line.debit) ?? 0) }}</span>
                 <span>{{ $t('accounting.entry.credit') }}: {{ money(parseMoneyToCents(line.credit) ?? 0) }}</span>
@@ -320,7 +334,8 @@ const money = (c: number): string => formatMoney(c, locale.value, store.currency
             <template v-else>
               <v-autocomplete v-model="line.accountId" :items="accountOptions" :label="$t('accounting.entry.account')" />
               <v-text-field v-model="line.description" :label="$t('common.description')" maxlength="255" />
-              <v-select v-if="costCenterOptions.length > 0" v-model="line.costCenterId" :items="costCenterOptions" :label="$t('accounting.entry.costCenter')" clearable />
+              <v-select v-if="showCostCenter" v-model="line.costCenterId" :items="costCenterOptions" :label="$t('accounting.entry.costCenter')" clearable />
+              <v-autocomplete v-if="showProject" v-model="line.projectId" :items="projectOptions" :label="$t('accounting.entry.project')" clearable />
               <div class="d-flex ga-3">
                 <v-text-field :model-value="line.debit" inputmode="decimal" :label="$t('accounting.entry.debit')" :error="parseMoneyToCents(line.debit) === null" @update:model-value="setSide(line, 'debit', $event)" />
                 <v-text-field :model-value="line.credit" inputmode="decimal" :label="$t('accounting.entry.credit')" :error="parseMoneyToCents(line.credit) === null" @update:model-value="setSide(line, 'credit', $event)" />

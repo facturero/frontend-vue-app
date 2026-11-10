@@ -16,6 +16,7 @@ import { formatMoney, splitBalance } from '@/utils/accounting';
 import type { TrialBalanceRow } from '@/types/accounting';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import AccountingTabs from '@/components/accounting/AccountingTabs.vue';
+import { useProjectOptions } from '@/composable/useProjectOptions';
 import AccountingSetupCard from '@/components/accounting/AccountingSetupCard.vue';
 
 const { t, locale } = useI18n();
@@ -27,6 +28,9 @@ const loadError = ref<string | null>(null);
 const from = ref(`${new Date().getFullYear()}-01-01`);
 const to = ref(todayLocal());
 const costCenterId = ref<string | null>(null);
+const projectId = ref<string | null>(null);
+const projects = useProjectOptions();
+const projectOptions = projects.allOptions;
 const includeZero = ref(false);
 const level = ref<number | null>(null);
 const ledgerPage = ref(1);
@@ -96,6 +100,7 @@ async function loadReport(): Promise<void> {
         from: from.value,
         to: to.value,
         costCenterId: costCenterId.value ?? undefined,
+        projectId: projectId.value ?? undefined,
         includeZero: includeZero.value || undefined,
         maxLevel: level.value ?? undefined,
       });
@@ -105,8 +110,11 @@ async function loadReport(): Promise<void> {
   }
 }
 
-onMounted(loadReport);
-watch([from, to, costCenterId, includeZero, level, accountId], () => {
+onMounted(() => {
+  void projects.load();
+  void loadReport();
+});
+watch([from, to, costCenterId, projectId, includeZero, level, accountId], () => {
   ledgerPage.value = 1;
   void loadReport();
 });
@@ -142,6 +150,7 @@ function closeLedger(): void {
             <v-col cols="6" sm="2"><DateField v-model="to" :min="from" :label="$t('accounting.journal.to')" /></v-col>
             <template v-if="!accountId">
               <v-col cols="12" sm="3"><v-select v-model="costCenterId" :items="costCenterOptions" :label="$t('accounting.entry.costCenter')" clearable /></v-col>
+              <v-col v-if="projectOptions.length > 0" cols="12" sm="3"><v-autocomplete v-model="projectId" :items="projectOptions" :label="$t('accounting.entry.project')" clearable /></v-col>
               <v-col cols="12" sm="2"><v-select v-model="level" :items="levelOptions" :label="$t('accounting.reports.level')" /></v-col>
               <v-col cols="12" sm="3" class="d-flex align-center"><v-switch v-model="includeZero" color="primary" :label="$t('accounting.reports.includeZero')" hide-details /></v-col>
             </template>

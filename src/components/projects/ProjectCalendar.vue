@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useDisplay } from 'vuetify';
-import { formatDate, formatLongDay, weekdayLabels, formatMonthYear } from '@/utils/format';
+import { formatDate, formatLongDay, formatMonthYear } from '@/utils/format';
 import { useI18n } from 'vue-i18n';
 import { useProjectsStore } from '@/stores/projects';
 import { localIsoDate } from '@/utils/projects';
-import { daysBetween, monthGrid, shiftDay } from '@/utils/timeline';
+import { daysBetween, shiftDay } from '@/utils/timeline';
 import type { BoardTask } from '@/types/projects';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import UserAvatar from './UserAvatar.vue';
@@ -14,15 +14,22 @@ import UserAvatar from './UserAvatar.vue';
  * Vista Calendario, como la de Asana: el mes con las tareas en su fecha de entrega. Arrastrar una tarea a otro día la reprograma
  * (si tenía inicio, se desplaza igual: la duración no cambia). «+» en un día crea ahí una tarea. Clic en una tarea abre el detalle.
  *
+ * La rejilla del mes es `v-calendar` (núcleo de Vuetify 4): pone las semanas, los nombres de los días en el idioma activo, el día de
+ * hoy y los días de otros meses. Las tareas van en su hueco `day` como fichas propias, porque las fichas de evento de `v-calendar` no
+ * se arrastran de un día a otro y eso es lo que más se usa en esta vista.
+ *
  * En el teléfono, agenda: la rejilla de siete columnas dejaba cada tarea en dos letras («Re…»). Allí van solo los días del mes que
  * tienen tareas, uno debajo de otro y con el título entero; no se arrastra (no hay dónde soltar) y se crea con el botón flotante.
  */
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const store = useProjectsStore();
 
 const today = localIsoDate(new Date());
 const cursor = ref({ year: Number(today.slice(0, 4)), month: Number(today.slice(5, 7)) });
-const days = computed(() => monthGrid(cursor.value.year, cursor.value.month));
+/** El día que `v-calendar` usa para saber qué mes pintar. */
+const focus = computed(() => `${cursor.value.year}-${String(cursor.value.month).padStart(2, '0')}-01`);
+/** La semana empieza el lunes, como en el resto de la aplicación (cronograma, carga de trabajo). */
+const WEEKDAYS = [1, 2, 3, 4, 5, 6, 0];
 const editable = computed(() => store.canEdit && store.current?.status === 'active');
 const { smAndDown } = useDisplay();
 
@@ -36,7 +43,6 @@ const byDay = computed(() => {
 });
 const undated = computed(() => Object.values(store.columns).flat().filter((t) => !t.dueOn && !t.completedAt).length);
 
-const weekdays = computed(() => weekdayLabels());
 
 /** Agenda del teléfono: los días del mes en pantalla que tienen tareas, en orden. */
 const agenda = computed(() => {
@@ -69,6 +75,8 @@ async function drop(day: string): Promise<void> {
 
 // ── Crear en un día ─────────────────────────────────────────────────────────
 const addingOn = ref<string | null>(null);
+/** El día cuyo «+» tiene el foco del teclado: así se ve aunque el ratón no esté encima. */
+const focusedAdd = ref<string | null>(null);
 const draft = ref('');
 
 async function add(): Promise<void> {
@@ -120,60 +128,54 @@ async function add(): Promise<void> {
       </div>
     </div>
 
-    <div v-else class="calendar">
-      <div v-for="w in weekdays" :key="w" class="text-body-small text-medium-emphasis text-center py-1 border-b text-capitalize">{{ w }}</div>
-      <div
-        v-for="day in days"
-        :key="day"
-        class="calendar__cell pa-1 border-e border-b"
-        :class="{
-          'bg-lightprimary': over === day,
-          'calendar__cell--other': day.slice(5, 7) !== String(cursor.month).padStart(2, '0'),
-        }"
-        @dragover.prevent="over = day"
-        @dragleave="over === day && (over = null)"
-        @drop.prevent="drop(day)"
-      >
-        <div class="d-flex align-center">
-          <span
-            class="text-body-small calendar__day"
-            :class="day === today ? 'bg-primary font-weight-bold' : 'text-medium-emphasis'"
-          >{{ Number(day.slice(8)) }}</span>
-          <v-spacer />
-          <v-btn
-            v-if="editable"
-            icon="mdi-plus"
-            variant="text"
-            size="x-small"
-            class="calendar__add"
-            :aria-label="t('projects.task.addTask')"
-            @click="addingOn = day"
-          />
-        </div>
-        <div class="d-flex flex-column ga-1">
+    <v-calendar v-else :model-value="focus" type="month" :weekdays="WEEKDAYS" :locale="locale">
+      <template #day="{ date }">
+        <v-hover v-slot="{ isHovering, props: hover }">
           <div
-            v-for="task in (byDay.get(day) ?? []).slice(0, 4)"
-            :key="task.id"
-            :draggable="editable"
-            class="calendar__chip text-body-small text-truncate px-1 rounded cursor-pointer"
-            :class="[
-              task.completedAt ? 'bg-lightsuccess text-decoration-line-through' : day < today ? 'bg-lighterror' : 'bg-lightprimary',
-              { 'font-weight-bold': task.kind === 'milestone' },
-            ]"
-            :title="task.title"
-            @dragstart="dragging = task.id"
-            @dragend="dragging = null"
-            @click="store.openTask(task.id)"
+            v-bind="hover"
+            class="calendar-day d-flex flex-column ga-1 pa-1"
+            :class="{ 'bg-lightprimary': over === date }"
+            @dragover.prevent="over = date"
+            @dragleave="over === date && (over = null)"
+            @drop.prevent="drop(date)"
           >
-            <v-icon v-if="task.kind === 'milestone'" icon="mdi-rhombus" size="x-small" color="warning" />
-            {{ task.title }}
+            <div
+              v-for="task in (byDay.get(date) ?? []).slice(0, 4)"
+              :key="task.id"
+              :draggable="editable"
+              class="text-body-small text-truncate px-1 rounded cursor-pointer"
+              :class="[
+                task.completedAt ? 'bg-lightsuccess text-decoration-line-through' : date < today ? 'bg-lighterror' : 'bg-lightprimary',
+                { 'font-weight-bold': task.kind === 'milestone' },
+              ]"
+              :title="task.title"
+              @dragstart="dragging = task.id"
+              @dragend="dragging = null"
+              @click="store.openTask(task.id)"
+            >
+              <v-icon v-if="task.kind === 'milestone'" icon="mdi-rhombus" size="x-small" color="warning" />
+              {{ task.title }}
+            </div>
+            <span v-if="(byDay.get(date) ?? []).length > 4" class="text-body-small text-medium-emphasis px-1">
+              {{ t('projects.calendar.more', { n: (byDay.get(date) ?? []).length - 4 }) }}
+            </span>
+            <!-- «+» aparece al pasar el ratón (como en Asana); con el teclado también se llega a él y se ve al enfocarlo. -->
+            <v-btn
+              v-if="editable"
+              icon="mdi-plus"
+              variant="text"
+              size="x-small"
+              class="align-self-end mt-auto"
+              :class="{ 'opacity-0': !isHovering && focusedAdd !== date }"
+              :aria-label="t('projects.calendar.addOn', { day: formatDate(date) })"
+              @focus="focusedAdd = date"
+              @blur="focusedAdd = null"
+              @click="addingOn = date"
+            />
           </div>
-          <span v-if="(byDay.get(day) ?? []).length > 4" class="text-body-small text-medium-emphasis px-1">
-            {{ t('projects.calendar.more', { n: (byDay.get(day) ?? []).length - 4 }) }}
-          </span>
-        </div>
-      </div>
-    </div>
+        </v-hover>
+      </template>
+    </v-calendar>
 
     <v-dialog :model-value="!!addingOn" @update:model-value="addingOn = null">
       <v-card>
@@ -192,27 +194,8 @@ async function add(): Promise<void> {
 </template>
 
 <style scoped>
-.calendar {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-}
-.calendar__cell {
-  min-height: 112px;
-}
-.calendar__cell--other {
-  opacity: 0.5;
-}
-.calendar__day {
-  width: 22px;
-  height: 22px;
-  line-height: 22px;
-  text-align: center;
-  border-radius: 50%;
-}
-.calendar__add {
-  opacity: 0;
-}
-.calendar__cell:hover .calendar__add {
-  opacity: 1;
+/* `v-calendar` deja el día a la altura de su contenido: sin un mínimo, un mes sin tareas quedaría en filas de 30 px. */
+.calendar-day {
+  min-height: 96px;
 }
 </style>

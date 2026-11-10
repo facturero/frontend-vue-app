@@ -90,6 +90,8 @@ Excepciones aprobadas hoy:
 | Arrastrar y soltar (tablero, listas) | `vue-draggable-plus` | Vuetify no tiene arrastrar y soltar |
 | Recorrido guiado | `driver.js` | Vuetify no tiene tours (§8) |
 | Color del editor de tema del POS | `<input type="color">` | **por revisar**: se decidió cuando Vuetify no traía `v-color-picker`; hoy sí lo trae |
+| Búsqueda global (Ctrl+K) | `v-command-palette` (*labs*, aprobado 2026-11-10), envuelto en `components/ui/CommandPalette.vue` | está en *labs*; se envuelve para que un cambio de API toque un archivo. Filtro propio (`no-filter`): el orden y los resultados de Proyectos los decide `GlobalSearch` |
+| Gráfico de anillo (panel del proyecto) | `v-pie` (*labs*, aprobado 2026-11-10), envuelto en `components/ui/PieChart.vue` | está en *labs*. Colores por token del tema: el envoltorio los pasa como `rgb(var(--v-theme-…))`, nunca en hexadecimal |
 
 **Fechas: hecho el 2026-11-06.** Las 61 `type="date"` de la app pasaron a
 `DateField` y `lint:ui` rechaza cualquier `type="date"` (kind `fecha`, sin
@@ -395,8 +397,13 @@ propios van en `src/styles/base.css`, dentro de `@layer vuetify-core.reset`.
 | Botón flotante en el teléfono | `v-fab` (y `v-speed-dial` si son varias acciones) | botón fijo con CSS |
 | Avisos | `notify` (usa `v-snackbar-queue`) | `v-snackbar` en la vista |
 
-*Labs* en 4.3 (necesitan decisión del dueño, §1): `v-command-palette`, `v-pie`, `v-heatmap`, `v-time-input`, `v-date-range-picker`,
-`v-mask-input`, `v-split-btn`, `v-checkbox-group`.
+*Labs* en 4.3 (necesitan decisión del dueño, §1): `v-heatmap`, `v-time-input`, `v-date-range-picker`, `v-mask-input`, `v-split-btn`,
+`v-checkbox-group`. Ya aprobados (2026-11-10) y envueltos en `components/ui/`: `v-command-palette` (`CommandPalette`) y `v-pie`
+(`PieChart`).
+
+Calendario de un mes con cosas en sus días: `v-calendar` (núcleo) con `type="month"` y la semana desde el lunes
+(`:weekdays="[1, 2, 3, 4, 5, 6, 0]"`). Si lo que va en cada día se tiene que arrastrar a otro, se pinta en el hueco `day` con
+arrastre nativo, no como eventos de `v-calendar` (sus fichas no se mueven de día). Ejemplo: `ProjectCalendar.vue`.
 
 ### Trampas conocidas
 

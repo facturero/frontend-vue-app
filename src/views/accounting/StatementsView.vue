@@ -18,6 +18,7 @@ import { downloadText, previousRange, sameDayLastYear, sameRangeLastYear, statem
 import type { StatementSection } from '@/types/accounting';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import AccountingTabs from '@/components/accounting/AccountingTabs.vue';
+import { useProjectOptions } from '@/composable/useProjectOptions';
 import AccountingSetupCard from '@/components/accounting/AccountingSetupCard.vue';
 
 const { t, locale } = useI18n();
@@ -33,6 +34,10 @@ const from = ref(`${year}-01-01`);
 const to = ref(today);
 const compareMode = ref<'none' | 'previous' | 'lastYear'>('none');
 const costCenterId = ref<string | null>(null);
+const projectId = ref<string | null>(null);
+/** Dimensión «proyecto» (si la organización usa Proyectos): el estado de resultados de un proyecto es lo que facturó y gastó. */
+const projects = useProjectOptions();
+const projectOptions = projects.allOptions;
 const level = ref<number | null>(null);
 const includeZero = ref(false);
 
@@ -66,7 +71,7 @@ async function load(): Promise<void> {
     if (store.configured === null) await store.fetchSettings();
     if (!store.configured) return;
     if (store.accounts.length === 0) await Promise.all([store.fetchAccounts(), store.fetchCostCenters()]);
-    const common = { costCenterId: costCenterId.value ?? undefined, includeZero: includeZero.value || undefined, maxLevel: level.value ?? undefined };
+    const common = { costCenterId: costCenterId.value ?? undefined, projectId: projectId.value ?? undefined, includeZero: includeZero.value || undefined, maxLevel: level.value ?? undefined };
     if (tab.value === 'balance') {
       await store.fetchBalanceSheet({ asOf: asOf.value, compareAsOf: compareAsOf.value, ...common });
     } else {
@@ -83,9 +88,12 @@ async function load(): Promise<void> {
   }
 }
 
-onMounted(load);
+onMounted(() => {
+  void projects.load();
+  void load();
+});
 let timer: ReturnType<typeof setTimeout> | undefined;
-watch([tab, asOf, from, to, compareMode, costCenterId, level, includeZero], () => {
+watch([tab, asOf, from, to, compareMode, costCenterId, projectId, level, includeZero], () => {
   clearTimeout(timer);
   timer = setTimeout(load, 250);
 });
@@ -175,6 +183,7 @@ const isCurrentBalanced = computed(() => (store.balanceSheet?.totals.differenceC
             </template>
             <v-col cols="12" sm="3"><v-select v-model="compareMode" :items="compareOptions" :label="$t('accounting.statements.compareWith')" /></v-col>
             <v-col cols="12" sm="3"><v-select v-model="costCenterId" :items="costCenterOptions" :label="$t('accounting.entry.costCenter')" clearable /></v-col>
+            <v-col v-if="projectOptions.length > 0" cols="12" sm="3"><v-autocomplete v-model="projectId" :items="projectOptions" :label="$t('accounting.entry.project')" clearable /></v-col>
             <v-col cols="12" sm="2"><v-select v-model="level" :items="levelOptions" :label="$t('accounting.reports.level')" /></v-col>
           </v-row>
           <div class="d-flex flex-wrap align-center ga-2">

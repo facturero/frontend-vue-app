@@ -124,7 +124,8 @@
         "bank_adjustment": "un ajuste bancario",
         "bank_adjustment_void": "la anulación de un ajuste bancario",
         "other": "otro documento"
-      }
+      },
+      "project": "Proyecto"
     },
     "periods": {
       "intro": "Cerrar un periodo impide contabilizar con fecha dentro de él. Se cierran en orden y se reabren de atrás hacia adelante.",
@@ -3041,7 +3042,9 @@
       "pages": "Pantallas",
       "actions": "Acciones rápidas",
       "plugins": "Plugins",
-      "assistant": "Asistente"
+      "assistant": "Asistente",
+      "projects": "Proyectos",
+      "tasks": "Tareas"
     },
     "askAssistant": "Preguntar al asistente: «{query}»",
     "noResults": "Sin resultados para «{query}»",
@@ -3072,7 +3075,9 @@
       "newProduct": "crear producto agregar artículo servicio",
       "inviteEmployee": "invitar usuario agregar empleado correo",
       "newRole": "crear rol permisos accesos"
-    }
+    },
+    "placeholderWithProjects": "Buscar pantallas, acciones, proyectos o tareas…",
+    "searching": "Buscando…"
   },
   "report": {
     "menu": "Reportar un problema",
@@ -4060,7 +4065,10 @@
       "nothingOpen": "No hay tareas abiertas.",
       "overdueCount": "{n} vencida | {n} vencidas",
       "completedByWeek": "Completadas por semana",
-      "milestones": "Hitos"
+      "milestones": "Hitos",
+      "done": "terminado",
+      "openOnTime": "Abiertas a tiempo",
+      "byStatusLabel": "Tareas por estado: {done} terminadas, {overdue} vencidas y {open} abiertas a tiempo"
     },
     "rules": {
       "title": "Reglas",

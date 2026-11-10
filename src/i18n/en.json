@@ -124,7 +124,8 @@
         "bank_adjustment": "a bank adjustment",
         "bank_adjustment_void": "the voiding of a bank adjustment",
         "other": "another document"
-      }
+      },
+      "project": "Project"
     },
     "periods": {
       "intro": "Closing a period prevents posting with a date inside it. They are closed in order and reopened from the latest backwards.",
@@ -3041,7 +3042,9 @@
       "pages": "Screens",
       "actions": "Quick actions",
       "plugins": "Plugins",
-      "assistant": "Assistant"
+      "assistant": "Assistant",
+      "projects": "Projects",
+      "tasks": "Tasks"
     },
     "askAssistant": "Ask the assistant: “{query}”",
     "noResults": "No results for “{query}”",
@@ -3072,7 +3075,9 @@
       "newProduct": "create product add item service",
       "inviteEmployee": "invite user add employee email",
       "newRole": "create role permissions access"
-    }
+    },
+    "placeholderWithProjects": "Search pages, actions, projects or tasks…",
+    "searching": "Searching…"
   },
   "report": {
     "menu": "Report a problem",
@@ -4060,7 +4065,10 @@
       "nothingOpen": "No open tasks.",
       "overdueCount": "{n} overdue | {n} overdue",
       "completedByWeek": "Completed per week",
-      "milestones": "Milestones"
+      "milestones": "Milestones",
+      "done": "done",
+      "openOnTime": "Open, on time",
+      "byStatusLabel": "Tasks by status: {done} completed, {overdue} overdue and {open} open on time"
     },
     "rules": {
       "title": "Rules",
