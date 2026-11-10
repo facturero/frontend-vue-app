@@ -58,7 +58,7 @@ const groups = computed(() => groupMyTasks(store.myTasks, localIsoDate(new Date(
  * Teléfono: deslizar hacia abajo recarga la lista, como cualquier app de tareas. En escritorio está apagado (con el ratón no hay
  * gesto, y la rueda no debe disparar una recarga).
  */
-const { smAndDown } = useDisplay();
+const { smAndDown, mdAndUp } = useDisplay();
 async function refresh({ done }: { done: () => void }): Promise<void> {
   try {
     await store.fetchMyTasks(showCompleted.value);
@@ -93,7 +93,8 @@ async function toggle(task: MyTask): Promise<void> {
       <template #actions>
         <RunningTimerChip />
         <v-btn variant="text" prepend-icon="mdi-folder-multiple-outline" to="/projects">{{ t('projects.title') }}</v-btn>
-        <v-btn color="primary" prepend-icon="mdi-plus" @click="quickInput?.focus()">{{ t('projects.task.addTask') }}</v-btn>
+        <!-- Solo enfoca el campo de abajo: en el teléfono el campo ya está a la vista y el botón empujaba las acciones a otra fila. -->
+        <v-btn v-if="!smAndDown" color="primary" prepend-icon="mdi-plus" @click="quickInput?.focus()">{{ t('projects.task.addTask') }}</v-btn>
         <!-- Atajos y la celebración son ayuda y preferencia, no acciones: al menú (REGLAS-FRONT R-70). -->
         <v-menu>
           <template #activator="{ props: menu }">
@@ -134,7 +135,7 @@ async function toggle(task: MyTask): Promise<void> {
     <v-pull-to-refresh :disabled="!smAndDown" @load="refresh">
     <v-card>
       <div v-for="group in MY_TASKS_GROUPS" :key="group">
-        <div class="d-flex align-center ga-2 px-2 py-2 border-b">
+        <div class="d-flex align-center ga-2 px-2 py-1 border-b">
           <v-tooltip location="top" :text="t(`projects.myTasks.groups.${group}`)"><template #activator="{ props: tip }"><v-btn v-bind="tip"
             :icon="collapsed[group] ? 'mdi-chevron-right' : 'mdi-chevron-down'"
             variant="text"
@@ -169,18 +170,25 @@ async function toggle(task: MyTask): Promise<void> {
                 <div :class="{ 'text-decoration-line-through text-medium-emphasis': task.completedAt }">{{ task.title }}</div>
                 <div v-if="task.parent" class="text-body-small text-medium-emphasis">{{ t('projects.task.subtaskOf', { title: task.parent.title }) }}</div>
               </div>
-              <div class="d-flex align-center flex-wrap ga-2">
-                <v-chip
-                  v-for="p in task.projects"
-                  :key="p.projectId"
-                  size="x-small"
-                  :color="p.color"
-                  :to="`/projects/${p.projectId}?task=${task.id}`"
-                  @click.stop
-                >
-                  {{ p.name }}
-                </v-chip>
-                <DueDateChip :due-on="task.dueOn" :completed="!!task.completedAt" />
+              <!-- Desde `md`, proyecto y fecha en columnas de ancho fijo (como en Asana): con ancho libre cada fila los ponía a una
+                   altura distinta y la columna de fechas quedaba en zigzag. -->
+              <div class="d-flex align-center flex-wrap flex-md-nowrap ga-2 flex-shrink-0">
+                <div class="d-flex align-center flex-wrap ga-1" :class="{ 'justify-end': mdAndUp }" :style="mdAndUp ? { width: '220px' } : undefined">
+                  <v-chip
+                    v-for="p in task.projects"
+                    :key="p.projectId"
+                    :size="mdAndUp ? 'small' : 'x-small'"
+                    :color="p.color"
+                    :to="`/projects/${p.projectId}?task=${task.id}`"
+                    class="text-truncate"
+                    @click.stop
+                  >
+                    {{ p.name }}
+                  </v-chip>
+                </div>
+                <div :style="mdAndUp ? { width: '110px' } : undefined" :class="{ 'text-end': mdAndUp }">
+                  <DueDateChip :due-on="task.dueOn" :completed="!!task.completedAt" />
+                </div>
               </div>
             </div>
           </div>

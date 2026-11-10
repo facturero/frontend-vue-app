@@ -23,7 +23,7 @@ import UserAvatar from './UserAvatar.vue';
 const props = defineProps<{ showCompleted: boolean }>();
 const { t, locale } = useI18n();
 const store = useProjectsStore();
-const { mobile } = useDisplay();
+const { mobile, smAndDown } = useDisplay();
 
 /**
  * Anchos de las columnas, una sola vez para la cabecera y las filas (REGLAS-FRONT R-51). El título tiene un mínimo: con muchos campos
@@ -146,7 +146,7 @@ defineExpose({
     </div>
 
     <div v-for="section in store.sections" :key="section.id">
-      <div class="d-flex align-center ga-2 px-2 py-2 border-b">
+      <div class="d-flex align-center ga-2 px-2 py-1 border-b">
         <v-tooltip location="top" :text="section.name"><template #activator="{ props: tip }"><v-btn v-bind="tip"
           :icon="collapsed[section.id] ? 'mdi-chevron-right' : 'mdi-chevron-down'"
           variant="text"
@@ -197,8 +197,9 @@ defineExpose({
                 />
               </template>
             </v-tooltip>
+            <!-- La casilla de la edición en lote, solo con espacio: en el teléfono se comía el sitio del título y allí no se edita en lote. -->
             <v-checkbox-btn
-              v-if="editable()"
+              v-if="editable() && !smAndDown"
               :model-value="selected.has(task.id)"
               density="compact"
               class="flex-grow-0"
@@ -215,11 +216,24 @@ defineExpose({
               size="small"
               :aria-label="t('projects.task.markComplete')"
               @click.stop="toggle(task)" /></template></v-tooltip>
-            <!-- En el teléfono el título no se edita en la fila: tocarla abre el detalle (como Asana), y ahí se edita. -->
-            <div class="flex-grow-1" :style="mobile ? undefined : { minWidth: COL.title }" @click="(e: MouseEvent) => !mobile && e.stopPropagation()">
+            <!-- Teléfono: el título entero (antes cortado en «Definir mapa del sitio y ar…») y debajo lo que en escritorio va en
+                 columnas: fecha, responsable y subtareas. Tocar la fila abre el detalle, como en Asana. -->
+            <div v-if="smAndDown" class="flex-grow-1 py-2 overflow-hidden">
+              <div :class="{ 'text-decoration-line-through text-medium-emphasis': task.completedAt }">{{ task.title }}</div>
+              <div v-if="task.dueOn || task.assigneeUserId || task.subtasks.total" class="d-flex align-center flex-wrap ga-2 mt-1">
+                <DueDateChip :due-on="task.dueOn" :completed="!!task.completedAt" />
+                <UserAvatar v-if="task.assigneeUserId" :user-id="task.assigneeUserId" :size="20" />
+                <span v-if="task.subtasks.total" class="text-body-small text-medium-emphasis">
+                  <v-icon icon="mdi-file-tree-outline" size="x-small" /> {{ task.subtasks.completed }}/{{ task.subtasks.total }}
+                </span>
+              </div>
+            </div>
+            <!-- En pantallas táctiles el título no se edita en la fila: tocarla abre el detalle (como Asana), y ahí se edita. -->
+            <div v-else class="flex-grow-1" :style="mobile ? undefined : { minWidth: COL.title }" @click="(e: MouseEvent) => !mobile && e.stopPropagation()">
               <v-text-field
                 :model-value="titles[task.id] ?? task.title"
                 variant="plain"
+                class="inline-field"
                 :readonly="!editable() || mobile"
                 :class="{ 'text-decoration-line-through text-medium-emphasis': task.completedAt }"
                 :aria-label="t('projects.task.title')"
@@ -232,7 +246,7 @@ defineExpose({
             <v-chip v-for="tag in task.tags.slice(0, 2)" :key="tag.id" size="x-small" :color="tag.color" class="d-none d-sm-flex flex-shrink-0">{{ tag.name }}</v-chip>
             <v-chip v-if="task.tags.length > 2" size="x-small" class="d-none d-sm-flex flex-shrink-0">+{{ task.tags.length - 2 }}</v-chip>
             <v-chip v-if="task.actualMinutes" size="x-small" prepend-icon="mdi-timer-outline" class="d-none d-sm-flex flex-shrink-0">{{ formatMinutes(task.actualMinutes) }}</v-chip>
-            <v-chip v-if="task.subtasks.total" size="x-small" prepend-icon="mdi-file-tree-outline" class="flex-shrink-0">
+            <v-chip v-if="task.subtasks.total && !smAndDown" size="x-small" prepend-icon="mdi-file-tree-outline" class="flex-shrink-0">
               {{ task.subtasks.completed }}/{{ task.subtasks.total }}
             </v-chip>
             <div class="d-none d-md-flex justify-center flex-shrink-0" :style="{ width: COL.assignee }">
@@ -254,6 +268,7 @@ defineExpose({
             :ref="(el) => setAddInput(section.id, el)"
             v-model="drafts[section.id]"
             variant="plain"
+            class="inline-field"
             :placeholder="t('projects.task.addTask')"
             @keyup.enter="add(section.id)"
           />
@@ -270,6 +285,12 @@ defineExpose({
 }
 .task-drag {
   cursor: grab;
+}
+/* El campo `plain` trae más relleno arriba que abajo (es para una etiqueta flotante que aquí no hay): el texto quedaba unos píxeles
+   más bajo que los iconos de la fila y «Agregar tarea» salía cortado por abajo. */
+.inline-field :deep(.v-field__input) {
+  padding-top: 0;
+  padding-bottom: 0;
 }
 /* Una sección vacía sigue aceptando tarjetas que se suelten en ella. */
 .task-list-zone {

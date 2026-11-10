@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
+import { useDisplay } from 'vuetify';
 import { useStickyHeader } from '@/composable/useStickyHeader';
 /**
  * Encabezado canónico de una vista. Toda vista de nivel superior empieza con
@@ -33,6 +34,8 @@ const props = withDefaults(
 const sheet = ref<{ $el: HTMLElement } | null>(null);
 const sheetEl = computed(() => sheet.value?.$el ?? null);
 const stickyStyle = useStickyHeader(sheetEl, () => props.sticky === true);
+/** En el teléfono el titular baja a `text-title-large`: a 24 px, el nombre de un proyecto y sus acciones no cabían en una fila. */
+const { xs } = useDisplay();
 </script>
 
 <template>
@@ -43,7 +46,9 @@ const stickyStyle = useStickyHeader(sheetEl, () => props.sticky === true);
     :class="{ 'position-sticky': sticky }"
     :style="stickyStyle"
   >
-    <div>
+    <!-- El título crece: en la misma fila empuja las acciones a la derecha, y si no caben, estas bajan a la fila siguiente alineadas
+         a la izquierda (antes quedaban sueltas a la derecha, con un hueco grande debajo del título en el teléfono). -->
+    <div class="flex-grow-1">
       <!--
         Color forzado, no utilidad de opacidad: sobre `lightprimary` el texto
         hereda `on-lightprimary`, que es el propio azul y deja el título
@@ -52,14 +57,14 @@ const stickyStyle = useStickyHeader(sheetEl, () => props.sticky === true);
         color base. Forzar `on-surface` a opacidad completa da el negro sólido
         de la referencia y funciona igual en claro y en oscuro.
       -->
-      <h1 class="text-headline-small font-weight-bold" style="color: rgb(var(--v-theme-on-surface))">{{ title }}</h1>
+      <h1 :class="xs ? 'text-title-large' : 'text-headline-small'" class="font-weight-bold" style="color: rgb(var(--v-theme-on-surface))">{{ title }}</h1>
       <div v-if="subtitle" class="text-body-medium text-medium-emphasis mt-1">
         {{ subtitle }}
       </div>
     </div>
 
     <!-- flex-wrap: con dos o más acciones, en un teléfono el segundo botón se salía de la pantalla (scroll lateral) -->
-    <div v-if="$slots.actions" class="d-flex flex-wrap align-center ga-2 ml-auto">
+    <div v-if="$slots.actions" class="d-flex flex-wrap align-center ga-2">
       <slot name="actions" />
     </div>
   </v-sheet>
