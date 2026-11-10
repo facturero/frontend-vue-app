@@ -66,13 +66,30 @@ watch(userOpened, (value) => {
   }
 });
 
+// Al llegar a una pantalla de otra área, se abre esa área: lo que se abrió a mano era para buscar, no para quedarse.
+watch(activeGroupId, (id, previous) => {
+  if (id !== previous) userOpened.value = [];
+});
+
 const hovering = ref(false);
 const collapsed = computed(() => !mobile.value && ui.rail && !hovering.value);
 
+/**
+ * Acordeón: un grupo abierto a la vez. Con todos abiertos el menú volvía a medir lo mismo que la lista de 22 pantallas que se quería
+ * evitar. Al abrir uno se cierra el anterior; si no hay ninguno elegido, queda abierto el de la pantalla actual.
+ */
 const opened = computed<string[]>({
-  get: () => (collapsed.value ? [] : [...new Set([...userOpened.value, ...(activeGroupId.value ? [activeGroupId.value] : [])])]),
+  get: () => {
+    if (collapsed.value) return [];
+    const chosen = userOpened.value[0] ?? activeGroupId.value;
+    return chosen ? [chosen] : [];
+  },
   set: (value) => {
-    if (!collapsed.value) userOpened.value = value;
+    if (collapsed.value) return;
+    const current = userOpened.value[0] ?? activeGroupId.value;
+    const added = value.filter((id) => id !== current);
+    // Lo recién abierto manda; si solo se cerró el abierto, no queda ninguno (ni siquiera el de la pantalla actual).
+    userOpened.value = added.length ? [added.at(-1)!] : value.length ? [value[0]!] : ['none'];
   },
 });
 </script>
@@ -80,9 +97,12 @@ const opened = computed<string[]>({
 <template>
   <v-navigation-drawer v-model="ui.drawer" :rail="!mobile && ui.rail" :permanent="!mobile" :temporary="mobile"
     expand-on-hover @mouseenter="hovering = true" @mouseleave="hovering = false">
-    <div class="d-flex flex-column h-100 overflow-y-auto overflow-x-hidden">
+    <!-- La columna no se desplaza entera: se desplaza la parte principal (flex-grow-1 + overflow) y Administración queda fija al
+         pie. Antes el contenedor tenía el scroll pero las listas se encogían para caber (v-list trae overflow: hidden), así que con
+         varios grupos abiertos lo último quedaba debajo de la pantalla sin forma de llegar. -->
+    <div class="d-flex flex-column h-100 overflow-hidden">
       <!-- Sin `color`: el ítem activo se pinta como píldora sólida (ver <style>). -->
-      <v-list v-model:opened="opened" nav density="compact">
+      <v-list v-model:opened="opened" nav density="compact" class="flex-grow-1 overflow-y-auto overflow-x-hidden nav-scroll">
         <v-list-item prepend-icon="mdi-alpha-c-circle" :title="$t('nav.brand')" :subtitle="$t('nav.brandSubtitle')"
           class="drawer-brand" />
         <v-divider class="mb-2" />
@@ -101,9 +121,7 @@ const opened = computed<string[]>({
         </template>
       </v-list>
 
-      <v-spacer />
-
-      <v-list v-if="adminEntry && adminEntry.kind === 'group'" v-model:opened="opened" nav density="compact">
+      <v-list v-if="adminEntry && adminEntry.kind === 'group'" v-model:opened="opened" nav density="compact" class="flex-shrink-0">
         <v-divider class="mb-2" />
         <v-list-group :value="adminEntry.id">
           <template #activator="{ props: activator }">
@@ -121,6 +139,11 @@ const opened = computed<string[]>({
 <style scoped>
 .drawer-brand {
   min-height: 64px;
+}
+
+/* Sin `min-height: 0` un hijo flex no baja de la altura de su contenido y el `overflow` nunca entra en juego. */
+.nav-scroll {
+  min-height: 0;
 }
 
 /*

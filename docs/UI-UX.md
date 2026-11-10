@@ -438,8 +438,12 @@ global y los tests) y el árbol por áreas (`getNavigationTree`): Inicio, Ventas
 Administración, esta última al pie y separada. Con 22 pantallas sueltas, el menú colapsado era una columna de iconos indistinguibles.
 
 - **Colapsado** (rail): un icono por área y ningún grupo abierto; el área de la pantalla actual se marca como píldora.
-- **Expandido** (al pasar el ratón, o en el teléfono): `v-list-group`; queda abierta el área de la pantalla actual más las que la
-  persona abrió (se recuerdan en `localStorage`, `crm:nav:opened`).
+- **Expandido** (al pasar el ratón, o en el teléfono): `v-list-group` en **acordeón**, un área abierta a la vez (con todas
+  abiertas el menú volvía a medir lo mismo que antes). Al entrar a una pantalla se abre su área; la que se abra a mano se recuerda
+  (`localStorage`, `crm:nav:opened`) hasta cambiar de área.
+- **Desplazamiento:** se desplaza solo la parte principal (`flex-grow-1`, `overflow-y-auto` y `min-height: 0`) y Administración queda
+  fija al pie. No pongas el scroll en el contenedor de la columna: `v-list` trae `overflow: hidden` y las listas se encogen para
+  caber, así que lo último quedaba fuera de la pantalla sin forma de llegar.
 - Un área sin pantallas visibles (permisos y módulos activos) no sale; una con una sola se pinta como esa pantalla, sin desplegable.
 - Pantalla nueva: entra en la lista plana **y** en un área del árbol. `navigation.test.ts` falla si queda fuera o repetida.
 - No repitas el icono de un área en una de sus pantallas (por eso Roles dejó el escudo a Administración).
