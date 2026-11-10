@@ -98,7 +98,13 @@ async function toggle(task: BoardTask): Promise<void> {
  * ve la pantalla.
  */
 const announcement = ref('');
+/**
+ * La ayuda del asa sobra en cuanto se usa el teclado: sin esto, al mover con ↑ ↓ el foco salta al asa de la tarea movida, la ayuda
+ * se vuelve a abrir en cada pulsación y viaja con la fila tapando lo que se está mirando.
+ */
+const keyboardUsed = ref(false);
 async function keyMove(task: BoardTask, direction: -1 | 1): Promise<void> {
+  keyboardUsed.value = true;
   const result = await store.moveTaskBy(task.id, direction, { visible: (x) => !x.completedAt || props.showCompleted });
   if (!result) return;
   announcement.value = t('projects.task.movedTo', { title: task.title, position: result.position, total: result.total, section: result.sectionName });
@@ -173,7 +179,9 @@ defineExpose({
           >
             <!-- En el teléfono no hay asa: arrastrar con el dedo choca con el scroll, y la fila gana sitio para el título (allí se mueve
                  con «Mover a» del detalle). En escritorio es un botón: se arrastra con el ratón o se mueve con ↑ ↓ (R-90). -->
-            <v-tooltip v-if="editable() && !mobile" location="top" :text="t('projects.task.reorderHint')">
+            <!-- La ayuda va al costado (end), no encima: arriba tapaba el nombre de la sección en la primera tarea y la fila anterior
+                 en las demás. -->
+            <v-tooltip v-if="editable() && !mobile" location="end" :disabled="keyboardUsed" :text="t('projects.task.reorderHint')">
               <template #activator="{ props: tip }">
                 <v-btn
                   v-bind="tip"

@@ -170,4 +170,13 @@ resuelve. Sin librerías nuevas; lo marcado *labs* necesita decisión del dueño
   enteras desde la misma IP). El límite del gateway es por IP (120/min en producción): una oficina detrás de una sola IP lo
   comparte; queda como decisión (ver abajo). Se quitó un `/auth/me` repetido en cada carga (`AppTopBar`).
 
-Pendiente: *labs* (`v-command-palette`, `v-pie`), decidir `v-calendar` (P2) y el límite del gateway por usuario en vez de por IP.
+### Hecho el 2026-11-10
+
+- **Límite del gateway** (P4): con sesión, el cupo es por usuario; sin ella, por IP. La IP sale de `cf-connecting-ip` o del último
+  salto de `x-forwarded-for` solo si quien conecta es un proxy propio (`TRUSTED_PROXIES`, por defecto redes privadas). Comprobado en
+  producción: la bitácora guarda la IP pública real y una IP inventada no abre cupo nuevo.
+- **Ayuda del asa** (lista): iba encima y tapaba el nombre de la sección en la primera tarea; ahora va al costado y se apaga en cuanto
+  se mueve con el teclado (si no, se reabría en cada pulsación y viajaba con la fila).
+- **Nombres** (P4): `displayName` ya usa `fullName` y solo cae al correo si la persona no tiene nombre (el usuario de la semilla).
+
+Pendiente: *labs* (`v-command-palette`, `v-pie`) y decidir `v-calendar` (P2).
