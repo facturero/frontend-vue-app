@@ -4060,7 +4060,11 @@
       "logOn": "Log on",
       "runningOn": "The timer is running on \"{task}\": stop it to change",
       "breakdown": "{own} on this task · {subtasks} on subtasks",
-      "inSubtask": "On \"{task}\""
+      "inSubtask": "On \"{task}\"",
+      "none": "No time yet",
+      "entries": "Time entries",
+      "startOn": "Start on",
+      "estimatePlaceholder": "e.g. 2h 30m"
     },
     "workload": {
       "title": "Workload",

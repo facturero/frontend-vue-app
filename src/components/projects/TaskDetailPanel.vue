@@ -501,6 +501,8 @@ const moveTargets = computed(() => {
                 />
               </td>
             </tr>
+            <!-- Horas y estimado, como filas de esta tabla (no una sección aparte): ver TaskTime. -->
+            <TaskTime />
             <tr>
               <td class="text-medium-emphasis text-no-wrap">{{ t('projects.task.projects') }}</td>
               <td>
@@ -703,7 +705,6 @@ const moveTargets = computed(() => {
           </v-text-field>
         </div>
 
-        <TaskTime />
         <TaskAttachments />
         <v-divider />
         <TaskConversation ref="conversation" />

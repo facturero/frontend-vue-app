@@ -4060,7 +4060,11 @@
       "logOn": "Enregistrer sur",
       "runningOn": "Le chronomètre tourne sur « {task} » : arrêtez-le pour changer",
       "breakdown": "{own} sur cette tâche · {subtasks} sur les sous-tâches",
-      "inSubtask": "Sur « {task} »"
+      "inSubtask": "Sur « {task} »",
+      "none": "Aucune heure",
+      "entries": "Saisies de temps",
+      "startOn": "Démarrer sur",
+      "estimatePlaceholder": "ex. 2h 30m"
     },
     "workload": {
       "title": "Charge de travail",

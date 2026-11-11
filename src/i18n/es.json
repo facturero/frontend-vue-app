@@ -4060,7 +4060,11 @@
       "logOn": "Registrar en",
       "runningOn": "El cronómetro corre en «{task}»: detenlo para cambiar",
       "breakdown": "{own} en esta tarea · {subtasks} en subtareas",
-      "inSubtask": "En «{task}»"
+      "inSubtask": "En «{task}»",
+      "none": "Sin horas",
+      "entries": "Registros de horas",
+      "startOn": "Iniciar en",
+      "estimatePlaceholder": "p. ej. 2h 30m"
     },
     "workload": {
       "title": "Carga de trabajo",
