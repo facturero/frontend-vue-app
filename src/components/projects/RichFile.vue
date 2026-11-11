@@ -6,7 +6,7 @@ import { fileKind } from '@/utils/projects';
 
 /**
  * Documento dentro de una descripción o un comentario (Excel, PDF, Word…): una ficha con el icono y el color de su tipo y el
- * nombre. Un clic lo abre en otra pestaña, también dentro del editor (la descripción de quien puede editarla es siempre el editor,
+ * nombre, en el estilo tonal de los chips (fondo suave, sin borde: con `outlined` las fichas sin color salían con borde negro). Un clic lo abre en otra pestaña, también dentro del editor (la descripción de quien puede editarla es siempre el editor,
  * así que si el clic solo seleccionara nunca se podría abrir). En el editor trae además una ✕ para quitarla del texto; el archivo
  * sigue en Adjuntos.
  */
@@ -25,7 +25,7 @@ const kind = computed(() => fileKind(props.mimeType, props.name));
     <v-chip
       :prepend-icon="kind.icon"
       :color="selected ? 'primary' : kind.color"
-      :variant="selected ? 'tonal' : 'outlined'"
+      :variant="selected ? 'flat' : undefined"
       label
       link
       :closable="removable"

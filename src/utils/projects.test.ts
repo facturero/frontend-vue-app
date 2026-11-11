@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { CustomField, MyTask } from '@/types/projects';
-import { addDays, avatarColor, dueState, fieldValueText, groupMyTasks, initials, linkRoute, localIsoDate, neighbours } from './projects';
+import { addDays, avatarColor, dueState, fieldValueText, groupMyTasks, initials, linkRoute, localIsoDate, neighbours, fileKind } from './projects';
 
 const task = (over: Partial<MyTask>): MyTask => ({
   id: over.id ?? 'x',
@@ -106,5 +106,51 @@ describe('campos personalizados y vínculos', () => {
     expect(linkRoute('customer', 'c1')).toBe('/customers/c1');
     expect(linkRoute('purchase_order', 'o1')).toBe('/purchasing/orders/o1');
     expect(linkRoute('quote', 'q1')).toBeNull();
+  });
+});
+
+describe('fileKind: icono y color de cada tipo de archivo', () => {
+  const X = 'application/vnd.openxmlformats-officedocument';
+  it.each([
+    // [nombre, tipo MIME, icono, color]
+    ['ventas.xlsx', `${X}.spreadsheetml.sheet`, 'mdi-file-excel-outline', 'success'],
+    ['macro.xlsm', 'application/vnd.ms-excel.sheet.macroEnabled.12', 'mdi-file-excel-outline', 'success'],
+    ['viejo.xls', 'application/vnd.ms-excel', 'mdi-file-excel-outline', 'success'],
+    ['datos.csv', 'text/csv', 'mdi-file-excel-outline', 'success'],
+    ['libre.ods', 'application/vnd.oasis.opendocument.spreadsheet', 'mdi-file-excel-outline', 'success'],
+    ['factura.pdf', 'application/pdf', 'mdi-file-pdf-box', 'error'],
+    ['contrato.docx', `${X}.wordprocessingml.document`, 'mdi-file-word-outline', 'primary'],
+    ['viejo.doc', 'application/msword', 'mdi-file-word-outline', 'primary'],
+    ['libre.odt', 'application/vnd.oasis.opendocument.text', 'mdi-file-word-outline', 'primary'],
+    ['nota.rtf', 'application/rtf', 'mdi-file-word-outline', 'primary'],
+    ['charla.pptx', `${X}.presentationml.presentation`, 'mdi-file-powerpoint-outline', 'warning'],
+    ['vieja.ppt', 'application/vnd.ms-powerpoint', 'mdi-file-powerpoint-outline', 'warning'],
+    ['libre.odp', 'application/vnd.oasis.opendocument.presentation', 'mdi-file-powerpoint-outline', 'warning'],
+    ['foto.png', 'image/png', 'mdi-file-image-outline', 'secondary'],
+    ['foto.jpg', 'image/jpeg', 'mdi-file-image-outline', 'secondary'],
+    ['anim.gif', 'image/gif', 'mdi-file-image-outline', 'secondary'],
+    ['logo.svg', 'image/svg+xml', 'mdi-file-image-outline', 'secondary'],
+    ['factura-001.xml', 'application/xml', 'mdi-file-code-outline', undefined],
+    ['sri.xml', 'text/xml', 'mdi-file-code-outline', undefined],
+    ['datos.json', 'application/json', 'mdi-file-code-outline', undefined],
+    ['leeme.txt', 'text/plain', 'mdi-file-document-outline', undefined],
+    ['demo.mp4', 'video/mp4', 'mdi-file-video-outline', undefined],
+    ['audio.mp3', 'audio/mpeg', 'mdi-file-music-outline', undefined],
+    ['todo.zip', 'application/zip', 'mdi-folder-zip-outline', undefined],
+    ['todo.rar', 'application/vnd.rar', 'mdi-folder-zip-outline', undefined],
+    ['raro.bin', 'application/octet-stream', 'mdi-file-outline', undefined],
+  ])('%s (%s)', (name, mime, icon, color) => {
+    expect(fileKind(mime, name)).toEqual({ icon, color });
+  });
+
+  it('manda la extensión: Office subido como application/octet-stream conserva su icono y color', () => {
+    expect(fileKind('application/octet-stream', 'cotizacion.xlsx')).toEqual({ icon: 'mdi-file-excel-outline', color: 'success' });
+    expect(fileKind('application/octet-stream', 'propuesta.pptx')).toEqual({ icon: 'mdi-file-powerpoint-outline', color: 'warning' });
+    expect(fileKind('', 'contrato.DOCX')).toEqual({ icon: 'mdi-file-word-outline', color: 'primary' });
+  });
+
+  it('sin extensión, decide por el tipo MIME', () => {
+    expect(fileKind('application/pdf', 'escaneo')).toEqual({ icon: 'mdi-file-pdf-box', color: 'error' });
+    expect(fileKind('image/webp', 'captura')).toEqual({ icon: 'mdi-file-image-outline', color: 'secondary' });
   });
 });

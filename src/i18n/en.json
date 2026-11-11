@@ -4300,7 +4300,7 @@
     "tourAgain": "Show the Projects tour",
     "colors": {
       "primary": "blue",
-      "secondary": "purple",
+      "secondary": "light blue",
       "success": "green",
       "warning": "orange",
       "error": "red",

@@ -31,7 +31,8 @@ const canRemove = (a: TaskAttachment) => a.uploadedBy === auth.user?.id || !!sto
     <v-list density="compact" class="pa-0">
       <v-list-item v-for="a in items" :key="a.id" class="px-0" @click="openFile(a.documentId)">
         <template #prepend>
-          <v-icon :icon="fileKind(a.mimeType, a.fileName).icon" :color="fileKind(a.mimeType, a.fileName).color" />
+          <!-- `opacity-100`: la fila atenúa los iconos de la izquierda y el color del tipo (el azul de Word, por ejemplo) casi no se veía. -->
+          <v-icon :icon="fileKind(a.mimeType, a.fileName).icon" :color="fileKind(a.mimeType, a.fileName).color" class="opacity-100" />
         </template>
         <v-list-item-title class="text-body-medium">{{ a.fileName }}</v-list-item-title>
         <v-list-item-subtitle>{{ size(a.sizeBytes) }}</v-list-item-subtitle>

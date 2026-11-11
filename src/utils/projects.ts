@@ -147,18 +147,34 @@ export function fieldValueText(field: CustomField, value: FieldValue | null | un
 }
 
 /**
- * Icono y color de un archivo por su tipo, para reconocerlo de un vistazo (lo pidió un cliente): Excel verde, PDF rojo, Word azul,
- * imagen naranja, presentación en el color secundario. Colores del tema, no hexadecimales. Lo usan la lista de adjuntos y la ficha
- * de archivo dentro de la descripción y los comentarios.
+ * Icono y color de un archivo por su tipo, para reconocerlo de un vistazo (lo pidió un cliente). Los colores son los que la gente
+ * asocia a cada programa, con los tokens del tema (nunca hexadecimales):
+ *
+ *   Excel / CSV / ODS  verde (`success`)      PDF          rojo (`error`)
+ *   Word / ODT / RTF   azul (`primary`)       PowerPoint   naranja (`warning`)
+ *   Imagen             celeste (`secondary`)  el resto     sin color: XML y JSON con icono de código (facturas electrónicas),
+ *                                                          texto, video, audio y comprimidos con el suyo
+ *
+ * Ojo: en este tema `secondary` es celeste (#49BEFF), no morado; antes PowerPoint salía celeste. Se decide por la extensión antes que
+ * por el tipo MIME, porque muchos navegadores suben los documentos de Office como `application/octet-stream`. Lo usan la lista de
+ * adjuntos y la ficha de archivo dentro de la descripción y los comentarios; `projects.test.ts` recorre todos los tipos.
  */
+const FILE_KINDS: Array<{ icon: string; color: string | undefined; exts: string[]; mime: (m: string) => boolean }> = [
+  { icon: 'mdi-file-pdf-box', color: 'error', exts: ['pdf'], mime: (m) => m === 'application/pdf' },
+  { icon: 'mdi-file-excel-outline', color: 'success', exts: ['xlsx', 'xlsm', 'xls', 'csv', 'ods'], mime: (m) => m.includes('spreadsheet') || m.includes('excel') || m === 'text/csv' },
+  { icon: 'mdi-file-powerpoint-outline', color: 'warning', exts: ['pptx', 'ppt', 'odp'], mime: (m) => m.includes('presentation') || m.includes('powerpoint') },
+  { icon: 'mdi-file-word-outline', color: 'primary', exts: ['docx', 'doc', 'odt', 'rtf'], mime: (m) => m.includes('wordprocessing') || m.includes('msword') || m.includes('opendocument.text') || m === 'application/rtf' },
+  { icon: 'mdi-file-image-outline', color: 'secondary', exts: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp', 'heic'], mime: (m) => m.startsWith('image/') },
+  { icon: 'mdi-file-code-outline', color: undefined, exts: ['xml', 'json'], mime: (m) => m.endsWith('/xml') || m.endsWith('+xml') || m === 'application/json' },
+  { icon: 'mdi-file-video-outline', color: undefined, exts: ['mp4', 'mov', 'avi', 'mkv', 'webm'], mime: (m) => m.startsWith('video/') },
+  { icon: 'mdi-file-music-outline', color: undefined, exts: ['mp3', 'wav', 'ogg', 'm4a'], mime: (m) => m.startsWith('audio/') },
+  { icon: 'mdi-folder-zip-outline', color: undefined, exts: ['zip', 'rar', '7z', 'gz', 'tar'], mime: (m) => m.includes('zip') || m.includes('compressed') || m.includes('x-tar') },
+  { icon: 'mdi-file-document-outline', color: undefined, exts: ['txt', 'md', 'log'], mime: (m) => m.startsWith('text/') },
+];
+
 export function fileKind(mimeType: string, fileName: string): { icon: string; color: string | undefined } {
   const mime = mimeType.toLowerCase();
-  const ext = fileName.split('.').pop()?.toLowerCase() ?? '';
-  if (mime.startsWith('image/')) return { icon: 'mdi-file-image-outline', color: 'warning' };
-  if (mime === 'application/pdf' || ext === 'pdf') return { icon: 'mdi-file-pdf-box', color: 'error' };
-  if (mime.includes('sheet') || mime.includes('excel') || mime === 'text/csv' || ['xlsx', 'xls', 'csv', 'ods'].includes(ext)) return { icon: 'mdi-file-excel-outline', color: 'success' };
-  if (mime.includes('presentation') || mime.includes('powerpoint') || ['pptx', 'ppt', 'odp'].includes(ext)) return { icon: 'mdi-file-powerpoint-outline', color: 'secondary' };
-  if (mime.includes('word') || mime.includes('document') || ['docx', 'doc', 'odt'].includes(ext)) return { icon: 'mdi-file-word-outline', color: 'info' };
-  if (mime.includes('zip') || mime.includes('compressed') || ['zip', 'rar', '7z'].includes(ext)) return { icon: 'mdi-folder-zip-outline', color: undefined };
-  return { icon: 'mdi-file-outline', color: undefined };
+  const ext = fileName.includes('.') ? fileName.split('.').pop()!.toLowerCase() : '';
+  const found = FILE_KINDS.find((k) => k.exts.includes(ext)) ?? FILE_KINDS.find((k) => k.mime(mime));
+  return found ? { icon: found.icon, color: found.color } : { icon: 'mdi-file-outline', color: undefined };
 }
