@@ -3919,7 +3919,8 @@
       "add": "Ajouter une étiquette",
       "hint": "Choisissez-en une, ou saisissez un nouveau nom et appuyez sur Entrée pour la créer",
       "color": "Couleur",
-      "colorOption": "Couleur {color}"
+      "colorOption": "Couleur {color}",
+      "createLabel": "Créer"
     },
     "fields": {
       "title": "Champs personnalisés",

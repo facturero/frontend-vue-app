@@ -3919,7 +3919,8 @@
       "add": "Agregar etiqueta",
       "hint": "Elige una o escribe un nombre nuevo y pulsa Enter para crearla",
       "color": "Color",
-      "colorOption": "Color {color}"
+      "colorOption": "Color {color}",
+      "createLabel": "Crear"
     },
     "fields": {
       "title": "Campos personalizados",

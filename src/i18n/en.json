@@ -3919,7 +3919,8 @@
       "add": "Add tag",
       "hint": "Pick one, or type a new name and press Enter to create it",
       "color": "Color",
-      "colorOption": "Color {color}"
+      "colorOption": "Color {color}",
+      "createLabel": "Create"
     },
     "fields": {
       "title": "Custom fields",

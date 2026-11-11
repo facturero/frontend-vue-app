@@ -91,6 +91,9 @@ export const HEALTH_COLOR: Record<ProjectHealth, string> = { on_track: 'success'
 // ── Entregable 4 ──────────────────────────────────────────────────────────────
 export const PROJECT_COLORS: ProjectColor[] = ['primary', 'secondary', 'success', 'warning', 'error', 'info'];
 
+/** Colores para elegir al crear una etiqueta: sin `info`, que en el tema es casi el mismo azul que `primary` y no se distinguían. */
+export const TAG_COLORS: ProjectColor[] = PROJECT_COLORS.filter((c) => c !== 'info');
+
 /** Icono de cada tipo de registro del ERP al que se vincula una tarea. */
 export const LINK_ICON: Record<LinkEntity, string> = {
   customer: 'mdi-account-tie-outline',

@@ -2,7 +2,7 @@
 import { computed, ref, watch, mergeProps } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useProjectsStore } from '@/stores/projects';
-import { PROJECT_COLORS } from '@/utils/projects';
+import { TAG_COLORS } from '@/utils/projects';
 import type { ProjectColor, Tag } from '@/types/projects';
 import TagColorPicker from './TagColorPicker.vue';
 
@@ -23,7 +23,7 @@ const busy = ref(false);
 /** Color elegido para la etiqueta nueva; sin elegir, rota según cuántas hay (dos nuevas seguidas no salen iguales). */
 const pickedColor = ref<ProjectColor | null>(null);
 const newColor = computed<ProjectColor>({
-  get: () => pickedColor.value ?? PROJECT_COLORS[store.tags.length % PROJECT_COLORS.length]!,
+  get: () => pickedColor.value ?? TAG_COLORS[store.tags.length % TAG_COLORS.length]!,
   set: (c) => (pickedColor.value = c),
 });
 
@@ -128,16 +128,10 @@ async function remove(tagId: string): Promise<void> {
             </v-list-item>
           </template>
           <template #prepend-item>
-            <template v-if="canCreate && visible.length">
-              <v-list-item prepend-icon="mdi-plus" :title="t('projects.tags.create', { name: typed })" @click="create" />
-              <TagColorPicker v-model="newColor" />
-            </template>
+            <TagColorPicker v-if="canCreate && visible.length" v-model="newColor" :name="typed" @create="create" />
           </template>
           <template #no-data>
-            <template v-if="canCreate">
-              <v-list-item prepend-icon="mdi-plus" :title="t('projects.tags.create', { name: typed })" @click="create" />
-              <TagColorPicker v-model="newColor" />
-            </template>
+            <TagColorPicker v-if="canCreate" v-model="newColor" :name="typed" @create="create" />
             <v-list-item v-else :title="t('projects.tags.none')" disabled />
           </template>
         </v-autocomplete>
