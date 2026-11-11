@@ -38,8 +38,21 @@ const creating = ref(false);
 /** «Nuevo proyecto» abre primero las plantillas; «En blanco» pasa al formulario de siempre. */
 const choosing = ref(false);
 const searching = ref(false);
-/** «Administrar etiquetas» (permiso `project_tag:manage`). */
+/**
+ * «Administrar etiquetas» (permiso `project_tag:manage`). También se abre con `/projects?tags=1`, el destino de la acción de la
+ * búsqueda global (Ctrl+K), así se llega desde cualquier pantalla; al cerrarlo se quita `tags` de la dirección.
+ */
 const managingTags = ref(false);
+watch(
+  () => route.query.tags,
+  (v) => {
+    if (v && auth.can('project_tag:manage')) managingTags.value = true;
+  },
+  { immediate: true },
+);
+watch(managingTags, (open) => {
+  if (!open && route.query.tags) void router.replace({ query: { ...route.query, tags: undefined } });
+});
 
 const SORTS: SortKey[] = ['name', 'nextDue', 'progress', 'overdue'];
 const fromQuery = <T extends string>(key: string, allowed: readonly T[], fallback: T): T => {

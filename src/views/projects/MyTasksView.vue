@@ -8,6 +8,7 @@ import DueDateChip from '@/components/projects/DueDateChip.vue';
 import TaskCelebration from '@/components/projects/TaskCelebration.vue';
 import ShortcutsDialog from '@/components/projects/ShortcutsDialog.vue';
 import TaskDetailPanel from '@/components/projects/TaskDetailPanel.vue';
+import TagManagerDialog from '@/components/projects/TagManagerDialog.vue';
 import { useViewShortcuts } from '@/composable/useViewShortcuts';
 import { useCelebration } from '@/composable/useCelebration';
 import { useAppTour } from '@/composable/useAppTour';
@@ -24,6 +25,8 @@ import type { MyTask } from '@/types/projects';
 const { t } = useI18n();
 const { startTour } = useAppTour();
 const auth = useAuthStore();
+/** «Administrar etiquetas» desde el menú ⋯ (permiso `project_tag:manage`). */
+const managingTags = ref(false);
 const store = useProjectsStore();
 const celebration = useCelebration();
 
@@ -104,6 +107,7 @@ async function toggle(task: MyTask): Promise<void> {
           </template>
           <v-list min-width="300">
             <v-list-item prepend-icon="mdi-map-marker-path" :title="t('projects.tourAgain')" @click="startTour('projects')" />
+            <v-list-item v-if="auth.can('project_tag:manage')" prepend-icon="mdi-tag-multiple-outline" :title="t('projects.tags.manage')" @click="managingTags = true" />
             <v-list-item prepend-icon="mdi-keyboard-outline" :title="t('projects.shortcuts.title')" @click="helpOpen = true">
               <template #append><v-hotkey keys="shift+slash" /></template>
             </v-list-item>
@@ -202,6 +206,7 @@ async function toggle(task: MyTask): Promise<void> {
     </v-pull-to-refresh>
 
     <TaskDetailPanel />
+    <TagManagerDialog v-if="auth.can('project_tag:manage')" v-model="managingTags" />
     <TaskCelebration />
     <ShortcutsDialog v-model="helpOpen" />
   </v-container>

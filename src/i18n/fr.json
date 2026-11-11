@@ -3083,7 +3083,8 @@
       "newCustomer": "créer client ajouter contact enregistrer",
       "newProduct": "créer produit ajouter article service",
       "inviteEmployee": "inviter utilisateur ajouter employé courriel",
-      "newRole": "créer rôle permissions accès"
+      "newRole": "créer rôle permissions accès",
+      "manageTags": "étiquettes couleurs renommer supprimer étiquette"
     },
     "placeholderWithProjects": "Rechercher des écrans, actions, projets ou tâches…",
     "searching": "Recherche…"

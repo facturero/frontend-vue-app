@@ -3083,7 +3083,8 @@
       "newCustomer": "create customer add contact register",
       "newProduct": "create product add item service",
       "inviteEmployee": "invite user add employee email",
-      "newRole": "create role permissions access"
+      "newRole": "create role permissions access",
+      "manageTags": "tags labels colors rename delete tag"
     },
     "placeholderWithProjects": "Search pages, actions, projects or tasks…",
     "searching": "Searching…"

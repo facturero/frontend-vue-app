@@ -14,6 +14,7 @@ import ProjectCalendar from '@/components/projects/ProjectCalendar.vue';
 import ProjectOverview from '@/components/projects/ProjectOverview.vue';
 import ProjectTimeline from '@/components/projects/ProjectTimeline.vue';
 import ProjectFieldsDialog from '@/components/projects/ProjectFieldsDialog.vue';
+import TagManagerDialog from '@/components/projects/TagManagerDialog.vue';
 import ProjectFormDialog from '@/components/projects/ProjectFormDialog.vue';
 import ProjectTaskList from '@/components/projects/ProjectTaskList.vue';
 import ShareDialog from '@/components/projects/ShareDialog.vue';
@@ -53,6 +54,7 @@ const showCompleted = ref(false);
 const editing = ref(false);
 const sharing = ref(false);
 const managingFields = ref(false);
+const managingTags = ref(false);
 const managingRules = ref(false);
 const managingForms = ref(false);
 const duplicating = ref(false);
@@ -192,6 +194,7 @@ async function remove(): Promise<void> {
               <v-list-item prepend-icon="mdi-map-marker-path" :title="t('projects.tourAgain')" @click="startTour('projects')" />
               <v-list-item v-if="store.canManage" prepend-icon="mdi-pencil-outline" :title="t('projects.edit')" @click="editing = true" />
               <v-list-item prepend-icon="mdi-form-select" :title="t('projects.fields.title')" @click="managingFields = true" />
+              <v-list-item v-if="auth.can('project_tag:manage')" prepend-icon="mdi-tag-multiple-outline" :title="t('projects.tags.manage')" @click="managingTags = true" />
               <v-list-item prepend-icon="mdi-lightning-bolt-outline" :title="t('projects.rules.title')" @click="managingRules = true" />
               <v-list-item v-if="store.canEdit" prepend-icon="mdi-clipboard-text-outline" :title="t('projects.forms.title')" @click="managingForms = true" />
               <v-list-item v-if="auth.can('project:create')" prepend-icon="mdi-content-copy" :title="t('projects.duplicate.action')" @click="startDuplicate" />
@@ -251,6 +254,7 @@ async function remove(): Promise<void> {
     <ShortcutsDialog v-model="helpOpen" />
     <ProjectFormDialog v-model="editing" :project="project" />
     <ProjectFieldsDialog v-model="managingFields" />
+    <TagManagerDialog v-if="auth.can('project_tag:manage')" v-model="managingTags" />
     <ProjectRulesDialog v-model="managingRules" />
     <ProjectFormsDialog v-model="managingForms" />
 
