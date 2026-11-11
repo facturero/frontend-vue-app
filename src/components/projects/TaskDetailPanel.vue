@@ -88,12 +88,21 @@ function saveTitle(): void {
   void save({ title: value });
 }
 
-function saveDescription(): void {
+async function saveDescription(): Promise<void> {
   if (!task.value || readOnly.value) return;
   const current = task.value.descriptionDoc ?? docFromText(task.value.description);
   if (JSON.stringify(descriptionDoc.value) === JSON.stringify(current)) return;
   const empty = !descriptionDoc.value || JSON.stringify(descriptionDoc.value) === JSON.stringify({ type: 'doc', content: [{ type: 'paragraph' }] });
-  void save(empty ? { descriptionDoc: null, description: null } : { descriptionDoc: descriptionDoc.value });
+  await save(empty ? { descriptionDoc: null, description: null } : { descriptionDoc: descriptionDoc.value });
+}
+
+/**
+ * Imagen pegada en la descripción. Antes de subirla se guarda lo escrito: al adjuntar, la tarea se recarga y la descripción se
+ * vuelve a leer del servidor, así que el texto aún sin guardar se habría perdido.
+ */
+async function uploadDescriptionImage(file: File): Promise<string | null> {
+  await saveDescription();
+  return store.attachFile(file);
 }
 
 async function decide(decision: ApprovalDecision): Promise<void> {
@@ -192,6 +201,29 @@ async function addSubtask(): Promise<void> {
     subtaskInput.value?.focus();
   } catch {
     newSubtask.value = value;
+  }
+}
+
+/** Subtarea abierta en el menú de responsable (uno a la vez). */
+const assigningId = ref<string | null>(null);
+
+async function assignSubtask(sub: Task, userId: string | null): Promise<void> {
+  assigningId.value = null;
+  if ((sub.assigneeUserId ?? null) === userId) return;
+  try {
+    await store.updateTask(sub.id, sub.version, { assigneeUserId: userId });
+  } catch {
+    // El aviso lo deja el store.
+  }
+}
+
+async function removeSubtask(sub: Task): Promise<void> {
+  const ok = await confirm({ title: t('projects.task.deleteSubtaskTitle'), text: t('projects.task.deleteSubtaskText', { title: sub.title }), confirmText: t('common.delete'), destructive: true });
+  if (!ok) return;
+  try {
+    await store.deleteTask(sub.id);
+  } catch {
+    // El aviso lo deja el store.
   }
 }
 
@@ -473,6 +505,7 @@ const moveTargets = computed(() => {
             :placeholder="t('projects.task.descriptionPlaceholder')"
             :editable="!readOnly"
             :toolbar="!readOnly"
+            :upload-image="uploadDescriptionImage"
             @blur="saveDescription"
           />
         </div>
@@ -498,23 +531,59 @@ const moveTargets = computed(() => {
                   @click.stop="toggle(s)" /></template></v-tooltip>
               </template>
               <v-list-item-title :class="{ 'text-decoration-line-through text-medium-emphasis': s.completedAt }">{{ s.title }}</v-list-item-title>
+              <!-- Responsable y borrar desde la fila, sin abrir la subtarea (lo pidió un cliente: entrar a cada una era lento). -->
               <template #append>
-                <div class="d-flex align-center ga-2">
+                <div class="d-flex align-center ga-1" @click.stop>
                   <DueDateChip :due-on="s.dueOn" :completed="!!s.completedAt" />
-                  <UserAvatar v-if="s.assigneeUserId" :user-id="s.assigneeUserId" :size="22" />
+                  <v-menu v-if="!readOnly" :model-value="assigningId === s.id" :close-on-content-click="false" location="bottom end"
+                    @update:model-value="(open: boolean) => (assigningId = open ? s.id : null)">
+                    <template #activator="{ props: activator }">
+                      <v-btn v-bind="activator" v-tooltip:top="t('projects.task.assignSubtask')" icon size="small" variant="text"
+                        :aria-label="t('projects.task.assignSubtask')">
+                        <UserAvatar v-if="s.assigneeUserId" :user-id="s.assigneeUserId" :size="22" :tooltip="false" />
+                        <v-icon v-else icon="mdi-account-plus-outline" size="small" />
+                      </v-btn>
+                    </template>
+                    <v-card min-width="260" class="pa-2">
+                      <v-autocomplete
+                        :model-value="s.assigneeUserId"
+                        :items="people"
+                        :label="t('projects.task.assignee')"
+                        :placeholder="t('projects.task.unassigned')"
+                        clearable
+                        autofocus
+                        @update:model-value="(v: string | null) => assignSubtask(s, v)"
+                      />
+                    </v-card>
+                  </v-menu>
+                  <UserAvatar v-else-if="s.assigneeUserId" :user-id="s.assigneeUserId" :size="22" />
+                  <v-btn v-if="!readOnly" v-tooltip:top="t('projects.task.deleteSubtask')" icon="mdi-trash-can-outline" size="small"
+                    variant="text" :aria-label="t('projects.task.deleteSubtask')" @click="removeSubtask(s)" />
                 </div>
               </template>
             </v-list-item>
           </v-list>
+          <!-- El «+» es un botón de verdad: antes era solo un icono y la gente lo pulsaba esperando que pasara algo (solo Enter creaba). -->
           <v-text-field
             v-if="!readOnly"
             ref="subtaskInput"
             v-model="newSubtask"
             :placeholder="t('projects.task.addSubtask')"
-            prepend-inner-icon="mdi-plus"
             variant="plain"
             @keyup.enter="addSubtask"
-          />
+          >
+            <template #prepend-inner>
+              <v-btn
+                v-tooltip:top="t('projects.task.addSubtaskButton')"
+                icon="mdi-plus"
+                size="small"
+                variant="text"
+                :color="newSubtask.trim() ? 'primary' : undefined"
+                :aria-label="t('projects.task.addSubtaskButton')"
+                @click="newSubtask.trim() ? addSubtask() : subtaskInput?.focus()"
+              />
+            </template>
+          </v-text-field>
         </div>
 
         <TaskTime />

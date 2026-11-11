@@ -3647,7 +3647,23 @@
       "italic": "Italique",
       "strike": "Barré",
       "bulletList": "Liste à puces",
-      "orderedList": "Liste numérotée"
+      "orderedList": "Liste numérotée",
+      "code": "Code",
+      "quote": "Citation",
+      "link": "Lien",
+      "linkText": "Texte affiché",
+      "linkTextHint": "Ainsi l'adresse complète n'apparaît pas",
+      "linkUrl": "Adresse (URL)",
+      "linkInvalid": "Saisissez une adresse web ou un e-mail",
+      "unlink": "Retirer le lien",
+      "table": "Tableau",
+      "addRow": "Ajouter une ligne",
+      "addColumn": "Ajouter une colonne",
+      "deleteRow": "Supprimer la ligne",
+      "deleteColumn": "Supprimer la colonne",
+      "headerRow": "Ligne d'en-tête",
+      "deleteTable": "Supprimer le tableau",
+      "image": "Insérer une image (vous pouvez aussi la coller ou la déposer)"
     },
     "conversation": {
       "empty": "Pas encore de commentaires.",
@@ -3837,7 +3853,7 @@
       "description": "Description",
       "descriptionPlaceholder": "De quoi s'agit-il ?",
       "subtasks": "Sous-tâches",
-      "addSubtask": "Ajouter une sous-tâche",
+      "addSubtask": "Ajouter une sous-tâche et appuyer sur Entrée",
       "markComplete": "Marquer comme terminée",
       "completed": "Terminée",
       "unassigned": "Non assignée",
@@ -3853,7 +3869,12 @@
       "reorder": "Déplacer « {title} »",
       "reorderHint": "Glissez pour déplacer, ou utilisez ↑ ↓ au clavier",
       "movedTo": "« {title} » : position {position} sur {total} dans {section}",
-      "boardCardLabel": "{title}. Alt et flèches pour la déplacer"
+      "boardCardLabel": "{title}. Alt et flèches pour la déplacer",
+      "addSubtaskButton": "Ajouter la sous-tâche",
+      "assignSubtask": "Assigner",
+      "deleteSubtask": "Supprimer la sous-tâche",
+      "deleteSubtaskTitle": "Supprimer cette sous-tâche ?",
+      "deleteSubtaskText": "« {title} » sera supprimée avec ses commentaires et pièces jointes."
     },
     "detail": {
       "createdBy": "Créée par {who} le {when}"
@@ -3897,7 +3918,9 @@
       "create": "Créer « {name} »",
       "title": "Étiquettes",
       "add": "Ajouter une étiquette",
-      "hint": "Choisissez-en une, ou saisissez un nouveau nom et appuyez sur Entrée pour la créer"
+      "hint": "Choisissez-en une, ou saisissez un nouveau nom et appuyez sur Entrée pour la créer",
+      "color": "Couleur",
+      "colorOption": "Couleur {color}"
     },
     "fields": {
       "title": "Champs personnalisés",
@@ -4254,6 +4277,14 @@
         "role": "Votre rôle"
       }
     },
-    "tourAgain": "Revoir la visite des Projets"
+    "tourAgain": "Revoir la visite des Projets",
+    "colors": {
+      "primary": "bleu",
+      "secondary": "violet",
+      "success": "vert",
+      "warning": "orange",
+      "error": "rouge",
+      "info": "bleu clair"
+    }
   }
 }

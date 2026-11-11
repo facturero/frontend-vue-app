@@ -3647,7 +3647,23 @@
       "italic": "Italic",
       "strike": "Strikethrough",
       "bulletList": "Bulleted list",
-      "orderedList": "Numbered list"
+      "orderedList": "Numbered list",
+      "code": "Code",
+      "quote": "Quote",
+      "link": "Link",
+      "linkText": "Text to display",
+      "linkTextHint": "So the full address is not shown",
+      "linkUrl": "Address (URL)",
+      "linkInvalid": "Enter a web address or an email",
+      "unlink": "Remove link",
+      "table": "Table",
+      "addRow": "Add row",
+      "addColumn": "Add column",
+      "deleteRow": "Delete row",
+      "deleteColumn": "Delete column",
+      "headerRow": "Header row",
+      "deleteTable": "Delete table",
+      "image": "Insert image (you can also paste or drop it)"
     },
     "conversation": {
       "empty": "No comments yet.",
@@ -3837,7 +3853,7 @@
       "description": "Description",
       "descriptionPlaceholder": "What is this task about?",
       "subtasks": "Subtasks",
-      "addSubtask": "Add subtask",
+      "addSubtask": "Add a subtask and press Enter",
       "markComplete": "Mark complete",
       "completed": "Completed",
       "unassigned": "Unassigned",
@@ -3853,7 +3869,12 @@
       "reorder": "Move “{title}”",
       "reorderHint": "Drag to move, or use ↑ ↓ on the keyboard",
       "movedTo": "“{title}”: position {position} of {total} in {section}",
-      "boardCardLabel": "{title}. Alt and arrows to move it"
+      "boardCardLabel": "{title}. Alt and arrows to move it",
+      "addSubtaskButton": "Add subtask",
+      "assignSubtask": "Assign",
+      "deleteSubtask": "Delete subtask",
+      "deleteSubtaskTitle": "Delete this subtask?",
+      "deleteSubtaskText": "\"{title}\" will be deleted along with its comments and attachments."
     },
     "detail": {
       "createdBy": "Created by {who} on {when}"
@@ -3897,7 +3918,9 @@
       "create": "Create “{name}”",
       "title": "Tags",
       "add": "Add tag",
-      "hint": "Pick one, or type a new name and press Enter to create it"
+      "hint": "Pick one, or type a new name and press Enter to create it",
+      "color": "Color",
+      "colorOption": "Color {color}"
     },
     "fields": {
       "title": "Custom fields",
@@ -4254,6 +4277,14 @@
         "role": "Your role"
       }
     },
-    "tourAgain": "Show the Projects tour"
+    "tourAgain": "Show the Projects tour",
+    "colors": {
+      "primary": "blue",
+      "secondary": "purple",
+      "success": "green",
+      "warning": "orange",
+      "error": "red",
+      "info": "light blue"
+    }
   }
 }

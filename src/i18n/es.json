@@ -3647,7 +3647,23 @@
       "italic": "Cursiva",
       "strike": "Tachado",
       "bulletList": "Lista",
-      "orderedList": "Lista numerada"
+      "orderedList": "Lista numerada",
+      "code": "Código",
+      "quote": "Cita",
+      "link": "Enlace",
+      "linkText": "Texto que se muestra",
+      "linkTextHint": "Así no se ve la dirección completa",
+      "linkUrl": "Dirección (URL)",
+      "linkInvalid": "Escribe una dirección web o un correo",
+      "unlink": "Quitar enlace",
+      "table": "Tabla",
+      "addRow": "Agregar fila",
+      "addColumn": "Agregar columna",
+      "deleteRow": "Eliminar fila",
+      "deleteColumn": "Eliminar columna",
+      "headerRow": "Fila de encabezado",
+      "deleteTable": "Eliminar tabla",
+      "image": "Insertar imagen (también puedes pegarla o soltarla)"
     },
     "conversation": {
       "empty": "Aún no hay comentarios.",
@@ -3837,7 +3853,7 @@
       "description": "Descripción",
       "descriptionPlaceholder": "¿De qué se trata esta tarea?",
       "subtasks": "Subtareas",
-      "addSubtask": "Agregar subtarea",
+      "addSubtask": "Agregar subtarea y pulsar Enter",
       "markComplete": "Marcar como finalizada",
       "completed": "Finalizada",
       "unassigned": "Sin asignar",
@@ -3853,7 +3869,12 @@
       "reorder": "Mover «{title}»",
       "reorderHint": "Arrastra para mover, o usa ↑ ↓ con el teclado",
       "movedTo": "«{title}»: puesto {position} de {total} en {section}",
-      "boardCardLabel": "{title}. Alt y flechas para moverla"
+      "boardCardLabel": "{title}. Alt y flechas para moverla",
+      "addSubtaskButton": "Agregar subtarea",
+      "assignSubtask": "Asignar responsable",
+      "deleteSubtask": "Eliminar subtarea",
+      "deleteSubtaskTitle": "¿Eliminar esta subtarea?",
+      "deleteSubtaskText": "Se eliminará «{title}» con sus comentarios y adjuntos."
     },
     "detail": {
       "createdBy": "Creada por {who} el {when}"
@@ -3897,7 +3918,9 @@
       "create": "Crear «{name}»",
       "title": "Etiquetas",
       "add": "Agregar etiqueta",
-      "hint": "Elige una o escribe un nombre nuevo y pulsa Enter para crearla"
+      "hint": "Elige una o escribe un nombre nuevo y pulsa Enter para crearla",
+      "color": "Color",
+      "colorOption": "Color {color}"
     },
     "fields": {
       "title": "Campos personalizados",
@@ -4254,6 +4277,14 @@
         "role": "Tu rol"
       }
     },
-    "tourAgain": "Ver el recorrido de Proyectos"
+    "tourAgain": "Ver el recorrido de Proyectos",
+    "colors": {
+      "primary": "azul",
+      "secondary": "morado",
+      "success": "verde",
+      "warning": "naranja",
+      "error": "rojo",
+      "info": "celeste"
+    }
   }
 }

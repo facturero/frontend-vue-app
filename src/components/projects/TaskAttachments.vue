@@ -21,12 +21,20 @@ const dropped = ref<File[]>([]);
 
 const items = computed(() => store.detail?.attachments ?? []);
 
-function icon(a: TaskAttachment): string {
-  if (a.mimeType.startsWith('image/')) return 'mdi-file-image-outline';
-  if (a.mimeType === 'application/pdf') return 'mdi-file-pdf-box';
-  if (a.mimeType.includes('sheet') || a.mimeType.includes('excel') || a.mimeType === 'text/csv') return 'mdi-file-excel-outline';
-  if (a.mimeType.includes('word') || a.mimeType.includes('document')) return 'mdi-file-word-outline';
-  return 'mdi-file-outline';
+/**
+ * Icono y color por tipo, para reconocer el archivo de un vistazo (lo pidió un cliente): Excel verde, PDF rojo, Word azul, imagen
+ * naranja, presentación en el color secundario. Colores del tema, no hexadecimales.
+ */
+function kind(a: TaskAttachment): { icon: string; color: string | undefined } {
+  const mime = a.mimeType.toLowerCase();
+  const ext = a.fileName.split('.').pop()?.toLowerCase() ?? '';
+  if (mime.startsWith('image/')) return { icon: 'mdi-file-image-outline', color: 'warning' };
+  if (mime === 'application/pdf' || ext === 'pdf') return { icon: 'mdi-file-pdf-box', color: 'error' };
+  if (mime.includes('sheet') || mime.includes('excel') || mime === 'text/csv' || ['xlsx', 'xls', 'csv', 'ods'].includes(ext)) return { icon: 'mdi-file-excel-outline', color: 'success' };
+  if (mime.includes('presentation') || mime.includes('powerpoint') || ['pptx', 'ppt', 'odp'].includes(ext)) return { icon: 'mdi-file-powerpoint-outline', color: 'secondary' };
+  if (mime.includes('word') || mime.includes('document') || ['docx', 'doc', 'odt'].includes(ext)) return { icon: 'mdi-file-word-outline', color: 'info' };
+  if (mime.includes('zip') || mime.includes('compressed') || ['zip', 'rar', '7z'].includes(ext)) return { icon: 'mdi-folder-zip-outline', color: undefined };
+  return { icon: 'mdi-file-outline', color: undefined };
 }
 
 const size = (bytes: number) => formatBytes(bytes);
@@ -64,7 +72,10 @@ const canRemove = (a: TaskAttachment) => a.uploadedBy === auth.user?.id || !!sto
       @update:model-value="picked"
     />
     <v-list v-if="items.length" density="compact" class="pa-0">
-      <v-list-item v-for="a in items" :key="a.id" :prepend-icon="icon(a)" class="px-0" @click="openFile(a.documentId)">
+      <v-list-item v-for="a in items" :key="a.id" class="px-0" @click="openFile(a.documentId)">
+        <template #prepend>
+          <v-icon :icon="kind(a).icon" :color="kind(a).color" />
+        </template>
         <v-list-item-title class="text-body-medium">{{ a.fileName }}</v-list-item-title>
         <v-list-item-subtitle>{{ size(a.sizeBytes) }}</v-list-item-subtitle>
         <template #append>

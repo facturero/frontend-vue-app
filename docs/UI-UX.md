@@ -86,7 +86,7 @@ Excepciones aprobadas hoy:
 | Caja web (`/pos`) | HTML propio + `pos-kiosk.css` | debe verse igual que la caja de escritorio, con el tema del cliente (ver «La caja web…») |
 | Plano del restaurante | SVG propio | medidas reales, imán y deshacer (ver «El editor del plano…») |
 | Vista previa del tema del POS | `div` con estilos en línea | tiene que ser fiel a la caja, no al CRM (§9) |
-| Texto enriquecido (descripción y comentarios de tareas) | Tiptap (`@tiptap/*`) | Vuetify no tiene editor de texto con formato ni menciones |
+| Texto enriquecido (descripción y comentarios de tareas) | Tiptap (`@tiptap/*`, con tablas e imágenes) | Vuetify no tiene editor de texto con formato ni menciones. Las imágenes guardan el id del archivo, no la URL (caduca); solo se ofrece lo que acepta la lista blanca de `projects-service/src/domain/richtext.ts` |
 | Arrastrar y soltar (tablero, listas) | `vue-draggable-plus` | Vuetify no tiene arrastrar y soltar |
 | Recorrido guiado | `driver.js` | Vuetify no tiene tours (§8) |
 | Color del editor de tema del POS | `<input type="color">` | **por revisar**: se decidió cuando Vuetify no traía `v-color-picker`; hoy sí lo trae |

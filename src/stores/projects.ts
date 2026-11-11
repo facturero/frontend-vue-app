@@ -440,9 +440,14 @@ export const useProjectsStore = defineStore('projects', () => {
    * Sube el archivo a document-service (URL firmada, igual que las imágenes del catálogo) y lo registra en la tarea. El archivo queda
    * ligado a la tarea (`project_task`) para que document-service sepa de qué es.
    */
-  async function attachFile(file: File): Promise<void> {
-    if (!detail.value) return;
+  /**
+   * Sube un archivo y lo deja como adjunto de la tarea abierta. Devuelve su id en document-service: las imágenes pegadas en la
+   * descripción o en un comentario pasan por aquí (quedan también en Adjuntos, como en Asana) y el documento guarda ese id.
+   */
+  async function attachFile(file: File): Promise<string | null> {
+    if (!detail.value) return null;
     const taskId = detail.value.id;
+    let documentId: string | null = null;
     await write(async () => {
       const presigned = await fileApi.requestPresigned({
         resourceType: 'project_task',
@@ -457,6 +462,7 @@ export const useProjectsStore = defineStore('projects', () => {
       const digest = await crypto.subtle.digest('SHA-256', await file.arrayBuffer());
       const checksum = Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, '0')).join('');
       await fileApi.confirm(presigned.fileId, checksum);
+      documentId = presigned.fileId;
       return projectsApi.addAttachment(taskId, {
         documentId: presigned.fileId,
         fileName: file.name,
@@ -465,6 +471,7 @@ export const useProjectsStore = defineStore('projects', () => {
       });
     });
     await refreshDetail();
+    return documentId;
   }
 
   async function removeAttachment(attachmentId: string): Promise<void> {

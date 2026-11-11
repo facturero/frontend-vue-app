@@ -3,7 +3,8 @@ import { computed, ref, watch, mergeProps } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useProjectsStore } from '@/stores/projects';
 import { PROJECT_COLORS } from '@/utils/projects';
-import type { Tag } from '@/types/projects';
+import type { ProjectColor, Tag } from '@/types/projects';
+import TagColorPicker from './TagColorPicker.vue';
 
 /**
  * Etiquetas de la tarea. Son de toda la organización (como en Asana): se elige una de la lista o, si no existe, se crea con Enter o
@@ -19,10 +20,19 @@ const store = useProjectsStore();
 const menu = ref(false);
 const search = ref('');
 const busy = ref(false);
+/** Color elegido para la etiqueta nueva; sin elegir, rota según cuántas hay (dos nuevas seguidas no salen iguales). */
+const pickedColor = ref<ProjectColor | null>(null);
+const newColor = computed<ProjectColor>({
+  get: () => pickedColor.value ?? PROJECT_COLORS[store.tags.length % PROJECT_COLORS.length]!,
+  set: (c) => (pickedColor.value = c),
+});
 
 watch(menu, (open) => {
   if (open) void store.ensureTags();
-  else search.value = '';
+  else {
+    search.value = '';
+    pickedColor.value = null;
+  }
 });
 
 const current = computed(() => store.detail?.tags ?? []);
@@ -56,8 +66,7 @@ async function create(): Promise<void> {
   if (sameName.value) return add(sameName.value);
   busy.value = true;
   try {
-    // Color rotando por cuántas hay: así dos etiquetas nuevas seguidas no salen iguales.
-    const tag = await store.createTag(typed.value, PROJECT_COLORS[store.tags.length % PROJECT_COLORS.length]!);
+    const tag = await store.createTag(typed.value, newColor.value);
     busy.value = false;
     await add(tag);
   } catch {
@@ -119,10 +128,16 @@ async function remove(tagId: string): Promise<void> {
             </v-list-item>
           </template>
           <template #prepend-item>
-            <v-list-item v-if="canCreate && visible.length" prepend-icon="mdi-plus" :title="t('projects.tags.create', { name: typed })" @click="create" />
+            <template v-if="canCreate && visible.length">
+              <v-list-item prepend-icon="mdi-plus" :title="t('projects.tags.create', { name: typed })" @click="create" />
+              <TagColorPicker v-model="newColor" />
+            </template>
           </template>
           <template #no-data>
-            <v-list-item v-if="canCreate" prepend-icon="mdi-plus" :title="t('projects.tags.create', { name: typed })" @click="create" />
+            <template v-if="canCreate">
+              <v-list-item prepend-icon="mdi-plus" :title="t('projects.tags.create', { name: typed })" @click="create" />
+              <TagColorPicker v-model="newColor" />
+            </template>
             <v-list-item v-else :title="t('projects.tags.none')" disabled />
           </template>
         </v-autocomplete>
