@@ -17,6 +17,12 @@ import UserAvatar from './UserAvatar.vue';
  * Horas de la tarea (entregable 5), como el «tiempo estimado / tiempo real» de Asana: el estimado se edita aquí (alimenta la carga
  * de trabajo) y las horas se registran con el cronómetro o a mano. Quien ve la tarea ve sus horas; registrar lo hace su responsable o
  * un editor; borrar un registro, quien lo hizo.
+ *
+ * Con subtareas (lo pidió un cliente: «al agregar la hora no lo hacía en una subtarea, sino en general»):
+ *   - «Registrar en» elige dónde van el cronómetro y el registro manual: la tarea o una de sus subtareas. Antes iba siempre a la tarea
+ *     abierta, y desde la madre no había forma de cargar horas a una subtarea sin entrar en ella.
+ *   - El total suma lo de las subtareas (es el tiempo que llevó la tarea) y debajo va el desglose; cada registro dice en qué subtarea
+ *     se hizo.
  */
 const { t } = useI18n();
 const store = useProjectsStore();
@@ -28,7 +34,20 @@ const task = computed(() => store.detail);
 const tracking = computed(() => plugins.isActive(TIME_TRACKING_PLUGIN));
 /** El estimado sirve también a la carga de trabajo, aunque no se registren horas. */
 const showEstimate = computed(() => tracking.value || plugins.isActive('projects.resource_allocation'));
-const running = computed(() => !!task.value && timer.timer?.taskId === task.value.id);
+const subtasks = computed(() => task.value?.subtasks ?? []);
+/** Dónde se registra: la tarea o una de sus subtareas. Vuelve a la tarea al abrir otra. */
+const target = ref<string | null>(null);
+watch(() => task.value?.id, (id) => (target.value = id ?? null), { immediate: true });
+const targetOptions = computed(() =>
+  task.value ? [{ value: task.value.id, title: t('projects.time.thisTask') }, ...subtasks.value.map((s) => ({ value: s.id, title: s.title }))] : [],
+);
+/** El cronómetro corre en la tarea o en una de sus subtareas: en ambos casos se ve aquí, con el botón de detener. */
+const runningId = computed(() => {
+  const id = timer.timer?.taskId;
+  return id && (id === task.value?.id || subtasks.value.some((s) => s.id === id)) ? id : null;
+});
+const running = computed(() => !!runningId.value);
+const titleOf = (taskId: string) => (taskId === task.value?.id ? '' : (subtasks.value.find((s) => s.id === taskId)?.title ?? ''));
 const me = computed(() => auth.user?.id ?? '');
 onMounted(() => void timer.load());
 
@@ -82,7 +101,7 @@ async function log(): Promise<void> {
   saving.value = true;
   failure.value = null;
   try {
-    await projectsApi.logTime({ taskId: d.id, workedOn: workedOn.value, minutes: parsed.value, billable: billable.value, note: note.value.trim() || null });
+    await projectsApi.logTime({ taskId: target.value ?? d.id, workedOn: workedOn.value, minutes: parsed.value, billable: billable.value, note: note.value.trim() || null });
     duration.value = '';
     note.value = '';
     adding.value = false;
@@ -98,7 +117,7 @@ async function toggleTimer(): Promise<void> {
   const d = task.value;
   if (!d) return;
   if (running.value) await timer.stop();
-  else await timer.start(d.id);
+  else await timer.start(target.value ?? d.id);
   await refresh();
 }
 
@@ -121,6 +140,10 @@ const day = (iso: string) => formatDate(iso);
       <v-chip v-if="tracking" size="small" prepend-icon="mdi-timer-outline">
         {{ t('projects.time.actual') }}: {{ formatMinutes(task.actualMinutes) }}
       </v-chip>
+      <!-- Desglose cuando hay horas en subtareas: el total de arriba ya las suma. -->
+      <span v-if="tracking && task.subtasksMinutes > 0" class="text-body-small text-medium-emphasis">
+        {{ t('projects.time.breakdown', { own: formatMinutes(task.ownMinutes), subtasks: formatMinutes(task.subtasksMinutes) }) }}
+      </span>
       <v-spacer />
       <template v-if="tracking && task.canLogTime">
         <v-btn
@@ -136,6 +159,19 @@ const day = (iso: string) => formatDate(iso);
         <v-btn size="small" variant="text" prepend-icon="mdi-plus" @click="adding = !adding">{{ t('projects.time.log') }}</v-btn>
       </template>
     </div>
+
+    <!-- Con subtareas: a dónde van el cronómetro y el registro manual. -->
+    <v-select
+      v-if="tracking && task.canLogTime && subtasks.length"
+      v-model="target"
+      :items="targetOptions"
+      :label="t('projects.time.logOn')"
+      :disabled="running"
+      :hint="running ? t('projects.time.runningOn', { task: titleOf(runningId!) || t('projects.time.thisTask') }) : undefined"
+      :persistent-hint="running"
+      prepend-inner-icon="mdi-subdirectory-arrow-right"
+      class="mb-2"
+    />
 
     <v-text-field
       v-if="showEstimate"
@@ -175,7 +211,10 @@ const day = (iso: string) => formatDate(iso);
           {{ formatMinutes(e.minutes) }} · {{ day(e.workedOn) }}
           <v-icon v-if="e.source === 'timer'" icon="mdi-timer-outline" size="x-small" class="ml-1" />
         </v-list-item-title>
-        <v-list-item-subtitle v-if="e.note">{{ e.note }}</v-list-item-subtitle>
+        <v-list-item-subtitle v-if="e.note || titleOf(e.taskId)">
+          <span v-if="titleOf(e.taskId)" class="text-primary">{{ t('projects.time.inSubtask', { task: titleOf(e.taskId) }) }}</span>
+          <template v-if="e.note && titleOf(e.taskId)"> · </template>{{ e.note }}
+        </v-list-item-subtitle>
         <template #append>
           <v-chip v-if="!e.billable" size="x-small" class="mr-1">{{ t('projects.time.nonBillable') }}</v-chip>
           <v-btn v-if="e.userId === me" icon="mdi-close" variant="text" size="x-small" :aria-label="t('common.delete')" @click="remove(e.id)" />

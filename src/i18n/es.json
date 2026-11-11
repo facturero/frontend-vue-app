@@ -4055,7 +4055,12 @@
         "all": "Todas",
         "yes": "Solo facturables",
         "no": "Solo no facturables"
-      }
+      },
+      "thisTask": "Esta tarea",
+      "logOn": "Registrar en",
+      "runningOn": "El cronómetro corre en «{task}»: detenlo para cambiar",
+      "breakdown": "{own} en esta tarea · {subtasks} en subtareas",
+      "inSubtask": "En «{task}»"
     },
     "workload": {
       "title": "Carga de trabajo",

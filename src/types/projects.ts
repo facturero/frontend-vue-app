@@ -221,7 +221,8 @@ export interface TaskDetail extends Task {
   blockedBy: LinkedTask[];
   blocking: LinkedTask[];
   parent: { id: string; title: string } | null;
-  subtasks: Task[];
+  /** `actualMinutes`: horas registradas en cada subtarea. */
+  subtasks: Array<Task & { actualMinutes?: number }>;
   projects: Array<ProjectChip & { sectionId: string; sectionName: string | null }>;
   followers: string[];
   likedBy: string[];
@@ -232,8 +233,12 @@ export interface TaskDetail extends Task {
   canEdit: boolean;
   canComplete: boolean;
   canDecide: boolean;
+  /** Las de la tarea y las de sus subtareas (cada una con su `taskId`). */
   timeEntries: TimeEntry[];
+  /** Total: propias + subtareas (el tiempo que llevó la tarea entera). */
   actualMinutes: number;
+  ownMinutes: number;
+  subtasksMinutes: number;
   /** Registrar horas: el responsable o un editor. */
   canLogTime: boolean;
 }

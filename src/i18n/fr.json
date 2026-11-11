@@ -4055,7 +4055,12 @@
         "all": "Toutes",
         "yes": "Facturables uniquement",
         "no": "Non facturables uniquement"
-      }
+      },
+      "thisTask": "Cette tâche",
+      "logOn": "Enregistrer sur",
+      "runningOn": "Le chronomètre tourne sur « {task} » : arrêtez-le pour changer",
+      "breakdown": "{own} sur cette tâche · {subtasks} sur les sous-tâches",
+      "inSubtask": "Sur « {task} »"
     },
     "workload": {
       "title": "Charge de travail",

@@ -4055,7 +4055,12 @@
         "all": "All",
         "yes": "Billable only",
         "no": "Non-billable only"
-      }
+      },
+      "thisTask": "This task",
+      "logOn": "Log on",
+      "runningOn": "The timer is running on \"{task}\": stop it to change",
+      "breakdown": "{own} on this task · {subtasks} on subtasks",
+      "inSubtask": "On \"{task}\""
     },
     "workload": {
       "title": "Workload",

@@ -3,6 +3,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch, mergeProps 
 import { useConfirm } from '@/composable/useConfirm';
 import { useI18n } from 'vue-i18n';
 import { useDisplay } from 'vuetify';
+import { formatMinutes } from '@/utils/duration';
 import DateField from '@/components/ui/DateField.vue';
 import { useAuthStore } from '@/stores/auth';
 import { useProjectsStore } from '@/stores/projects';
@@ -645,6 +646,10 @@ const moveTargets = computed(() => {
               <!-- Responsable y borrar desde la fila, sin abrir la subtarea (lo pidió un cliente: entrar a cada una era lento). -->
               <template #append>
                 <div class="d-flex align-center ga-1" @click.stop>
+                  <!-- Horas registradas en la subtarea (el total de la tarea, en «Horas», ya las suma). -->
+                  <span v-if="s.actualMinutes" class="d-flex align-center ga-1 text-body-small text-medium-emphasis text-no-wrap">
+                    <v-icon icon="mdi-timer-outline" size="x-small" />{{ formatMinutes(s.actualMinutes) }}
+                  </span>
                   <DueDateChip :due-on="s.dueOn" :completed="!!s.completedAt" />
                   <v-menu v-if="!readOnly" :model-value="assigningId === s.id" :close-on-content-click="false" location="bottom end"
                     @update:model-value="(open: boolean) => (assigningId = open ? s.id : null)">
