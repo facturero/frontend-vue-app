@@ -682,6 +682,7 @@ const moveTargets = computed(() => {
             v-model="newSubtask"
             :placeholder="t('projects.task.addSubtask')"
             variant="plain"
+            class="subtask-add"
             @keyup.enter="addSubtask"
           >
             <template #prepend-inner>
@@ -711,6 +712,18 @@ const moveTargets = computed(() => {
 </template>
 
 <style scoped>
+/* «Agregar subtarea»: el campo `plain` reserva relleno arriba para una etiqueta flotante que aquí no hay, y su texto (32 px, pegado
+   arriba) quedaba más alto que el «+», centrado en los 40 px del botón. Sin ese relleno y con la altura del botón, quedan en línea. */
+.subtask-add :deep(.v-field__input),
+.subtask-add :deep(.v-field__prepend-inner) {
+  padding-top: 0;
+  padding-bottom: 0;
+  align-items: center;
+}
+.subtask-add :deep(.v-field__input) {
+  min-height: 40px;
+}
+
 /* Borde izquierdo del panel para agrandarlo: invisible hasta pasar el ratón; una línea de color al pasar o al arrastrar. Por encima
    del contenido (que se desplaza) y sin desplazarse con él. */
 .panel-resizer {
