@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { EditorContent, useEditor, VueNodeViewRenderer } from '@tiptap/vue-3';
 import { Node, mergeAttributes } from '@tiptap/core';
+import { NodeSelection } from '@tiptap/pm/state';
 import StarterKit from '@tiptap/starter-kit';
 import Mention from '@tiptap/extension-mention';
 import Link from '@tiptap/extension-link';
@@ -137,6 +138,9 @@ async function insertFiles(files: File[]): Promise<void> {
           ? { type: 'image', attrs: { documentId, alt: file.name } }
           : { type: 'file', attrs: { documentId, name: file.name, mimeType: file.type || 'application/octet-stream' } };
         e.chain().focus().insertContentAt(at, node).run();
+        // La imagen o la ficha recién puesta queda seleccionada, y lo siguiente que se escribía o pegaba la reemplazaba (pegar una tabla
+        // debajo de una captura borraba la captura). Se abre una línea debajo y el cursor pasa ahí.
+        if (e.state.selection instanceof NodeSelection) e.commands.createParagraphNear();
         at = e.state.selection.to;
       }
     } catch {
@@ -149,6 +153,16 @@ async function insertFiles(files: File[]): Promise<void> {
 
 function filesOf(list: FileList | null | undefined): File[] {
   return Array.from(list ?? []);
+}
+
+/** Archivos del portapapeles. Algunos programas solo los dan en `items` (como `kind: 'file'`) y dejan `files` vacío. */
+function clipboardFiles(data: DataTransfer | null | undefined): File[] {
+  const files = filesOf(data?.files);
+  if (files.length || !data?.items) return files;
+  return Array.from(data.items)
+    .filter((item) => item.kind === 'file')
+    .map((item) => item.getAsFile())
+    .filter((f): f is File => !!f);
 }
 
 const editor = useEditor({
@@ -206,14 +220,17 @@ const editor = useEditor({
       }
       return false;
     },
-    // Pegar una captura o soltar archivos los sube y los inserta. Si lo pegado trae además texto (celdas de Excel, un párrafo de Word),
-    // se pega el texto: esos programas ponen también una imagen de lo copiado en el portapapeles, y antes se subía esa imagen en vez
-    // de pegar la tabla.
+    // Pegar una captura, una imagen copiada o un archivo los sube y los inserta. La regla para decidir entre archivo y texto:
+    //   - Si lo copiado trae TEXTO escrito (celdas de Excel, un párrafo de Word), se pega el texto: esos programas ponen además una
+    //     imagen de lo copiado en el portapapeles, y subirla en vez de pegar la tabla era peor.
+    //   - Si no trae texto, se sube el archivo aunque venga con HTML: «Copiar imagen» del navegador pone la imagen Y un `<img src=…>`.
+    //     Antes cualquier HTML hacía descartar la imagen, y ese `<img>` tampoco se pegaba (solo se aceptan imágenes subidas al CRM):
+    //     pegar una imagen copiada no hacía nada.
     handlePaste: (_view, event) => {
       const data = event.clipboardData;
-      const files = filesOf(data?.files);
+      const files = clipboardFiles(data);
       if (!props.uploadFile || !files.length) return false;
-      if (data?.getData('text/html') || data?.getData('text/plain')) return false;
+      if ((data?.getData('text/plain') ?? '').trim()) return false;
       void insertFiles(files);
       return true;
     },
