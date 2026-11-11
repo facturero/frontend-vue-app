@@ -4306,6 +4306,11 @@
       "error": "rojo",
       "info": "celeste"
     },
-    "unlike": "Ya no me gusta"
+    "unlike": "Ya no me gusta",
+    "image": {
+      "view": "Ver imagen",
+      "title": "Imagen",
+      "openTab": "Abrir en otra pestaña"
+    }
   }
 }

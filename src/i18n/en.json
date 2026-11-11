@@ -4306,6 +4306,11 @@
       "error": "red",
       "info": "light blue"
     },
-    "unlike": "Unlike"
+    "unlike": "Unlike",
+    "image": {
+      "view": "View image",
+      "title": "Image",
+      "openTab": "Open in new tab"
+    }
   }
 }

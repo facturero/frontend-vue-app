@@ -4306,6 +4306,11 @@
       "error": "rouge",
       "info": "bleu clair"
     },
-    "unlike": "Je n'aime plus"
+    "unlike": "Je n'aime plus",
+    "image": {
+      "view": "Voir l'image",
+      "title": "Image",
+      "openTab": "Ouvrir dans un nouvel onglet"
+    }
   }
 }
