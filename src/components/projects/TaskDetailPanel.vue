@@ -29,6 +29,72 @@ const { t } = useI18n();
 const confirm = useConfirm();
 // En el teléfono el panel ocupa toda la pantalla (REGLAS-FRONT R-23): 360 px fijos dejaban una franja inútil.
 const { mobile, width: displayWidth } = useDisplay();
+
+// ── Ancho del panel ─────────────────────────────────────────────────────────
+// Se agranda arrastrando el borde izquierdo (lo pidió el dueño: 560 px quedaban cortos para descripciones con tablas). El ancho se
+// recuerda en este navegador; doble clic en el borde vuelve al normal. En el teléfono el panel ya ocupa toda la pantalla.
+const PANEL_WIDTH_KEY = 'crm:projects:panel-width';
+const PANEL_DEFAULT = 560;
+const PANEL_MIN = 420;
+/**
+ * Siempre deja 320 px libres a la izquierda: se ve la lista detrás y el borde de arrastre no queda debajo del menú lateral cuando este
+ * se despliega (256 px). Con 160 px el borde quedaba tapado por el menú y no se podía volver a agarrar para achicar el panel.
+ */
+const panelMax = computed(() => Math.max(PANEL_MIN, Math.min(1400, displayWidth.value - 320)));
+function readPanelWidth(): number {
+  try {
+    const n = Number(localStorage.getItem(PANEL_WIDTH_KEY));
+    return Number.isFinite(n) && n >= PANEL_MIN ? n : PANEL_DEFAULT;
+  } catch {
+    return PANEL_DEFAULT;
+  }
+}
+const panelWidth = ref(readPanelWidth());
+const shownWidth = computed(() => (mobile.value ? displayWidth.value : Math.min(panelWidth.value, panelMax.value)));
+const resizing = ref(false);
+
+function savePanelWidth(): void {
+  try {
+    localStorage.setItem(PANEL_WIDTH_KEY, String(Math.round(panelWidth.value)));
+  } catch {
+    // Sin almacenamiento (ventana privada): el ancho dura lo que la sesión.
+  }
+}
+
+function setPanelWidth(w: number): void {
+  panelWidth.value = Math.round(Math.min(panelMax.value, Math.max(PANEL_MIN, w)));
+}
+
+function startResize(event: PointerEvent): void {
+  if (mobile.value) return;
+  event.preventDefault();
+  resizing.value = true;
+  const move = (e: PointerEvent) => setPanelWidth(window.innerWidth - e.clientX);
+  const stop = () => {
+    resizing.value = false;
+    window.removeEventListener('pointermove', move);
+    window.removeEventListener('pointerup', stop);
+    savePanelWidth();
+  };
+  window.addEventListener('pointermove', move);
+  window.addEventListener('pointerup', stop);
+}
+
+/** Con el teclado (el borde es enfocable): ← agranda, → achica, Inicio vuelve al ancho normal. */
+function resizeByKey(event: KeyboardEvent): void {
+  const step = event.shiftKey ? 80 : 24;
+  if (event.key === 'ArrowLeft') setPanelWidth(panelWidth.value + step);
+  else if (event.key === 'ArrowRight') setPanelWidth(panelWidth.value - step);
+  else if (event.key === 'Home') setPanelWidth(PANEL_DEFAULT);
+  else return;
+  event.preventDefault();
+  savePanelWidth();
+}
+
+function resetPanelWidth(): void {
+  setPanelWidth(PANEL_DEFAULT);
+  savePanelWidth();
+}
 const store = useProjectsStore();
 const auth = useAuthStore();
 
@@ -269,7 +335,23 @@ const moveTargets = computed(() => {
 </script>
 
 <template>
-  <v-navigation-drawer v-model="open" location="right" temporary :width="mobile ? displayWidth : 560">
+  <v-navigation-drawer v-model="open" location="right" temporary :width="shownWidth" :class="{ 'panel-resizing': resizing }">
+    <!-- Borde para agrandar el panel arrastrando (o con ←/→ si está enfocado). Doble clic: ancho normal. -->
+    <div
+      v-if="!mobile"
+      class="panel-resizer"
+      role="separator"
+      aria-orientation="vertical"
+      tabindex="0"
+      :aria-label="t('projects.task.resizePanel')"
+      :aria-valuenow="shownWidth"
+      :aria-valuemin="PANEL_MIN"
+      :aria-valuemax="panelMax"
+      :title="t('projects.task.resizePanel')"
+      @pointerdown="startResize"
+      @dblclick="resetPanelWidth"
+      @keydown="resizeByKey"
+    />
     <template v-if="task">
       <div class="d-flex align-center flex-wrap ga-2 pa-4 border-b">
         <v-btn
@@ -283,37 +365,41 @@ const moveTargets = computed(() => {
           {{ task.completedAt ? t('projects.task.completed') : t('projects.task.markComplete') }}
         </v-btn>
         <v-spacer />
-        <v-btn
-          :prepend-icon="task.likedBy.includes(me) ? 'mdi-thumb-up' : 'mdi-thumb-up-outline'"
-          :color="task.likedBy.includes(me) ? 'primary' : undefined"
-          variant="text"
-          size="small"
-          :disabled="!task.canComment"
-          :aria-label="t('projects.like')"
-          @click="run(() => store.toggleTaskLike(me))"
-        >
-          {{ task.likedBy.length || '' }}
-        </v-btn>
-        <v-menu v-if="task.canEdit && !task.parentTaskId">
+        <!--
+          «Me gusta» y «Eliminar» van en el menú ⋯ (lo pidió el dueño): el encabezado queda con lo que se usa siempre —finalizar y
+          cerrar—. Los «me gusta» que ya tiene la tarea se ven en el propio menú.
+        -->
+        <v-menu v-if="task.canComment || task.canEdit">
           <template #activator="{ props: menu }">
             <v-btn v-bind="menu" icon="mdi-dots-horizontal" variant="text" size="small" :aria-label="t('projects.menu')" />
           </template>
           <v-list density="compact">
             <v-list-item
-              v-if="task.kind !== 'approval'"
+              v-if="task.canComment"
+              :prepend-icon="task.likedBy.includes(me) ? 'mdi-thumb-up' : 'mdi-thumb-up-outline'"
+              :base-color="task.likedBy.includes(me) ? 'primary' : undefined"
+              :title="task.likedBy.includes(me) ? t('projects.unlike') : t('projects.like')"
+              @click="run(() => store.toggleTaskLike(me))"
+            >
+              <template v-if="task.likedBy.length" #append>
+                <span class="text-body-small text-medium-emphasis">{{ task.likedBy.length }}</span>
+              </template>
+            </v-list-item>
+            <v-list-item
+              v-if="task.canEdit && !task.parentTaskId && task.kind !== 'approval'"
               prepend-icon="mdi-thumbs-up-down-outline"
               :title="t('projects.approval.makeApproval')"
               @click="run(() => store.setKind('approval'))"
             />
-            <v-list-item v-if="task.kind !== 'milestone'" prepend-icon="mdi-rhombus-outline" :title="t('projects.milestone.make')" @click="run(() => store.setKind('milestone'))" />
+            <v-list-item v-if="task.canEdit && !task.parentTaskId && task.kind !== 'milestone'" prepend-icon="mdi-rhombus-outline" :title="t('projects.milestone.make')" @click="run(() => store.setKind('milestone'))" />
             <v-list-item
-              v-if="task.kind !== 'task'"
+              v-if="task.canEdit && !task.parentTaskId && task.kind !== 'task'"
               prepend-icon="mdi-checkbox-marked-circle-outline"
               :title="t('projects.approval.makeTask')"
               @click="run(() => store.setKind('task'))"
             />
             <!-- Mover sin arrastrar (REGLAS-FRONT R-91): las demás secciones del proyecto abierto. -->
-            <template v-if="moveTargets.length">
+            <template v-if="task.canEdit && !task.parentTaskId && moveTargets.length">
               <v-divider />
               <v-list-subheader>{{ t('projects.task.moveTo') }}</v-list-subheader>
               <v-list-item
@@ -324,9 +410,12 @@ const moveTargets = computed(() => {
                 @click="run(() => store.moveTaskToSection(task!.id, sec.id))"
               />
             </template>
+            <template v-if="task.canEdit">
+              <v-divider />
+              <v-list-item prepend-icon="mdi-trash-can-outline" base-color="error" :title="t('projects.task.delete')" @click="remove" />
+            </template>
           </v-list>
         </v-menu>
-        <v-btn v-if="task.canEdit" icon="mdi-trash-can-outline" variant="text" size="small" :aria-label="t('common.delete')" @click="remove" />
         <v-btn icon="mdi-close" variant="text" size="small" :aria-label="t('common.close')" @click="store.closeTask()" />
       </div>
 
@@ -620,3 +709,41 @@ const moveTargets = computed(() => {
   </v-navigation-drawer>
 
 </template>
+
+<style scoped>
+/* Borde izquierdo del panel para agrandarlo: invisible hasta pasar el ratón; una línea de color al pasar o al arrastrar. Por encima
+   del contenido (que se desplaza) y sin desplazarse con él. */
+.panel-resizer {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -3px;
+  width: 8px;
+  cursor: col-resize;
+  z-index: 2;
+  touch-action: none;
+}
+.panel-resizer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 3px;
+  width: 2px;
+  background: transparent;
+  transition: background-color 0.15s;
+}
+.panel-resizer:hover::after,
+.panel-resizer:focus-visible::after,
+.panel-resizing .panel-resizer::after {
+  background: rgb(var(--v-theme-primary));
+}
+.panel-resizer:focus-visible {
+  outline: none;
+}
+/* Mientras se arrastra: sin la animación de ancho del panel (iba a tirones) ni selección de texto. */
+.panel-resizing {
+  transition: none !important;
+  user-select: none;
+}
+</style>

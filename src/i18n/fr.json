@@ -3877,7 +3877,9 @@
       "assignSubtask": "Assigner",
       "deleteSubtask": "Supprimer la sous-tâche",
       "deleteSubtaskTitle": "Supprimer cette sous-tâche ?",
-      "deleteSubtaskText": "« {title} » sera supprimée avec ses commentaires et pièces jointes."
+      "deleteSubtaskText": "« {title} » sera supprimée avec ses commentaires et pièces jointes.",
+      "delete": "Supprimer la tâche",
+      "resizePanel": "Faites glisser pour redimensionner (double-clic : largeur normale)"
     },
     "detail": {
       "createdBy": "Créée par {who} le {when}"
@@ -4303,6 +4305,7 @@
       "warning": "orange",
       "error": "rouge",
       "info": "bleu clair"
-    }
+    },
+    "unlike": "Je n'aime plus"
   }
 }

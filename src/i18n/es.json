@@ -3877,7 +3877,9 @@
       "assignSubtask": "Asignar responsable",
       "deleteSubtask": "Eliminar subtarea",
       "deleteSubtaskTitle": "¿Eliminar esta subtarea?",
-      "deleteSubtaskText": "Se eliminará «{title}» con sus comentarios y adjuntos."
+      "deleteSubtaskText": "Se eliminará «{title}» con sus comentarios y adjuntos.",
+      "delete": "Eliminar tarea",
+      "resizePanel": "Arrastra para cambiar el ancho (doble clic: ancho normal)"
     },
     "detail": {
       "createdBy": "Creada por {who} el {when}"
@@ -4303,6 +4305,7 @@
       "warning": "naranja",
       "error": "rojo",
       "info": "celeste"
-    }
+    },
+    "unlike": "Ya no me gusta"
   }
 }

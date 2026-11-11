@@ -3877,7 +3877,9 @@
       "assignSubtask": "Assign",
       "deleteSubtask": "Delete subtask",
       "deleteSubtaskTitle": "Delete this subtask?",
-      "deleteSubtaskText": "\"{title}\" will be deleted along with its comments and attachments."
+      "deleteSubtaskText": "\"{title}\" will be deleted along with its comments and attachments.",
+      "delete": "Delete task",
+      "resizePanel": "Drag to resize (double-click: default width)"
     },
     "detail": {
       "createdBy": "Created by {who} on {when}"
@@ -4303,6 +4305,7 @@
       "warning": "orange",
       "error": "red",
       "info": "light blue"
-    }
+    },
+    "unlike": "Unlike"
   }
 }
