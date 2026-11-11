@@ -9,14 +9,16 @@ import { formatRelative } from '@/utils/format';
 import { useAuthStore } from '@/stores/auth';
 import { useProjectsStore } from '@/stores/projects';
 import { displayName } from '@/utils/projects';
-import type { RichDoc, TaskComment } from '@/types/projects';
+import type { RichDoc, TaskActivity, TaskComment } from '@/types/projects';
 import RichTextEditor from './RichTextEditor.vue';
 import RichTextView from './RichTextView.vue';
 import UserAvatar from './UserAvatar.vue';
+import { useActivityText } from '@/composable/useActivityText';
 
 /**
- * Los comentarios de la tarea, en orden de fecha, con la caja para comentar al pie (Ctrl+Enter envía). El historial de cambios va
- * aparte, al final del panel (TaskActivity). Siempre visible: no se pliega.
+ * La conversación de la tarea, con dos pestañas como en Asana: «Comentarios» (solo comentarios) y «Todo» (los comentarios y el
+ * historial de cambios juntos, por fecha y hora). Caja para comentar al pie (Ctrl+Enter envía). La pestaña elegida se recuerda en el
+ * navegador. Antes el historial iba aparte, al final del panel, y no se veía qué pasó entre un comentario y otro.
  *
  * El borrador vive en el store, por tarea (`commentDrafts`): un clic fuera del panel lo cierra y, cuando el borrador era de este
  * componente, se perdía lo escrito. Los comentarios borrados dejan su hueco; editar o borrar un comentario lo hace su autor (el
@@ -42,6 +44,34 @@ const me = computed(() => auth.user?.id ?? '');
 const name = (id: string | null) => (id ? displayName(store.users.get(id)) || t('projects.share.unknownUser') : t('projects.activity.system'));
 const comments = computed<TaskComment[]>(() => [...(store.detail?.comments ?? [])].sort((a, b) => a.createdAt.localeCompare(b.createdAt)));
 const relative = (iso: string) => formatRelative(iso);
+const { describe } = useActivityText();
+
+// ── Pestañas: Comentarios | Todo ────────────────────────────────────────────
+type Tab = 'comments' | 'all';
+const TAB_KEY = 'crm:projects:conversation-tab';
+function readTab(): Tab {
+  try {
+    return localStorage.getItem(TAB_KEY) === 'all' ? 'all' : 'comments';
+  } catch {
+    return 'comments';
+  }
+}
+const tab = ref<Tab>(readTab());
+watch(tab, (v) => {
+  try {
+    localStorage.setItem(TAB_KEY, v);
+  } catch {
+    // Sin almacenamiento: la pestaña dura lo que la sesión.
+  }
+});
+
+type Entry = { kind: 'comment'; at: string; comment: TaskComment } | { kind: 'activity'; at: string; activity: TaskActivity };
+/** Lo que se ve en la pestaña elegida, de lo más antiguo a lo más reciente (lo último queda abajo, junto a la caja de comentar). */
+const entries = computed<Entry[]>(() => {
+  const list: Entry[] = comments.value.map((c) => ({ kind: 'comment', at: c.createdAt, comment: c }));
+  if (tab.value === 'all') for (const a of store.detail?.activity ?? []) list.push({ kind: 'activity', at: a.at, activity: a });
+  return list.sort((x, y) => x.at.localeCompare(y.at));
+});
 
 /**
  * «Resumir»: la IA lee comentarios e historial y devuelve en qué punto está la tarea, qué se decidió y qué falta. Solo tiene
@@ -118,7 +148,10 @@ defineExpose({
 <template>
   <div v-if="store.detail">
     <div class="d-flex align-center ga-2 mb-2">
-      <div class="text-body-large font-weight-medium">{{ t('projects.conversation.title') }} ({{ comments.length }})</div>
+      <v-tabs v-model="tab" density="compact" class="flex-grow-0">
+        <v-tab value="comments">{{ t('projects.conversation.title') }} ({{ comments.length }})</v-tab>
+        <v-tab value="all">{{ t('projects.conversation.all') }}</v-tab>
+      </v-tabs>
       <v-spacer />
       <v-btn v-if="canSummarize" variant="text" size="small" prepend-icon="mdi-creation" :loading="summarizing" @click="summarize">
         {{ t('projects.ai.summarize') }}
@@ -137,8 +170,14 @@ defineExpose({
     </v-alert>
 
       <div class="d-flex flex-column ga-2">
-        <div v-if="!comments.length" class="text-body-medium text-medium-emphasis">{{ t('projects.conversation.empty') }}</div>
-        <div v-for="c in comments" :key="c.id" class="d-flex ga-2">
+        <div v-if="!entries.length" class="text-body-medium text-medium-emphasis">{{ t('projects.conversation.empty') }}</div>
+        <template v-for="e in entries" :key="e.kind === 'comment' ? `c-${e.comment.id}` : `a-${e.activity.id}`">
+        <!-- Una línea del historial (pestaña «Todo»): compacta, para que la conversación siga mandando. -->
+        <div v-if="e.kind === 'activity'" class="d-flex align-center ga-2 text-body-small text-medium-emphasis activity-line">
+          <v-icon icon="mdi-history" size="x-small" />
+          <span><strong>{{ name(e.activity.actorUserId) }}</strong> {{ describe(e.activity) }} · {{ relative(e.at) }}</span>
+        </div>
+        <div v-else v-for="c in [e.comment]" :key="c.id" class="d-flex ga-2">
           <UserAvatar :user-id="c.authorUserId" :size="32" />
           <div class="flex-grow-1">
             <div class="d-flex align-center ga-2">
@@ -181,6 +220,7 @@ defineExpose({
             <RichTextView v-else :doc="c.bodyDoc" class="text-body-medium" />
           </div>
         </div>
+        </template>
       </div>
 
       <div v-if="store.detail.canComment" class="d-flex flex-column ga-2 mt-4">
@@ -194,3 +234,10 @@ defineExpose({
       </div>
   </div>
 </template>
+
+<style scoped>
+/* La línea del historial empieza donde el texto de un comentario (avatar de 32 px + separación): se lee como parte del hilo. */
+.activity-line {
+  padding-left: 40px;
+}
+</style>

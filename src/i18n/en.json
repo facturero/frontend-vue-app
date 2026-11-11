@@ -3673,12 +3673,12 @@
     "conversation": {
       "empty": "No comments yet.",
       "title": "Comments",
-      "showActivity": "Show activity",
       "edited": "edited",
       "deleted": "Comment deleted",
       "placeholder": "Write a comment… use {'@'} to mention someone",
       "hint": "Ctrl + Enter to send",
-      "send": "Comment"
+      "send": "Comment",
+      "all": "All activity"
     },
     "activity": {
       "showAll": "See all ({n})",

@@ -7,11 +7,13 @@
  *
  *   npm run lint:ui
  */
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { execSync } from 'node:child_process';
 
-const files = execSync('git ls-files src', { encoding: 'utf8' })
-  .trim().split('\n').filter((f) => f.endsWith('.vue'));
+// También los archivos nuevos que aún no están en git (antes no se revisaban hasta añadirlos) y sin los ya borrados del disco
+// (antes un componente borrado y sin confirmar hacía fallar al guardián con ENOENT).
+const files = execSync('git ls-files --cached --others --exclude-standard src', { encoding: 'utf8' })
+  .trim().split('\n').filter((f) => f.endsWith('.vue') && existsSync(f));
 
 /**
  * Props que ya son default global: repetirlas es cómo empieza la divergencia.

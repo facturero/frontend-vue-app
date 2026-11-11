@@ -12,7 +12,6 @@ import DueDateChip from './DueDateChip.vue';
 import RichTextEditor from './RichTextEditor.vue';
 import TaskAttachments from './TaskAttachments.vue';
 import SubtaskSuggestionsDialog from './SubtaskSuggestionsDialog.vue';
-import TaskActivity from './TaskActivity.vue';
 import TaskConversation from './TaskConversation.vue';
 import TaskFieldInput from './TaskFieldInput.vue';
 import TaskLinks from './TaskLinks.vue';
@@ -702,9 +701,7 @@ const moveTargets = computed(() => {
         <TaskTime />
         <TaskAttachments />
         <v-divider />
-        <TaskConversation ref="conversation" />
-        <!-- El historial va al final del panel, aparte de los comentarios (que tapaba); siempre visible, sin plegar. -->
-        <TaskActivity />
+        <TaskConversation ref="conversation" />
       </div>
     </template>
   </v-navigation-drawer>
