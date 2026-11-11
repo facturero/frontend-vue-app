@@ -25,6 +25,8 @@ const store = useProjectsStore();
 const auth = useAuthStore();
 const canManage = computed(() => auth.can('project_tag:manage'));
 const managing = ref(false);
+/** Etiqueta con su menú de color abierto. Con estado propio para cerrarlo al pasar a «Administrar etiquetas»: si no, el menú quedaba abierto detrás del diálogo. */
+const colorMenuFor = ref<string | null>(null);
 
 const menu = ref(false);
 const search = ref('');
@@ -103,6 +105,7 @@ async function recolor(tag: Tag, color: ProjectColor): Promise<void> {
 
 function openManager(): void {
   menu.value = false;
+  colorMenuFor.value = null;
   managing.value = true;
 }
 
@@ -120,7 +123,8 @@ async function remove(tagId: string): Promise<void> {
   <div class="d-flex align-center flex-wrap ga-2 py-2">
     <!-- Con «Administrar etiquetas», un clic en la etiqueta abre su color (cambia en todas las tareas que la llevan). -->
     <template v-for="tag in current" :key="tag.id">
-      <v-menu v-if="canManage" :close-on-content-click="false">
+      <v-menu v-if="canManage" :model-value="colorMenuFor === tag.id" :close-on-content-click="false"
+        @update:model-value="(open: boolean) => (colorMenuFor = open ? tag.id : null)">
         <template #activator="{ props: chipMenu }">
           <v-chip v-bind="chipMenu" size="small" :color="tag.color" :closable="props.canEdit" link @click:close="remove(tag.id)">
             {{ tag.name }}
@@ -129,7 +133,7 @@ async function remove(tagId: string): Promise<void> {
         <v-card class="pa-4">
           <div class="text-body-small text-medium-emphasis mb-2">{{ t('projects.tags.colorEverywhere') }}</div>
           <TagColorSwatches :model-value="tag.color" @update:model-value="(c: ProjectColor) => recolor(tag, c)" />
-          <v-btn variant="text" size="small" prepend-icon="mdi-tag-multiple-outline" class="mt-2" @click="managing = true">
+          <v-btn variant="text" size="small" prepend-icon="mdi-tag-multiple-outline" class="mt-2" @click="openManager">
             {{ t('projects.tags.manage') }}
           </v-btn>
         </v-card>
