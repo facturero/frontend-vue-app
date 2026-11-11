@@ -58,24 +58,40 @@ const newSubtask = ref('');
 const suggesting = ref(false);
 const subtaskInput = ref<{ focus: () => void } | null>(null);
 
+/**
+ * ¿Hay en el editor de la descripción algo escrito que aún no se guardó? Mientras lo haya, lo que llega del servidor (un aviso en
+ * tiempo real, la recarga tras adjuntar) no lo pisa. Antes sí: en producción, una imagen recién insertada desaparecía porque el aviso
+ * de «tarea cambiada» llegaba justo después y la descripción se volvía a leer del servidor.
+ */
+const descriptionDirty = ref(false);
+
+function onDescriptionInput(doc: RichDoc): void {
+  descriptionDoc.value = doc;
+  descriptionDirty.value = true;
+}
+
 watch(
-  () => [task.value?.id, task.value?.version],
-  () => {
+  () => [task.value?.id, task.value?.version] as const,
+  (now, before) => {
     title.value = task.value?.title ?? '';
-    descriptionDoc.value = task.value?.descriptionDoc ?? docFromText(task.value?.description ?? null);
+    const otherTask = !before || now[0] !== before[0];
+    if (otherTask) descriptionDirty.value = false;
+    if (!descriptionDirty.value) descriptionDoc.value = task.value?.descriptionDoc ?? docFromText(task.value?.description ?? null);
   },
   { immediate: true },
 );
 
 const people = computed(() => store.directory.map((u) => ({ value: u.id, title: displayName(u), subtitle: u.email })));
 
-async function save(patch: Parameters<typeof store.updateTask>[2]): Promise<void> {
+async function save(patch: Parameters<typeof store.updateTask>[2]): Promise<boolean> {
   const current = task.value;
-  if (!current) return;
+  if (!current) return false;
   try {
     await store.updateTask(current.id, current.version, patch);
+    return true;
   } catch {
     // El aviso ya lo deja el store (y recarga si fue un conflicto de versión).
+    return false;
   }
 }
 
@@ -91,9 +107,15 @@ function saveTitle(): void {
 async function saveDescription(): Promise<void> {
   if (!task.value || readOnly.value) return;
   const current = task.value.descriptionDoc ?? docFromText(task.value.description);
-  if (JSON.stringify(descriptionDoc.value) === JSON.stringify(current)) return;
-  const empty = !descriptionDoc.value || JSON.stringify(descriptionDoc.value) === JSON.stringify({ type: 'doc', content: [{ type: 'paragraph' }] });
-  await save(empty ? { descriptionDoc: null, description: null } : { descriptionDoc: descriptionDoc.value });
+  const sent = JSON.stringify(descriptionDoc.value);
+  if (sent === JSON.stringify(current)) {
+    descriptionDirty.value = false;
+    return;
+  }
+  const empty = !descriptionDoc.value || sent === JSON.stringify({ type: 'doc', content: [{ type: 'paragraph' }] });
+  const ok = await save(empty ? { descriptionDoc: null, description: null } : { descriptionDoc: descriptionDoc.value });
+  // Sigue «sin guardar» si falló o si se siguió escribiendo mientras se guardaba.
+  if (ok) descriptionDirty.value = JSON.stringify(descriptionDoc.value) !== sent;
 }
 
 /**
@@ -501,11 +523,12 @@ const moveTargets = computed(() => {
           <div class="text-body-medium text-medium-emphasis mb-1">{{ t('projects.task.description') }}</div>
           <RichTextEditor
             :key="task.id"
-            v-model="descriptionDoc"
+            :model-value="descriptionDoc"
             :placeholder="t('projects.task.descriptionPlaceholder')"
             :editable="!readOnly"
             :toolbar="!readOnly"
             :upload-image="uploadDescriptionImage"
+            @update:model-value="onDescriptionInput"
             @blur="saveDescription"
           />
         </div>

@@ -60,7 +60,10 @@ async function doRefresh(staleAccess: string | null): Promise<string> {
     if (current && current !== staleAccess) return current;
     const refreshToken = getRefreshToken();
     if (!refreshToken) throw new Error('sin refresh token');
-    const { data } = await axios.post(`${baseURL}/auth/refresh`, { refreshToken });
+    // `baseURL` como opción y no pegado a mano: en producción VITE_API_URL termina en «/» y `${baseURL}/auth/refresh` daba
+    // «//auth/refresh», que el gateway responde con 404. La renovación nunca llegó a auth-service y la sesión moría a los 15 minutos
+    // (lo que dura el access token). axios junta las barras igual que en el resto de llamadas.
+    const { data } = await axios.post('/auth/refresh', { refreshToken }, { baseURL });
     setTokens(data.accessToken, data.refreshToken);
     return data.accessToken;
   };
