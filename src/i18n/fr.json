@@ -3663,7 +3663,8 @@
       "deleteColumn": "Supprimer la colonne",
       "headerRow": "Ligne d'en-tête",
       "deleteTable": "Supprimer le tableau",
-      "image": "Insérer une image (vous pouvez aussi la coller ou la déposer)"
+      "attach": "Joindre un fichier (vous pouvez aussi le coller ou le déposer ici)",
+      "removeFile": "Retirer du texte (reste dans les pièces jointes)"
     },
     "conversation": {
       "empty": "Pas encore de commentaires.",
@@ -3734,10 +3735,8 @@
     },
     "attachments": {
       "title": "Pièces jointes",
-      "drop": "Déposez des fichiers ici",
       "add": "Joindre",
-      "remove": "Retirer la pièce jointe",
-      "empty": "Aucune pièce jointe."
+      "remove": "Retirer la pièce jointe"
     },
     "followers": {
       "title": "Abonnés",

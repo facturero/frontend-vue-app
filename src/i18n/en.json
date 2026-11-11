@@ -3663,7 +3663,8 @@
       "deleteColumn": "Delete column",
       "headerRow": "Header row",
       "deleteTable": "Delete table",
-      "image": "Insert image (you can also paste or drop it)"
+      "attach": "Attach a file (you can also paste or drop it here)",
+      "removeFile": "Remove from text (stays in Attachments)"
     },
     "conversation": {
       "empty": "No comments yet.",
@@ -3734,10 +3735,8 @@
     },
     "attachments": {
       "title": "Attachments",
-      "drop": "Drop files here",
       "add": "Attach",
-      "remove": "Remove attachment",
-      "empty": "No attachments."
+      "remove": "Remove attachment"
     },
     "followers": {
       "title": "Followers",

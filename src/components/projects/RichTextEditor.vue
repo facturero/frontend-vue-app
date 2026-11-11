@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { EditorContent, useEditor, VueNodeViewRenderer } from '@tiptap/vue-3';
+import { Node, mergeAttributes } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Mention from '@tiptap/extension-mention';
 import Link from '@tiptap/extension-link';
@@ -17,17 +18,20 @@ import { displayName } from '@/utils/projects';
 import type { DirectoryUser, RichDoc } from '@/types/projects';
 import UserAvatar from './UserAvatar.vue';
 import RichImageNode from './RichImageNode.vue';
+import RichFileNode from './RichFileNode.vue';
 
 /**
  * Editor de descripciones y comentarios (TipTap). Solo ofrece lo que el servidor acepta (lista blanca de `richtext.ts` en
- * projects-service): párrafos, listas, cita, código, negrita, cursiva, tachado, enlaces, @menciones, tablas e imágenes. Los títulos
+ * projects-service): párrafos, listas, cita, código, negrita, cursiva, tachado, enlaces, @menciones, tablas, imágenes y fichas de
+ * documentos. Los títulos
  * y las líneas horizontales de StarterKit se apagan: el servidor los rechazaría.
  *
  * @menciones: al escribir «@» aparece la lista de compañeros (directorio de auth-service); ↑/↓ para elegir, Enter o Tab para
  * insertar, Esc para cerrar. Ctrl+Enter (⌘+Enter) emite `submit`, como en Asana.
  *
- * Imágenes: con `uploadImage` (sube el archivo y devuelve su id en document-service) se pueden insertar con el botón, pegar o
- * soltar, y se ven en línea. Sin esa función no hay botón ni pegado de imágenes.
+ * Archivos: con `uploadFile` (sube el archivo y devuelve su id en document-service) se adjuntan con el clip, pegándolos o soltándolos
+ * sobre el texto. Una imagen se ve en línea; cualquier otro (Excel, PDF…) queda como una ficha donde estaba el cursor. Sustituye al
+ * recuadro «Suelta archivos aquí» de la tarea, que ocupaba mucho (lo pidió un cliente). Sin esa función no hay clip.
  */
 const props = withDefaults(
   defineProps<{
@@ -36,9 +40,9 @@ const props = withDefaults(
     editable?: boolean;
     autofocus?: boolean;
     toolbar?: boolean;
-    uploadImage?: (file: File) => Promise<string | null>;
+    uploadFile?: (file: File) => Promise<string | null>;
   }>(),
-  { placeholder: '', editable: true, autofocus: false, toolbar: true, uploadImage: undefined },
+  { placeholder: '', editable: true, autofocus: false, toolbar: true, uploadFile: undefined },
 );
 const emit = defineEmits<{ 'update:modelValue': [RichDoc]; submit: []; blur: [] }>();
 
@@ -90,34 +94,61 @@ const RichImage = Image.extend({
   },
 });
 
-const uploading = ref(0);
-const imageInput = ref<HTMLInputElement | null>(null);
+/** Ficha de un documento (Excel, PDF…) dentro del texto. Como la imagen, guarda el id del archivo; nombre y tipo solo para pintarla. */
+const RichFile = Node.create({
+  name: 'file',
+  group: 'block',
+  atom: true,
+  draggable: true,
+  addAttributes() {
+    return {
+      documentId: { default: null, parseHTML: (el: HTMLElement) => el.getAttribute('data-file-id'), renderHTML: (a: Record<string, unknown>) => ({ 'data-file-id': a.documentId }) },
+      name: { default: '', parseHTML: (el: HTMLElement) => el.getAttribute('data-file-name') ?? '', renderHTML: (a: Record<string, unknown>) => ({ 'data-file-name': a.name }) },
+      mimeType: { default: '', parseHTML: (el: HTMLElement) => el.getAttribute('data-file-type') ?? '', renderHTML: (a: Record<string, unknown>) => ({ 'data-file-type': a.mimeType }) },
+    };
+  },
+  parseHTML() {
+    return [{ tag: 'div[data-file-id]' }];
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['div', mergeAttributes(HTMLAttributes), String(HTMLAttributes['data-file-name'] ?? '')];
+  },
+  addNodeView() {
+    return VueNodeViewRenderer(RichFileNode);
+  },
+});
 
-async function insertImages(files: File[]): Promise<void> {
-  if (!props.uploadImage) return;
-  // Donde estaba el cursor al pedir la imagen. Mientras se sube, la tarea se guarda y se recarga, el contenido se vuelve a poner y el
+const uploading = ref(0);
+const fileInput = ref<HTMLInputElement | null>(null);
+
+async function insertFiles(files: File[]): Promise<void> {
+  if (!props.uploadFile) return;
+  // Donde estaba el cursor al pedir el archivo. Mientras se sube, la tarea se guarda y se recarga, el contenido se vuelve a poner y el
   // cursor saltaba al final (la imagen caía en la última celda de una tabla, por ejemplo).
   let at = editor.value?.state.selection.to ?? 0;
-  for (const file of files.filter((f) => f.type.startsWith('image/'))) {
+  for (const file of files) {
     uploading.value += 1;
     try {
-      const documentId = await props.uploadImage(file);
+      const documentId = await props.uploadFile(file);
       const e = editor.value;
       if (documentId && e) {
         at = Math.min(at, e.state.doc.content.size);
-        e.chain().focus().insertContentAt(at, { type: 'image', attrs: { documentId, alt: file.name } }).run();
+        const node = file.type.startsWith('image/')
+          ? { type: 'image', attrs: { documentId, alt: file.name } }
+          : { type: 'file', attrs: { documentId, name: file.name, mimeType: file.type || 'application/octet-stream' } };
+        e.chain().focus().insertContentAt(at, node).run();
         at = e.state.selection.to;
       }
     } catch {
-      // El aviso lo deja quien sube (el store); se sigue con las demás imágenes.
+      // El aviso lo deja quien sube (el store); se sigue con los demás archivos.
     } finally {
       uploading.value -= 1;
     }
   }
 }
 
-function imagesOf(list: FileList | null | undefined): File[] {
-  return Array.from(list ?? []).filter((f) => f.type.startsWith('image/'));
+function filesOf(list: FileList | null | undefined): File[] {
+  return Array.from(list ?? []);
 }
 
 const editor = useEditor({
@@ -129,6 +160,7 @@ const editor = useEditor({
     Link.configure({ openOnClick: false, autolink: true, protocols: ['http', 'https', 'mailto'], HTMLAttributes: { rel: 'noopener noreferrer', target: '_blank' } }),
     Placeholder.configure({ placeholder: () => props.placeholder }),
     RichImage.configure({ inline: false }),
+    RichFile,
     Table.configure({ resizable: false }),
     TableRow,
     TableHeader,
@@ -174,17 +206,21 @@ const editor = useEditor({
       }
       return false;
     },
-    // Pegar o soltar una captura la sube y la inserta en línea (si este editor admite imágenes).
+    // Pegar una captura o soltar archivos los sube y los inserta. Si lo pegado trae además texto (celdas de Excel, un párrafo de Word),
+    // se pega el texto: esos programas ponen también una imagen de lo copiado en el portapapeles, y antes se subía esa imagen en vez
+    // de pegar la tabla.
     handlePaste: (_view, event) => {
-      const files = imagesOf(event.clipboardData?.files);
-      if (!props.uploadImage || !files.length) return false;
-      void insertImages(files);
+      const data = event.clipboardData;
+      const files = filesOf(data?.files);
+      if (!props.uploadFile || !files.length) return false;
+      if (data?.getData('text/html') || data?.getData('text/plain')) return false;
+      void insertFiles(files);
       return true;
     },
     handleDrop: (_view, event) => {
-      const files = imagesOf((event as DragEvent).dataTransfer?.files);
-      if (!props.uploadImage || !files.length) return false;
-      void insertImages(files);
+      const files = filesOf((event as DragEvent).dataTransfer?.files);
+      if (!props.uploadFile || !files.length) return false;
+      void insertFiles(files);
       return true;
     },
   },
@@ -296,9 +332,9 @@ function tableCmd(cmd: TableCmd): void {
   editor.value?.chain().focus()[cmd]().run();
 }
 
-function pickImages(event: Event): void {
+function pickFiles(event: Event): void {
   const input = event.target as HTMLInputElement;
-  void insertImages(imagesOf(input.files));
+  void insertFiles(filesOf(input.files));
   input.value = '';
 }
 
@@ -377,18 +413,18 @@ onBeforeUnmount(() => editor.value?.destroy());
         @click="insertTable"
       />
 
-      <template v-if="uploadImage">
+      <template v-if="uploadFile">
         <v-btn
-          v-tooltip:top="t('projects.editor.image')"
-          icon="mdi-image-plus-outline"
+          v-tooltip:top="t('projects.editor.attach')"
+          icon="mdi-paperclip"
           size="x-small"
           variant="text"
           :loading="uploading > 0"
-          :aria-label="t('projects.editor.image')"
+          :aria-label="t('projects.editor.attach')"
           @mousedown.prevent
-          @click="imageInput?.click()"
+          @click="fileInput?.click()"
         />
-        <input ref="imageInput" type="file" accept="image/*" multiple hidden @change="pickImages" />
+        <input ref="fileInput" type="file" multiple hidden @change="pickFiles" />
       </template>
     </div>
     <EditorContent :editor="editor" />

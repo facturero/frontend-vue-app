@@ -119,10 +119,10 @@ async function saveDescription(): Promise<void> {
 }
 
 /**
- * Imagen pegada en la descripción. Antes de subirla se guarda lo escrito: al adjuntar, la tarea se recarga y la descripción se
- * vuelve a leer del servidor, así que el texto aún sin guardar se habría perdido.
+ * Archivo adjuntado desde la descripción (imagen o documento). Antes de subirlo se guarda lo escrito: al adjuntar, la tarea se recarga
+ * y la descripción se vuelve a leer del servidor.
  */
-async function uploadDescriptionImage(file: File): Promise<string | null> {
+async function uploadDescriptionFile(file: File): Promise<string | null> {
   await saveDescription();
   return store.attachFile(file);
 }
@@ -527,7 +527,7 @@ const moveTargets = computed(() => {
             :placeholder="t('projects.task.descriptionPlaceholder')"
             :editable="!readOnly"
             :toolbar="!readOnly"
-            :upload-image="uploadDescriptionImage"
+            :upload-file="uploadDescriptionFile"
             @update:model-value="onDescriptionInput"
             @blur="saveDescription"
           />

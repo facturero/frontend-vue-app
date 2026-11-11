@@ -172,7 +172,7 @@ defineExpose({
             </div>
             <div v-if="c.deleted" class="text-body-medium text-medium-emphasis font-italic">{{ t('projects.conversation.deleted') }}</div>
             <div v-else-if="editingId === c.id" class="d-flex flex-column ga-2">
-              <RichTextEditor v-model="editDraft" :upload-image="store.attachFile" autofocus @submit="saveEdit" />
+              <RichTextEditor v-model="editDraft" :upload-file="store.attachFile" autofocus @submit="saveEdit" />
               <div class="d-flex ga-2 justify-end">
                 <v-btn variant="text" size="small" @click="editingId = null">{{ t('common.cancel') }}</v-btn>
                 <v-btn color="primary" size="small" @click="saveEdit">{{ t('common.save') }}</v-btn>
@@ -184,8 +184,8 @@ defineExpose({
       </div>
 
       <div v-if="store.detail.canComment" class="d-flex flex-column ga-2 mt-4">
-        <!-- Misma barra que la descripción (formato, enlaces con texto, tablas, imágenes): el cliente la pidió también al comentar. -->
-        <RichTextEditor ref="composer" v-model="draft" :placeholder="t('projects.conversation.placeholder')" :upload-image="store.attachFile" @submit="send" />
+        <!-- Misma barra que la descripción (formato, enlaces con texto, tablas, archivos): el cliente la pidió también al comentar. -->
+        <RichTextEditor ref="composer" v-model="draft" :placeholder="t('projects.conversation.placeholder')" :upload-file="store.attachFile" @submit="send" />
         <div class="d-flex align-center ga-2">
           <span class="text-body-small text-medium-emphasis">{{ t('projects.conversation.hint') }}</span>
           <v-spacer />

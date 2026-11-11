@@ -3663,7 +3663,8 @@
       "deleteColumn": "Eliminar columna",
       "headerRow": "Fila de encabezado",
       "deleteTable": "Eliminar tabla",
-      "image": "Insertar imagen (también puedes pegarla o soltarla)"
+      "attach": "Adjuntar archivo (también puedes pegarlo o soltarlo aquí)",
+      "removeFile": "Quitar del texto (sigue en Adjuntos)"
     },
     "conversation": {
       "empty": "Aún no hay comentarios.",
@@ -3734,10 +3735,8 @@
     },
     "attachments": {
       "title": "Adjuntos",
-      "drop": "Suelta archivos aquí",
       "add": "Adjuntar",
-      "remove": "Quitar adjunto",
-      "empty": "Sin adjuntos."
+      "remove": "Quitar adjunto"
     },
     "followers": {
       "title": "Seguidores",

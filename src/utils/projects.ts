@@ -142,3 +142,20 @@ export function fieldValueText(field: CustomField, value: FieldValue | null | un
       return String(value);
   }
 }
+
+/**
+ * Icono y color de un archivo por su tipo, para reconocerlo de un vistazo (lo pidió un cliente): Excel verde, PDF rojo, Word azul,
+ * imagen naranja, presentación en el color secundario. Colores del tema, no hexadecimales. Lo usan la lista de adjuntos y la ficha
+ * de archivo dentro de la descripción y los comentarios.
+ */
+export function fileKind(mimeType: string, fileName: string): { icon: string; color: string | undefined } {
+  const mime = mimeType.toLowerCase();
+  const ext = fileName.split('.').pop()?.toLowerCase() ?? '';
+  if (mime.startsWith('image/')) return { icon: 'mdi-file-image-outline', color: 'warning' };
+  if (mime === 'application/pdf' || ext === 'pdf') return { icon: 'mdi-file-pdf-box', color: 'error' };
+  if (mime.includes('sheet') || mime.includes('excel') || mime === 'text/csv' || ['xlsx', 'xls', 'csv', 'ods'].includes(ext)) return { icon: 'mdi-file-excel-outline', color: 'success' };
+  if (mime.includes('presentation') || mime.includes('powerpoint') || ['pptx', 'ppt', 'odp'].includes(ext)) return { icon: 'mdi-file-powerpoint-outline', color: 'secondary' };
+  if (mime.includes('word') || mime.includes('document') || ['docx', 'doc', 'odt'].includes(ext)) return { icon: 'mdi-file-word-outline', color: 'info' };
+  if (mime.includes('zip') || mime.includes('compressed') || ['zip', 'rar', '7z'].includes(ext)) return { icon: 'mdi-folder-zip-outline', color: undefined };
+  return { icon: 'mdi-file-outline', color: undefined };
+}

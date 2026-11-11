@@ -2,6 +2,7 @@
 import { defineComponent, h, type PropType, type VNodeChild } from 'vue';
 import type { RichDoc } from '@/types/projects';
 import RichImage from './RichImage.vue';
+import RichFile from './RichFile.vue';
 
 /**
  * Muestra un documento de TipTap ya guardado SIN `v-html` ni el editor: recorre el documento y arma los elementos con Vue, así el
@@ -74,6 +75,10 @@ function render(node: RichDoc, key: number): VNodeChild {
     }
     case 'image':
       return typeof node.attrs?.documentId === 'string' ? h(RichImage, { key, documentId: node.attrs.documentId, alt: String(node.attrs.alt ?? '') }) : null;
+    case 'file':
+      return typeof node.attrs?.documentId === 'string'
+        ? h(RichFile, { key, documentId: node.attrs.documentId, name: String(node.attrs.name ?? ''), mimeType: String(node.attrs.mimeType ?? '') })
+        : null;
     case 'codeBlock':
       return h('pre', { key, class: 'bg-surface-variant pa-2 rounded mb-1 text-body-medium' }, kids());
     default:
