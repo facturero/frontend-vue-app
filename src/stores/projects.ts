@@ -555,6 +555,27 @@ export const useProjectsStore = defineStore('projects', () => {
     return tag;
   }
 
+  /** Las tarjetas y el detalle abiertos que llevan esa etiqueta, para reflejar un cambio de nombre o color o su borrado al instante. */
+  function eachTagged(tagId: string, fn: (list: Tag[]) => Tag[]): void {
+    for (const card of Object.values(columns.value).flat()) if (card.tags.some((t) => t.id === tagId)) card.tags = fn(card.tags);
+    if (detail.value?.tags.some((t) => t.id === tagId)) detail.value.tags = fn(detail.value.tags);
+  }
+
+  /** Renombrar o cambiar el color (pide «Administrar etiquetas»; el servidor lo comprueba). */
+  async function updateTag(tagId: string, patch: { name?: string; color?: ProjectColor }): Promise<Tag> {
+    const tag = await write(() => projectsApi.updateTag(tagId, patch));
+    tags.value = tags.value.map((t) => (t.id === tagId ? { ...t, ...tag } : t)).sort((a, b) => a.name.localeCompare(b.name));
+    eachTagged(tagId, (list) => list.map((t) => (t.id === tagId ? { ...t, ...tag } : t)));
+    return tag;
+  }
+
+  /** La borra de la organización y de todas sus tareas. */
+  async function deleteTag(tagId: string): Promise<void> {
+    await write(() => projectsApi.deleteTag(tagId));
+    tags.value = tags.value.filter((t) => t.id !== tagId);
+    eachTagged(tagId, (list) => list.filter((t) => t.id !== tagId));
+  }
+
   async function setTaskTag(taskId: string, tagId: string, on: boolean): Promise<void> {
     const items = await write(() => projectsApi.setTaskTag(taskId, tagId, on));
     if (detail.value?.id === taskId) detail.value.tags = items;
@@ -735,6 +756,8 @@ export const useProjectsStore = defineStore('projects', () => {
     tags,
     ensureTags,
     createTag,
+    updateTag,
+    deleteTag,
     setTaskTag,
     addLink,
     removeLink,

@@ -634,7 +634,9 @@
       "projects_rule_applied": "Regla aplicada a una tarea",
       "projects_form_saved": "Formulario de solicitud guardado",
       "projects_form_deleted": "Formulario de solicitud borrado",
-      "projects_form_submitted": "Solicitud recibida por formulario"
+      "projects_form_submitted": "Solicitud recibida por formulario",
+      "projects_tag_updated": "Etiqueta cambiada",
+      "projects_tag_deleted": "Etiqueta eliminada"
     },
     "filters": {
       "title": "Filtros",
@@ -3920,7 +3922,21 @@
       "hint": "Elige una o escribe un nombre nuevo y pulsa Enter para crearla",
       "color": "Color",
       "colorOption": "Color {color}",
-      "createLabel": "Crear"
+      "createLabel": "Crear",
+      "manage": "Administrar etiquetas",
+      "manageTitle": "Administrar etiquetas",
+      "manageHint": "Las etiquetas son de toda la organización: un cambio de nombre o color se ve en todas las tareas que la llevan.",
+      "hintPickOnly": "Elige una etiqueta existente",
+      "noPermission": "No existe «{name}». Pide a quien administra las etiquetas que la cree.",
+      "colorEverywhere": "Color (cambia en todas las tareas)",
+      "name": "Nombre",
+      "searchLabel": "Buscar etiqueta",
+      "empty": "Aún no hay etiquetas.",
+      "usage": "Sin uso | En 1 tarea | En {count} tareas",
+      "delete": "Eliminar la etiqueta {name}",
+      "deleteTitle": "¿Eliminar «{name}»?",
+      "deleteText": "Se quitará de 1 tarea. No se puede deshacer. | Se quitará de {count} tareas. No se puede deshacer.",
+      "deleteUnused": "No está en ninguna tarea."
     },
     "fields": {
       "title": "Campos personalizados",

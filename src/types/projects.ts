@@ -121,6 +121,8 @@ export interface Tag {
   id: string;
   name: string;
   color: ProjectColor;
+  /** En cuántas tareas está (solo en la lista de la organización, `GET /projects/tags`). */
+  taskCount?: number;
 }
 
 export type FieldType = 'text' | 'number' | 'select' | 'date' | 'person';

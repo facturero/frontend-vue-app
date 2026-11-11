@@ -131,6 +131,8 @@ export const projectsApi = {
 
   tags: () => http.get<{ items: Tag[] }>(`${base}/tags`).then((r) => r.data.items),
   createTag: (name: string, color?: ProjectColor) => http.post<Tag>(`${base}/tags`, { name, color }).then((r) => r.data),
+  updateTag: (id: string, patch: { name?: string; color?: ProjectColor }) => http.patch<Tag>(`${base}/tags/${id}`, patch).then((r) => r.data),
+  deleteTag: (id: string) => http.delete<{ taskCount: number }>(`${base}/tags/${id}`).then((r) => r.data),
   setTaskTag: (taskId: string, tagId: string, on: boolean) =>
     (on ? http.post<{ items: Tag[] }>(`${base}/tasks/${taskId}/tags`, { tagId }) : http.delete<{ items: Tag[] }>(`${base}/tasks/${taskId}/tags/${tagId}`)).then((r) => r.data.items),
 

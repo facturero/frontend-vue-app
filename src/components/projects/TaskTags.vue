@@ -1,14 +1,20 @@
 <script setup lang="ts">
 import { computed, ref, watch, mergeProps } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useAuthStore } from '@/stores/auth';
 import { useProjectsStore } from '@/stores/projects';
 import { TAG_COLORS } from '@/utils/projects';
 import type { ProjectColor, Tag } from '@/types/projects';
 import TagColorPicker from './TagColorPicker.vue';
+import TagColorSwatches from './TagColorSwatches.vue';
+import TagManagerDialog from './TagManagerDialog.vue';
 
 /**
  * Etiquetas de la tarea. Son de toda la organización (como en Asana): se elige una de la lista o, si no existe, se crea con Enter o
  * con «Crear "…"». Si ya hay una que se llama igual, sin importar mayúsculas, se usa esa y no se duplica.
+ *
+ * Crear, cambiar el color (clic en una etiqueta) y «Administrar etiquetas» solo salen con el permiso `project_tag:manage`: son de toda
+ * la organización. Sin él se eligen las que ya existen. El servidor lo vuelve a exigir.
  *
  * Es un `v-autocomplete` y no un `v-combobox` a propósito: el combobox confirma lo escrito al salir del campo, y un clic en otro
  * botón (o en otra parte del panel) creaba la etiqueta a medio escribir. Aquí lo escrito solo es búsqueda hasta que se pide crearla.
@@ -16,6 +22,9 @@ import TagColorPicker from './TagColorPicker.vue';
 const props = defineProps<{ canEdit: boolean }>();
 const { t } = useI18n();
 const store = useProjectsStore();
+const auth = useAuthStore();
+const canManage = computed(() => auth.can('project_tag:manage'));
+const managing = ref(false);
 
 const menu = ref(false);
 const search = ref('');
@@ -40,8 +49,8 @@ const candidates = computed(() => store.tags.filter((tag) => !current.value.some
 const typed = computed(() => search.value.trim());
 /** Una etiqueta con ese nombre exacto (sin importar mayúsculas), en la organización. */
 const sameName = computed(() => store.tags.find((x) => x.name.toLowerCase() === typed.value.toLowerCase()));
-/** «Crear "…"» solo si lo escrito no es ya una etiqueta. */
-const canCreate = computed(() => !!typed.value && !sameName.value);
+/** «Crear "…"» solo si lo escrito no es ya una etiqueta y se pueden administrar las etiquetas. */
+const canCreate = computed(() => canManage.value && !!typed.value && !sameName.value);
 const visible = computed(() => {
   const q = typed.value.toLowerCase();
   return q ? candidates.value.filter((tag) => tag.name.toLowerCase().includes(q)) : candidates.value;
@@ -63,6 +72,7 @@ async function add(tag: Tag): Promise<void> {
 
 async function create(): Promise<void> {
   if (!typed.value || busy.value) return;
+  if (!sameName.value && !canManage.value) return;
   if (sameName.value) return add(sameName.value);
   busy.value = true;
   try {
@@ -82,6 +92,20 @@ function onEnter(): void {
   if (!visible.value.length) void create();
 }
 
+async function recolor(tag: Tag, color: ProjectColor): Promise<void> {
+  if (color === tag.color) return;
+  try {
+    await store.updateTag(tag.id, { color });
+  } catch {
+    // El aviso lo deja el store.
+  }
+}
+
+function openManager(): void {
+  menu.value = false;
+  managing.value = true;
+}
+
 async function remove(tagId: string): Promise<void> {
   if (!store.detail) return;
   try {
@@ -94,9 +118,26 @@ async function remove(tagId: string): Promise<void> {
 
 <template>
   <div class="d-flex align-center flex-wrap ga-2 py-2">
-    <v-chip v-for="tag in current" :key="tag.id" size="small" :color="tag.color" :closable="props.canEdit" @click:close="remove(tag.id)">
-      {{ tag.name }}
-    </v-chip>
+    <!-- Con «Administrar etiquetas», un clic en la etiqueta abre su color (cambia en todas las tareas que la llevan). -->
+    <template v-for="tag in current" :key="tag.id">
+      <v-menu v-if="canManage" :close-on-content-click="false">
+        <template #activator="{ props: chipMenu }">
+          <v-chip v-bind="chipMenu" size="small" :color="tag.color" :closable="props.canEdit" link @click:close="remove(tag.id)">
+            {{ tag.name }}
+          </v-chip>
+        </template>
+        <v-card class="pa-4">
+          <div class="text-body-small text-medium-emphasis mb-2">{{ t('projects.tags.colorEverywhere') }}</div>
+          <TagColorSwatches :model-value="tag.color" @update:model-value="(c: ProjectColor) => recolor(tag, c)" />
+          <v-btn variant="text" size="small" prepend-icon="mdi-tag-multiple-outline" class="mt-2" @click="managing = true">
+            {{ t('projects.tags.manage') }}
+          </v-btn>
+        </v-card>
+      </v-menu>
+      <v-chip v-else size="small" :color="tag.color" :closable="props.canEdit" @click:close="remove(tag.id)">
+        {{ tag.name }}
+      </v-chip>
+    </template>
     <v-menu v-if="props.canEdit" v-model="menu" :close-on-content-click="false">
       <template #activator="{ props: activator }">
         <v-tooltip location="top" :text="t('projects.tags.add')">
@@ -115,7 +156,7 @@ async function remove(tagId: string): Promise<void> {
           no-filter
           auto-select-first
           :label="t('projects.tags.add')"
-          :hint="t('projects.tags.hint')"
+          :hint="canManage ? t('projects.tags.hint') : t('projects.tags.hintPickOnly')"
           persistent-hint
           :loading="busy"
           autofocus
@@ -132,11 +173,16 @@ async function remove(tagId: string): Promise<void> {
           </template>
           <template #no-data>
             <TagColorPicker v-if="canCreate" v-model="newColor" :name="typed" @create="create" />
+            <v-list-item v-else-if="typed && !sameName" :title="t('projects.tags.noPermission', { name: typed })" disabled />
             <v-list-item v-else :title="t('projects.tags.none')" disabled />
           </template>
         </v-autocomplete>
+        <v-btn v-if="canManage" variant="text" size="small" prepend-icon="mdi-tag-multiple-outline" class="mt-2" @click="openManager">
+          {{ t('projects.tags.manage') }}
+        </v-btn>
       </v-card>
     </v-menu>
     <span v-if="!current.length && !props.canEdit" class="text-body-medium text-medium-emphasis">—</span>
+    <TagManagerDialog v-if="canManage" v-model="managing" />
   </div>
 </template>

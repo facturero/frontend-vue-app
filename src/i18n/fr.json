@@ -634,7 +634,9 @@
       "projects_rule_applied": "Règle appliquée à une tâche",
       "projects_form_saved": "Formulaire de demande enregistré",
       "projects_form_deleted": "Formulaire de demande supprimé",
-      "projects_form_submitted": "Demande reçue par formulaire"
+      "projects_form_submitted": "Demande reçue par formulaire",
+      "projects_tag_updated": "Étiquette modifiée",
+      "projects_tag_deleted": "Étiquette supprimée"
     },
     "filters": {
       "title": "Filtres",
@@ -3920,7 +3922,21 @@
       "hint": "Choisissez-en une, ou saisissez un nouveau nom et appuyez sur Entrée pour la créer",
       "color": "Couleur",
       "colorOption": "Couleur {color}",
-      "createLabel": "Créer"
+      "createLabel": "Créer",
+      "manage": "Gérer les étiquettes",
+      "manageTitle": "Gérer les étiquettes",
+      "manageHint": "Les étiquettes appartiennent à toute l'organisation : un nouveau nom ou une nouvelle couleur s'affiche sur toutes les tâches qui la portent.",
+      "hintPickOnly": "Choisissez une étiquette existante",
+      "noPermission": "« {name} » n'existe pas. Demandez à la personne qui gère les étiquettes de la créer.",
+      "colorEverywhere": "Couleur (change sur toutes les tâches)",
+      "name": "Nom",
+      "searchLabel": "Rechercher une étiquette",
+      "empty": "Aucune étiquette pour l'instant.",
+      "usage": "Non utilisée | Sur 1 tâche | Sur {count} tâches",
+      "delete": "Supprimer l'étiquette {name}",
+      "deleteTitle": "Supprimer « {name} » ?",
+      "deleteText": "Elle sera retirée de 1 tâche. Action irréversible. | Elle sera retirée de {count} tâches. Action irréversible.",
+      "deleteUnused": "Elle n'est sur aucune tâche."
     },
     "fields": {
       "title": "Champs personnalisés",

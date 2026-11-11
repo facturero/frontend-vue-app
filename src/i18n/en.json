@@ -634,7 +634,9 @@
       "projects_rule_applied": "Rule applied to a task",
       "projects_form_saved": "Request form saved",
       "projects_form_deleted": "Request form deleted",
-      "projects_form_submitted": "Request received by form"
+      "projects_form_submitted": "Request received by form",
+      "projects_tag_updated": "Tag changed",
+      "projects_tag_deleted": "Tag deleted"
     },
     "filters": {
       "title": "Filters",
@@ -3920,7 +3922,21 @@
       "hint": "Pick one, or type a new name and press Enter to create it",
       "color": "Color",
       "colorOption": "Color {color}",
-      "createLabel": "Create"
+      "createLabel": "Create",
+      "manage": "Manage tags",
+      "manageTitle": "Manage tags",
+      "manageHint": "Tags belong to the whole organization: a new name or color shows on every task that has it.",
+      "hintPickOnly": "Pick an existing tag",
+      "noPermission": "\"{name}\" does not exist. Ask whoever manages tags to create it.",
+      "colorEverywhere": "Color (changes on every task)",
+      "name": "Name",
+      "searchLabel": "Search tags",
+      "empty": "No tags yet.",
+      "usage": "Unused | On 1 task | On {count} tasks",
+      "delete": "Delete tag {name}",
+      "deleteTitle": "Delete \"{name}\"?",
+      "deleteText": "It will be removed from 1 task. This cannot be undone. | It will be removed from {count} tasks. This cannot be undone.",
+      "deleteUnused": "It is not on any task."
     },
     "fields": {
       "title": "Custom fields",

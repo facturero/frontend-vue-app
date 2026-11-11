@@ -8,6 +8,7 @@ import PageHeader from '@/components/ui/PageHeader.vue';
 import DueDateChip from '@/components/projects/DueDateChip.vue';
 import ProjectFormDialog from '@/components/projects/ProjectFormDialog.vue';
 import ProjectSearchDialog from '@/components/projects/ProjectSearchDialog.vue';
+import TagManagerDialog from '@/components/projects/TagManagerDialog.vue';
 import ProjectTemplateDialog from '@/components/projects/ProjectTemplateDialog.vue';
 import UserAvatar from '@/components/projects/UserAvatar.vue';
 import { useAuthStore } from '@/stores/auth';
@@ -37,6 +38,8 @@ const creating = ref(false);
 /** «Nuevo proyecto» abre primero las plantillas; «En blanco» pasa al formulario de siempre. */
 const choosing = ref(false);
 const searching = ref(false);
+/** «Administrar etiquetas» (permiso `project_tag:manage`). */
+const managingTags = ref(false);
 
 const SORTS: SortKey[] = ['name', 'nextDue', 'progress', 'overdue'];
 const fromQuery = <T extends string>(key: string, allowed: readonly T[], fallback: T): T => {
@@ -106,6 +109,9 @@ function opened(id: string): void {
       <template #actions>
         <v-btn variant="text" prepend-icon="mdi-magnify" @click="searching = true">{{ t('projects.search.button') }}</v-btn>
         <v-btn variant="text" prepend-icon="mdi-check-circle-outline" to="/my-tasks">{{ t('projects.myTasks.title') }}</v-btn>
+        <v-btn v-if="auth.can('project_tag:manage')" variant="text" prepend-icon="mdi-tag-multiple-outline" @click="managingTags = true">
+          {{ t('projects.tags.title') }}
+        </v-btn>
         <v-btn v-if="auth.can('project:create')" color="primary" prepend-icon="mdi-plus" data-tour="projects-new" @click="choosing = true">
           {{ t('projects.new') }}
         </v-btn>
@@ -264,5 +270,6 @@ function opened(id: string): void {
     <ProjectFormDialog v-model="creating" @saved="opened" />
     <ProjectTemplateDialog v-model="choosing" @blank="creating = true" @saved="opened" />
     <ProjectSearchDialog v-model="searching" />
+    <TagManagerDialog v-if="auth.can('project_tag:manage')" v-model="managingTags" />
   </v-container>
 </template>
