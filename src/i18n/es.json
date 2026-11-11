@@ -2433,7 +2433,8 @@
       "finance": "Finanzas",
       "projects": "Proyectos",
       "admin": "Administración"
-    }
+    },
+    "projectTags": "Etiquetas"
   },
   "notificationPrefs": {
     "app": "App",
@@ -3084,7 +3085,7 @@
       "newProduct": "crear producto agregar artículo servicio",
       "inviteEmployee": "invitar usuario agregar empleado correo",
       "newRole": "crear rol permisos accesos",
-      "manageTags": "etiquetas colores renombrar borrar etiqueta"
+      "projectTags": "etiquetas colores renombrar borrar etiqueta administrar"
     },
     "placeholderWithProjects": "Buscar pantallas, acciones, proyectos o tareas…",
     "searching": "Buscando…"

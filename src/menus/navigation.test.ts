@@ -70,4 +70,11 @@ describe('menú agrupado por áreas', () => {
     const last = tree.at(-1)!;
     expect(isNavGroup(last) && last.id).toBe('admin');
   });
+
+  it('Etiquetas (diálogo sobre Proyectos) va en el grupo Proyectos y nunca sale marcada: Proyectos conserva la marca', () => {
+    const tags = item('/projects?tags=1');
+    expect(tags.permission).toBe('project_tag:manage');
+    expect(isNavItemActive(tags, '/projects')).toBe(false);
+    expect(isNavItemActive(item('/projects'), '/projects')).toBe(true);
+  });
 });

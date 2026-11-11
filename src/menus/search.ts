@@ -33,8 +33,6 @@ const extraEntries: SearchEntry[] = [
   { id: 'newProduct', group: 'actions', titleKey: 'products.new', icon: 'mdi-package-variant-plus', to: '/products/new', plugin: 'infra.catalog_products' },
   { id: 'inviteEmployee', group: 'actions', titleKey: 'employees.inviteTitle', icon: 'mdi-account-arrow-right-outline', to: '/employees/invite', permission: 'user:invite' },
   { id: 'newRole', group: 'actions', titleKey: 'roles.new', icon: 'mdi-shield-plus-outline', to: '/roles/new', permission: 'user:assign_role' },
-  // Abre «Administrar etiquetas» sobre Proyectos (`?tags=1`, ver ProjectsView): es un diálogo, no una pantalla del menú.
-  { id: 'manageTags', group: 'actions', titleKey: 'projects.tags.manage', icon: 'mdi-tag-multiple-outline', to: '/projects?tags=1', permission: 'project_tag:manage', plugin: 'projects.tasks_kanban' },
 ];
 
 /** Todo lo buscable, sin filtrar: el componente descarta lo que el usuario no puede abrir. */

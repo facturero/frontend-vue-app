@@ -447,6 +447,9 @@ Administración, esta última al pie y separada. Con 22 pantallas sueltas, el me
 - Un área sin pantallas visibles (permisos y módulos activos) no sale; una con una sola se pinta como esa pantalla, sin desplegable.
 - Pantalla nueva: entra en la lista plana **y** en un área del árbol. `navigation.test.ts` falla si queda fuera o repetida.
 - No repitas el icono de un área en una de sus pantallas (por eso Roles dejó el escudo a Administración).
+- Una entrada puede abrir un diálogo de uso frecuente en vez de una pantalla, con un parámetro en la ruta de su pantalla madre:
+  «Etiquetas» es `/projects?tags=1` y Proyectos abre «Administrar etiquetas» al verlo (y lo quita al cerrarlo). Nunca sale marcada,
+  porque `isNavItemActive` compara solo la ruta; la marca la conserva la pantalla madre. Sale también en Ctrl+K como pantalla.
 
 ---
 

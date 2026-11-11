@@ -2433,7 +2433,8 @@
       "finance": "Finance",
       "projects": "Projects",
       "admin": "Administration"
-    }
+    },
+    "projectTags": "Tags"
   },
   "notificationPrefs": {
     "app": "App",
@@ -3084,7 +3085,7 @@
       "newProduct": "create product add item service",
       "inviteEmployee": "invite user add employee email",
       "newRole": "create role permissions access",
-      "manageTags": "tags labels colors rename delete tag"
+      "projectTags": "tags labels colors rename delete tag manage"
     },
     "placeholderWithProjects": "Search pages, actions, projects or tasks…",
     "searching": "Searching…"

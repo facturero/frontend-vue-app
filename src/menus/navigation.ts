@@ -32,6 +32,9 @@ const items: NavItem[] = [
   { titleKey: 'nav.projects', icon: 'mdi-folder-multiple-outline', to: '/projects', permission: 'project:read', plugin: 'projects.tasks_kanban' },
   { titleKey: 'nav.timeTracking', icon: 'mdi-timer-outline', to: '/time-tracking', permission: 'project:read', plugin: 'projects.time_tracking' },
   { titleKey: 'nav.workload', icon: 'mdi-chart-bar-stacked', to: '/workload', permission: 'project:read', plugin: 'projects.resource_allocation' },
+  // No es una pantalla: abre «Administrar etiquetas» sobre Proyectos (`?tags=1`, ver ProjectsView). Va en el menú para tenerlo a mano
+  // (lo pidió el dueño); nunca sale marcado, porque la ruta es la de Proyectos.
+  { titleKey: 'nav.projectTags', icon: 'mdi-tag-multiple-outline', to: '/projects?tags=1', permission: 'project_tag:manage', plugin: 'projects.tasks_kanban' },
   { titleKey: 'nav.restaurant', icon: 'mdi-silverware-fork-knife', to: '/restaurant/tables', activeFor: ['/restaurant'], permission: 'restaurant:read', plugin: 'restaurant.floorplan' },
   { titleKey: 'nav.purchasing', icon: 'mdi-cart-arrow-down', to: '/purchasing/orders', activeFor: ['/purchasing'], permission: 'purchase:read', plugin: 'purchasing.purchase_orders' },
   { titleKey: 'nav.treasury', icon: 'mdi-cash-multiple', to: '/treasury/receivables', activeFor: ['/treasury'], permission: 'receivable:read', plugin: 'finance.accounts_receivable_payable' },
@@ -77,7 +80,7 @@ const tree: NavEntry[] = [
   { id: 'sales', titleKey: 'nav.groups.sales', icon: 'mdi-storefront-outline', items: [byTo('/customers'), byTo('/pos'), byTo('/invoices'), byTo('/tax-documents/withholdings')] },
   { id: 'inventory', titleKey: 'nav.groups.inventory', icon: 'mdi-package-variant', items: [byTo('/products'), byTo('/purchasing/orders'), byTo('/stock')] },
   { id: 'finance', titleKey: 'nav.groups.finance', icon: 'mdi-bank-outline', items: [byTo('/treasury/receivables'), byTo('/accounting/accounts'), byTo('/reporting/annexes')] },
-  { id: 'projects', titleKey: 'nav.groups.projects', icon: 'mdi-briefcase-outline', items: [byTo('/my-tasks'), byTo('/projects'), byTo('/time-tracking'), byTo('/workload')] },
+  { id: 'projects', titleKey: 'nav.groups.projects', icon: 'mdi-briefcase-outline', items: [byTo('/my-tasks'), byTo('/projects'), byTo('/time-tracking'), byTo('/workload'), byTo('/projects?tags=1')] },
   byTo('/restaurant/tables'),
   { id: 'admin', titleKey: 'nav.groups.admin', icon: 'mdi-shield-account-outline', items: [byTo('/employees'), byTo('/roles'), byTo('/plugins'), byTo('/audit-logs'), byTo('/settings')] },
 ];
