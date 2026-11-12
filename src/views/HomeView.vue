@@ -12,7 +12,7 @@ import PageHeader from '@/components/ui/PageHeader.vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import DashboardWidget from '@/widgets/DashboardWidget.vue';
 import WidgetCatalogDialog from '@/widgets/WidgetCatalogDialog.vue';
-import { GRID_COLUMNS, ROW_HEIGHT } from '@/widgets/registry';
+import { GRID_COLUMNS, MOBILE_MAX_HEIGHT, ROW_HEIGHT } from '@/widgets/registry';
 
 /**
  * Inicio = el tablero de la persona: widgets de los plugins activos de su organización que su rol le deja ver, en una rejilla de 12
@@ -159,8 +159,8 @@ onMounted(async () => {
 
       <!-- Teléfono y tablet: columnas de Vuetify; al editar, solo agregar y quitar. Teléfono, todo a lo ancho (cols 12); tablet, los
            indicadores de dos en dos.
-           Cada widget mide lo que su contenido (un indicador, solo su cifra); las listas se topan en su alto del tablero y se desplazan
-           dentro. Con la celda fija de la rejilla, media tarjeta quedaba en blanco. -->
+           Cada widget mide lo que su contenido (un indicador, solo su cifra); las listas se topan en su alto del tablero o en
+           MOBILE_MAX_HEIGHT, lo menor, y se desplazan dentro. Con la celda fija de la rejilla, media tarjeta quedaba en blanco. -->
       <v-row v-else-if="smAndDown" density="comfortable">
         <v-col v-for="{ item, def } in stacked" :key="item.i" cols="12" :sm="def.kind === 'kpi' ? 6 : 12">
           <DashboardWidget
@@ -168,7 +168,7 @@ onMounted(async () => {
             :def="def"
             :editing="editing"
             fit
-            :max-height="def.kind === 'kpi' ? undefined : item.h * ROW_HEIGHT"
+            :max-height="def.kind === 'kpi' ? undefined : Math.min(item.h * ROW_HEIGHT, MOBILE_MAX_HEIGHT)"
             @remove="dashboard.remove(item.i)"
           />
         </v-col>

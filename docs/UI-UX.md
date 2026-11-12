@@ -568,6 +568,7 @@ usuario y organización.
 - **Catálogo «Agregar widget»: agrupado por área (`WIDGET_GROUPS` del registro, textos en `dashboard.groups.*`)**, no por el nombre del
   plugin en la tienda (largo y técnico). Todo widget nuevo declara su `group`. En el teléfono va a pantalla completa con la ✕ arriba.
   Ahí los widgets van con `fit`: miden lo que su contenido (no la celda de la rejilla, que dejaba media tarjeta en blanco); las listas
-  y los widgets propios se topan en su alto del tablero (`h × 72 px`) y se desplazan dentro.
+  y los widgets propios se topan en su alto del tablero (`h × 72 px`) o en `MOBILE_MAX_HEIGHT` (320 px), lo menor, y se desplazan
+  dentro.
 - Un widget que necesita un establecimiento (restaurante) lleva `needs: 'establishment'`: el selector y su `config` los pone
   `DashboardWidget`; ese tipo de widget se puede repetir (uno por local).

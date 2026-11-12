@@ -33,6 +33,11 @@ import { localIsoDate } from '@/utils/projects';
  */
 export const GRID_COLUMNS = 12;
 export const ROW_HEIGHT = 72;
+/**
+ * Tope de alto de una lista o widget propio en teléfono y tablet (una columna): ahí el widget mide lo que su contenido y, si pasa de
+ * esto, se desplaza dentro. No es su alto del tablero: un widget agrandado en la computadora ocupaba media pantalla del teléfono.
+ */
+export const MOBILE_MAX_HEIGHT = 320;
 
 export interface WidgetSize {
   w: number;
