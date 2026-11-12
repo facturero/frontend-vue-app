@@ -67,8 +67,16 @@ export interface ListItem {
   progress?: number;
 }
 
+/**
+ * Grupos del catálogo «Agregar widget», en este orden. Son propios del tablero (no el nombre del plugin en la tienda, que es largo y
+ * técnico: «Catálogo de productos (incluye categorías…)»); su texto está en `dashboard.groups.<grupo>`.
+ */
+export const WIDGET_GROUPS = ['sales', 'projects', 'inventory', 'finance', 'admin', 'restaurant'] as const;
+export type WidgetGroup = (typeof WIDGET_GROUPS)[number];
+
 interface BaseWidget {
   code: string;
+  group: WidgetGroup;
   /** Código del plugin del catálogo. Los incluidos (usuarios, roles, establecimientos…) también lo llevan: siempre están activos. */
   plugin: string;
   permission: string | null;
@@ -108,17 +116,17 @@ const count = (n: number) => String(n);
 export const WIDGETS: WidgetDef[] = [
   // ── Ventas y clientes ─────────────────────────────────────────────────────
   {
-    code: 'customers.active', kind: 'kpi', plugin: 'crm.contacts', permission: 'customer:read', titleKey: 'widgets.customersActive',
+    code: 'customers.active', kind: 'kpi', group: 'sales', plugin: 'crm.contacts', permission: 'customer:read', titleKey: 'widgets.customersActive',
     icon: 'mdi-account-group-outline', color: 'primary', to: '/customers', size: KPI, inDefault: true,
     load: async () => ({ value: count((await customerApi.list()).filter((c) => c.status === 'active').length) }),
   },
   {
-    code: 'invoices.issued', kind: 'kpi', plugin: 'finance.electronic_invoicing', permission: 'invoice:read', titleKey: 'widgets.invoicesIssued',
+    code: 'invoices.issued', kind: 'kpi', group: 'sales', plugin: 'finance.electronic_invoicing', permission: 'invoice:read', titleKey: 'widgets.invoicesIssued',
     icon: 'mdi-file-document-outline', color: 'warning', to: '/invoices', size: KPI, inDefault: true,
     load: async () => ({ value: count((await invoiceApi.list({ status: 'issued' })).length) }),
   },
   {
-    code: 'invoices.month_sales', kind: 'kpi', plugin: 'finance.electronic_invoicing', permission: 'invoice:read', titleKey: 'widgets.monthSales',
+    code: 'invoices.month_sales', kind: 'kpi', group: 'sales', plugin: 'finance.electronic_invoicing', permission: 'invoice:read', titleKey: 'widgets.monthSales',
     icon: 'mdi-cash-multiple', color: 'success', to: '/invoices', size: KPI,
     load: async (ctx) => {
       const list = await invoiceApi.list({ status: 'issued', from: monthStart(), to: today() });
@@ -126,7 +134,7 @@ export const WIDGETS: WidgetDef[] = [
     },
   },
   {
-    code: 'invoices.recent', kind: 'list', plugin: 'finance.electronic_invoicing', permission: 'invoice:read', titleKey: 'widgets.recentInvoices',
+    code: 'invoices.recent', kind: 'list', group: 'sales', plugin: 'finance.electronic_invoicing', permission: 'invoice:read', titleKey: 'widgets.recentInvoices',
     icon: 'mdi-receipt-text-outline', color: 'warning', to: '/invoices', size: LIST, emptyKey: 'widgets.emptyInvoices',
     load: async (ctx) =>
       (await invoiceApi.list())
@@ -141,7 +149,7 @@ export const WIDGETS: WidgetDef[] = [
         })),
   },
   {
-    code: 'pos.today', kind: 'kpi', plugin: 'pos.core', permission: 'invoice:read', titleKey: 'widgets.posToday',
+    code: 'pos.today', kind: 'kpi', group: 'sales', plugin: 'pos.core', permission: 'invoice:read', titleKey: 'widgets.posToday',
     icon: 'mdi-point-of-sale', color: 'primary', to: '/pos', size: KPI,
     load: async (ctx) => {
       const list = await invoiceApi.list({ status: 'issued', from: today(), to: today() });
@@ -151,12 +159,12 @@ export const WIDGETS: WidgetDef[] = [
 
   // ── Proyectos y horas ─────────────────────────────────────────────────────
   {
-    code: 'projects.my_tasks', kind: 'component', plugin: 'projects.tasks_kanban', permission: 'project:read', titleKey: 'widgets.myTasks',
+    code: 'projects.my_tasks', kind: 'component', group: 'projects', plugin: 'projects.tasks_kanban', permission: 'project:read', titleKey: 'widgets.myTasks',
     icon: 'mdi-check-circle-outline', color: 'primary', to: '/my-tasks', size: { w: 6, h: 5, minW: 3, maxW: 12, minH: 3, maxH: 10 }, inDefault: true,
     component: () => import('./MyTasksWidget.vue'),
   },
   {
-    code: 'projects.active', kind: 'list', plugin: 'projects.tasks_kanban', permission: 'project:read', titleKey: 'widgets.activeProjects',
+    code: 'projects.active', kind: 'list', group: 'projects', plugin: 'projects.tasks_kanban', permission: 'project:read', titleKey: 'widgets.activeProjects',
     icon: 'mdi-folder-multiple-outline', color: 'info', to: '/projects', size: LIST, emptyKey: 'widgets.emptyProjects',
     load: async (ctx) =>
       (await projectsApi.list('active')).slice(0, 10).map((p) => {
@@ -172,12 +180,12 @@ export const WIDGETS: WidgetDef[] = [
       }),
   },
   {
-    code: 'projects.my_week_hours', kind: 'component', plugin: 'projects.time_tracking', permission: 'project:read', titleKey: 'widgets.weekHours',
+    code: 'projects.my_week_hours', kind: 'component', group: 'projects', plugin: 'projects.time_tracking', permission: 'project:read', titleKey: 'widgets.weekHours',
     icon: 'mdi-timer-outline', color: 'secondary', to: '/time-tracking', size: { w: 3, h: 3, minW: 3, maxW: 6, minH: 2, maxH: 4 },
     component: () => import('./WeekHoursWidget.vue'),
   },
   {
-    code: 'projects.workload_week', kind: 'kpi', plugin: 'projects.resource_allocation', permission: 'project:read', titleKey: 'widgets.workloadWeek',
+    code: 'projects.workload_week', kind: 'kpi', group: 'projects', plugin: 'projects.resource_allocation', permission: 'project:read', titleKey: 'widgets.workloadWeek',
     icon: 'mdi-chart-bar-stacked', color: 'warning', to: '/workload', size: KPI,
     load: async (ctx) => {
       const w = await projectsApi.workload(monday(), 1);
@@ -186,7 +194,7 @@ export const WIDGETS: WidgetDef[] = [
     },
   },
   {
-    code: 'projects.unbilled', kind: 'kpi', plugin: 'projects.project_billing', permission: 'project:bill', titleKey: 'widgets.unbilled',
+    code: 'projects.unbilled', kind: 'kpi', group: 'projects', plugin: 'projects.project_billing', permission: 'project:bill', titleKey: 'widgets.unbilled',
     icon: 'mdi-cash-clock', color: 'success', to: '/projects', size: KPI,
     load: async (ctx) => {
       // Un resumen por proyecto (no hay total de la organización): como mucho los 10 primeros, para no disparar decenas de llamadas.
@@ -200,12 +208,12 @@ export const WIDGETS: WidgetDef[] = [
 
   // ── Inventario y compras ──────────────────────────────────────────────────
   {
-    code: 'products.active', kind: 'kpi', plugin: 'infra.catalog_products', permission: 'product:read', titleKey: 'widgets.productsActive',
+    code: 'products.active', kind: 'kpi', group: 'inventory', plugin: 'infra.catalog_products', permission: 'product:read', titleKey: 'widgets.productsActive',
     icon: 'mdi-package-variant-closed', color: 'success', to: '/products', size: KPI, inDefault: true,
     load: async () => ({ value: count((await productApi.list({ status: 'active', pageSize: 1 })).total) }),
   },
   {
-    code: 'inventory.out_of_stock', kind: 'kpi', plugin: 'inventory.kardex', permission: 'inventory:read', titleKey: 'widgets.outOfStock',
+    code: 'inventory.out_of_stock', kind: 'kpi', group: 'inventory', plugin: 'inventory.kardex', permission: 'inventory:read', titleKey: 'widgets.outOfStock',
     icon: 'mdi-package-variant-remove', color: 'error', to: '/stock', size: KPI,
     load: async () => {
       const n = (await inventoryApi.listStock({ stockState: 'without_stock', pageSize: 1 })).total;
@@ -213,17 +221,17 @@ export const WIDGETS: WidgetDef[] = [
     },
   },
   {
-    code: 'inventory.warehouses', kind: 'kpi', plugin: 'inventory.warehouses', permission: null, titleKey: 'widgets.warehouses',
+    code: 'inventory.warehouses', kind: 'kpi', group: 'inventory', plugin: 'inventory.warehouses', permission: null, titleKey: 'widgets.warehouses',
     icon: 'mdi-warehouse', color: 'info', to: '/warehouses', size: KPI,
     load: async () => ({ value: count((await inventoryApi.listWarehouses()).filter((w) => w.status === 'active').length) }),
   },
   {
-    code: 'purchasing.suppliers', kind: 'kpi', plugin: 'inventory.suppliers', permission: 'supplier:read', titleKey: 'widgets.suppliers',
+    code: 'purchasing.suppliers', kind: 'kpi', group: 'inventory', plugin: 'inventory.suppliers', permission: 'supplier:read', titleKey: 'widgets.suppliers',
     icon: 'mdi-truck-outline', color: 'secondary', to: '/purchasing/suppliers', size: KPI,
     load: async () => ({ value: count((await purchasingApi.listSuppliers({ status: 'active', pageSize: 1 })).total) }),
   },
   {
-    code: 'purchasing.pending_orders', kind: 'list', plugin: 'purchasing.purchase_orders', permission: 'purchase:read', titleKey: 'widgets.pendingOrders',
+    code: 'purchasing.pending_orders', kind: 'list', group: 'inventory', plugin: 'purchasing.purchase_orders', permission: 'purchase:read', titleKey: 'widgets.pendingOrders',
     icon: 'mdi-cart-arrow-down', color: 'warning', to: '/purchasing/orders', size: LIST, emptyKey: 'widgets.emptyOrders',
     load: async (ctx) => {
       const [toApprove, toReceive] = await Promise.all([
@@ -242,13 +250,13 @@ export const WIDGETS: WidgetDef[] = [
 
   // ── Finanzas ──────────────────────────────────────────────────────────────
   {
-    code: 'finance.receivables_aging', kind: 'component', plugin: 'finance.accounts_receivable_payable', permission: 'receivable:read',
+    code: 'finance.receivables_aging', kind: 'component', group: 'finance', plugin: 'finance.accounts_receivable_payable', permission: 'receivable:read',
     titleKey: 'widgets.receivablesAging', icon: 'mdi-hand-coin-outline', color: 'success', to: '/treasury/receivables',
     size: { w: 4, h: 4, minW: 3, maxW: 6, minH: 4, maxH: 6 },
     component: () => import('./ReceivablesAgingWidget.vue'),
   },
   {
-    code: 'finance.payables', kind: 'kpi', plugin: 'finance.accounts_receivable_payable', permission: 'payable:read', titleKey: 'widgets.payables',
+    code: 'finance.payables', kind: 'kpi', group: 'finance', plugin: 'finance.accounts_receivable_payable', permission: 'payable:read', titleKey: 'widgets.payables',
     icon: 'mdi-cash-minus', color: 'error', to: '/treasury/payables', size: KPI,
     load: async (ctx) => {
       const t = (await treasuryApi.getPayablesAging()).totals;
@@ -257,7 +265,7 @@ export const WIDGETS: WidgetDef[] = [
     },
   },
   {
-    code: 'finance.pending_postings', kind: 'kpi', plugin: 'finance.general_ledger', permission: 'journal:read', titleKey: 'widgets.pendingPostings',
+    code: 'finance.pending_postings', kind: 'kpi', group: 'finance', plugin: 'finance.general_ledger', permission: 'journal:read', titleKey: 'widgets.pendingPostings',
     icon: 'mdi-book-clock-outline', color: 'info', to: '/accounting/accounts', size: KPI,
     load: async () => {
       const n = (await accountingApi.listPending({ status: 'pending', page: 1, pageSize: 1 })).total;
@@ -265,7 +273,7 @@ export const WIDGETS: WidgetDef[] = [
     },
   },
   {
-    code: 'finance.certificate', kind: 'kpi', plugin: 'finance.electronic_certificate', permission: 'fiscal:manage', titleKey: 'widgets.certificate',
+    code: 'finance.certificate', kind: 'kpi', group: 'finance', plugin: 'finance.electronic_certificate', permission: 'fiscal:manage', titleKey: 'widgets.certificate',
     icon: 'mdi-certificate-outline', color: 'primary', to: '/organization/settings', size: KPI,
     load: async (ctx) => {
       const active = (await fiscalApi.getCertificates()).filter((c) => c.status === 'active').sort((a, b) => b.valid_until.localeCompare(a.valid_until))[0];
@@ -281,17 +289,17 @@ export const WIDGETS: WidgetDef[] = [
 
   // ── Organización y administración ─────────────────────────────────────────
   {
-    code: 'admin.employees', kind: 'kpi', plugin: 'admin.users_roles', permission: 'user:read', titleKey: 'widgets.employeesActive',
+    code: 'admin.employees', kind: 'kpi', group: 'admin', plugin: 'admin.users_roles', permission: 'user:read', titleKey: 'widgets.employeesActive',
     icon: 'mdi-account-tie-outline', color: 'info', to: '/employees', size: KPI, inDefault: true,
     load: async () => ({ value: count((await employeeApi.list()).filter((e) => e.status === 'active').length) }),
   },
   {
-    code: 'admin.roles', kind: 'kpi', plugin: 'admin.permissions', permission: 'user:read', titleKey: 'widgets.roles',
+    code: 'admin.roles', kind: 'kpi', group: 'admin', plugin: 'admin.permissions', permission: 'user:read', titleKey: 'widgets.roles',
     icon: 'mdi-badge-account-horizontal-outline', color: 'secondary', to: '/roles', size: KPI,
     load: async () => ({ value: count((await roleApi.list()).length) }),
   },
   {
-    code: 'admin.audit_recent', kind: 'list', plugin: 'admin.audit_log', permission: 'audit:read', titleKey: 'widgets.recentActivity',
+    code: 'admin.audit_recent', kind: 'list', group: 'admin', plugin: 'admin.audit_log', permission: 'audit:read', titleKey: 'widgets.recentActivity',
     icon: 'mdi-history', color: 'primary', to: '/audit-logs', size: LIST, emptyKey: 'widgets.emptyActivity',
     load: async (ctx) =>
       (await auditApi.list({ limit: 10 })).items.map((e) => ({
@@ -302,14 +310,14 @@ export const WIDGETS: WidgetDef[] = [
       })),
   },
   {
-    code: 'org.establishments', kind: 'kpi', plugin: 'org.establishments', permission: 'establishment:read', titleKey: 'widgets.establishments',
+    code: 'org.establishments', kind: 'kpi', group: 'admin', plugin: 'org.establishments', permission: 'establishment:read', titleKey: 'widgets.establishments',
     icon: 'mdi-store-outline', color: 'primary', to: '/organization/settings', size: KPI,
     load: async () => ({ value: count((await organizationApi.getEstablishments()).filter((e) => e.status === 'active').length) }),
   },
 
   // ── Restaurante ───────────────────────────────────────────────────────────
   {
-    code: 'restaurant.tables', kind: 'kpi', plugin: 'restaurant.floorplan', permission: 'restaurant:read', titleKey: 'widgets.tables',
+    code: 'restaurant.tables', kind: 'kpi', group: 'restaurant', plugin: 'restaurant.floorplan', permission: 'restaurant:read', titleKey: 'widgets.tables',
     icon: 'mdi-table-furniture', color: 'warning', to: '/restaurant/tables', size: KPI, needs: 'establishment',
     load: async (ctx) => {
       const tables = ctx.establishmentId ? (await restaurantApi.listTables(ctx.establishmentId)).filter((t) => t.status === 'active') : [];
@@ -317,7 +325,7 @@ export const WIDGETS: WidgetDef[] = [
     },
   },
   {
-    code: 'restaurant.reservations_today', kind: 'list', plugin: 'restaurant.reservations', permission: 'reservation:read',
+    code: 'restaurant.reservations_today', kind: 'list', group: 'restaurant', plugin: 'restaurant.reservations', permission: 'reservation:read',
     titleKey: 'widgets.reservationsToday', icon: 'mdi-calendar-account-outline', color: 'success', to: '/restaurant/reservations', size: LIST,
     emptyKey: 'widgets.emptyReservations', needs: 'establishment',
     load: async (ctx) =>

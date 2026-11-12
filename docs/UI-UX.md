@@ -562,8 +562,11 @@ usuario y organización.
   desactivado se oculta pero se conserva en lo guardado: al reactivarlo vuelve.
 - **Regla: todo plugin construido tiene al menos un widget con sus datos**, o una exención con su razón en `scripts/check-widgets.mjs`.
   `check-all` lo vigila. Al construir un plugin nuevo, su widget es parte del entregable.
-- **Teléfono y tablet (`smAndDown`): `v-row` / `v-col` en el orden del tablero, sin edición.** `cols="12"` en el teléfono; en tablet
-  (`sm`) los indicadores van de dos en dos. Arrastrar y redimensionar con el dedo es torpe; el tablero se arma desde una computadora.
+- **Teléfono y tablet (`smAndDown`): `v-row` / `v-col` en el orden del tablero.** `cols="12"` en el teléfono; en tablet (`sm`) los
+  indicadores van de dos en dos. Al editar solo se agregan (al final) y se quitan widgets: arrastrar y redimensionar con el dedo es
+  torpe, la disposición se arma desde una computadora.
+- **Catálogo «Agregar widget»: agrupado por área (`WIDGET_GROUPS` del registro, textos en `dashboard.groups.*`)**, no por el nombre del
+  plugin en la tienda (largo y técnico). Todo widget nuevo declara su `group`. En el teléfono va a pantalla completa con la ✕ arriba.
   Ahí los widgets van con `fit`: miden lo que su contenido (no la celda de la rejilla, que dejaba media tarjeta en blanco); las listas
   y los widgets propios se topan en su alto del tablero (`h × 72 px`) y se desplazan dentro.
 - Un widget que necesita un establecimiento (restaurante) lleva `needs: 'establishment'`: el selector y su `config` los pone

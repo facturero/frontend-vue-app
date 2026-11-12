@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import es from '@/i18n/es.json';
 import en from '@/i18n/en.json';
 import fr from '@/i18n/fr.json';
-import { clampSize, GRID_COLUMNS, WIDGETS } from './registry';
+import { clampSize, GRID_COLUMNS, WIDGET_GROUPS, WIDGETS } from './registry';
 
 /** Busca una clave con puntos («widgets.myTasks») en un JSON de traducciones. */
 function has(dict: Record<string, unknown>, key: string): boolean {
@@ -41,6 +41,15 @@ describe('catálogo de widgets del tablero', () => {
       }
     }
     expect(missing).toEqual([]);
+  });
+
+  it('cada grupo del catálogo tiene su nombre en es, en y fr, y cada widget usa un grupo conocido', () => {
+    const missing: string[] = [];
+    for (const g of WIDGET_GROUPS) {
+      for (const [lang, dict] of Object.entries({ es, en, fr })) if (!has(dict as Record<string, unknown>, `dashboard.groups.${g}`)) missing.push(`${lang}:${g}`);
+    }
+    expect(missing).toEqual([]);
+    for (const w of WIDGETS) expect(WIDGET_GROUPS).toContain(w.group);
   });
 
   it('un tamaño guardado fuera de los límites se acota al cargar', () => {

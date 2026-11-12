@@ -19,8 +19,8 @@ import { GRID_COLUMNS, ROW_HEIGHT } from '@/widgets/registry';
  * columnas. Con «Editar tablero» se agregan, se arrastran, se agrandan o achican (cada widget entre el mínimo y el máximo de
  * `widgets/registry.ts`, el único listado) y se quitan; se guarda solo, en el servidor (auth-service), por usuario y organización.
  *
- * En el teléfono va en una columna, en el orden del tablero y sin edición (arrastrar y redimensionar con el dedo es torpe); se arma
- * desde una computadora y se ve igual en todas partes.
+ * En el teléfono y la tablet va en columnas, en el orden del tablero: ahí se agregan y se quitan widgets (lo nuevo va al final), pero no
+ * se arrastran ni se redimensionan (con el dedo es torpe); la disposición se arma desde una computadora y se ve igual en todas partes.
  */
 const { t, locale } = useI18n();
 const auth = useAuthStore();
@@ -28,7 +28,7 @@ const router = useRouter();
 const plugins = usePluginsStore();
 const dashboard = useDashboardStore();
 const confirm = useConfirm();
-const { smAndDown } = useDisplay();
+const { smAndDown, xs } = useDisplay();
 
 const loading = ref(true);
 const loadError = ref<string | null>(null);
@@ -109,9 +109,11 @@ onMounted(async () => {
 <template>
   <v-container>
     <PageHeader :title="t('home.title')" :subtitle="t('home.today', { date: todayLabel })">
-      <template v-if="!smAndDown && dashboard.loaded" #actions>
+      <template v-if="dashboard.loaded" #actions>
         <template v-if="editing">
-          <v-btn variant="text" prepend-icon="mdi-restore" @click="reset">{{ t('dashboard.reset') }}</v-btn>
+          <!-- En el teléfono, solo el icono: con el texto, los tres botones no caben en una fila. -->
+          <v-btn v-if="xs" icon="mdi-restore" variant="text" :aria-label="t('dashboard.reset')" @click="reset" />
+          <v-btn v-else variant="text" prepend-icon="mdi-restore" @click="reset">{{ t('dashboard.reset') }}</v-btn>
           <v-btn variant="tonal" color="primary" prepend-icon="mdi-plus" @click="adding = true">{{ t('dashboard.addWidget') }}</v-btn>
           <v-btn color="primary" prepend-icon="mdi-check" :loading="dashboard.saving" @click="finishEditing">{{ t('dashboard.done') }}</v-btn>
         </template>
@@ -142,20 +144,21 @@ onMounted(async () => {
     <div v-if="loading" class="text-center py-12"><v-progress-circular indeterminate color="primary" /></div>
 
     <template v-else>
-      <v-alert v-if="editing" type="info" class="mb-4" :text="t('dashboard.editingHint')" />
+      <v-alert v-if="editing" type="info" class="mb-4" :text="t(smAndDown ? 'dashboard.editingHintMobile' : 'dashboard.editingHint')" />
 
       <v-card v-if="!dashboard.visible.length" class="mb-4">
         <EmptyState
           icon="mdi-view-dashboard-outline"
           :title="t('dashboard.emptyTitle', { org: orgName })"
           :text="t('dashboard.emptyText')"
-          :action-text="!smAndDown ? t('dashboard.addWidget') : undefined"
+          :action-text="t('dashboard.addWidget')"
           action-icon="mdi-plus"
           @action="editing = true; adding = true"
         />
       </v-card>
 
-      <!-- Teléfono y tablet: columnas de Vuetify, sin edición. Teléfono, todo a lo ancho (cols 12); tablet, los indicadores de dos en dos.
+      <!-- Teléfono y tablet: columnas de Vuetify; al editar, solo agregar y quitar. Teléfono, todo a lo ancho (cols 12); tablet, los
+           indicadores de dos en dos.
            Cada widget mide lo que su contenido (un indicador, solo su cifra); las listas se topan en su alto del tablero y se desplazan
            dentro. Con la celda fija de la rejilla, media tarjeta quedaba en blanco. -->
       <v-row v-else-if="smAndDown" density="comfortable">
@@ -163,9 +166,10 @@ onMounted(async () => {
           <DashboardWidget
             :item="item"
             :def="def"
-            :editing="false"
+            :editing="editing"
             fit
             :max-height="def.kind === 'kpi' ? undefined : item.h * ROW_HEIGHT"
+            @remove="dashboard.remove(item.i)"
           />
         </v-col>
       </v-row>

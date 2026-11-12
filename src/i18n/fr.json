@@ -4338,7 +4338,16 @@
     "loadError": "Chargement impossible.",
     "retry": "Réessayer",
     "establishment": "Établissement",
-    "saveError": "Impossible d'enregistrer le tableau de bord : {message}"
+    "saveError": "Impossible d'enregistrer le tableau de bord : {message}",
+    "groups": {
+      "sales": "Ventes et clients",
+      "projects": "Projets",
+      "inventory": "Stock et achats",
+      "finance": "Finances",
+      "admin": "Administration",
+      "restaurant": "Restaurant"
+    },
+    "editingHintMobile": "Ajoutez des widgets ou retirez-les avec le ✕. Pour les déplacer ou les redimensionner, utilisez un ordinateur."
   },
   "widgets": {
     "customersActive": "Clients actifs",

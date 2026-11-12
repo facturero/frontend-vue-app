@@ -4338,7 +4338,16 @@
     "loadError": "No se pudo cargar.",
     "retry": "Reintentar",
     "establishment": "Establecimiento",
-    "saveError": "No se pudo guardar el tablero: {message}"
+    "saveError": "No se pudo guardar el tablero: {message}",
+    "groups": {
+      "sales": "Ventas y clientes",
+      "projects": "Proyectos",
+      "inventory": "Inventario y compras",
+      "finance": "Finanzas",
+      "admin": "Administración",
+      "restaurant": "Restaurante"
+    },
+    "editingHintMobile": "Agrega widgets o quítalos con la ✕. Para moverlos o cambiarles el tamaño, usa una computadora."
   },
   "widgets": {
     "customersActive": "Clientes activos",

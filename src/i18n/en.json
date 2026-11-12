@@ -4338,7 +4338,16 @@
     "loadError": "Could not load.",
     "retry": "Retry",
     "establishment": "Establishment",
-    "saveError": "Could not save the dashboard: {message}"
+    "saveError": "Could not save the dashboard: {message}",
+    "groups": {
+      "sales": "Sales and customers",
+      "projects": "Projects",
+      "inventory": "Inventory and purchasing",
+      "finance": "Finance",
+      "admin": "Administration",
+      "restaurant": "Restaurant"
+    },
+    "editingHintMobile": "Add widgets or remove them with the ✕. To move or resize them, use a computer."
   },
   "widgets": {
     "customersActive": "Active customers",
