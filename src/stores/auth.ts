@@ -2,6 +2,7 @@ import { clearFileUrls } from '@/composable/useFileUrl';
 import { defineStore } from 'pinia';
 import { usePluginsStore } from '@/stores/plugins';
 import { usePluginCartStore } from '@/stores/pluginCart';
+import { useDashboardStore } from '@/stores/dashboard';
 import { computed, ref } from 'vue';
 import { clearTokens, getAccessToken, setTokens } from '@/utils/http';
 import { extractError } from '@/utils/error';
@@ -118,6 +119,8 @@ export const useAuthStore = defineStore('auth', () => {
     usePluginCartStore().reset();
     // Igual con los enlaces a archivos: se pidieron con esa sesión.
     clearFileUrls();
+    // Y el tablero de Inicio: es de esa persona y esa organización.
+    useDashboardStore().clear();
   }
 
   return {

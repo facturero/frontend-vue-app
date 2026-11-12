@@ -543,3 +543,26 @@ sí sigue el sistema.
   todo el alto. Envuélvelo en un `<div>`.
 - **Unidades:** centímetros enteros en el estado y en la API; el metro solo se ve en la interfaz (`utils/restaurant-plan.ts`).
 - **Borrador en el navegador** (`localStorage`, por usuario y organización) y guardado atómico con `expectedVersion` (409 si otra persona guardó).
+
+## El tablero de Inicio (`/`, `src/widgets/`)
+
+Inicio es el tablero de cada persona: widgets de los plugins activos de su organización que su rol le deja ver, en una rejilla de
+**12 columnas** con filas de **72 px** (`grid-layout-plus`). Se guarda en el servidor (`GET`/`PUT /users/me/dashboard` de auth-service), por
+usuario y organización.
+
+- **Un solo listado: `src/widgets/registry.ts`.** Cada widget declara ahí su plugin, su permiso, su título (clave i18n), su icono, su color
+  y su tamaño `{ w, h, minW, maxW, minH, maxH }` en celdas. El mínimo y el máximo salen de ahí y de ningún otro sitio; lo guardado se acota
+  al cargar (`clampSize`). Tamaños base: indicador (`kpi`) 3×2 (2–6 × 2–3), lista 4×4 (3–8 × 3–8).
+- **Tres clases de widget:** `kpi` (una cifra y un pie), `list` (filas con enlace, texto de vacío obligatorio) y `component` (un `.vue`
+  propio para lo que no cabe en las otras dos: dona, cronómetro, grupos de tareas). Prefiere `kpi`/`list`: carga, error, reintento y vacío
+  ya los resuelve `DashboardWidget.vue`.
+- **`WidgetShell.vue` es el marco común** (icono en tono `light{color}`, título, «Ver todo», ✕ en edición). Un widget nunca dibuja su
+  propia tarjeta ni su encabezado.
+- **Visible = plugin activo + permiso** (`plugins.isActive` + `auth.can`, el mismo par del menú lateral). Un widget de un plugin
+  desactivado se oculta pero se conserva en lo guardado: al reactivarlo vuelve.
+- **Regla: todo plugin construido tiene al menos un widget con sus datos**, o una exención con su razón en `scripts/check-widgets.mjs`.
+  `check-all` lo vigila. Al construir un plugin nuevo, su widget es parte del entregable.
+- **Teléfono (`smAndDown`): una columna en el orden del tablero, sin edición.** Arrastrar y redimensionar con el dedo es torpe; el
+  tablero se arma desde una computadora.
+- Un widget que necesita un establecimiento (restaurante) lleva `needs: 'establishment'`: el selector y su `config` los pone
+  `DashboardWidget`; ese tipo de widget se puede repetir (uno por local).
