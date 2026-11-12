@@ -18,7 +18,7 @@ import WidgetShell from './WidgetShell.vue';
  * Los widgets de restaurante (`needs: 'establishment'`) eligen el establecimiento en su cabecera; por defecto el principal. La elección
  * se guarda en el `config` del widget (va al servidor con el resto del tablero).
  */
-const props = defineProps<{ item: DashboardItem; def: WidgetDef; editing: boolean }>();
+const props = defineProps<{ item: DashboardItem; def: WidgetDef; editing: boolean; fit?: boolean; maxHeight?: number }>();
 const emit = defineEmits<{ remove: []; config: [Record<string, string | number | boolean>] }>();
 const { t } = useI18n();
 const auth = useAuthStore();
@@ -81,7 +81,16 @@ const emptyKey = computed(() => (props.def.kind === 'list' ? props.def.emptyKey 
 </script>
 
 <template>
-  <WidgetShell :title="t(def.titleKey)" :icon="def.icon" :color="def.color" :to="def.to" :editing="editing" @remove="emit('remove')">
+  <WidgetShell
+    :title="t(def.titleKey)"
+    :icon="def.icon"
+    :color="def.color"
+    :to="def.to"
+    :editing="editing"
+    :fit="fit"
+    :max-height="maxHeight"
+    @remove="emit('remove')"
+  >
     <template v-if="def.needs === 'establishment' && establishments.length > 1" #actions>
       <v-select
         :model-value="establishmentId"

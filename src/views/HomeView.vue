@@ -155,12 +155,20 @@ onMounted(async () => {
         />
       </v-card>
 
-      <!-- Teléfono: una columna, sin edición. -->
-      <div v-else-if="smAndDown" class="d-flex flex-column ga-4">
-        <div v-for="{ item, def } in stacked" :key="item.i" :style="{ height: `${item.h * ROW_HEIGHT}px` }">
-          <DashboardWidget :item="item" :def="def" :editing="false" />
-        </div>
-      </div>
+      <!-- Teléfono y tablet: columnas de Vuetify, sin edición. Teléfono, todo a lo ancho (cols 12); tablet, los indicadores de dos en dos.
+           Cada widget mide lo que su contenido (un indicador, solo su cifra); las listas se topan en su alto del tablero y se desplazan
+           dentro. Con la celda fija de la rejilla, media tarjeta quedaba en blanco. -->
+      <v-row v-else-if="smAndDown" density="comfortable">
+        <v-col v-for="{ item, def } in stacked" :key="item.i" cols="12" :sm="def.kind === 'kpi' ? 6 : 12">
+          <DashboardWidget
+            :item="item"
+            :def="def"
+            :editing="false"
+            fit
+            :max-height="def.kind === 'kpi' ? undefined : item.h * ROW_HEIGHT"
+          />
+        </v-col>
+      </v-row>
 
       <GridLayout
         v-else
