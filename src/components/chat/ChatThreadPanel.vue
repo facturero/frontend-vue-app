@@ -103,9 +103,7 @@ const retry = (m: ChatMessage) => chat.send(props.conversationId, m.bodyDoc!, m)
       </template>
     </div>
     <v-divider />
-    <!-- A la derecha, sitio para el botón flotante del asistente (abajo a la derecha en toda la app), que si no tapa «Enviar». En el
-         teléfono ese botón queda debajo de la tarjeta: el margen solo apretaba el editor. -->
-    <div v-if="canWrite" class="pa-4" :style="{ paddingRight: mobile ? undefined : '80px' }">
+    <div v-if="canWrite" class="pa-4">
       <!-- Como en la conversación: todos los botones arriba del editor (aquí sin los de formato: el panel es estrecho). -->
       <RichTextEditor
         ref="editor"

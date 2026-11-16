@@ -167,7 +167,8 @@ async function remove(): Promise<void> {
 </script>
 
 <template>
-  <v-container>
+  <!-- `pb-16`: sitio para «Agregar tarea» flotante en el teléfono, que si no tapa la última fila. -->
+  <v-container :class="{ 'pb-16': canQuickAdd }">
     <v-alert v-if="store.error && !project" type="error" class="mb-4">{{ store.error }}</v-alert>
     <v-progress-linear v-if="store.loading && !project" indeterminate color="primary" />
 
@@ -274,9 +275,8 @@ async function remove(): Promise<void> {
     </v-dialog>
     <ShareDialog v-model="sharing" @left="router.push('/projects')" />
 
-    <!-- Abajo a la IZQUIERDA: la derecha es del botón del asistente, y dos `v-fab app` en la misma esquina no se apilan, se montan
-         uno encima del otro (probado a 375 px). En el teléfono la izquierda está libre: el menú lateral va oculto. -->
-    <v-fab v-if="canQuickAdd" app appear location="bottom start" extended color="primary" prepend-icon="mdi-plus" :text="t('projects.task.addTask')" @click="quickAdd = true" />
+    <!-- Abajo a la derecha, donde cae el pulgar (esa esquina era del botón del asistente, que pasó a la barra superior). -->
+    <v-fab v-if="canQuickAdd" app appear location="bottom end" extended color="primary" prepend-icon="mdi-plus" :text="t('projects.task.addTask')" @click="quickAdd = true" />
     <v-dialog v-model="quickAdd">
       <v-card>
         <v-card-title>{{ t('projects.task.addTask') }}</v-card-title>

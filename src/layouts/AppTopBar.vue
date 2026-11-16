@@ -122,6 +122,18 @@ function logout(): void {
     <v-spacer></v-spacer>
 
     <template v-if="!bareShell">
+      <!-- El asistente vive aquí, con la campana y los mensajes: como botón flotante tapaba el contenido (tablero de proyectos, panel de
+           la tarea, «Enviar» del chat). Resaltado mientras su panel está abierto. -->
+      <v-btn
+        icon
+        :color="assistant.open ? 'primary' : undefined"
+        :title="$t('assistant.title')"
+        :aria-label="$t('assistant.title')"
+        data-topbar-assistant
+        @click="assistant.toggle()"
+      >
+        <v-icon icon="mdi-robot-outline" />
+      </v-btn>
       <NotificationBell />
       <MessageInbox />
     </template>

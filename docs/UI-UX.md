@@ -222,7 +222,7 @@ Reglas fijas:
   `var(--v-layout-top)` más el alto del encabezado (ver el panel de vista previa de `PosThemeEditorView`). Lógica en
   `composable/useStickyHeader.ts`.
 - **Teléfono (< 600 px):** se resuelve con clases y props de Vuetify, no con CSS: `App.vue` quita el relleno de su contenedor en móvil
-  (`pa-0`, porque cada vista trae el suyo y juntos eran 32 px por lado) y deja sitio al botón del asistente (`pb-16`); los filtros
+  (`pa-0`, porque cada vista trae el suyo y juntos eran 32 px por lado); los filtros
   llevan `cols="12" sm="…"` (a pantalla completa en el teléfono, para que «Todos los estados» no se corte en «Todo…»); los títulos de
   tarjeta y de diálogo se parten en líneas por defecto (`VCardTitle`/`VCardSubtitle` llevan `text-wrap` en `vuetify.ts`; Vuetify los cortaba con «…») y las filas de acciones usan `flex-wrap` en vez de desbordar. **Diálogos:** mídelos a 375 px (ancho útil ~327 px): un selector de ancho fijo o tres botones en una fila no caben; apila los campos (`flex-column flex-sm-row`) y deja que `v-card-actions` envuelva (`flex-wrap ga-2`). Lo único con CSS propio (`src/styles/mobile.css`) son
   las celdas de las tablas en una línea con scroll horizontal, porque `text-no-wrap` de Vuetify no tiene variante por tamaño y dejaría
@@ -423,8 +423,10 @@ arrastre nativo, no como eventos de `v-calendar` (sus fichas no se mueven de dí
 - En un diálogo, Vuetify 4 pone el `v-card-text` a 24 px de los lados pero deja el `v-card-title` suelto a 15 px y el
   `v-card-actions` a 8 px: título, campos y botones quedaban desalineados. `src/styles/base.css` (bloque 4) los pone a los tres a
   24 px del borde. No le pongas `pa-*` al título ni al pie de un diálogo.
-- Dos `v-fab app` en la misma esquina no se apilan: se montan uno sobre otro. La esquina inferior derecha es del botón del
-  asistente (`App.vue`); un botón flotante de una vista va abajo a la izquierda (`location="bottom start"`, ver `ProjectView.vue`).
+- El asistente se abre desde la barra superior (`AppTopBar.vue`, junto a la campana), no con un botón flotante: el que había abajo a
+  la derecha tapaba el tablero de proyectos, el panel de la tarea y el «Enviar» del chat. La esquina inferior derecha queda para el
+  botón flotante de cada vista en el teléfono (`location="bottom end"`, ver `ProjectView.vue`), que deja su propio `pb-16`. Dos
+  `v-fab app` en la misma esquina no se apilan: se montan uno sobre otro.
 - Un `v-card` con `@click` se ve como enlace (`v-card--link`) pero Vuetify no le pone `tabindex`: con el teclado no se llega a él.
   Si la tarjeta abre algo, `tabindex="0"` y `@keydown.enter.self` con la misma acción (REGLAS-FRONT R-90; ver `ProjectBoard.vue`).
 - Un `v-menu` (y la lista de un `v-select`/`v-autocomplete`/`v-combobox`, que es un `v-menu` por dentro) usa por defecto

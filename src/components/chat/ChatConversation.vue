@@ -353,8 +353,7 @@ async function toggleArchive(): Promise<void> {
 
     <!-- Escribir -->
     <v-divider />
-    <!-- Sin hilo abierto este editor queda contra el borde derecho: sitio para el botón flotante del asistente, que tapa «Enviar». -->
-    <div class="pa-4" :style="{ paddingRight: !mobile && !chat.threadId ? '80px' : undefined }">
+    <div class="pa-4">
       <v-alert v-if="detail?.archivedAt" type="info" :text="t('chat.archivedHint')" />
       <div v-else-if="detail && !detail.isMember" class="d-flex flex-column flex-sm-row align-center ga-2">
         <span class="text-body-medium text-medium-emphasis flex-grow-1">{{ t('chat.previewHint', { name: title }) }}</span>
