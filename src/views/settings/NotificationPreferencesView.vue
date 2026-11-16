@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useNotificationPrefsStore } from '@/stores/notificationPrefs';
 import { usePluginsStore } from '@/stores/plugins';
 import PageHeader from '@/components/ui/PageHeader.vue';
@@ -12,12 +13,20 @@ import type { NotificationProvider } from '@/types/notifications';
 // se guardan como EXCEPCIONES del usuario (lo no tocado sigue el default).
 const props = defineProps<{ embedded?: boolean }>();
 
+const { t } = useI18n();
 const store = useNotificationPrefsStore();
 const plugins = usePluginsStore();
 
 const draft = ref<Record<string, { app: boolean; smtp: boolean }>>({});
 const suggestedDefaults = ref<Record<string, { app: boolean; smtp: boolean }>>({});
 const saved = ref(false);
+
+/**
+ * Grupos que no son un plugin del catálogo sino parte fija del CRM (siempre activos): `core.feedback` son los avisos de «Comentarios y
+ * mejoras». Su nombre sale de i18n, no de plugin-catalog.
+ */
+const CORE_GROUPS: Record<string, string> = { 'core.feedback': 'notificationPrefs.group.core_feedback' };
+const isOn = (pluginCode: string) => pluginCode in CORE_GROUPS || plugins.isActive(pluginCode);
 
 /** Nombre traducido del plugin (plugin-catalog lo traduce vía Accept-Language). */
 const pluginNameMap = computed(() => {
@@ -32,14 +41,14 @@ const pluginNameMap = computed(() => {
 const groups = computed(() => {
   const byPlugin = new Map<string, NotificationProvider[]>();
   for (const p of store.providers) {
-    if (!plugins.isActive(p.pluginCode)) continue;
+    if (!isOn(p.pluginCode)) continue;
     const list = byPlugin.get(p.pluginCode) ?? [];
     list.push(p);
     byPlugin.set(p.pluginCode, list);
   }
   return [...byPlugin.entries()].map(([pluginCode, providers]) => ({
     pluginCode,
-    pluginName: pluginNameMap.value[pluginCode] ?? pluginCode,
+    pluginName: CORE_GROUPS[pluginCode] ? t(CORE_GROUPS[pluginCode]) : (pluginNameMap.value[pluginCode] ?? pluginCode),
     providers: providers.sort((a, b) => a.code.localeCompare(b.code)),
   }));
 });
@@ -73,7 +82,7 @@ function resetAll(): void {
 
 async function saveAll(): Promise<void> {
   const updates = store.providers
-    .filter((p) => plugins.isActive(p.pluginCode))
+    .filter((p) => isOn(p.pluginCode))
     .map((p) => {
       const d = draft.value[p.code];
       const u: { providerCode: string; app?: boolean; smtp?: boolean } = { providerCode: p.code };

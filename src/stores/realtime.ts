@@ -50,7 +50,21 @@ const EVENT_TITLE_KEYS: Record<string, string> = {
   'projects.status_update.posted': 'notifications.projectsStatusUpdatePosted',
   // Mensajería (chat-service): una campana por conversación sin leer, agrupada en notification-service (`count`).
   'chat.message.created': 'notifications.chatMessage',
+  // Comentarios y mejoras (feedback-service): solo a quien escribió. El cambio de estado lleva un título por estado (`titleKeyFor`).
+  'feedback.reply.created': 'notifications.feedbackReply',
+  'feedback.item.status_changed': 'notifications.feedbackStatusChanged',
+  'feedback.points.granted': 'notifications.feedbackPoints',
 };
+
+const FEEDBACK_STATUSES = ['new', 'reviewing', 'accepted', 'implemented', 'declined'];
+
+/** Clave del título: la del evento, salvo el cambio de estado del buzón, que dice cuál («Aceptamos tu propuesta»). */
+function titleKeyFor(event: string, data: Record<string, unknown>): string {
+  if (event === 'feedback.item.status_changed' && typeof data.status === 'string' && FEEDBACK_STATUSES.includes(data.status)) {
+    return `notifications.feedbackStatus.${data.status}`;
+  }
+  return EVENT_TITLE_KEYS[event] ?? 'notifications.pluginsUpdate';
+}
 
 /**
  * Destino del click. Cada evento lleva al elemento del que habla; si el payload
@@ -75,6 +89,8 @@ export function routeForEvent(
     if (typeof data.conversationId !== 'string') return '/messages';
     return typeof data.threadRootId === 'string' ? `/messages/${data.conversationId}?thread=${data.threadRootId}` : `/messages/${data.conversationId}`;
   }
+  // Comentarios y mejoras: el envío abierto en «Comentarios y mejoras» (los puntos de un ajuste sin envío, la misma pantalla arriba).
+  if (event.startsWith('feedback.')) return typeof data.itemId === 'string' ? `/feedback?id=${data.itemId}` : '/feedback';
   // Los identity.* de la campana (cuenta activada/desactivada) hablan de la
   // cuenta del propio usuario.
   if (event.startsWith('identity.')) return '/settings';
@@ -105,6 +121,9 @@ function detailFor(event: string, data: Record<string, unknown>): string {
     const count = typeof data.count === 'number' && data.count > 1 ? `×${data.count}` : '';
     return [where, count].filter(Boolean).join(' ');
   }
+  // Los eventos del buzón no traen títulos ni textos: de los puntos, cuántos (sin traducir, `+50` se lee igual en los tres idiomas).
+  if (event === 'feedback.points.granted') return typeof data.amount === 'number' ? `${data.amount > 0 ? '+' : ''}${data.amount}` : '';
+  if (event.startsWith('feedback.')) return '';
   return typeof data.code === 'string' ? data.code : '';
 }
 
@@ -112,7 +131,7 @@ function fromServer(n: AppNotification): RealtimeNotification {
   return {
     id: n.id,
     event: n.event,
-    titleKey: EVENT_TITLE_KEYS[n.event] ?? 'notifications.pluginsUpdate',
+    titleKey: titleKeyFor(n.event, n.data),
     detail: detailFor(n.event, n.data),
     at: new Date(n.createdAt).getTime(),
     read: n.read,

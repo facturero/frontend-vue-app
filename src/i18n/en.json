@@ -2485,13 +2485,22 @@
       "fiscal_attention_required": "Invoice with SRI problems",
       "fiscal_attention_required_desc": "Notify me when the SRI rejects an invoice or it cannot be sent without help.",
       "chat_message_created": "Chat messages and mentions",
-      "chat_message_created_desc": "Direct messages, mentions and @channel (grouped by conversation)"
+      "chat_message_created_desc": "Direct messages, mentions and @channel (grouped by conversation)",
+      "feedback_reply_created": "Replies to what you sent",
+      "feedback_reply_created_desc": "When the platform replies to an idea, comment or problem you sent.",
+      "feedback_status_changed": "Status of what you sent",
+      "feedback_status_changed_desc": "When what you sent goes into review, is accepted, implemented or declined.",
+      "feedback_points_granted": "Loyalty points",
+      "feedback_points_granted_desc": "When your company earns points for something you sent."
     },
     "reset": "Reset",
     "saved": "Preferences saved.",
     "smtp": "Email",
     "tabTitle": "Notifications",
-    "title": "Notifications"
+    "title": "Notifications",
+    "group": {
+      "core_feedback": "Feedback & ideas"
+    }
   },
   "notifications": {
     "projectsTaskUnblocked": "A task is ready to start",
@@ -2524,7 +2533,17 @@
     "requestSent": "Request sent",
     "title": "Notifications",
     "fiscalAttention": "An invoice needs your attention",
-    "chatMessage": "New messages"
+    "chatMessage": "New messages",
+    "feedbackReply": "You got a reply in Feedback & ideas",
+    "feedbackStatusChanged": "Your submission changed status",
+    "feedbackPoints": "Your company earned points",
+    "feedbackStatus": {
+      "new": "Your submission is back to “New”",
+      "reviewing": "We are reviewing your submission",
+      "accepted": "We accepted your suggestion",
+      "implemented": "We implemented your suggestion!",
+      "declined": "We declined your submission"
+    }
   },
   "onboarding": {
     "businessProfile": {

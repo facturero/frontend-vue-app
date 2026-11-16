@@ -1,6 +1,7 @@
 import { io, type Socket } from 'socket.io-client';
 import { getAccessToken } from '@/utils/http';
 import { useRealtimeStore } from '@/stores/realtime';
+import { useFeedbackStore } from '@/stores/feedback';
 import { useProjectsStore } from '@/stores/projects';
 import { usePosThemeStore } from '@/stores/posTheme';
 import { useAuthStore } from '@/stores/auth';
@@ -204,7 +205,7 @@ export function connectRealtime(): void {
     }
   });
 
-  socket.on('notification', () => {
+  socket.on('notification', (data?: Record<string, unknown>) => {
     // Canal `app` de notification-service: el gateway emite esto en tu sala
     // `user:<uid>` solo si tienes activa la notificación para ese provider.
     // notification-service ya la persistió, así que el socket es solo el aviso:
@@ -213,6 +214,8 @@ export function connectRealtime(): void {
     // pestañas.
     try {
       useRealtimeStore().onIncoming();
+      // Un aviso del buzón (respuesta, estado, puntos) también mueve el número de «Comentarios y mejoras» del menú del avatar.
+      if (typeof data?.event === 'string' && data.event.startsWith('feedback.')) void useFeedbackStore().refresh();
     } catch {
       // pinia aún no activa (no debería ocurrir tras el login)
     }

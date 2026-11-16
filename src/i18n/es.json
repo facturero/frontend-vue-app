@@ -2485,13 +2485,22 @@
       "fiscal_attention_required": "Factura con problemas ante el SRI",
       "fiscal_attention_required_desc": "Avísame cuando el SRI rechace una factura o no se pueda enviar sin ayuda.",
       "chat_message_created": "Mensajes y menciones en el chat",
-      "chat_message_created_desc": "Mensajes directos, menciones y @canal (se agrupan por conversación)"
+      "chat_message_created_desc": "Mensajes directos, menciones y @canal (se agrupan por conversación)",
+      "feedback_reply_created": "Respuestas a lo que enviaste",
+      "feedback_reply_created_desc": "Cuando la plataforma responde a una mejora, comentario o problema que mandaste.",
+      "feedback_status_changed": "Estado de lo que enviaste",
+      "feedback_status_changed_desc": "Cuando lo que mandaste pasa a revisión, se acepta, se implementa o se descarta.",
+      "feedback_points_granted": "Puntos de fidelidad",
+      "feedback_points_granted_desc": "Cuando tu empresa gana puntos por algo que enviaste."
     },
     "reset": "Restablecer",
     "saved": "Preferencias guardadas.",
     "smtp": "Correo",
     "tabTitle": "Notificaciones",
-    "title": "Notificaciones"
+    "title": "Notificaciones",
+    "group": {
+      "core_feedback": "Comentarios y mejoras"
+    }
   },
   "notifications": {
     "projectsTaskUnblocked": "Ya puedes empezar una tarea",
@@ -2524,7 +2533,17 @@
     "requestSent": "Solicitud enviada",
     "title": "Notificaciones",
     "fiscalAttention": "Una factura necesita tu atención",
-    "chatMessage": "Mensajes nuevos"
+    "chatMessage": "Mensajes nuevos",
+    "feedbackReply": "Te respondieron en Comentarios y mejoras",
+    "feedbackStatusChanged": "Cambió el estado de tu envío",
+    "feedbackPoints": "Tu empresa ganó puntos",
+    "feedbackStatus": {
+      "new": "Tu envío volvió a «Nueva»",
+      "reviewing": "Estamos revisando tu envío",
+      "accepted": "Aceptamos tu propuesta",
+      "implemented": "¡Implementamos tu propuesta!",
+      "declined": "Descartamos tu envío"
+    }
   },
   "onboarding": {
     "businessProfile": {

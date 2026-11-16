@@ -2485,13 +2485,22 @@
       "fiscal_attention_required": "Facture en difficulté auprès du SRI",
       "fiscal_attention_required_desc": "Me prévenir lorsque le SRI rejette une facture ou qu’elle ne peut pas être envoyée sans aide.",
       "chat_message_created": "Messages et mentions du chat",
-      "chat_message_created_desc": "Messages directs, mentions et @canal (regroupés par conversation)"
+      "chat_message_created_desc": "Messages directs, mentions et @canal (regroupés par conversation)",
+      "feedback_reply_created": "Réponses à vos envois",
+      "feedback_reply_created_desc": "Quand la plateforme répond à une idée, un commentaire ou un problème que vous avez envoyé.",
+      "feedback_status_changed": "Statut de vos envois",
+      "feedback_status_changed_desc": "Quand votre envoi passe en revue, est accepté, mis en place ou écarté.",
+      "feedback_points_granted": "Points de fidélité",
+      "feedback_points_granted_desc": "Quand votre entreprise gagne des points pour un de vos envois."
     },
     "reset": "Réinitialiser",
     "saved": "Préférences enregistrées.",
     "smtp": "Courriel",
     "tabTitle": "Notifications",
-    "title": "Notifications"
+    "title": "Notifications",
+    "group": {
+      "core_feedback": "Commentaires et idées"
+    }
   },
   "notifications": {
     "projectsTaskUnblocked": "Une tâche peut commencer",
@@ -2524,7 +2533,17 @@
     "requestSent": "Demande envoyée",
     "title": "Notifications",
     "fiscalAttention": "Une facture requiert votre attention",
-    "chatMessage": "Nouveaux messages"
+    "chatMessage": "Nouveaux messages",
+    "feedbackReply": "Vous avez une réponse dans Commentaires et idées",
+    "feedbackStatusChanged": "Votre envoi a changé de statut",
+    "feedbackPoints": "Votre entreprise a gagné des points",
+    "feedbackStatus": {
+      "new": "Votre envoi est revenu à « Nouveau »",
+      "reviewing": "Nous examinons votre envoi",
+      "accepted": "Nous avons accepté votre proposition",
+      "implemented": "Nous avons mis en place votre proposition !",
+      "declined": "Nous avons écarté votre envoi"
+    }
   },
   "onboarding": {
     "businessProfile": {
