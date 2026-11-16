@@ -4,7 +4,9 @@ import { useRealtimeStore } from '@/stores/realtime';
 import { useProjectsStore } from '@/stores/projects';
 import { usePosThemeStore } from '@/stores/posTheme';
 import { useAuthStore } from '@/stores/auth';
+import { useChatStore } from '@/stores/chat';
 import type { AssistantTurn } from '@/types/assistant';
+import type { ChatMessageEvent } from '@/types/chat';
 
 let socket: Socket | null = null;
 
@@ -65,6 +67,7 @@ export function connectRealtime(): void {
   if (socket) return;
   const token = getAccessToken();
   if (!token) return;
+  watchActivity();
 
   socket = io(import.meta.env.VITE_API_URL, {
     path: '/ws',
@@ -96,6 +99,81 @@ export function connectRealtime(): void {
   socket.on('projects.changed', (data: { event: string; projectIds: string[]; taskId: string | null }) => {
     try {
       useProjectsStore().onRealtime(data);
+    } catch {
+      // pinia aún no activa
+    }
+  });
+
+  // Mensajería (chat-service por el hub del gateway; contrato en backend/chat-service/docs/tiempo-real.md). El socket solo avisa:
+  // enviar y marcar leído van por REST. `chat.message.new` ya trae el mensaje (lo pide el hub); si no, el store lo pide.
+  let chatConnectedBefore = false;
+  socket.on('connect', () => {
+    // Presencia: esta pestaña se anuncia (el hub no cuenta un socket hasta que lo hace: la caja POS también conecta).
+    announceActivity(true);
+    try {
+      const chat = useChatStore();
+      // La primera conexión trae el contador del sobre; una reconexión, además, lo que llegó sin conexión.
+      if (chatConnectedBefore) void chat.resync();
+      else void chat.refreshUnread();
+      // Al reconectar el registro del hub pudo cambiar entero (reinicio del gateway): se vuelve a pedir.
+      chat.refreshPresence();
+      chatConnectedBefore = true;
+    } catch {
+      // pinia aún no activa
+    }
+  });
+  socket.on('chat.message.new', (data: ChatMessageEvent) => {
+    try {
+      void useChatStore().onMessageNew(data);
+    } catch {
+      // pinia aún no activa
+    }
+  });
+  socket.on('chat.message.updated', (data: ChatMessageEvent) => {
+    try {
+      void useChatStore().onMessageUpdated(data);
+    } catch {
+      // pinia aún no activa
+    }
+  });
+  socket.on('chat.message.deleted', (data: { messageId: string }) => {
+    try {
+      useChatStore().onMessageDeleted(data);
+    } catch {
+      // pinia aún no activa
+    }
+  });
+  socket.on('chat.reaction.changed', (data: { messageId: string; emoji: string; userId: string; added: boolean }) => {
+    try {
+      useChatStore().onReactionChanged(data);
+    } catch {
+      // pinia aún no activa
+    }
+  });
+  socket.on('chat.conversation.changed', (data: { event: string; conversationId: string }) => {
+    try {
+      useChatStore().onConversationChanged(data);
+    } catch {
+      // pinia aún no activa
+    }
+  });
+  socket.on('chat.presence', (data: { userId: string; state: 'online' | 'away' | 'offline' }) => {
+    try {
+      useChatStore().onPresence(data);
+    } catch {
+      // pinia aún no activa
+    }
+  });
+  socket.on('chat.typing', (data: { conversationId: string; threadRootId: string | null; userId: string }) => {
+    try {
+      useChatStore().onTyping(data);
+    } catch {
+      // pinia aún no activa
+    }
+  });
+  socket.on('chat.read', (data: { conversationId: string; lastReadSeq: number | null }) => {
+    try {
+      useChatStore().onRead(data);
     } catch {
       // pinia aún no activa
     }
@@ -141,7 +219,41 @@ export function connectRealtime(): void {
   });
 }
 
+// ── Actividad (presencia del chat) ──────────────────────────────────────────
+// «Ausente» a los 10 min sin tocar el teclado ni el ratón en esta pestaña (como Slack); al volver, «activo». El hub junta todas las
+// pestañas de la persona: sale ausente solo si todas lo están. Pestaña oculta no es ausente: puede estar en otra ventana trabajando.
+const AWAY_AFTER_MS = 10 * 60_000;
+let lastInput = Date.now();
+let away = false;
+let activityTimer: ReturnType<typeof setInterval> | null = null;
+
+function announceActivity(force = false): void {
+  const nowAway = Date.now() - lastInput >= AWAY_AFTER_MS;
+  if (!force && nowAway === away) return;
+  away = nowAway;
+  socket?.emit('chat:activity', { state: away ? 'away' : 'active' });
+}
+
+function onInput(): void {
+  lastInput = Date.now();
+  if (away) announceActivity();
+}
+
+function watchActivity(): void {
+  if (activityTimer || typeof window === 'undefined') return;
+  for (const e of ['pointerdown', 'keydown', 'wheel', 'touchstart']) window.addEventListener(e, onInput, { passive: true });
+  activityTimer = setInterval(() => announceActivity(), 60_000);
+}
+
+function unwatchActivity(): void {
+  if (!activityTimer) return;
+  clearInterval(activityTimer);
+  activityTimer = null;
+  for (const e of ['pointerdown', 'keydown', 'wheel', 'touchstart']) window.removeEventListener(e, onInput);
+}
+
 export function disconnectRealtime(): void {
+  unwatchActivity();
   if (!socket) return;
   socket.disconnect();
   socket = null;

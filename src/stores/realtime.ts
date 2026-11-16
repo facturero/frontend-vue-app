@@ -48,6 +48,8 @@ const EVENT_TITLE_KEYS: Record<string, string> = {
   'projects.member.added': 'notifications.projectsMemberAdded',
   'projects.task.unblocked': 'notifications.projectsTaskUnblocked',
   'projects.status_update.posted': 'notifications.projectsStatusUpdatePosted',
+  // Mensajería (chat-service): una campana por conversación sin leer, agrupada en notification-service (`count`).
+  'chat.message.created': 'notifications.chatMessage',
 };
 
 /**
@@ -69,6 +71,10 @@ export function routeForEvent(
   if (event === 'projects.member.added') return typeof data.projectId === 'string' ? `/projects/${data.projectId}` : '/projects';
   if (event === 'projects.status_update.posted') return typeof data.projectId === 'string' ? `/projects/${data.projectId}?view=overview` : '/projects';
   if (event.startsWith('projects.')) return typeof data.taskId === 'string' ? `/my-tasks?task=${data.taskId}` : '/my-tasks';
+  if (event === 'chat.message.created') {
+    if (typeof data.conversationId !== 'string') return '/messages';
+    return typeof data.threadRootId === 'string' ? `/messages/${data.conversationId}?thread=${data.threadRootId}` : `/messages/${data.conversationId}`;
+  }
   // Los identity.* de la campana (cuenta activada/desactivada) hablan de la
   // cuenta del propio usuario.
   if (event.startsWith('identity.')) return '/settings';
@@ -92,6 +98,12 @@ function detailFor(event: string, data: Record<string, unknown>): string {
   if (event.startsWith('projects.')) {
     // El título de la tarea y, si es un comentario o una mención, cómo empieza.
     return [data.title, data.excerpt].filter((v) => typeof v === 'string' && v).join(' — ');
+  }
+  if (event === 'chat.message.created') {
+    // De qué conversación y cuántos (la campana se agrupa por conversación). Sin texto: el evento del chat no lo trae.
+    const where = data.kind === 'channel' && typeof data.conversationName === 'string' ? `#${data.conversationName}` : '';
+    const count = typeof data.count === 'number' && data.count > 1 ? `×${data.count}` : '';
+    return [where, count].filter(Boolean).join(' ');
   }
   return typeof data.code === 'string' ? data.code : '';
 }

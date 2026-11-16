@@ -3,6 +3,8 @@ import { defineStore } from 'pinia';
 import { usePluginsStore } from '@/stores/plugins';
 import { usePluginCartStore } from '@/stores/pluginCart';
 import { useDashboardStore } from '@/stores/dashboard';
+import { useChatStore } from '@/stores/chat';
+import { useFeedbackStore } from '@/stores/feedback';
 import { computed, ref } from 'vue';
 import { clearTokens, getAccessToken, setTokens } from '@/utils/http';
 import { extractError } from '@/utils/error';
@@ -121,6 +123,9 @@ export const useAuthStore = defineStore('auth', () => {
     clearFileUrls();
     // Y el tablero de Inicio: es de esa persona y esa organización.
     useDashboardStore().clear();
+    // Y la mensajería: sus conversaciones y mensajes no pueden quedar para quien entre después en esta pestaña.
+    useChatStore().reset();
+    useFeedbackStore().reset();
   }
 
   return {

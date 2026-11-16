@@ -15,10 +15,14 @@ export interface NavItem {
    * marcado. Sin esto, solo `to` exacto lo marcaba, y al entrar a «Nuevo rol» se perdía el resaltado de «Roles».
    */
   activeFor?: string[];
+  /** Contador junto al rótulo. `chat`: menciones y mensajes directos sin leer (store de la mensajería). */
+  badge?: 'chat';
 }
 
 const items: NavItem[] = [
   { titleKey: 'nav.home', icon: 'mdi-view-dashboard-outline', to: '/' },
+  // Mensajería: del núcleo (siempre activa), por eso va suelta y arriba, como en Slack, en vez de dentro de un área.
+  { titleKey: 'nav.messages', icon: 'mdi-forum-outline', to: '/messages', plugin: 'comm.internal_chat', badge: 'chat' },
   { titleKey: 'nav.employees', icon: 'mdi-account-multiple-outline', to: '/employees', permission: 'user:read' },
   { titleKey: 'nav.roles', icon: 'mdi-badge-account-horizontal-outline', to: '/roles', permission: 'user:read' },
   { titleKey: 'nav.customers', icon: 'mdi-account-group-outline', to: '/customers', permission: 'customer:read', plugin: 'crm.contacts' },
@@ -77,6 +81,7 @@ const byTo = (to: string): NavItem => {
  */
 const tree: NavEntry[] = [
   byTo('/'),
+  byTo('/messages'),
   { id: 'sales', titleKey: 'nav.groups.sales', icon: 'mdi-storefront-outline', items: [byTo('/customers'), byTo('/pos'), byTo('/invoices'), byTo('/tax-documents/withholdings')] },
   { id: 'inventory', titleKey: 'nav.groups.inventory', icon: 'mdi-package-variant', items: [byTo('/products'), byTo('/purchasing/orders'), byTo('/stock')] },
   { id: 'finance', titleKey: 'nav.groups.finance', icon: 'mdi-bank-outline', items: [byTo('/treasury/receivables'), byTo('/accounting/accounts'), byTo('/reporting/annexes')] },

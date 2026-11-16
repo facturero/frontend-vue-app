@@ -636,7 +636,23 @@
       "projects_form_deleted": "Formulaire de demande supprimé",
       "projects_form_submitted": "Demande reçue par formulaire",
       "projects_tag_updated": "Étiquette modifiée",
-      "projects_tag_deleted": "Étiquette supprimée"
+      "projects_tag_deleted": "Étiquette supprimée",
+      "chat_conversation_created": "Canal ou conversation créé",
+      "chat_conversation_updated": "Canal renommé ou modifié",
+      "chat_conversation_archived": "Canal archivé",
+      "chat_conversation_unarchived": "Canal désarchivé",
+      "chat_conversation_read": "Conversation lue",
+      "chat_member_joined": "Quelqu'un a rejoint un canal",
+      "chat_member_left": "Quelqu'un a quitté un canal",
+      "feedback_item_created": "Commentaire ou suggestion envoyé",
+      "feedback_reply_created": "Réponse à un commentaire",
+      "feedback_item_status_changed": "Statut d'un commentaire modifié",
+      "feedback_points_granted": "Points de fidélité attribués",
+      "chat_message_created": "Message envoyé",
+      "chat_message_updated": "Message modifié",
+      "chat_message_deleted": "Message supprimé",
+      "chat_reaction_added": "Réaction ajoutée",
+      "chat_reaction_removed": "Réaction retirée"
     },
     "filters": {
       "title": "Filtres",
@@ -1150,9 +1166,6 @@
     "voidTitle": "Annulation",
     "detailsTitle": "Détails de la facture",
     "step3SubtitleGeneric": "Vérifiez les totaux et émettez la facture."
-  },
-  "messages": {
-    "empty": "Aucun message"
   },
   "taxDocuments": {
     "title": "Retenues et bons de livraison",
@@ -2429,7 +2442,8 @@
       "projects": "Projets",
       "admin": "Administration"
     },
-    "projectTags": "Étiquettes"
+    "projectTags": "Étiquettes",
+    "messages": "Messages"
   },
   "notificationPrefs": {
     "app": "App",
@@ -2469,7 +2483,9 @@
       "identity_password_reset": "Réinitialisation du mot de passe",
       "identity_password_reset_desc": "Prévenez-moi quand une réinitialisation de mot de passe est demandée.",
       "fiscal_attention_required": "Facture en difficulté auprès du SRI",
-      "fiscal_attention_required_desc": "Me prévenir lorsque le SRI rejette une facture ou qu’elle ne peut pas être envoyée sans aide."
+      "fiscal_attention_required_desc": "Me prévenir lorsque le SRI rejette une facture ou qu’elle ne peut pas être envoyée sans aide.",
+      "chat_message_created": "Messages et mentions du chat",
+      "chat_message_created_desc": "Messages directs, mentions et @canal (regroupés par conversation)"
     },
     "reset": "Réinitialiser",
     "saved": "Préférences enregistrées.",
@@ -2507,7 +2523,8 @@
     "requestRejected": "Demande refusée",
     "requestSent": "Demande envoyée",
     "title": "Notifications",
-    "fiscalAttention": "Une facture requiert votre attention"
+    "fiscalAttention": "Une facture requiert votre attention",
+    "chatMessage": "Nouveaux messages"
   },
   "onboarding": {
     "businessProfile": {
@@ -3461,6 +3478,10 @@
     }
   },
   "tour": {
+    "chat": {
+      "title": "Messages",
+      "desc": "Discutez avec votre équipe comme dans Slack : canaux publics ou privés, messages directs et fils. Tapez « / » pour partager un client, une facture ou une tâche, et créez une tâche depuis n'importe quel message avec son menu ⋯."
+    },
     "help": "Voir le guide de l'application",
     "progress": "{current} / {total}",
     "next": "Suivant",
@@ -3587,6 +3608,80 @@
     "uploadError": "Erreur de téléversement",
     "uploaded": "{count} images téléversées",
     "uploadedOne": "Image téléversée"
+  },
+  "feedbackBox": {
+    "menu": "Commentaires et idées",
+    "platformMenu": "Boîte de la plateforme",
+    "title": "Commentaires et idées",
+    "subtitle": "Dites-nous quoi améliorer ou ce qui ne marche pas. Votre entreprise gagne des points quand une idée est acceptée.",
+    "new": "Nouveau",
+    "newTitle": "Que voulez-vous nous dire ?",
+    "kind": {
+      "improvement": "Idée",
+      "comment": "Commentaire",
+      "problem": "Problème"
+    },
+    "kindHint": {
+      "improvement": "Quelque chose qui rendrait le CRM plus utile pour votre travail. Si nous l'acceptons, votre entreprise gagne des points.",
+      "comment": "Un avis, une question ou ce que vous voulez nous faire savoir.",
+      "problem": "Quelque chose qui ne marche pas comme prévu. Dites-nous ce que vous avez fait et ce qui s'est passé."
+    },
+    "titleLabel": "Titre",
+    "bodyLabel": "Détail",
+    "bodyHint": {
+      "improvement": "Ce que vous aimeriez pouvoir faire et à quoi cela vous servirait.",
+      "comment": "Écrivez ce que vous voulez nous dire.",
+      "problem": "Ce que vous avez fait, ce que vous attendiez et ce qui s'est passé."
+    },
+    "send": "Envoyer",
+    "sent": "Merci : nous l’avons reçu et nous vous répondrons ici.",
+    "status": {
+      "new": "Nouvelle",
+      "reviewing": "En cours d’examen",
+      "accepted": "Acceptée",
+      "implemented": "Réalisée",
+      "declined": "Écartée"
+    },
+    "companyPoints": "Points de votre entreprise",
+    "pointsHint": "Plus tard, ils pourront être échangés contre des remises, des cadeaux et des prix.",
+    "showMovements": "Voir l'historique",
+    "hideMovements": "Masquer l'historique",
+    "emptyTitle": "Vous n'avez encore rien envoyé",
+    "emptyText": "Vos idées nous aident à améliorer le CRM, et quand nous en acceptons une votre entreprise gagne des points.",
+    "replies": "{n} réponse | {n} réponses",
+    "more": "Voir plus",
+    "unknownPerson": "Quelqu'un",
+    "screen": "Écran",
+    "traceCode": "Code du signalement",
+    "earned": "Cette idée a rapporté {n} points à l'entreprise.",
+    "platformTeam": "Équipe de la plateforme",
+    "you": "Vous",
+    "replyLabel": "Écrire une réponse",
+    "respondLabel": "Réponse pour la personne",
+    "statusLabel": "Statut",
+    "givePoints": "Donner des points à l'entreprise",
+    "points": "Points",
+    "reason": "Motif",
+    "reasonHint": "Sans motif : « Idée : <titre> »",
+    "sendReply": "Répondre",
+    "sendRespond": "Envoyer",
+    "responded": "Réponse envoyée",
+    "platformTitle": "Boîte de la plateforme",
+    "platformSubtitle": "Commentaires, idées et problèmes de toutes les entreprises. Répondez, changez le statut et donnez des points.",
+    "tabItems": "Envois",
+    "tabPoints": "Points par entreprise",
+    "search": "Rechercher par texte, personne ou entreprise",
+    "kindLabel": "Type",
+    "onlyUnread": "Non lus seulement",
+    "platformEmpty": "Aucun envoi avec ces filtres",
+    "balancesTitle": "Soldes par entreprise",
+    "adjust": "Ajuster",
+    "adjustTitle": "Ajuster les points",
+    "adjustHint": "Positif pour ajouter, négatif pour retirer (un échange ou une correction).",
+    "adjusted": "Points ajustés",
+    "company": "Entreprise",
+    "noBalances": "Aucune entreprise n'a encore de points",
+    "movements": "{n} mouvement | {n} mouvements"
   },
   "feedback": {
     "send": "Envoyer des commentaires"
@@ -4340,6 +4435,7 @@
     "establishment": "Établissement",
     "saveError": "Impossible d'enregistrer le tableau de bord : {message}",
     "groups": {
+      "team": "Équipe",
       "sales": "Ventes et clients",
       "projects": "Projets",
       "inventory": "Stock et achats",
@@ -4350,6 +4446,10 @@
     "editingHintMobile": "Ajoutez des widgets ou retirez-les avec le ✕. Pour les déplacer ou les redimensionner, utilisez un ordinateur."
   },
   "widgets": {
+    "chatUnread": "Messages non lus",
+    "emptyChat": "Vous êtes à jour dans vos messages.",
+    "chatMentions": "{'@'}{n}",
+    "chatUnreadCount": "{n} non lu(s)",
     "customersActive": "Clients actifs",
     "invoicesIssued": "Factures émises",
     "monthSales": "Ventes du mois",
@@ -4404,6 +4504,228 @@
       "d60": "31 à 60 jours",
       "d90": "61 à 90 jours",
       "over": "Plus de 90 jours"
+    }
+  },
+  "chat": {
+    "emojis": {
+      "title": "Émojis personnalisés",
+      "intro": "Importez une image et utilisez-la dans les messages et les réactions en tapant :nom:. Toute l'équipe les voit.",
+      "pickImage": "Choisir une image",
+      "changeImage": "Changer l'image",
+      "imageHint": "PNG, GIF, JPG ou WebP, jusqu'à 256 Ko. Carrée de préférence.",
+      "name": "Nom",
+      "willBe": "S'appellera :{name}:",
+      "nameShort": "Au moins 2 lettres ou chiffres",
+      "nameTaken": "Un émoji porte déjà ce nom",
+      "badType": "L'image doit être PNG, GIF, JPG ou WebP.",
+      "tooBig": "L'image dépasse 256 Ko.",
+      "add": "Ajouter",
+      "added": "Voilà : vous pouvez utiliser :{name}:",
+      "list": "De l'organisation ({n})",
+      "filter": "Rechercher",
+      "none": "Pas encore d'émojis personnalisés.",
+      "by": "Ajouté par {name}",
+      "remove": "Retirer :{name}:",
+      "removeTitle": "Retirer :{name}: ?",
+      "removeText": "Il disparaît du sélecteur. Là où il a été utilisé, son nom s'affiche en texte.",
+      "removeConfirm": "Retirer",
+      "custom": "Personnalisés",
+      "manage": "Ajouter un émoji",
+      "insert": "Émoji"
+    },
+    "foldedMore": "{n} de plus",
+    "threads": {
+      "title": "Fils",
+      "emptyTitle": "Vous ne suivez encore aucun fil",
+      "emptyText": "Vous suivez un fil quand vous le lancez, y répondez ou y êtes mentionné. Ses nouvelles réponses apparaissent ici.",
+      "mentions": "{'@'}{n}",
+      "unread": "{n} non lu(s)",
+      "more": "{n} autre réponse | {n} autres réponses",
+      "inboxLine": "Aucun fil avec de nouvelles réponses | {n} fil avec de nouvelles réponses | {n} fils avec de nouvelles réponses",
+      "reply": "Répondre"
+    },
+    "details": {
+      "action": "Détails du canal",
+      "membersAction": "Voir les membres",
+      "about": "À propos",
+      "members": "Membres ({n})",
+      "topic": "Sujet",
+      "description": "Description",
+      "created": "Créé par {name} le {date}",
+      "generalName": "#general appartient à toute l'équipe : il ne se renomme pas.",
+      "onlyOwner": "Seul le créateur du canal (ou un administrateur du chat) peut modifier ces informations.",
+      "saved": "Canal mis à jour",
+      "addPeople": "Ajouter des personnes",
+      "add": "Ajouter",
+      "filter": "Rechercher un membre",
+      "inactive": "Utilisateur désactivé",
+      "owner": "Propriétaire",
+      "remove": "Retirer {name}",
+      "removeTitle": "Retirer {name} du canal ?",
+      "removeText": "Cette personne ne voit plus le canal ni ses nouveaux messages. Vous pouvez la rajouter quand vous voulez.",
+      "removeConfirm": "Retirer"
+    },
+    "search": {
+      "action": "Rechercher des messages",
+      "title": "Rechercher dans les messages",
+      "placeholder": "Mots à rechercher",
+      "hint": "Cherche dans vos conversations et les canaux publics. « fact » trouve « factures ».",
+      "none": "Aucun message ne correspond",
+      "more": "Voir plus",
+      "direct": "Message direct"
+    },
+    "presence": {
+      "online": "En ligne",
+      "away": "Absent",
+      "offline": "Hors ligne"
+    },
+    "typing": {
+      "one": "{name} est en train d'écrire…",
+      "two": "{a} et {b} sont en train d'écrire…",
+      "many": "Plusieurs personnes sont en train d'écrire…"
+    },
+    "task": {
+      "action": "Créer une tâche",
+      "title": "Créer une tâche à partir du message",
+      "name": "Tâche",
+      "assignee": "Responsable",
+      "dueOn": "Échéance",
+      "hint": "Elle va dans « Mes tâches » du responsable, avec le message cité. Le fil reçoit une réponse avec la carte de la tâche.",
+      "create": "Créer la tâche",
+      "created": "J'ai créé une tâche à partir de ce message :",
+      "done": "Tâche créée",
+      "from": "Message de {name} dans le chat.",
+      "openMessage": "Ouvrir le message"
+    },
+    "crm": {
+      "add": "Partager un enregistrement du CRM",
+      "what": "Quoi",
+      "search": "Rechercher",
+      "none": "Aucun résultat",
+      "typeToSearch": "Tapez pour chercher des tâches",
+      "noAccess": "Pas d'accès",
+      "remove": "Retirer la carte",
+      "type": {
+        "customer": "Client",
+        "invoice": "Facture",
+        "task": "Tâche",
+        "project": "Projet",
+        "product": "Produit"
+      }
+    },
+    "title": "Messages",
+    "channels": "Canaux",
+    "directs": "Messages directs",
+    "addChannel": "Ajouter un canal",
+    "andMore": "et {n} de plus",
+    "unknownUser": "Quelqu'un",
+    "members": "{n} membre | {n} membres",
+    "archived": "Archivé",
+    "deleted": "Ce message a été supprimé.",
+    "edited": "(modifié)",
+    "sendFailed": "Non envoyé.",
+    "retry": "Réessayer",
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "newMessages": "Nouveaux",
+    "newBelow": "Nouveaux messages",
+    "send": "Envoyer",
+    "join": "Rejoindre le canal",
+    "previewHint": "Vous consultez #{name}. Rejoignez-le pour écrire.",
+    "archivedHint": "Ce canal est archivé : on peut le lire, pas y écrire.",
+    "emptyChannel": "Début de #{name}",
+    "emptyDirect": "Votre conversation avec {name}",
+    "emptyText": "Écrivez le premier message.",
+    "pickTitle": "Choisissez une conversation",
+    "pickText": "Ouvrez un canal à gauche ou commencez un message direct.",
+    "loadError": "Impossible de charger la messagerie.",
+    "menu": "Options du canal",
+    "generalHint": "Toute l'équipe est dans #general",
+    "composer": {
+      "channel": "Message dans #{name}",
+      "direct": "Message à {name}",
+      "hint": "Entrée pour envoyer · Maj+Entrée pour une nouvelle ligne",
+      "reply": "Répondre…"
+    },
+    "leave": {
+      "action": "Quitter le canal",
+      "title": "Quitter #{name} ?",
+      "text": "Vous ne recevrez plus ses messages. S’il est public, vous pourrez le rejoindre à tout moment.",
+      "confirm": "Quitter",
+      "done": "Vous avez quitté #{name}"
+    },
+    "archive": {
+      "action": "Archiver le canal",
+      "unarchive": "Désarchiver le canal",
+      "title": "Archiver #{name} ?",
+      "text": "Personne ne pourra y écrire ; les messages restent lisibles et il peut être désarchivé.",
+      "confirm": "Archiver",
+      "done": "Canal archivé",
+      "undone": "Canal désarchivé"
+    },
+    "newChannel": {
+      "title": "Créer un canal",
+      "name": "Nom",
+      "nameHint": "En minuscules et sans espaces, par exemple ventes-quito",
+      "willBe": "S'appellera #{name}",
+      "topic": "Sujet (facultatif)",
+      "people": "Ajouter des personnes (facultatif)",
+      "private": "Canal privé",
+      "privateHint": "Seules les personnes ajoutées le voient et le trouvent.",
+      "publicHint": "Toute l'organisation peut le trouver et le rejoindre.",
+      "create": "Créer"
+    },
+    "browse": {
+      "title": "Parcourir les canaux",
+      "search": "Rechercher un canal",
+      "joined": "Membre",
+      "emptyTitle": "Aucun canal ne correspond",
+      "emptyText": "Créez-en un pour votre équipe ou votre sujet."
+    },
+    "newDirect": {
+      "title": "Nouveau message",
+      "people": "À",
+      "hint": "Une personne, ou jusqu'à {max} pour un groupe",
+      "tooMany": "{max} personnes au maximum",
+      "start": "Ouvrir la conversation"
+    },
+    "inbox": {
+      "open": "Tout voir",
+      "empty": "Vous êtes à jour."
+    },
+    "react": "Réagir",
+    "you": "Vous",
+    "edit": "Modifier",
+    "editHint": "Entrée pour enregistrer · Échap pour annuler",
+    "copyLink": "Copier le lien",
+    "linkCopied": "Lien copié",
+    "more": "Plus d'actions",
+    "replyInThread": "Répondre dans un fil",
+    "thread": "Fil",
+    "replies": "{n} réponse | {n} réponses",
+    "delete": {
+      "action": "Supprimer le message",
+      "title": "Supprimer ce message ?",
+      "text": "Il est supprimé pour tout le monde, sans retour possible.",
+      "confirm": "Supprimer"
+    },
+    "mention": {
+      "channel": "canal",
+      "channelHint": "Prévenir tout le canal",
+      "here": "ici",
+      "hereHint": "Prévenir les personnes connectées"
+    },
+    "notify": {
+      "title": "M'avertir de",
+      "all": "Tous les messages",
+      "mentions": "Mentions seulement",
+      "none": "Rien",
+      "mute": "Mettre en sourdine",
+      "unmute": "Réactiver",
+      "muteHint": "Ne compte pas dans les badges ; vous avertit seulement si on vous mentionne"
+    },
+    "browserNotify": {
+      "enable": "Activer les notifications du navigateur"
     }
   }
 }

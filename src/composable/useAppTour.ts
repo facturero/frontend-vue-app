@@ -349,6 +349,20 @@ export function useAppTour(): { startTour: (tour?: TourName) => void } {
       });
     }
 
+    // Mensajería (núcleo y gratis: no tiene recorrido de compra). Su pantalla no lleva PageHeader: se señala la barra de canales.
+    if (pluginStep('comm.internal_chat')) {
+      steps.push({
+        element: q('[data-tour="chat-sidebar"]'),
+        data: { route: 'messages' },
+        popover: {
+          title: t('tour.chat.title'),
+          description: t('tour.chat.desc'),
+          side: 'right',
+          align: 'start',
+        },
+      });
+    }
+
     steps.push({
       element: q('main h1'),
       data: { route: 'settings' },

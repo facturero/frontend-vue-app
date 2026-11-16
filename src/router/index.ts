@@ -67,6 +67,7 @@ import ReportingAnnexesView from '@/views/reporting/AnnexesView.vue';
 import ReportingAnnexRunDetailView from '@/views/reporting/AnnexRunDetailView.vue';
 import ReportingDocumentsView from '@/views/reporting/DocumentsView.vue';
 import ProjectsView from '@/views/projects/ProjectsView.vue';
+import MessagesView from '@/views/MessagesView.vue';
 import ProjectView from '@/views/projects/ProjectView.vue';
 import MyTasksView from '@/views/projects/MyTasksView.vue';
 import TimeTrackingView from '@/views/projects/TimeTrackingView.vue';
@@ -589,6 +590,36 @@ const router = createRouter({
       name: 'reporting-documents',
       component: ReportingDocumentsView,
       meta: { requiresAuth: true, requiredPermission: 'tax_annex:read', requiredPlugin: 'compliance.sri_annexes' },
+    },
+
+    // Mensajería al estilo Slack (`comm.internal_chat`, del núcleo: siempre activo). Sin permiso: cualquier miembro usa el chat; qué
+    // conversación puede leer lo decide chat-service. La conversación va en la ruta para poder enlazarla y volver con «atrás».
+    // Comentarios y mejoras (feedback-service): para todos, sin módulo ni permiso. La bandeja de todas las empresas solo para el dueño de
+    // la plataforma (`feedback:manage`, que auth solo da a `is_platform_admin`).
+    {
+      path: '/feedback',
+      name: 'feedback',
+      component: () => import('@/views/FeedbackView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/platform/feedback',
+      name: 'platform-feedback',
+      component: () => import('@/views/PlatformFeedbackView.vue'),
+      meta: { requiresAuth: true, requiredPermission: 'feedback:manage' },
+    },
+    // Vista «Hilos» (los hilos que sigo): la misma pantalla de mensajes con otra cosa en el centro. Va antes de `:conversationId`.
+    {
+      path: '/messages/threads',
+      name: 'messages-threads',
+      component: MessagesView,
+      meta: { requiresAuth: true, requiredPlugin: 'comm.internal_chat' },
+    },
+    {
+      path: '/messages/:conversationId?',
+      name: 'messages',
+      component: MessagesView,
+      meta: { requiresAuth: true, requiredPlugin: 'comm.internal_chat' },
     },
 
     // Proyectos y tareas, al estilo Asana (módulo `projects.tasks_kanban`). «Mis tareas» vive en su propia ruta para que el menú

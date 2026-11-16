@@ -3,6 +3,9 @@ import { defineComponent, h, type PropType, type VNodeChild } from 'vue';
 import type { RichDoc } from '@/types/projects';
 import RichImage from './RichImage.vue';
 import RichFile from './RichFile.vue';
+import CrmLinkCard from '@/components/chat/CrmLinkCard.vue';
+import CustomEmoji from '@/components/chat/CustomEmoji.vue';
+import { CRM_SOURCES, type CrmEntity } from '@/utils/crm-links';
 
 /**
  * Muestra un documento de TipTap ya guardado SIN `v-html` ni el editor: recorre el documento y arma los elementos con Vue, así el
@@ -53,6 +56,8 @@ function render(node: RichDoc, key: number): VNodeChild {
       return marks(node, node.text ?? '');
     case 'hardBreak':
       return h('br', { key });
+    case 'emoji':
+      return typeof node.attrs?.name === 'string' ? h(CustomEmoji, { key, name: node.attrs.name }) : null;
     case 'mention':
       return h('span', { key, class: 'text-primary font-weight-medium' }, `@${String(node.attrs?.label ?? '')}`);
     case 'bulletList':
@@ -79,6 +84,12 @@ function render(node: RichDoc, key: number): VNodeChild {
       return typeof node.attrs?.documentId === 'string'
         ? h(RichFile, { key, documentId: node.attrs.documentId, name: String(node.attrs.name ?? ''), mimeType: String(node.attrs.mimeType ?? '') })
         : null;
+    case 'crmLink': {
+      const a = node.attrs ?? {};
+      return typeof a.entityId === 'string' && typeof a.entityType === 'string' && a.entityType in CRM_SOURCES
+        ? h('div', { key }, [h(CrmLinkCard, { entityType: a.entityType as CrmEntity, entityId: a.entityId, label: String(a.label ?? '') })])
+        : null;
+    }
     case 'codeBlock':
       return h('pre', { key, class: 'bg-surface-variant pa-2 rounded mb-1 text-body-medium' }, kids());
     default:
@@ -86,11 +97,26 @@ function render(node: RichDoc, key: number): VNodeChild {
   }
 }
 
+/**
+ * `suffix` (mensajería: «(editado)») va al final del último párrafo, en la misma línea, como en Slack; si el documento termina en otra
+ * cosa (una imagen, una tabla), en un renglón propio.
+ */
+function withSuffix(doc: RichDoc, suffix: string): VNodeChild {
+  const blocks = doc.content ?? [];
+  const tail = h('span', { key: 'suffix', class: 'text-body-small text-medium-emphasis ml-1' }, suffix);
+  const last = blocks[blocks.length - 1];
+  if (last?.type !== 'paragraph') return h('div', null, [render(doc, 0), h('div', null, [tail])]);
+  return h('div', null, [
+    ...blocks.slice(0, -1).map((c, i) => render(c, i)),
+    h('p', { key: blocks.length - 1, class: 'mb-1' }, [...(last.content ?? []).map((c, i) => render(c, i)), tail]),
+  ]);
+}
+
 export default defineComponent({
   name: 'RichTextView',
-  props: { doc: { type: Object as PropType<RichDoc | null>, default: null } },
+  props: { doc: { type: Object as PropType<RichDoc | null>, default: null }, suffix: { type: String, default: '' } },
   setup(props) {
-    return () => (props.doc ? render(props.doc, 0) : null);
+    return () => (props.doc ? (props.suffix ? withSuffix(props.doc, props.suffix) : render(props.doc, 0)) : null);
   },
 });
 </script>

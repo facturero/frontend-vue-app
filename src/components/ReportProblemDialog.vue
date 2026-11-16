@@ -3,6 +3,8 @@ import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUiStore } from '@/stores/ui';
 import { MAX_MESSAGE, submitProblemReport } from '@/telemetry/report';
+import { feedbackApi } from '@/api/feedback';
+import { useAuthStore } from '@/stores/auth';
 
 const ui = useUiStore();
 const { t } = useI18n();
@@ -33,6 +35,15 @@ async function send(): Promise<void> {
   error.value = null;
   try {
     result.value = await submitProblemReport({ message: message.value, includeActivity: includeActivity.value });
+    // Copia en el buzón de comentarios (feedback-service), con el código de traza para cruzarlo con SigNoz: si el servidor de
+    // observabilidad está apagado, el reporte ya no se pierde. Desde el login (sin sesión) solo va a SigNoz.
+    const user = useAuthStore().user as { orgName?: string } | null;
+    if (user) {
+      const text = message.value.trim();
+      void feedbackApi
+        .submit({ kind: 'problem', title: text.split('\n')[0].slice(0, 120) || t('report.title'), body: text, traceId: result.value.id, urlPath: window.location.pathname, organizationName: user.orgName ?? null })
+        .catch(() => undefined);
+    }
   } catch {
     error.value = t('report.error');
   } finally {

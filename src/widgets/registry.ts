@@ -14,6 +14,9 @@ import { organizationApi } from '@/api/organization';
 import { projectsApi } from '@/api/projects';
 import { restaurantApi } from '@/api/restaurant';
 import { reservationsApi } from '@/api/reservations';
+import { chatApi } from '@/api/chat';
+import { useProjectsStore } from '@/stores/projects';
+import { conversationTitle } from '@/utils/chat';
 import { formatMoney, formatRelative } from '@/utils/format';
 import { formatMinutes } from '@/utils/duration';
 import { localIsoDate } from '@/utils/projects';
@@ -76,7 +79,7 @@ export interface ListItem {
  * Grupos del catálogo «Agregar widget», en este orden. Son propios del tablero (no el nombre del plugin en la tienda, que es largo y
  * técnico: «Catálogo de productos (incluye categorías…)»); su texto está en `dashboard.groups.<grupo>`.
  */
-export const WIDGET_GROUPS = ['sales', 'projects', 'inventory', 'finance', 'admin', 'restaurant'] as const;
+export const WIDGET_GROUPS = ['sales', 'projects', 'team', 'inventory', 'finance', 'admin', 'restaurant'] as const;
 export type WidgetGroup = (typeof WIDGET_GROUPS)[number];
 
 interface BaseWidget {
@@ -159,6 +162,26 @@ export const WIDGETS: WidgetDef[] = [
     load: async (ctx) => {
       const list = await invoiceApi.list({ status: 'issued', from: today(), to: today() });
       return { value: formatMoney(list.reduce((n, i) => n + cents(i.total), 0)), caption: ctx.t('widgets.invoicesCount', { n: list.length }) };
+    },
+  },
+
+  // ── Equipo ───────────────────────────────────────────────────────────────
+  {
+    // Las conversaciones con algo sin leer, la más reciente primero (la misma bandeja del sobre de la barra superior). Lo silenciado no
+    // aparece: chat-service no lo cuenta.
+    code: 'chat.unread', kind: 'list', group: 'team', plugin: 'comm.internal_chat', permission: null, titleKey: 'widgets.chatUnread',
+    icon: 'mdi-forum-outline', color: 'primary', to: '/messages', size: LIST, inDefault: true, emptyKey: 'widgets.emptyChat',
+    load: async (ctx) => {
+      const directory = useProjectsStore();
+      const [summary] = await Promise.all([chatApi.unread(), directory.ensureDirectory()]);
+      return summary.latest.map((c) => ({
+        id: c.conversationId,
+        title: c.kind === 'channel' ? `#${c.name ?? ''}` : conversationTitle(c, directory.users, (n) => ctx.t('chat.andMore', { n })),
+        subtitle: c.lastMessage.deletedAt ? ctx.t('chat.deleted') : (c.lastMessage.bodyText ?? '').replace(/\s+/g, ' ').slice(0, 120),
+        // En un mensaje directo todo cuenta como mención (chat-service): ahí «@» no dice nada, va el número de nuevos.
+        trailing: c.kind === 'channel' && c.mentionCount ? ctx.t('widgets.chatMentions', { n: c.mentionCount }) : ctx.t('widgets.chatUnreadCount', { n: c.unreadCount }),
+        to: `/messages/${c.conversationId}`,
+      }));
     },
   },
 

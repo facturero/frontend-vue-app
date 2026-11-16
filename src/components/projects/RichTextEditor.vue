@@ -2,8 +2,9 @@
 import { computed, onBeforeUnmount, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { EditorContent, useEditor, VueNodeViewRenderer } from '@tiptap/vue-3';
-import { Node, mergeAttributes } from '@tiptap/core';
-import { NodeSelection } from '@tiptap/pm/state';
+import { InputRule, Node, mergeAttributes } from '@tiptap/core';
+import { NodeSelection, PluginKey } from '@tiptap/pm/state';
+import Suggestion from '@tiptap/suggestion';
 import StarterKit from '@tiptap/starter-kit';
 import Mention from '@tiptap/extension-mention';
 import Link from '@tiptap/extension-link';
@@ -20,6 +21,11 @@ import type { DirectoryUser, RichDoc } from '@/types/projects';
 import UserAvatar from './UserAvatar.vue';
 import RichImageNode from './RichImageNode.vue';
 import RichFileNode from './RichFileNode.vue';
+import CrmLinkNode from '@/components/chat/CrmLinkNode.vue';
+import CustomEmojiNode from '@/components/chat/CustomEmojiNode.vue';
+import CustomEmojiImg from '@/components/chat/CustomEmoji.vue';
+import type { CustomEmoji } from '@/types/chat';
+import { CRM_SOURCES, parseCrmUrl, resolveCrmCard, type CrmLinkAttrs } from '@/utils/crm-links';
 
 /**
  * Editor de descripciones y comentarios (TipTap). Solo ofrece lo que el servidor acepta (lista blanca de `richtext.ts` en
@@ -42,15 +48,40 @@ const props = withDefaults(
     autofocus?: boolean;
     toolbar?: boolean;
     uploadFile?: (file: File) => Promise<string | null>;
+    /**
+     * Mensajería (estilo Slack): Enter envía (`submit`) y Mayús+Enter hace un salto de línea. Apagado por defecto: en una descripción o
+     * un comentario de Proyectos Enter es un párrafo nuevo y se envía con Ctrl+Enter.
+     */
+    enterSends?: boolean;
+    /**
+     * Mensajería: menciones que no son personas (@canal, @aquí), con su id especial (`channel`, `here`) y su texto de ayuda. Salen
+     * primero en la lista cuando coinciden con lo escrito. El servidor decide si se pueden usar.
+     */
+    mentionExtras?: Array<{ id: string; label: string; hint: string }>;
+    /** Mensajería: a quién se puede mencionar (los miembros de la conversación). Sin esto, todo el directorio. */
+    mentionUserIds?: string[] | null;
+    /**
+     * Mensajería: emojis personalizados de la organización. Con ellos, «:» seguido de letras ofrece la lista y `:nombre:` escrito
+     * entero se vuelve el emoji. Sin esto (Proyectos) no hay nodo de emoji: su servidor no lo acepta.
+     */
+    customEmojis?: CustomEmoji[] | null;
+    /** Botones de formato en la barra. Apagados queda solo el clip y el hueco `toolbar-end` (el chat en el teléfono, el hilo). */
+    formatting?: boolean;
+    /**
+     * Mensajería: tarjetas del CRM. Pegar un enlace a un cliente, factura, tarea, proyecto o producto de este CRM lo vuelve tarjeta, y
+     * «/» con el editor vacío emite `slash` (quien usa el editor abre el buscador de registros). Apagado en Proyectos: su servidor no
+     * acepta el nodo `crmLink`.
+     */
+    crmLinks?: boolean;
   }>(),
-  { placeholder: '', editable: true, autofocus: false, toolbar: true, uploadFile: undefined },
+  { placeholder: '', editable: true, autofocus: false, toolbar: true, uploadFile: undefined, enterSends: false, mentionExtras: () => [], mentionUserIds: null, crmLinks: false, customEmojis: null, formatting: true },
 );
-const emit = defineEmits<{ 'update:modelValue': [RichDoc]; submit: []; blur: [] }>();
+const emit = defineEmits<{ 'update:modelValue': [RichDoc]; submit: []; blur: []; slash: [] }>();
 
 const { t } = useI18n();
 const store = useProjectsStore();
 
-const mention = reactive<{ open: boolean; items: DirectoryUser[]; index: number; x: number; y: number; command: ((p: { id: string; label: string }) => void) | null }>({
+const mention = reactive<{ open: boolean; items: DirectoryUser[]; index: number; x: number; y: number; up?: boolean; command: ((p: { id: string; label: string }) => void) | null }>({
   open: false,
   items: [],
   index: 0,
@@ -59,15 +90,123 @@ const mention = reactive<{ open: boolean; items: DirectoryUser[]; index: number;
   command: null,
 });
 
+/**
+ * Dónde abrir una lista de sugerencias: debajo del cursor, o encima si el cursor está al pie de la ventana (el editor del chat vive
+ * abajo del todo y la lista quedaba fuera de pantalla).
+ */
+function anchor(rect: DOMRect | null | undefined): { x: number; y: number; up: boolean } | null {
+  if (!rect) return null;
+  const up = rect.bottom > window.innerHeight - 280;
+  return { x: rect.left, y: up ? rect.top - 4 : rect.bottom + 4, up };
+}
+
 function place(props: SuggestionProps<DirectoryUser>): void {
   mention.items = props.items;
   mention.command = (attrs) => props.command(attrs);
-  const rect = props.clientRect?.();
-  if (rect) {
-    mention.x = rect.left;
-    mention.y = rect.bottom + 4;
-  }
+  const at = anchor(props.clientRect?.());
+  if (at) Object.assign(mention, at);
 }
+
+// ── Emojis personalizados (mensajería) ───────────────────────────────────────
+const emojiMenu = reactive<{ open: boolean; items: CustomEmoji[]; index: number; x: number; y: number; up: boolean; command: ((e: CustomEmoji) => void) | null }>({
+  open: false,
+  items: [],
+  index: 0,
+  x: 0,
+  y: 0,
+  up: false,
+  command: null,
+});
+function placeEmoji(p: SuggestionProps<CustomEmoji>): void {
+  emojiMenu.items = p.items;
+  emojiMenu.command = (e) => p.command(e);
+  const at = anchor(p.clientRect?.());
+  if (at) Object.assign(emojiMenu, at);
+}
+function chooseEmoji(e: CustomEmoji | undefined): void {
+  if (!e || !emojiMenu.command) return;
+  emojiMenu.command(e);
+  emojiMenu.open = false;
+}
+const knownEmoji = (name: string) => !!props.customEmojis?.some((e) => e.name === name);
+
+/** Emoji personalizado en el texto: solo su nombre (lo valida chat-service). Se ve como imagen; en texto plano, `:nombre:`. */
+const EmojiNode = Node.create({
+  name: 'emoji',
+  group: 'inline',
+  inline: true,
+  atom: true,
+  addAttributes() {
+    return { name: { default: '' } };
+  },
+  parseHTML() {
+    return [{ tag: 'span[data-emoji-node]', getAttrs: (el) => ({ name: (el as HTMLElement).getAttribute('data-emoji-node') }) }];
+  },
+  renderHTML({ node }) {
+    return ['span', { 'data-emoji-node': node.attrs.name }, `:${node.attrs.name}:`];
+  },
+  renderText({ node }) {
+    return `:${node.attrs.name}:`;
+  },
+  addNodeView() {
+    return VueNodeViewRenderer(CustomEmojiNode);
+  },
+  addInputRules() {
+    // `:nombre:` escrito entero (sin elegirlo de la lista) también se vuelve el emoji, si la organización lo tiene.
+    return [
+      new InputRule({
+        find: /:([a-z0-9_+-]{2,32}):$/,
+        handler: ({ state, range, match }) => {
+          if (!knownEmoji(match[1])) return null;
+          state.tr.replaceWith(range.from, range.to, this.type.create({ name: match[1] }));
+        },
+      }),
+    ];
+  },
+  addProseMirrorPlugins() {
+    return [
+      Suggestion<CustomEmoji>({
+        editor: this.editor,
+        char: ':',
+        pluginKey: new PluginKey('emojiSuggestion'),
+        allow: () => !!props.customEmojis?.length,
+        items: ({ query }) => {
+          const q = query.toLowerCase();
+          if (q.length < 1) return [];
+          const list = props.customEmojis ?? [];
+          // Primero los que empiezan así, después los que lo contienen.
+          return [...list.filter((e) => e.name.startsWith(q)), ...list.filter((e) => !e.name.startsWith(q) && e.name.includes(q))].slice(0, 8);
+        },
+        command: ({ editor: e, range, props: chosen }) => {
+          e.chain().focus().insertContentAt(range, [{ type: 'emoji', attrs: { name: chosen.name } }, { type: 'text', text: ' ' }]).run();
+        },
+        render: () => ({
+          onStart: (p) => {
+            emojiMenu.open = true;
+            emojiMenu.index = 0;
+            placeEmoji(p);
+          },
+          onUpdate: (p) => {
+            emojiMenu.index = 0;
+            placeEmoji(p);
+          },
+          onKeyDown: ({ event }) => {
+            if (!emojiMenu.open || emojiMenu.items.length === 0) return false;
+            if (event.key === 'ArrowDown') emojiMenu.index = (emojiMenu.index + 1) % emojiMenu.items.length;
+            else if (event.key === 'ArrowUp') emojiMenu.index = (emojiMenu.index - 1 + emojiMenu.items.length) % emojiMenu.items.length;
+            else if (event.key === 'Enter' || event.key === 'Tab') chooseEmoji(emojiMenu.items[emojiMenu.index]);
+            else if (event.key === 'Escape') emojiMenu.open = false;
+            else return false;
+            return true;
+          },
+          onExit: () => {
+            emojiMenu.open = false;
+          },
+        }),
+      }),
+    ];
+  },
+});
 
 function choose(user: DirectoryUser | undefined): void {
   if (!user || !mention.command) return;
@@ -118,6 +257,40 @@ const RichFile = Node.create({
     return VueNodeViewRenderer(RichFileNode);
   },
 });
+
+/** Tarjeta de un registro del CRM (mensajería). Guarda qué es, su id y la etiqueta del momento; el resto se pide al pintarla. */
+const CrmLink = Node.create({
+  name: 'crmLink',
+  group: 'block',
+  atom: true,
+  draggable: true,
+  addAttributes() {
+    return { entityType: { default: null }, entityId: { default: null }, label: { default: '' } };
+  },
+  parseHTML() {
+    return [{ tag: 'div[data-crm-link-node]' }];
+  },
+  renderHTML({ HTMLAttributes }) {
+    return ['div', mergeAttributes(HTMLAttributes, { 'data-crm-link-node': '' }), String(HTMLAttributes.label ?? '')];
+  },
+  addNodeView() {
+    return VueNodeViewRenderer(CrmLinkNode);
+  },
+});
+
+/** Pone una tarjeta del CRM donde está el cursor y deja una línea debajo para seguir escribiendo (como con una imagen). */
+function insertCrmLink(attrs: CrmLinkAttrs): void {
+  const e = editor.value;
+  if (!e) return;
+  e.chain().focus().insertContent({ type: 'crmLink', attrs }).run();
+  if (e.state.selection instanceof NodeSelection) e.commands.createParagraphNear();
+}
+
+/** Pegar un enlace de este CRM: la etiqueta sale del registro (con la sesión de quien pega); si no se puede leer, el tipo. */
+async function pasteCrmLink(entityType: CrmLinkAttrs['entityType'], entityId: string): Promise<void> {
+  const data = await resolveCrmCard(entityType, entityId);
+  insertCrmLink({ entityType, entityId, label: data?.title ?? t(`chat.crm.type.${entityType}`) });
+}
 
 const uploading = ref(0);
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -175,6 +348,9 @@ const editor = useEditor({
     Placeholder.configure({ placeholder: () => props.placeholder }),
     RichImage.configure({ inline: false }),
     RichFile,
+    CrmLink,
+    // Solo con emojis personalizados (mensajería): Proyectos no acepta el nodo.
+    ...(props.customEmojis ? [EmojiNode] : []),
     Table.configure({ resizable: false }),
     TableRow,
     TableHeader,
@@ -184,7 +360,15 @@ const editor = useEditor({
       suggestion: {
         items: ({ query }: { query: string }) => {
           const q = query.toLowerCase();
-          return store.directory.filter((u) => displayName(u).toLowerCase().includes(q) || u.email.toLowerCase().includes(q)).slice(0, 6);
+          const allowed = props.mentionUserIds ? new Set(props.mentionUserIds) : null;
+          // Las especiales van con la forma de una persona del directorio: `email` lleva su ayuda («avisa a todo el canal»).
+          // Por el principio («@can» → canal), no por cualquier parte: «@Ana» no debe ofrecer «c-ana-l» antes que a Ana.
+          const extras = props.mentionExtras
+            .filter((x) => x.label.toLowerCase().startsWith(q) || x.id.startsWith(q))
+            .map((x): DirectoryUser => ({ id: x.id, email: x.hint, fullName: x.label, avatarFileId: null }));
+          const people = store.directory.filter((u) => (!allowed || allowed.has(u.id)) && (displayName(u).toLowerCase().includes(q) || u.email.toLowerCase().includes(q)));
+          // Sin nada escrito, las especiales arriba (se descubren); escribiendo, primero las personas.
+          return (q ? [...people.slice(0, 6), ...extras] : [...extras, ...people]).slice(0, 7);
         },
         render: () => ({
           onStart: (p: SuggestionProps<DirectoryUser>) => {
@@ -218,6 +402,12 @@ const editor = useEditor({
         emit('submit');
         return true;
       }
+      // Con la lista de @menciones abierta, Enter elige a la persona (lo maneja la sugerencia), no envía. Durante una composición de
+      // teclado (tildes con tecla muerta, IME) tampoco: el Enter es del sistema.
+      if (props.enterSends && event.key === 'Enter' && !event.shiftKey && !event.isComposing && !mention.open && !(emojiMenu.open && emojiMenu.items.length)) {
+        emit('submit');
+        return true;
+      }
       return false;
     },
     // Pegar una captura, una imagen copiada o un archivo los sube y los inserta. La regla para decidir entre archivo y texto:
@@ -228,10 +418,23 @@ const editor = useEditor({
     //     pegar una imagen copiada no hacía nada.
     handlePaste: (_view, event) => {
       const data = event.clipboardData;
+      if (props.crmLinks) {
+        const link = parseCrmUrl(data?.getData('text/plain') ?? '', window.location.origin);
+        if (link && CRM_SOURCES[link.entityType]) {
+          void pasteCrmLink(link.entityType, link.entityId);
+          return true;
+        }
+      }
       const files = clipboardFiles(data);
       if (!props.uploadFile || !files.length) return false;
       if ((data?.getData('text/plain') ?? '').trim()) return false;
       void insertFiles(files);
+      return true;
+    },
+    // «/» con el editor vacío abre el buscador de registros del CRM (como los comandos de Slack). En medio de un texto es una barra.
+    handleTextInput: (_view, _from, _to, text) => {
+      if (!props.crmLinks || text !== '/' || !editor.value?.isEmpty) return false;
+      emit('slash');
       return true;
     },
     handleDrop: (_view, event) => {
@@ -359,14 +562,30 @@ defineExpose({
   focus: () => editor.value?.commands.focus('end'),
   isEmpty: () => editor.value?.isEmpty ?? true,
   clear: () => editor.value?.commands.clearContent(true),
+  /** Inserta una tarjeta del CRM (la elige un buscador fuera del editor). */
+  insertCrmLink,
+  /** Inserta un emoji donde está el cursor: los normales como texto, los personalizados (`:nombre:`) como su nodo. */
+  insertEmoji: (emoji: string) => {
+    const e = editor.value;
+    if (!e) return;
+    const custom = emoji.match(/^:([a-z0-9_+-]{2,32}):$/)?.[1];
+    if (custom && props.customEmojis) e.chain().focus().insertContent([{ type: 'emoji', attrs: { name: custom } }, { type: 'text', text: ' ' }]).run();
+    else e.chain().focus().insertContent(emoji).run();
+  },
+  /** Abre el selector de archivos (para un clip fuera del editor, como el del chat). */
+  attach: () => fileInput.value?.click(),
+  /** Archivos subiéndose ahora: quien pone el clip por fuera lo muestra cargando. */
+  uploading: () => uploading.value > 0,
 });
 
 onBeforeUnmount(() => editor.value?.destroy());
 </script>
 
 <template>
-  <div class="rte" :class="{ 'rte--readonly': !editable }">
+  <div class="rte" :class="{ 'rte--readonly': !editable, 'rte--append': !!$slots.append }">
     <div v-if="toolbar && editable && editor" class="d-flex flex-wrap align-center ga-1 mb-1">
+      <!-- Formato (negrita, listas, enlace, tabla): se apaga con `formatting` donde no cabe (el chat en el teléfono, el hilo). -->
+      <template v-if="formatting">
       <v-btn
         v-for="b in marks"
         :key="b.cmd"
@@ -429,6 +648,7 @@ onBeforeUnmount(() => editor.value?.destroy());
         @mousedown.prevent
         @click="insertTable"
       />
+      </template>
 
       <template v-if="uploadFile">
         <v-btn
@@ -441,17 +661,34 @@ onBeforeUnmount(() => editor.value?.destroy());
           @mousedown.prevent
           @click="fileInput?.click()"
         />
-        <input ref="fileInput" type="file" multiple hidden @change="pickFiles" />
+      </template>
+      <!-- A la derecha de la barra, lo que quien usa el editor quiera poner (el chat: emoji, tarjeta del CRM y «Enviar»). -->
+      <template v-if="$slots['toolbar-end']">
+        <v-spacer />
+        <slot name="toolbar-end" />
       </template>
     </div>
-    <EditorContent :editor="editor" />
+    <!-- Fuera de la barra: así `attach()` también abre el selector cuando no hay barra. -->
+    <input v-if="uploadFile" ref="fileInput" type="file" multiple hidden @change="pickFiles" />
+    <!-- `append`: un botón dentro del recuadro, abajo a la derecha (el chat pone ahí «Enviar», como el icono de un campo de texto). -->
+    <div class="position-relative">
+      <EditorContent :editor="editor" />
+      <div v-if="$slots.append && editable" class="rte-append position-absolute d-flex align-center">
+        <slot name="append" />
+      </div>
+    </div>
 
     <!--
       Lista de @menciones junto al cursor (TipTap da la posición con clientRect). Se lleva al <body>: dentro del panel lateral, que
       se desliza con `transform`, un `position: fixed` se mide desde el panel y no desde la ventana, y la lista salía fuera de pantalla.
     -->
     <Teleport to="body">
-      <v-card v-if="mention.open && mention.items.length" class="rte-suggestions" :style="{ left: `${mention.x}px`, top: `${mention.y}px` }" elevation="3">
+      <v-card
+        v-if="mention.open && mention.items.length"
+        class="rte-suggestions"
+        :style="{ left: `${mention.x}px`, top: `${mention.y}px`, transform: mention.up ? 'translateY(-100%)' : undefined }"
+        elevation="3"
+      >
         <v-list density="compact">
           <v-list-item
             v-for="(u, i) in mention.items"
@@ -462,9 +699,28 @@ onBeforeUnmount(() => editor.value?.destroy());
             @mousedown.prevent="choose(u)"
           >
             <template #prepend>
-              <UserAvatar :user-id="u.id" :size="24" :tooltip="false" class="mr-2" />
+              <v-avatar v-if="props.mentionExtras.some((x) => x.id === u.id)" size="24" color="lightprimary" class="mr-2">
+                <v-icon icon="mdi-bullhorn-outline" size="14" color="primary" />
+              </v-avatar>
+              <UserAvatar v-else :user-id="u.id" :size="24" :tooltip="false" class="mr-2" />
             </template>
             <v-list-item-title>{{ displayName(u) }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-card>
+      <v-card
+        v-if="emojiMenu.open && emojiMenu.items.length"
+        class="rte-suggestions"
+        :style="{ left: `${emojiMenu.x}px`, top: `${emojiMenu.y}px`, transform: emojiMenu.up ? 'translateY(-100%)' : undefined }"
+        elevation="3"
+        data-emoji-suggestions
+      >
+        <v-list density="compact">
+          <v-list-item v-for="(e, i) in emojiMenu.items" :key="e.id" :active="i === emojiMenu.index" color="primary" @mousedown.prevent="chooseEmoji(e)">
+            <template #prepend>
+              <CustomEmojiImg :name="e.name" size="22px" class="mr-3" />
+            </template>
+            <v-list-item-title>:{{ e.name }}:</v-list-item-title>
           </v-list-item>
         </v-list>
       </v-card>
@@ -473,6 +729,14 @@ onBeforeUnmount(() => editor.value?.destroy());
 </template>
 
 <style scoped>
+/* Sitio para el botón de `append` dentro del recuadro: el texto no pasa por debajo. */
+.rte--append :deep(.ProseMirror) {
+  padding-right: 52px;
+}
+.rte-append {
+  right: 6px;
+  bottom: 6px;
+}
 .rte :deep(.ProseMirror) {
   min-height: 72px;
   padding: 8px 12px;

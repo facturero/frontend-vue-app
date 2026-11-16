@@ -92,6 +92,7 @@ function iconFor(event: string): string {
   if (event === 'identity.user.disabled') return 'mdi-account-cancel-outline';
   if (event === 'identity.user.invited') return 'mdi-account-plus-outline';
   if (event === 'projects.task.mentioned') return 'mdi-at';
+  if (event === 'chat.message.created') return 'mdi-forum-outline';
   if (event === 'projects.comment.created') return 'mdi-comment-text-outline';
   if (event === 'projects.task.completed') return 'mdi-check-circle-outline';
   if (event === 'projects.task.due_soon') return 'mdi-calendar-alert';

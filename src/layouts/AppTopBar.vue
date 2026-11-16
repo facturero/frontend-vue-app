@@ -13,6 +13,7 @@ import GlobalSearch from '@/components/GlobalSearch.vue';
 import { useAppTour } from '@/composable/useAppTour';
 import { useBareShell } from '@/composable/useBareShell';
 import { useAssistantStore } from '@/stores/assistant';
+import { useFeedbackStore } from '@/stores/feedback';
 import type { Me } from '@/types/auth';
 
 const ui = useUiStore();
@@ -90,6 +91,17 @@ function openReport(): void {
   menuOpen.value = false;
   ui.openReport();
 }
+
+function go(name: string): void {
+  menuOpen.value = false;
+  void router.push({ name });
+}
+
+// Al abrir el menú, los números del buzón al día (sin tiempo real: los avisos llegan por la campana).
+const feedbackStore = useFeedbackStore();
+watch(menuOpen, (open) => {
+  if (open) void feedbackStore.refresh();
+});
 
 function logout(): void {
   menuOpen.value = false;
@@ -177,6 +189,20 @@ function logout(): void {
           @click="openTour" />
 
         <v-list-item prepend-icon="mdi-bug-outline" :title="$t('report.menu')" value="report" @click="openReport" />
+        <!-- Comentarios y mejoras (feedback-service): con número si el equipo de la plataforma respondió algo mío. -->
+        <v-list-item v-if="!bareShell" prepend-icon="mdi-lightbulb-on-outline" :title="$t('feedbackBox.menu')" value="feedback-box" data-menu-feedback @click="go('feedback')">
+          <template v-if="feedbackStore.unread" #append><v-badge :content="feedbackStore.unread" color="error" inline /></template>
+        </v-list-item>
+        <v-list-item
+          v-if="!bareShell && auth.can('feedback:manage')"
+          prepend-icon="mdi-inbox-arrow-down-outline"
+          :title="$t('feedbackBox.platformMenu')"
+          value="platform-feedback"
+          data-menu-platform-feedback
+          @click="go('platform-feedback')"
+        >
+          <template v-if="feedbackStore.platformUnread" #append><v-badge :content="feedbackStore.platformUnread" color="error" inline /></template>
+        </v-list-item>
       </v-list>
 
       <v-divider />

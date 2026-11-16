@@ -572,3 +572,17 @@ usuario y organización.
   dentro.
 - Un widget que necesita un establecimiento (restaurante) lleva `needs: 'establishment'`: el selector y su `config` los pone
   `DashboardWidget`; ese tipo de widget se puede repetir (uno por local).
+
+## La mensajería no lleva `PageHeader` (`/messages`)
+
+Excepción acotada, aprobada por el dueño el 2026-11-14 (como el editor del plano del restaurante): la mensajería al estilo Slack
+ocupa todo el alto disponible con dos paneles —barra de canales y DMs a la izquierda (`components/chat/ChatSidebar.vue`), conversación a
+la derecha— y el nombre del canal hace de título. Un `PageHeader` arriba le quitaba ~100 px a la conversación, que es lo que importa.
+
+- El alto sale de la ventana menos la barra superior y el relleno del contenedor de la app (`MessagesView.vue`); el desplazamiento va
+  dentro de la lista de mensajes y de la barra, nunca en la página.
+- **Teléfono (`smAndDown`): un panel a la vez.** La lista; al abrir una conversación, la conversación con «atrás» (la conversación va en la
+  ruta, `/messages/:conversationId`, así «atrás» del navegador también funciona).
+- El resto sigue el sistema: tokens del tema, `EmptyState`, `useConfirm`, `useNotify`, diálogos con la acción principal `variant="flat"`.
+- El editor es el de Proyectos (`RichTextEditor`) con `enter-sends`: Enter envía, Mayús+Enter salto de línea.
+- Diseño y reglas del servicio: `backend/chat-service/IMPLEMENTATION.md`.
