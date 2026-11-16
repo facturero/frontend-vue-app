@@ -57,7 +57,7 @@ function render(node: RichDoc, key: number): VNodeChild {
     case 'hardBreak':
       return h('br', { key });
     case 'emoji':
-      return typeof node.attrs?.name === 'string' ? h(CustomEmoji, { key, name: node.attrs.name }) : null;
+      return typeof node.attrs?.name === 'string' ? h(CustomEmoji, { key, name: node.attrs.name, preview: true }) : null;
     case 'mention':
       return h('span', { key, class: 'text-primary font-weight-medium' }, `@${String(node.attrs?.label ?? '')}`);
     case 'bulletList':

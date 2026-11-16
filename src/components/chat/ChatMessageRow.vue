@@ -15,6 +15,7 @@ import RichTextView from '@/components/projects/RichTextView.vue';
 import RichTextEditor from '@/components/projects/RichTextEditor.vue';
 import EmojiPicker from './EmojiPicker.vue';
 import CustomEmojiImg from './CustomEmoji.vue';
+import EmojiPreview from './EmojiPreview.vue';
 import ChatCreateTaskDialog from './ChatCreateTaskDialog.vue';
 import { usePluginsStore } from '@/stores/plugins';
 
@@ -144,7 +145,8 @@ const customName = (emoji: string) => emoji.match(/^:([a-z0-9_+-]{2,32}):$/)?.[1
 
       <!-- Reacciones -->
       <div v-if="message.reactions.length" class="d-flex flex-wrap ga-1 mt-1">
-        <v-tooltip v-for="r in message.reactions" :key="r.emoji" :text="reactors(r.userIds)" location="top">
+        <!-- El tooltip de una reacción: el emoji en grande, su nombre si es personalizado y quién reaccionó. -->
+        <v-tooltip v-for="r in message.reactions" :key="r.emoji" location="top">
           <template #activator="{ props: tip }">
             <v-chip
               v-bind="tip"
@@ -159,6 +161,7 @@ const customName = (emoji: string) => emoji.match(/^:([a-z0-9_+-]{2,32}):$/)?.[1
               <span class="ml-1">{{ r.count }}</span>
             </v-chip>
           </template>
+          <EmojiPreview :name="customName(r.emoji)" :char="customName(r.emoji) ? null : r.emoji" :caption="reactors(r.userIds)" />
         </v-tooltip>
         <EmojiPicker v-if="canWrite" @pick="react" />
       </div>
