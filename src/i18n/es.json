@@ -4550,7 +4550,9 @@
       "removeConfirm": "Quitar",
       "custom": "Personalizados",
       "manage": "Agregar emoji",
-      "insert": "Emoji"
+      "insert": "Emoji",
+      "search": "Buscar emoji",
+      "noMatch": "Ningún emoji con ese nombre."
     },
     "foldedMore": "{n} más",
     "threads": {
