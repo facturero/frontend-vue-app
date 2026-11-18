@@ -725,7 +725,7 @@
     "signIn": "Connexion",
     "toAccessTemplate": "Pour accéder au tableau de bord",
     "welcomeSubtitle": "Votre tableau de bord",
-    "welcomeTitle": "Bienvenue sur le CRM"
+    "welcomeTitle": "Bienvenue sur Noah Solution"
   },
   "certificates": {
     "empty": "Aucun certificat téléversé pour le moment.",
@@ -2416,7 +2416,7 @@
     "treasury": "Trésorerie",
     "reporting": "Annexes SRI",
     "audit": "Journal d'audit",
-    "brand": "CRM",
+    "brand": "Noah Solution",
     "brandSubtitle": "Panneau d'admin.",
     "comingSoon": "bientôt",
     "customers": "Clients",

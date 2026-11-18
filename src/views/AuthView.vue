@@ -66,7 +66,7 @@ function toggleMode(): void {
           <v-avatar color="primary" size="38" rounded="lg">
             <v-icon icon="mdi-shield-lock-outline" size="22" />
           </v-avatar>
-          <span class="text-title-large font-weight-bold">CRM</span>
+          <span class="text-title-large font-weight-bold">{{ $t('nav.brand') }}</span>
         </div>
 
         <v-img

@@ -674,7 +674,7 @@ export const useChatStore = defineStore('chat', () => {
     const title = summary?.kind === 'channel' ? `${sender} · #${where}` : sender || where;
     const body = (message?.bodyText ?? '').slice(0, 140);
     try {
-      const n = new Notification(title, { body, tag: evt.conversationId, icon: '/favicon.ico' });
+      const n = new Notification(title, { body, tag: evt.conversationId, icon: '/favicon-192.png' });
       n.onclick = async () => {
         window.focus();
         const { default: router } = await import('@/router');
