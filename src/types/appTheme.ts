@@ -109,9 +109,16 @@ export function mix(a: string, b: string, amount: number): string {
 const WHITE = '#ffffff';
 const BLACK = '#000000';
 
-/** Blanco o negro, el que más se lea encima. El servidor hace la misma cuenta al validar el primario. */
+/**
+ * El texto y los iconos encima de un color: blanco mientras se lea (3:1, el mínimo para iconos y texto grande, como hace Material),
+ * negro solo sobre colores claros. Antes era «el que más contraste dé», y sobre el azul del tema claro (#5d87ff) eso es el negro
+ * (6,5 vs 3,3): al abrir el editor, los iconos sobre el primario pasaban de blanco a negro sin haber tocado nada.
+ *
+ * El servidor valida lo mismo por otro camino (que el mejor de los dos llegue a 3:1): si el blanco no llega, el negro supera 7:1,
+ * así que lo que acepta el servidor y lo que pinta el navegador siempre se leen.
+ */
 export function bestTextOn(hex: string): string {
-  return contrastRatio(WHITE, hex) >= contrastRatio(BLACK, hex) ? WHITE : BLACK;
+  return contrastRatio(WHITE, hex) >= 3 ? WHITE : BLACK;
 }
 
 /**
@@ -164,6 +171,32 @@ export function deriveThemeColors(config: AppThemeConfig, baseColors: Record<str
   for (const key of ['background', 'surface', 'surface-light', 'surface-bright', 'skin-bordered-background', 'skin-bordered-surface', 'code', 'kbd']) {
     out[`on-${key}`] = text;
   }
+  // Lo que no se tocó se queda EXACTAMENTE como en el tema integrado de la base: un token derivado cuyos colores de origen siguen
+  // iguales a los del integrado toma el valor del integrado (que se eligió a mano en plugins/vuetify.ts). Sin esto, abrir el editor
+  // sin cambiar nada recalculaba, por ejemplo, el texto sobre el secundario (de blanco a negro) o los tonos suaves.
+  const baseOf: Record<AppThemeColorToken, string> = {
+    primary: 'primary', secondary: 'secondary', background: 'background', surface: 'surface',
+    text: 'on-surface', success: 'success', warning: 'warning', error: 'error',
+  };
+  const untouched = (...tokens: AppThemeColorToken[]) =>
+    tokens.every((tk) => (baseColors[baseOf[tk]] ?? '').toLowerCase() === config.colors[tk].toLowerCase());
+  const DEPENDS: Record<string, AppThemeColorToken[]> = {
+    'primary-darken-1': ['primary'], 'on-primary': ['primary'], 'on-primary-darken-1': ['primary'], 'on-lightprimary': ['primary'],
+    'secondary-darken-1': ['secondary'], 'on-secondary': ['secondary'], 'on-secondary-darken-1': ['secondary'], 'on-lightsecondary': ['secondary'],
+    'on-success': ['success'], 'on-lightsuccess': ['success'], 'on-warning': ['warning'], 'on-lightwarning': ['warning'],
+    'on-error': ['error'], 'on-lighterror': ['error'], 'on-info': [], 'on-lightinfo': [],
+    lightprimary: ['primary', 'surface'], lightsecondary: ['secondary', 'surface'], lightsuccess: ['success', 'surface'],
+    lightwarning: ['warning', 'surface'], lighterror: ['error', 'surface'], lightinfo: ['surface'],
+    borderColor: ['text', 'surface'], inputBorder: ['text', 'surface'], hoverColor: ['text', 'surface'], 'surface-light': ['text', 'surface'],
+    code: ['text', 'surface'], kbd: ['text', 'surface'], grey100: ['background'], grey200: ['text', 'background'],
+    'auth-panel': ['primary', 'surface'], 'surface-bright': ['surface'],
+    'skin-bordered-background': ['background'], 'skin-bordered-surface': ['surface'],
+    'on-background': ['text'], 'on-surface-light': ['text', 'surface'], 'on-surface-bright': ['text', 'surface'],
+    'on-skin-bordered-background': ['text', 'background'], 'on-skin-bordered-surface': ['text', 'surface'], 'on-code': ['text', 'surface'], 'on-kbd': ['text', 'surface'],
+  };
+  for (const [key, deps] of Object.entries(DEPENDS)) {
+    if (baseColors[key] && untouched(...deps)) out[key] = baseColors[key];
+  }
   return out;
 }
 
@@ -171,11 +204,11 @@ export function deriveThemeColors(config: AppThemeConfig, baseColors: Record<str
  * Un tema nuevo empieza con los colores del tema integrado de su base: lo que la persona ve hoy. Salvo el fondo en base oscura:
  * el oscuro integrado tiene fondo y superficie iguales, y en un tema propio las tarjetas no se distinguirían del fondo; se oscurece.
  */
-export function configFromBase(base: AppThemeBase, baseColors: Record<string, string>): AppThemeConfig {
+export function configFromBase(base: AppThemeBase, baseColors: Record<string, string>, opts: { separateBackground?: boolean } = {}): AppThemeConfig {
   const pick = (k: string, fallback: string) => (isValidHexColor((baseColors[k] ?? '').toLowerCase()) ? baseColors[k].toLowerCase() : fallback);
   const surface = pick('surface', base === 'dark' ? '#2a3447' : '#ffffff');
   let background = pick('background', base === 'dark' ? '#202936' : '#f2f6fa');
-  if (background === surface) background = mix(surface, base === 'dark' ? '#000000' : '#6b7a90', base === 'dark' ? 0.72 : 0.94);
+  if ((opts.separateBackground ?? true) && background === surface) background = mix(surface, base === 'dark' ? '#000000' : '#6b7a90', base === 'dark' ? 0.72 : 0.94);
   return {
     schemaVersion: APP_THEME_SCHEMA_VERSION,
     base,

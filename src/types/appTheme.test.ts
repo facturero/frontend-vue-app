@@ -19,9 +19,27 @@ describe('temas de la aplicación', () => {
     expect(mix('#ff0000', '#0000ff', 0.5)).toBe('#800080');
   });
 
-  it('el texto sobre un color es el que más se lee (blanco o negro)', () => {
+  it('el texto sobre un color es blanco mientras se lea (3:1); negro solo sobre colores claros', () => {
     expect(bestTextOn('#0b6e99')).toBe('#ffffff');
+    // El azul del tema claro: el negro contrasta más, pero el blanco se lee y es el que usa el tema integrado.
+    expect(bestTextOn('#5d87ff')).toBe('#ffffff');
     expect(bestTextOn('#ffd54f')).toBe('#000000');
+    expect(bestTextOn('#13deb9')).toBe('#000000');
+  });
+
+  it('un tema sin tocar (los colores del integrado) da exactamente la paleta del integrado', () => {
+    const full = {
+      ...base, secondary: '#49BEFF', success: '#13DEB9', warning: '#FFAE1F', error: '#FA896B',
+      'on-primary': '#FFFFFF', 'on-secondary': '#FFFFFF', 'on-success': '#FFFFFF', 'on-warning': '#FFFFFF',
+      lightprimary: '#ECF2FF', lightsecondary: '#E8F7FF', borderColor: '#E5EAEF', 'on-background': '#2A3547',
+    };
+    const c = deriveThemeColors(configFromBase('light', full, { separateBackground: false }), full);
+    for (const [k, v] of Object.entries(full)) expect(c[k].toLowerCase(), k).toBe(v.toLowerCase());
+  });
+
+  it('abrir el editor con los colores del tema claro no cambia el texto sobre el primario', () => {
+    const c = deriveThemeColors(configFromBase('light', base), base);
+    expect(c['on-primary']).toBe('#ffffff');
   });
 
   it('deriva la paleta completa desde los ocho colores, sin tokens del integrado colados', () => {

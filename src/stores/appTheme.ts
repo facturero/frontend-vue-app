@@ -4,6 +4,7 @@ import vuetify from '@/plugins/vuetify';
 import { themesApi } from '@/api/themes';
 import { useAuthStore } from '@/stores/auth';
 import {
+  configFromBase,
   deriveThemeColors,
   isBuiltinRef,
   isUsableConfig,
@@ -63,8 +64,15 @@ function register(name: string, dark: boolean, colors: Record<string, string>): 
   vuetify.theme.themes.value[name] = { ...base, dark, colors: colors as typeof base.colors };
 }
 
+/** Velo de los diálogos según el tema (base.css, bloque 4 bis): en un tema oscuro, el 32 % de Vuetify no separa el diálogo. */
+function setScrim(name: string): void {
+  const dark = vuetify.theme.themes.value[name]?.dark ?? false;
+  document.documentElement.style.setProperty('--app-scrim-opacity', dark ? '0.6' : '0.32');
+}
+
 function show(name: string): void {
   if (vuetify.theme.name.value !== name) void vuetify.theme.change(name);
+  setScrim(name);
 }
 
 /** Antes de montar: el último tema pintado, si hay sesión. Sin sesión (inicio de sesión, alta) siempre claro. */
@@ -73,6 +81,7 @@ export function applyCachedTheme(hasSession: boolean): void {
   if (!cached) return;
   if (!isBuiltinRef(cached.name)) register(cached.name, cached.dark, cached.colors);
   vuetify.theme.change(cached.name);
+  setScrim(cached.name);
 }
 
 const systemDark = typeof window !== 'undefined' && window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
@@ -174,6 +183,19 @@ export const useAppThemeStore = defineStore('appTheme', () => {
     await load();
   }
 
+  /**
+   * Los colores del tema que se está viendo, como punto de partida de un tema nuevo: abrir el editor no tiene que cambiar nada en
+   * pantalla. Claro, oscuro y «como el sistema» salen de los integrados; un predefinido o un tema propio, de su configuración.
+   */
+  function currentConfig(): AppThemeConfig {
+    let target = effectiveRef.value;
+    if (target === 'system') target = systemDark?.matches ? 'dark' : 'light';
+    // Tal cual el integrado (sin separar el fondo de las tarjetas en oscuro): abrir el editor no cambia nada en pantalla.
+    if (target === 'light' || target === 'dark') return configFromBase(target, baseColorsOf(target), { separateBackground: false });
+    const config = presetOf(target)?.config ?? themes.value.find((t) => t.id === target)?.config;
+    return config && isUsableConfig(config) ? structuredClone(config) : configFromBase('light', baseColorsOf('light'));
+  }
+
   function startPreview(config: AppThemeConfig): void {
     preview.value = config;
     apply();
@@ -197,6 +219,6 @@ export const useAppThemeStore = defineStore('appTheme', () => {
 
   return {
     themes, settings, myChoice, loaded, preview, isAdmin, locked, effectiveRef,
-    load, choose, saveSettings, create, update, remove, startPreview, stopPreview, reset, apply,
+    load, choose, saveSettings, create, update, remove, startPreview, stopPreview, reset, apply, currentConfig,
   };
 });

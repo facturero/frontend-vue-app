@@ -52,7 +52,8 @@ watch(
     }
     error.value = null;
     name.value = props.theme?.name ?? '';
-    config.value = props.theme ? structuredClone(props.theme.config) : configFromBase('light', baseColorsOf('light'));
+    // Un tema nuevo arranca con el que se está viendo: abrir el editor no cambia nada en pantalla hasta que se toque un color.
+    config.value = props.theme ? structuredClone(props.theme.config) : store.currentConfig();
     initial.value = JSON.stringify([name.value, config.value]);
     store.startPreview(config.value);
   },

@@ -64,6 +64,13 @@
   .v-dialog > .v-overlay__content > form > .v-card > .v-card-actions {
     padding: 0 24px 24px;
   }
+
+  /* 4 bis. El velo detrás de un diálogo. Vuetify lo pinta negro al 32 % en todos los temas; sobre un fondo oscuro eso casi no se
+   *    nota y el diálogo (del mismo color que las tarjetas) no se separa de la página. `--app-scrim-opacity` lo pone
+   *    stores/appTheme.ts según el tema activo: 0.32 en los claros, 0.6 en los oscuros (integrado, predefinidos y propios). */
+  .v-overlay__scrim {
+    opacity: var(--app-scrim-opacity, 0.32);
+  }
 }
 
 /* 5. Transición entre pantallas (App.vue, `<transition name="page">`). La nueva entra con un fundido y un desliz corto hacia arriba;

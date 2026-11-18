@@ -598,6 +598,9 @@ Cada persona elige su tema en el menú del avatar («Tema», un diálogo de cuad
   tema integrado de la base y no seguirá al tema propio.
 - **Vista previa = la aplicación misma:** el editor (`components/themes/AppThemeEditorDialog.vue`) pinta toda la aplicación con lo que
   se edita. Por eso es un panel lateral sin velo (`:scrim="false"`, teletransportado al `body` para que ningún encabezado fijo lo tape): lo que queda a la izquierda es la vista previa.
+- **Velo de los diálogos:** negro al 32 % en los temas claros y al 60 % en los oscuros (`--app-scrim-opacity`, lo pone
+  `stores/appTheme.ts`; regla en `base.css`, bloque 4 bis). Con el 32 % de Vuetify, en oscuro el diálogo no se separaba de la
+  página. Ningún diálogo cambia su `scrim` por su cuenta (la excepción es el editor de temas, que no lleva velo).
 - **Sin destello al recargar:** el último tema pintado se guarda en `localStorage` (`crm:app-theme`) y `main.ts` lo aplica antes de
   montar. Sin sesión (inicio de sesión, alta) siempre claro.
 - **No siguen el tema, a propósito:** la caja web (`/pos`, tiene sus propios temas, §9), la vista previa del tema del POS y la página
