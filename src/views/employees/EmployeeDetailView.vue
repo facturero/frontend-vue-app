@@ -10,6 +10,7 @@ import RoleSelect from '@/components/RoleSelect.vue';
 import RestorePasswordDialog from '@/components/RestorePasswordDialog.vue';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import { extractError } from '@/utils/error';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const props = defineProps<{ id: string }>();
 const emp = useEmployeeStore();
@@ -271,9 +272,7 @@ function openChangeDialog(): void {
       {{ $t('employees.notFound') }}
     </div>
 
-    <div v-else class="d-flex justify-center py-8">
-      <v-progress-circular indeterminate color="primary" />
-    </div>
+    <ViewSkeleton v-else type="detail" />
 
     <RestorePasswordDialog
       v-model="changeDialog"

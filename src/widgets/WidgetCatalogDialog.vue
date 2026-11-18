@@ -51,7 +51,7 @@ function add(def: WidgetDef): void {
           <v-list density="compact" class="pa-0">
             <v-list-item v-for="def in g.defs" :key="def.code" class="px-0">
               <template #prepend>
-                <v-sheet :color="`light${def.color}`" class="d-flex align-center justify-center rounded-lg mr-4 catalog-icon">
+                <v-sheet :color="`light${def.color}`" width="32" height="32" class="d-flex align-center justify-center rounded-lg mr-4">
                   <v-icon :icon="def.icon" :color="def.color" size="18" />
                 </v-sheet>
               </template>
@@ -72,9 +72,4 @@ function add(def: WidgetDef): void {
   </v-dialog>
 </template>
 
-<style scoped>
-.catalog-icon {
-  width: 32px;
-  height: 32px;
-}
-</style>
+

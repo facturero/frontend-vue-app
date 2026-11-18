@@ -1,7 +1,37 @@
-# Temas — análisis
+# Temas
 
-Escrito el 2026-11-18. Estado: **análisis, nada construido**. Lo único hecho ese día fue quitar el interruptor «Modo nocturno» del
-menú del avatar (decisión del dueño): el CRM se ve siempre en claro hasta que exista este módulo.
+Escrito el 2026-11-18 como análisis; construido el mismo día. Estado: **hecho en local, sin subir**. Falta el recorrido del modo
+oscuro por todas las pantallas (ver «Lo que hay que arreglar antes de ofrecer el oscuro»).
+
+## Decisiones del dueño (2026-11-18)
+
+1. Vive en **organization-service**, junto a los temas del POS. No hay microservicio nuevo.
+2. **Gratis** para todos: no es un módulo del catálogo (ni plugin, ni widget, ni precio).
+3. **Todos pueden cambiar de tema; no todos pueden crearlo.** Crean temas y deciden el de la empresa quienes tienen
+   `organization:admin` (no hay permiso nuevo).
+4. **Se puede fijar.** Los administradores fijan el tema de la empresa para el resto; ellos siguen pudiendo elegir.
+
+## Lo construido
+
+- **organization-service:** tablas `app_themes`, `organization_theme_settings` y `user_theme_choices` (migración
+  `20261118100000-create-app-themes.js`).
+  - Rutas `GET /organizations/me/themes` (temas + ajustes + mi elección, sin permiso), `POST`/`PUT /:id`/`DELETE /:id`
+    (`organization:admin`), `PUT /organizations/me/theme-settings` (`organization:admin`) y `PUT /organizations/me/theme-choice`
+    (sin permiso; 409 `THEME_ENFORCED` si está fijado y no eres administrador).
+  - Eventos `organization.app_theme.created/updated/deleted` y `organization.theme_settings.updated`, con etiqueta en la bitácora.
+    Elegir tu tema no publica nada.
+  - La elección de cada usuario vive aquí y no en auth-service (cambio respecto al análisis): una sola petición devuelve todo y la
+    regla del fijado se aplica junto al dato. Así auth-service no se toca.
+- **api-gateway-node:** el hub enlaza `organization.app_theme.#` y `organization.theme_settings.#` y avisa `app_theme.changed` a
+  la sala de la organización: si un administrador fija un tema, el resto lo ve sin recargar.
+- **frontend:** «Tema» en el menú del avatar (`ThemeSwitcher.vue`), `Ajustes → Temas` (`AppThemesView.vue`) con el editor
+  (`AppThemeEditorDialog.vue`), y el store `stores/appTheme.ts` (ver UI-UX.md §9 bis).
+
+**Orden de despliegue:** organization-service (migración) → api-gateway-node → frontend.
+
+---
+
+El resto es el análisis original, con lo que se decidió marcado arriba.
 
 ## Qué pidió el dueño
 

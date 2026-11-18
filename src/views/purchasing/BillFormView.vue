@@ -19,6 +19,7 @@ import type { LineAmounts } from '@/utils/purchasing';
 import type { BillDocType, BillInput, OrderStatus } from '@/types/purchasing';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import PurchasingTabs from '@/components/purchasing/PurchasingTabs.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -249,7 +250,15 @@ async function save(): Promise<void> {
   }
 }
 
-onMounted(async () => {
+/** Primera carga de la pantalla: mientras dura se ve su esqueleto (ViewSkeleton), no un formulario vacío que luego se rellena de golpe. */
+const loading = ref(true);
+onMounted(() => {
+  void loadView().finally(() => {
+    loading.value = false;
+  });
+});
+
+async function loadView(): Promise<void> {
   store.error = null;
   await Promise.all([store.fetchSuppliers({ status: 'active' }), productStore.fetchCatalog()]);
 
@@ -302,7 +311,7 @@ onMounted(async () => {
       await loadFromOrder();
     }
   }
-});
+}
 </script>
 
 <template>
@@ -313,6 +322,7 @@ onMounted(async () => {
     <v-alert v-if="loadError" type="error" class="mb-4">{{ loadError.startsWith('purchasing.') ? $t(loadError) : loadError }}</v-alert>
     <v-alert v-if="formError" type="error" closable class="mb-4" @click:close="formError = null">{{ formError }}</v-alert>
 
+    <ViewSkeleton :loading="loading" type="form">
     <v-form v-if="!loadError" @submit.prevent="save">
       <v-card class="mb-4">
         <v-card-title class="text-title-large">{{ $t('purchasing.bills.header') }}</v-card-title>
@@ -430,5 +440,6 @@ onMounted(async () => {
         <v-btn color="primary" :loading="store.saving" :disabled="!canSave" @click="save">{{ $t('purchasing.bills.saveDraft') }}</v-btn>
       </div>
     </v-form>
+    </ViewSkeleton>
   </v-container>
 </template>

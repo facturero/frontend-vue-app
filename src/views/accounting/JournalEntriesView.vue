@@ -15,6 +15,7 @@ import type { EntryStatus } from '@/types/accounting';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import AccountingTabs from '@/components/accounting/AccountingTabs.vue';
 import AccountingSetupCard from '@/components/accounting/AccountingSetupCard.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t, locale } = useI18n();
 const router = useRouter();
@@ -119,6 +120,7 @@ function open(_: unknown, row: { item: { id: string } }): void {
           class="cursor-pointer"
           @click:row="open"
         >
+          <template v-if="!store.entries?.length" #loading><ViewSkeleton type="rows" /></template>
           <template #item.number="{ item }">
             <span v-if="item.number" class="font-weight-medium">{{ item.number }}</span>
             <span v-else class="text-medium-emphasis">{{ $t('accounting.journal.noNumber') }}</span>

@@ -296,15 +296,14 @@ function leaveAnyway(): void {
           elevation="1"
         >
           <span class="text-body-medium text-medium-emphasis">{{ $t('restaurant.plan.wallHint') }}</span>
-          <v-text-field
+          <v-number-input
             v-if="editor.wallAnchor"
-            v-model.number="wallLengthM"
-            type="number"
-            min="0.1"
-            step="0.1"
+            v-model="wallLengthM"
+            :min="0.1"
+            :step="0.1" :precision="2"
             :label="$t('restaurant.plan.wallLength')"
             suffix="m"
-            style="max-width: 140px; pointer-events: auto"
+            max-width="140" class="pointer-events-auto"
             @change="applyWallLength"
           />
           <v-btn v-if="editor.wallAnchor" size="small" variant="tonal" style="pointer-events: auto" @click="editor.finishWall()">
@@ -352,8 +351,8 @@ function leaveAnyway(): void {
           <p class="text-body-medium text-medium-emphasis">{{ $t('restaurant.plan.roomIntro') }}</p>
           <div v-if="roomError"><v-alert type="error">{{ roomError }}</v-alert></div>
           <div class="d-flex ga-3">
-            <v-text-field v-model.number="roomForm.widthM" type="number" min="1" step="0.5" :label="$t('restaurant.plan.roomWidth')" suffix="m" />
-            <v-text-field v-model.number="roomForm.heightM" type="number" min="1" step="0.5" :label="$t('restaurant.plan.roomHeight')" suffix="m" />
+            <v-number-input v-model="roomForm.widthM" :min="1" :step="0.5" :precision="2" :label="$t('restaurant.plan.roomWidth')" suffix="m" />
+            <v-number-input v-model="roomForm.heightM" :min="1" :step="0.5" :precision="2" :label="$t('restaurant.plan.roomHeight')" suffix="m" />
           </div>
         </v-card-text>
         <v-card-actions>

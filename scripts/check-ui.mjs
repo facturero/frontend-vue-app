@@ -121,6 +121,18 @@ for (const file of files) {
       add(file, n, 'fecha', 'type="date" dibuja el calendario del navegador: usa <DateField> (components/ui/DateField.vue, UI-UX.md §1)');
     }
 
+    // 2c bis. Número, hora y color con el control del navegador (el «spinner», el reloj y el diálogo de colores del sistema
+    //     operativo: otro idioma, otro formato de hora, sin el tema). Desde el 2026-11-18 ninguna pantalla lo usa: sin excepciones.
+    const nativeControl = line.match(/\btype="(number|time|color)"/);
+    if (nativeControl && !/^\s*(\*|\/\/|<!--)/.test(line)) {
+      const use = {
+        number: '<v-number-input>',
+        time: '<TimeField> (components/ui/TimeField.vue)',
+        color: '<ColorField> (components/ui/ColorField.vue)',
+      }[nativeControl[1]];
+      add(file, n, 'control', `type="${nativeControl[1]}" lo dibuja el navegador: usa ${use} (UI-UX.md §1)`);
+    }
+
     // 2d. Avisos: un solo snackbar, el de App.vue (useNotify). Desde el 2026-11-06 no queda ninguno más: sin excepciones.
     if (/<v-snackbar\b(?!-queue)/.test(line) && file !== 'src/App.vue') {
       add(file, n, 'aviso', '<v-snackbar> propio: usa notify.success/error/undoable (composable/useNotify.ts, REGLAS-FRONT.md R-31)');

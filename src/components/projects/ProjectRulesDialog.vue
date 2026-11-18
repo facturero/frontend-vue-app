@@ -189,7 +189,7 @@ async function remove(r: ProjectRule): Promise<void> {
               @update:model-value="(v) => (editing!.actions[i] = blankAction(v))"
             />
             <v-autocomplete v-if="a.type === 'assign'" v-model="a.userId" :items="people" :label="t('projects.task.assignee')" clearable :placeholder="t('projects.task.unassigned')" persistent-placeholder />
-            <v-text-field v-else-if="a.type === 'set_due'" v-model.number="a.days" type="number" min="0" max="365" :label="t('projects.rules.days')" />
+            <v-number-input v-else-if="a.type === 'set_due'" v-model="a.days" :min="0" :max="365" :label="t('projects.rules.days')" />
             <v-select v-else-if="a.type === 'move_to_section'" v-model="a.sectionId" :items="sectionItems" :label="t('projects.rules.section')" />
             <v-select v-else-if="a.type === 'add_tag'" v-model="a.tagId" :items="tagItems" :label="t('projects.tags.title')" :no-data-text="t('projects.rules.noTags')" />
             <v-autocomplete v-else-if="a.type === 'add_follower'" v-model="a.userId" :items="people" :label="t('projects.followers.title')" />

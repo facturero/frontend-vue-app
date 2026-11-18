@@ -7,6 +7,7 @@ import { usePluginsStore } from '@/stores/plugins';
 import { shouldAutoStartTour, useAppTour } from '@/composable/useAppTour';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import FieldHelp from '@/components/ui/FieldHelp.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const auth = useAuthStore();
 const store = useOrganizationStore();
@@ -153,6 +154,7 @@ async function submit(): Promise<void> {
   <component :is="props.embedded ? 'div' : 'v-container'">
     <PageHeader v-if="!props.embedded" :title="$t('organization.settingsTitle')" />
 
+    <ViewSkeleton :loading="store.loading && !store.org" type="form" :count="10">
     <v-row>
       <v-col cols="12">
         <v-card>
@@ -300,6 +302,7 @@ async function submit(): Promise<void> {
         </v-card>
       </v-col>
     </v-row>
+    </ViewSkeleton>
 
     <!-- Durante el alta estas dos tarjetas son callejones sin salida: el guard
          del router no deja entrar a ninguna de las dos hasta que la organización

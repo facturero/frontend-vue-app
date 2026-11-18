@@ -18,6 +18,7 @@ import { ORDER_STATUS_COLOR } from '@/utils/purchasing';
 import { ORDER_STATUSES, type OrderStatus, type PurchaseOrder } from '@/types/purchasing';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import PurchasingTabs from '@/components/purchasing/PurchasingTabs.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t, locale } = useI18n();
 const router = useRouter();
@@ -164,6 +165,7 @@ async function saveSettings(): Promise<void> {
           hide-default-footer
           @click:row="(_: Event, { item }: { item: PurchaseOrder }) => open(item)"
         >
+          <template v-if="!store.orders?.length" #loading><ViewSkeleton type="rows" /></template>
           <template #item.number="{ item }">
             {{ item.number ?? $t('purchasing.orders.draft') }}
           </template>

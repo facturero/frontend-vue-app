@@ -16,6 +16,7 @@ import type { Supplier } from '@/types/purchasing';
 import type { PayableOpeningBalanceLoad } from '@/types/treasury';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import TreasuryTabs from '@/components/treasury/TreasuryTabs.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t, locale } = useI18n();
 const store = useTreasuryPayablesStore();
@@ -28,14 +29,22 @@ const confirm = ref(false);
 const suppliers = ref<Supplier[]>([]);
 const loadingSuppliers = ref(false);
 
-onMounted(async () => {
+/** Primera carga de la pantalla: mientras dura se ve su esqueleto (ViewSkeleton), no un formulario vacío que luego se rellena de golpe. */
+const loading = ref(true);
+onMounted(() => {
+  void loadView().finally(() => {
+    loading.value = false;
+  });
+});
+
+async function loadView(): Promise<void> {
   loadingSuppliers.value = true;
   try {
     suppliers.value = (await purchasingApi.listSuppliers({ status: 'active', pageSize: 100 })).items;
   } finally {
     loadingSuppliers.value = false;
   }
-});
+}
 
 const supplierItems = computed(() => suppliers.value.map((s) => ({ value: s.id, title: s.identification ? `${s.legalName} · ${s.identification}` : s.legalName })));
 const total = computed(() => form.value.rows.reduce((acc, row) => acc + Math.max(0, parseMoneyToCents(row.amount) ?? 0), 0));
@@ -83,6 +92,7 @@ function again(): void {
 
     <v-alert type="warning" class="mb-4" :title="$t('treasury.opening.noEntryTitle')">{{ $t('treasury.payableOpening.noEntry') }}</v-alert>
 
+    <ViewSkeleton :loading="loading" type="table">
     <v-card v-if="done">
       <v-card-text>
         <v-alert type="success" class="mb-4">{{ $t('treasury.payableOpening.done', { total: formatMoney(done.totalCents, locale), date: done.cutoffDate }) }}</v-alert>
@@ -141,6 +151,7 @@ function again(): void {
         <v-btn variant="flat" color="primary" :loading="store.saving" @click="review">{{ $t('treasury.opening.load') }}</v-btn>
       </v-card-actions>
     </v-card>
+    </ViewSkeleton>
 
     <v-dialog v-model="confirm" max-width="480">
       <v-card>

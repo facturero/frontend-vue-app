@@ -7,6 +7,7 @@ import RoleBadge from '@/components/RoleBadge.vue';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import { extractError } from '@/utils/error';
 import type { RoleSummary } from '@/types/roles';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const auth = useAuthStore();
 const store = useRoleStore();
@@ -62,7 +63,7 @@ onMounted(() => {
       {{ store.error }}
     </v-alert>
 
-    <template v-if="!store.loading">
+    <ViewSkeleton :loading="store.loading && !store.list.length" type="cards">
       <v-row>
         <v-col v-for="r in store.list" :key="r.id" cols="12" md="6" lg="4">
           <v-card
@@ -122,11 +123,7 @@ onMounted(() => {
           </v-card>
         </v-col>
       </v-row>
-    </template>
-
-    <div v-else class="d-flex justify-center py-8">
-      <v-progress-circular indeterminate color="primary" />
-    </div>
+    </ViewSkeleton>
 
     <v-dialog :model-value="roleToDelete !== null" max-width="420" @update:model-value="roleToDelete = null">
       <v-card :title="$t('roles.deleteConfirmTitle')">

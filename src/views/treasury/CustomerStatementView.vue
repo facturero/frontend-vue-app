@@ -17,6 +17,7 @@ import { centsToInput, formatMoney } from '@/utils/accounting';
 import { creditUsage, daysOverdue, downloadBlob, isOverdue, parseCreditDays, parseCreditLimit, RECEIVABLE_STATUS_COLOR, reportLang } from '@/utils/treasury';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import TreasuryTabs from '@/components/treasury/TreasuryTabs.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -175,6 +176,7 @@ async function saveTerms(): Promise<void> {
       <v-card-title class="text-title-large">{{ $t('treasury.statement.receivables') }}</v-card-title>
       <v-card-text>
         <v-data-table :headers="receivableHeaders" :items="statement?.receivables ?? []" :loading="store.loading" :items-per-page="-1" hide-default-footer>
+          <template v-if="!statement?.receivables?.length" #loading><ViewSkeleton type="rows" /></template>
           <template #item.documentNumber="{ item }">
             {{ item.documentNumber ?? $t(`treasury.receivables.source.${item.sourceType}`) }}
             <div v-for="a in applicationsOf(item.id)" :key="a.id" class="text-body-medium text-medium-emphasis">

@@ -9,6 +9,7 @@ import OrganizationSettingsView from '@/views/organization/OrganizationSettingsV
 import EstablishmentsView from '@/views/organization/EstablishmentsView.vue';
 import CertificatesView from '@/views/organization/CertificatesView.vue';
 import PosThemesView from '@/views/organization/PosThemesView.vue';
+import AppThemesView from '@/views/settings/AppThemesView.vue';
 import NotificationPreferencesView from '@/views/settings/NotificationPreferencesView.vue';
 
 interface SettingsTab {
@@ -53,6 +54,14 @@ const tabs: SettingsTab[] = [
     icon: 'mdi-file-certificate-outline',
     component: CertificatesView,
     visible: auth.can('fiscal:manage') && plugins.isActive('finance.electronic_certificate'),
+  },
+  {
+    // Temas de la aplicación (docs/TEMAS.md): solo quien administra la organización los crea; cada uno elige en el menú del avatar.
+    key: 'themes',
+    titleKey: 'themes.tabTitle',
+    icon: 'mdi-palette-swatch-outline',
+    component: AppThemesView,
+    visible: auth.can('organization:admin'),
   },
   {
     key: 'pos-themes',

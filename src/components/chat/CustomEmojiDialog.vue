@@ -119,7 +119,7 @@ async function remove(e: CustomEmoji): Promise<void> {
         <!-- Agregar -->
         <div class="d-flex align-start ga-4 mb-6">
           <v-sheet class="border rounded d-flex align-center justify-center flex-shrink-0" width="72" height="72">
-            <img v-if="preview" :src="preview" alt="" :style="{ maxWidth: '56px', maxHeight: '56px', objectFit: 'contain' }" />
+            <v-img v-if="preview" :src="preview" alt="" width="56" height="56" />
             <v-icon v-else icon="mdi-emoticon-plus-outline" size="32" class="text-medium-emphasis" />
           </v-sheet>
           <div class="flex-grow-1 d-flex flex-column ga-2" :style="{ minWidth: 0 }">

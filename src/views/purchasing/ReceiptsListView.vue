@@ -13,6 +13,7 @@ import { formatMoney } from '@/utils/accounting';
 import type { GoodsReceipt } from '@/types/purchasing';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import PurchasingTabs from '@/components/purchasing/PurchasingTabs.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t, locale } = useI18n();
 const router = useRouter();
@@ -97,6 +98,7 @@ async function open(receipt: GoodsReceipt): Promise<void> {
           hide-default-footer
           @click:row="(_: Event, { item }: { item: GoodsReceipt }) => open(item)"
         >
+          <template v-if="!store.receipts?.length" #loading><ViewSkeleton type="rows" /></template>
           <template #item.supplierId="{ item }">{{ supplierName(item) }}</template>
           <template #item.supplierDeliveryRef="{ item }">{{ item.supplierDeliveryRef ?? '—' }}</template>
           <template #no-data>{{ $t('purchasing.receipts.empty') }}</template>
@@ -123,7 +125,7 @@ async function open(receipt: GoodsReceipt): Promise<void> {
           </v-btn>
         </v-card-title>
         <v-card-text>
-          <v-progress-linear v-if="store.loading && !store.currentReceipt" indeterminate class="mb-4" />
+          <ViewSkeleton v-if="store.loading && !store.currentReceipt" type="text" />
           <template v-if="store.currentReceipt">
             <v-row class="mb-2">
               <v-col cols="12" sm="4">

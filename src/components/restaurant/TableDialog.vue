@@ -97,16 +97,14 @@ function close(): void {
         />
 
         <div class="d-flex ga-3">
-          <v-text-field
-            v-model.number="form.capacityMin"
-            type="number"
-            min="1"
+          <v-number-input
+            v-model="form.capacityMin"
+            :min="1"
             :label="$t('restaurant.tables.capacityMin')"
           />
-          <v-text-field
-            v-model.number="form.capacityMax"
-            type="number"
-            min="1"
+          <v-number-input
+            v-model="form.capacityMax"
+            :min="1"
             :label="$t('restaurant.tables.capacityMax')"
             :hint="$t('restaurant.tableForm.capacityHint')"
             persistent-hint

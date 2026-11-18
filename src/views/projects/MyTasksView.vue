@@ -17,6 +17,7 @@ import RunningTimerChip from '@/components/projects/RunningTimerChip.vue';
 import { useProjectsStore } from '@/stores/projects';
 import { groupMyTasks, localIsoDate, MY_TASKS_GROUPS, type MyTasksGroup } from '@/utils/projects';
 import type { MyTask } from '@/types/projects';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 /**
  * «Mis tareas» de Asana: todo lo que me toca, de todos los proyectos, agrupado en Recién asignadas / Hoy / Próximas / Más tarde.
@@ -138,10 +139,11 @@ async function toggle(task: MyTask): Promise<void> {
       <v-switch v-model="showCompleted" :label="t('projects.showCompleted')" class="flex-grow-0" />
     </div>
 
-    <v-progress-linear v-if="store.loading" indeterminate color="primary" class="mb-4" />
+    <v-progress-linear v-if="store.loading && store.myTasks.length" indeterminate color="primary" class="mb-4" />
 
     <v-pull-to-refresh :disabled="!smAndDown" @load="refresh">
-    <v-card>
+    <ViewSkeleton v-if="store.loading && !store.myTasks.length" type="list" :count="6" />
+    <v-card v-else>
       <div v-for="group in MY_TASKS_GROUPS" :key="group">
         <div class="d-flex align-center ga-2 px-2 py-1 border-b">
           <v-tooltip location="top" :text="t(`projects.myTasks.groups.${group}`)"><template #activator="{ props: tip }"><v-btn v-bind="tip"

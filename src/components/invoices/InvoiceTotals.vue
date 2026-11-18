@@ -28,31 +28,21 @@ const totalDisplay = computed(() => {
 
 <template>
   <div class="d-flex justify-end mb-6">
-    <div class="totals-block">
+    <v-sheet min-width="260" color="transparent" rounded="0">
       <div class="d-flex justify-space-between text-body-medium text-medium-emphasis py-1">
         <span>{{ $t('invoices.subtotal') }}</span>
-        <span class="mono">{{ currencySymbol }}{{ store.current?.subtotal ?? '0.00' }}</span>
+        <span class="text-mono">{{ currencySymbol }}{{ store.current?.subtotal ?? '0.00' }}</span>
       </div>
       <div class="d-flex justify-space-between text-body-medium text-medium-emphasis py-1">
         <span>{{ $t('invoices.taxTotal') }}</span>
-        <span class="mono">{{ currencySymbol }}{{ taxTotalDisplay }}</span>
+        <span class="text-mono">{{ currencySymbol }}{{ taxTotalDisplay }}</span>
       </div>
       <v-divider class="my-2" />
       <div class="d-flex justify-space-between text-title-large font-weight-bold">
         <span>{{ $t('invoices.totalDue') }}</span>
-        <span class="mono">{{ currencySymbol }}{{ totalDisplay }}</span>
+        <span class="text-mono">{{ currencySymbol }}{{ totalDisplay }}</span>
       </div>
-    </div>
+    </v-sheet>
   </div>
 </template>
 
-<style scoped>
-.mono {
-  font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', 'Roboto Mono', monospace;
-  font-variant-numeric: tabular-nums;
-}
-
-.totals-block {
-  min-width: 260px;
-}
-</style>

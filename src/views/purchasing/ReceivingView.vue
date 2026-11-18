@@ -16,6 +16,7 @@ import { todayIso } from '@/utils/taxDocuments';
 import type { OrderReceivingLine } from '@/types/purchasing';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import PurchasingTabs from '@/components/purchasing/PurchasingTabs.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -158,7 +159,8 @@ async function confirmClose(): Promise<void> {
     </PageHeader>
     <PurchasingTabs />
 
-    <v-progress-linear v-if="store.loading" indeterminate class="mb-4" />
+    <ViewSkeleton v-if="store.loading && !order" type="detail" />
+    <v-progress-linear v-else-if="store.loading" indeterminate class="mb-4" />
     <v-alert v-if="!order && !store.loading && store.error" type="error" class="mb-4">{{ store.error }}</v-alert>
     <v-alert v-if="store.error && order && !receiveDialog && !closeDialog" type="error" closable class="mb-4" @click:close="clearError">{{ store.error }}</v-alert>
 
@@ -176,6 +178,7 @@ async function confirmClose(): Promise<void> {
           <p class="text-body-medium text-medium-emphasis mb-4">{{ $t('purchasing.receiving.intro') }}</p>
 
           <v-data-table :headers="headers" :items="rows" :loading="store.loading" :items-per-page="-1" hide-default-footer>
+            <template v-if="!rows?.length" #loading><ViewSkeleton type="rows" /></template>
             <template #no-data>{{ $t('purchasing.receiving.noLines') }}</template>
           </v-data-table>
         </v-card-text>

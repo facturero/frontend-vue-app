@@ -10,6 +10,7 @@ import { extractError } from '@/utils/error';
 import ImageUploader from '@/components/ImageUploader.vue';
 import type { ProductType, CreateProductInput, UpdateProductInput } from '@/types/products';
 import PageHeader from '@/components/ui/PageHeader.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -90,7 +91,15 @@ function onPriceInput(e: Event): void {
   price.value = sanitized;
 }
 
-onMounted(async () => {
+/** Primera carga (catálogos, establecimientos y, al editar, el producto): sin ella el formulario se pinta vacío y se rellena de golpe. */
+const loading = ref(true);
+onMounted(() => {
+  void loadForm().finally(() => {
+    loading.value = false;
+  });
+});
+
+async function loadForm(): Promise<void> {
   await store.fetchCatalog();
   await organizationStore.fetchEstablishments();
   if (isEdit.value && productId.value) {
@@ -117,7 +126,7 @@ onMounted(async () => {
       router.push({ name: 'products' });
     }
   }
-});
+}
 
 async function submit(): Promise<void> {
   saving.value = true;
@@ -212,6 +221,7 @@ async function submit(): Promise<void> {
       {{ saveError }}
     </v-alert>
 
+    <ViewSkeleton :loading="loading" type="form" :count="8">
     <v-row>
       <v-col cols="12">
         <v-card>
@@ -390,5 +400,6 @@ async function submit(): Promise<void> {
         </v-card>
       </v-col>
     </v-row>
+    </ViewSkeleton>
   </v-container>
 </template>

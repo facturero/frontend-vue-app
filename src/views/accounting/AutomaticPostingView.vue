@@ -19,6 +19,7 @@ import { SYSTEM_ROLES, type CollectionRole, type PendingPosting, type PendingSta
 import PageHeader from '@/components/ui/PageHeader.vue';
 import AccountingTabs from '@/components/accounting/AccountingTabs.vue';
 import AccountingSetupCard from '@/components/accounting/AccountingSetupCard.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -211,6 +212,7 @@ function openEntry(id: string | null): void {
             :items-length="store.pendingTotal"
             :loading="store.loading"
           >
+            <template v-if="!store.pending?.length" #loading><ViewSkeleton type="rows" /></template>
             <template #item.entryDate="{ item }">{{ item.entryDate ?? '' }}</template>
             <template #item.sourceType="{ item }">
               <!-- Un origen nuevo sin traducción se muestra tal cual en vez de dejar una clave técnica a la vista -->

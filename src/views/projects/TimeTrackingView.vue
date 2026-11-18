@@ -16,6 +16,7 @@ import { displayName, localIsoDate } from '@/utils/projects';
 import { downloadText } from '@/utils/statements';
 import { RANGE_PRESETS, rangeFor, timeReportCsv, totalsBy, type RangePreset } from '@/utils/timeReport';
 import type { TimeReport, TimeReportRow } from '@/types/projects';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 /**
  * «Horas» (entregable 5): el reporte de tiempo de Asana, por persona y proyecto, con CSV. Cada quien ve sus horas; con
@@ -178,7 +179,8 @@ async function remove(e: TimeReportRow): Promise<void> {
 
     <v-alert v-if="failure" type="error" closable class="mb-4" @click:close="failure = null">{{ failure }}</v-alert>
     <v-alert v-if="report?.truncated" type="warning" class="mb-4">{{ t('projects.time.truncated') }}</v-alert>
-    <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-4" />
+    <v-progress-linear v-if="loading && report" indeterminate color="primary" class="mb-4" />
+    <ViewSkeleton v-if="loading && !report" type="table" />
 
     <v-row v-if="report" class="mb-2">
       <v-col cols="12" sm="4">
@@ -232,7 +234,7 @@ async function remove(e: TimeReportRow): Promise<void> {
       </v-col>
     </v-row>
 
-    <v-card>
+    <v-card v-if="!(loading && !report)">
       <v-table>
         <thead>
           <tr>

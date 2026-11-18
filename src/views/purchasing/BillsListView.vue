@@ -15,6 +15,7 @@ import { BILL_STATUS_COLOR, MATCH_STATUS_COLOR } from '@/utils/purchasing';
 import { BILL_STATUSES, MATCH_STATUSES, type BillStatus, type MatchStatus, type PurchaseBill } from '@/types/purchasing';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import PurchasingTabs from '@/components/purchasing/PurchasingTabs.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t, locale } = useI18n();
 const router = useRouter();
@@ -116,6 +117,7 @@ const document = (bill: PurchaseBill) => `${bill.establishment}-${bill.emissionP
           hide-default-footer
           @click:row="(_: Event, { item }: { item: PurchaseBill }) => open(item)"
         >
+          <template v-if="!store.bills?.length" #loading><ViewSkeleton type="rows" /></template>
           <template #item.internalNumber="{ item }">
             {{ item.internalNumber ?? $t('purchasing.bills.draft') }}
           </template>

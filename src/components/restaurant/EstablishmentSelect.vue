@@ -24,7 +24,7 @@ const items = computed(() =>
     :items="items"
     :label="$t('restaurant.establishment')"
     class="mb-4"
-    style="max-width: 360px"
+    max-width="360"
     data-testid="restaurant-establishment"
     @update:model-value="emit('update:modelValue', $event)"
   />

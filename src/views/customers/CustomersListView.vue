@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { useCustomerStore } from '@/stores/customers';
 import PageHeader from '@/components/ui/PageHeader.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t } = useI18n();
 const router = useRouter();
@@ -154,6 +155,7 @@ onMounted(async () => {
           { title: '25', value: 25 },
           { title: '50', value: 50 },
         ]">
+        <template v-if="!filtered?.length" #loading><ViewSkeleton type="rows" /></template>
         <template #item.identification="{ item }">
           <span class="text-body-small font-weight-medium">{{ item.identification || '—' }}</span>
         </template>

@@ -14,6 +14,7 @@ import { ANNEXES, currentPeriod, formatDateTime, formatPeriod, isMoneyKey, keyFi
 import type { AnnexType, RunSummary } from '@/types/reporting';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import ReportingTabs from '@/components/reporting/ReportingTabs.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t, te, locale } = useI18n();
 const router = useRouter();
@@ -95,6 +96,7 @@ const open = (_: Event, { item }: { item: RunSummary }) => router.push({ name: '
       <v-card-title class="text-title-large">{{ $t('reporting.versions.title') }} · {{ formatPeriod(period, locale) }}</v-card-title>
       <v-card-text>
         <v-data-table :headers="headers" :items="store.runs" :loading="store.loading" :items-per-page="-1" hide-default-footer @click:row="open">
+          <template v-if="!store.runs?.length" #loading><ViewSkeleton type="rows" /></template>
           <template #item.annex="{ item }"><v-chip size="small">{{ $t(`reporting.annexName.${item.annex}`) }}</v-chip></template>
           <template #item.period="{ item }">{{ formatPeriod(item.period, locale) }}</template>
           <template #item.generatedAt="{ item }">{{ formatDateTime(item.generatedAt, locale) }}</template>

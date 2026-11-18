@@ -12,6 +12,7 @@ import { formatMoney } from '@/utils/accounting';
 import type { DocumentFilters, ReportDocumentRow } from '@/types/reporting';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import ReportingTabs from '@/components/reporting/ReportingTabs.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -92,6 +93,7 @@ const headers = computed(() => [
           :items-length="store.documentsTotal"
           :loading="store.loading"
         >
+          <template v-if="!store.documents?.length" #loading><ViewSkeleton type="rows" /></template>
           <template #item.direction="{ item }">{{ $t(`reporting.documents.directions.${item.direction}`) }}</template>
           <template #item.partyName="{ item }">
             {{ item.partyName ?? '—' }}<div v-if="item.partyIdentification" class="text-body-medium text-medium-emphasis">{{ item.partyIdentification }}</div>

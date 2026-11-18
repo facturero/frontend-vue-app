@@ -23,6 +23,7 @@ import EstablishmentSelect from '@/components/restaurant/EstablishmentSelect.vue
 import ReservationDialog from '@/components/restaurant/ReservationDialog.vue';
 import { restaurantApi } from '@/api/restaurant';
 import type { DiningTable } from '@/types/restaurant';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t, locale } = useI18n();
 const { restaurant, ready, establishmentId, showSelector, hasEstablishments, bootstrap } = useRestaurantEstablishment();
@@ -169,7 +170,7 @@ async function onCreated(): Promise<void> {
       {{ $t('restaurant.noEstablishment') }}
     </v-alert>
 
-    <v-skeleton-loader v-else-if="!ready" type="table" />
+    <ViewSkeleton v-else-if="!ready" type="table" />
 
     <template v-else>
       <!-- Navegación por días -->
@@ -178,7 +179,7 @@ async function onCreated(): Promise<void> {
         <DateField
           :model-value="store.date"
           :label="$t('restaurant.reservations.day')"
-          style="max-width: 190px"
+          max-width="190"
           data-testid="resv-day"
           required
           @update:model-value="(v) => v && goTo(v)"
@@ -201,6 +202,7 @@ async function onCreated(): Promise<void> {
 
       <v-card>
         <v-data-table :headers="headers" :items="visible" :loading="store.loading" item-value="id" :items-per-page="100" hide-default-footer>
+          <template v-if="!visible?.length" #loading><ViewSkeleton type="rows" /></template>
           <template #item.time="{ item }">
             <span class="font-weight-medium">{{ item.time }}</span>
           </template>

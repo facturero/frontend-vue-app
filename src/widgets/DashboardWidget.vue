@@ -98,7 +98,7 @@ const emptyKey = computed(() => (props.def.kind === 'list' ? props.def.emptyKey 
         item-title="name"
         item-value="id"
         variant="plain"
-        class="widget-establishment"
+        max-width="180"
         :aria-label="t('dashboard.establishment')"
         @update:model-value="chooseEstablishment"
       />
@@ -140,8 +140,4 @@ const emptyKey = computed(() => (props.def.kind === 'list' ? props.def.emptyKey 
   </WidgetShell>
 </template>
 
-<style scoped>
-.widget-establishment {
-  max-width: 180px;
-}
-</style>
+

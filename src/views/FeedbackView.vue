@@ -14,6 +14,7 @@ import EmptyState from '@/components/ui/EmptyState.vue';
 import FeedbackStatusChip from '@/components/feedback/FeedbackStatusChip.vue';
 import FeedbackConversation from '@/components/feedback/FeedbackConversation.vue';
 import NewFeedbackDialog from '@/components/feedback/NewFeedbackDialog.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 /**
  * «Comentarios y mejoras» (feedback-service): cualquiera manda mejoras, comentarios o problemas y conversa con el equipo de la
@@ -136,7 +137,7 @@ onMounted(async () => {
     </v-card>
 
     <v-alert v-if="failure" type="error" class="mb-4" :text="failure" />
-    <div v-else-if="loading" class="d-flex justify-center pa-6"><v-progress-circular indeterminate color="primary" /></div>
+    <ViewSkeleton v-else-if="loading" type="list" />
     <v-card v-else-if="!items.length">
       <EmptyState icon="mdi-lightbulb-on-outline" :title="t('feedbackBox.emptyTitle')" :text="t('feedbackBox.emptyText')" :action-text="t('feedbackBox.new')" action-icon="mdi-plus" @action="creating = true" />
     </v-card>

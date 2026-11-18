@@ -173,7 +173,7 @@ defineExpose({
             v-for="task in store.columns[section.id]"
             :key="task.id"
             :data-task-id="task.id"
-            class="d-flex align-center ga-2 px-2 border-b task-row"
+            class="d-flex align-center ga-2 px-2 border-b cursor-pointer task-row"
             :class="{ 'd-none': task.completedAt && !props.showCompleted, 'bg-lightprimary': store.detail?.id === task.id }"
             @click="store.openTask(task.id)"
           >
@@ -188,7 +188,7 @@ defineExpose({
                   icon="mdi-drag-vertical"
                   variant="text"
                   size="x-small"
-                  class="task-drag text-medium-emphasis"
+                  class="task-drag cursor-grab text-medium-emphasis"
                   :data-handle="task.id"
                   :aria-label="t('projects.task.reorder', { title: task.title })"
                   @click.stop
@@ -280,11 +280,7 @@ defineExpose({
 
 <style scoped>
 .task-row {
-  cursor: pointer;
   min-height: 44px;
-}
-.task-drag {
-  cursor: grab;
 }
 /* El campo `plain` trae más relleno arriba que abajo (es para una etiqueta flotante que aquí no hay): el texto quedaba unos píxeles
    más bajo que los iconos de la fila y «Agregar tarea» salía cortado por abajo. */

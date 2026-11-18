@@ -16,6 +16,7 @@ import { daysOverdue, downloadBlob, isOverdue, RECEIVABLE_STATUS_COLOR, reportLa
 import { RECEIVABLE_STATUSES, type Receivable, type ReceivableStatus } from '@/types/treasury';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import TreasuryTabs from '@/components/treasury/TreasuryTabs.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t, locale } = useI18n();
 const router = useRouter();
@@ -120,6 +121,7 @@ const sourceLabel = (item: Receivable) => (item.documentNumber ? item.documentNu
           hide-default-footer
           @click:row="(_: Event, { item }: { item: Receivable }) => openCustomer(item)"
         >
+          <template v-if="!store.receivables?.length" #loading><ViewSkeleton type="rows" /></template>
           <template #item.customerName="{ item }">
             {{ item.customerName }}
             <div v-if="item.customerIdentification" class="text-body-medium text-medium-emphasis">{{ item.customerIdentification }}</div>

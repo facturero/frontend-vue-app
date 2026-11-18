@@ -15,6 +15,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useProjectsStore } from '@/stores/projects';
 import { HEALTH_COLOR } from '@/utils/projects';
 import type { ProjectWithRole } from '@/types/projects';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 /**
  * Proyectos visibles para la persona: los de toda la organización y los privados donde es miembro.
@@ -158,9 +159,10 @@ function opened(id: string): void {
       </v-col>
     </v-row>
 
-    <v-progress-linear v-if="store.loading" indeterminate color="primary" class="mb-4" />
+    <v-progress-linear v-if="store.loading && store.projects.length" indeterminate color="primary" class="mb-4" />
 
-    <v-card v-if="!store.loading && store.projects.length === 0">
+    <ViewSkeleton v-if="store.loading && !store.projects.length" type="cards" />
+    <v-card v-else-if="store.projects.length === 0">
       <EmptyState
         :icon="status === 'active' ? 'mdi-folder-star-outline' : 'mdi-archive-outline'"
         :title="status === 'active' ? t('projects.empty.title') : t('projects.empty.archived')"

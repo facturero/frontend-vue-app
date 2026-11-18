@@ -14,6 +14,7 @@ import type { Period } from '@/types/accounting';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import AccountingTabs from '@/components/accounting/AccountingTabs.vue';
 import AccountingSetupCard from '@/components/accounting/AccountingSetupCard.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t, locale } = useI18n();
 const auth = useAuthStore();
@@ -80,7 +81,8 @@ async function createYear(): Promise<void> {
     <v-alert v-if="loadError" type="error" class="mb-4">{{ loadError }}</v-alert>
     <v-alert v-if="actionError" type="error" closable class="mb-4" @click:close="actionError = null">{{ actionError }}</v-alert>
 
-    <AccountingSetupCard v-if="store.configured === false" @done="load" />
+    <ViewSkeleton v-if="store.configured === null && !loadError" type="list" :count="3" />
+    <AccountingSetupCard v-else-if="store.configured === false" @done="load" />
 
     <v-expansion-panels v-else-if="store.configured" multiple :model-value="store.years.map((_, i) => i).slice(0, 1)">
       <v-expansion-panel v-for="fy in store.years" :key="fy.id">
@@ -125,7 +127,7 @@ async function createYear(): Promise<void> {
       <v-card>
         <v-card-title>{{ $t('accounting.periods.newYear') }}</v-card-title>
         <v-card-text>
-          <v-text-field v-model.number="newYear" type="number" :label="$t('accounting.setup.fiscalYear')" />
+          <v-number-input v-model="newYear" :label="$t('accounting.setup.fiscalYear')" />
         </v-card-text>
         <v-card-actions class="flex-wrap ga-2">
           <v-spacer />

@@ -6,6 +6,7 @@ import { useI18n } from 'vue-i18n';
 import { useAuditStore } from '@/stores/audit';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import type { AuditLogEntry } from '@/types/audit';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t, te } = useI18n();
 const store = useAuditStore();
@@ -445,6 +446,7 @@ onMounted(load);
         @update:page="load"
         @update:items-per-page="applyFilters"
       >
+        <template v-if="!store.items?.length" #loading><ViewSkeleton type="rows" /></template>
         <template #item.occurredAt="{ item }">
           <span class="text-body-small text-no-wrap">{{ formatDate(item.occurredAt) }}</span>
         </template>
@@ -503,9 +505,7 @@ onMounted(load);
         <v-divider />
 
         <v-card-text>
-          <div v-if="store.loadingDetail" class="text-center pa-6">
-            <v-progress-circular indeterminate color="primary" />
-          </div>
+          <ViewSkeleton v-if="store.loadingDetail" type="text" :count="5" />
 
           <template v-else-if="store.current">
             <v-list density="compact" class="py-0">

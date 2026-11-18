@@ -17,6 +17,7 @@ import { parseApprovalThreshold, PAYMENT_STATUS_COLOR } from '@/utils/treasury-p
 import { PAYMENT_STATUSES, type Payment, type PaymentStatus } from '@/types/treasury';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import TreasuryTabs from '@/components/treasury/TreasuryTabs.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t, locale } = useI18n();
 const router = useRouter();
@@ -127,6 +128,7 @@ async function saveThreshold(): Promise<void> {
         </v-row>
 
         <v-data-table :headers="headers" :items="store.payments" :loading="store.loading" :items-per-page="-1" hide-default-footer @click:row="(_: Event, { item }: { item: Payment }) => open(item)">
+          <template v-if="!store.payments?.length" #loading><ViewSkeleton type="rows" /></template>
           <template #item.number="{ item }">{{ item.number ?? $t('treasury.payments.draft') }}</template>
           <template #item.supplierName="{ item }">
             {{ item.supplierName }}

@@ -20,11 +20,11 @@ const { t } = useI18n();
 <template>
   <v-card
     class="widget-shell d-flex flex-column"
-    :class="{ 'h-100': !fit, 'widget-shell--editing': editing }"
+    :class="{ 'h-100': !fit, 'widget-shell--editing cursor-move': editing }"
     :style="fit && maxHeight ? { maxHeight: `${maxHeight}px` } : undefined"
   >
     <div class="d-flex align-center ga-2 px-4 pt-4 pb-2">
-      <v-sheet :color="`light${color}`" class="widget-shell__icon d-flex align-center justify-center rounded-lg flex-shrink-0">
+      <v-sheet :color="`light${color}`" width="36" height="36" class="d-flex align-center justify-center rounded-lg flex-shrink-0">
         <v-icon :icon="icon" :color="color" size="20" />
       </v-sheet>
       <span class="text-body-large font-weight-medium text-truncate flex-grow-1">{{ title }}</span>
@@ -34,25 +34,19 @@ const { t } = useI18n();
         <v-btn v-if="editing" icon="mdi-close" variant="text" size="small" :aria-label="t('dashboard.remove', { name: title })" @click="emit('remove')" />
       </div>
     </div>
-    <div class="widget-shell__body flex-grow-1 px-4 pb-4">
+    <div class="widget-shell__body flex-grow-1 overflow-y-auto px-4 pb-4">
       <slot />
     </div>
   </v-card>
 </template>
 
 <style scoped>
-.widget-shell__icon {
-  width: 36px;
-  height: 36px;
-}
 /* El cuerpo se desplaza dentro del tamaño elegido; sin `min-height: 0` el flex lo estiraba y el contenido se salía de la tarjeta. */
 .widget-shell__body {
   min-height: 0;
-  overflow-y: auto;
 }
-/* En edición se ve que la tarjeta se arrastra. */
+/* En edición se ve que la tarjeta se arrastra (el cursor lo pone `cursor-move`; un contorno discontinuo no tiene utilidad). */
 .widget-shell--editing {
-  cursor: move;
   outline: 1px dashed rgb(var(--v-theme-primary));
 }
 </style>

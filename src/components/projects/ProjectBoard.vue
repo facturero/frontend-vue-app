@@ -119,7 +119,7 @@ function onColumnDrop(evt: DropEvent): void {
         width="300"
         class="flex-shrink-0 pa-2 border"
       >
-        <div class="d-flex align-center ga-2 px-2 py-1" :class="{ 'column-drag': editable() }">
+        <div class="d-flex align-center ga-2 px-2 py-1" :class="{ 'column-drag cursor-grab': editable() }">
           <span class="text-body-large font-weight-bold text-truncate">{{ section.name }}</span>
           <span class="text-body-small text-medium-emphasis">{{ (store.columns[section.id] ?? []).length }}</span>
           <v-spacer />
@@ -147,7 +147,7 @@ function onColumnDrop(evt: DropEvent): void {
             v-for="task in store.columns[section.id]"
             :key="task.id"
             :data-task-id="task.id"
-            class="pa-3 board-card"
+            class="pa-3 board-card cursor-grab"
             :class="{ 'border-primary border-md': store.detail?.id === task.id }"
             :aria-label="editable() ? t('projects.task.boardCardLabel', { title: task.title }) : task.title"
             tabindex="0"
@@ -227,11 +227,5 @@ function onColumnDrop(evt: DropEvent): void {
 <style scoped>
 .board-column {
   min-height: 48px;
-}
-.board-card {
-  cursor: grab;
-}
-.column-drag {
-  cursor: grab;
 }
 </style>

@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { useFiscalStore } from '@/stores/fiscal';
 import PageHeader from '@/components/ui/PageHeader.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t } = useI18n();
 const auth = useAuthStore();
@@ -114,6 +115,7 @@ onMounted(() => {
             <v-btn icon="mdi-delete-outline" variant="text" size="small" :title="$t('certificates.revoke')" @click="revoke(cert.id)" />
           </template>
         </v-list-item>
+        <ViewSkeleton v-if="store.loading && store.certificates.length === 0" type="text" :count="2" />
         <v-list-item v-if="store.certificates.length === 0 && !store.loading">
           <v-list-item-title class="text-medium-emphasis">
             {{ $t('certificates.empty') }}

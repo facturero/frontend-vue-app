@@ -129,7 +129,7 @@ function send(): void {
           <v-switch v-model="givePoints" color="primary" :label="t('feedbackBox.givePoints')" hide-details />
         </div>
         <div v-if="givePoints" class="d-flex flex-wrap ga-4">
-          <v-text-field v-model.number="amount" type="number" min="1" :label="t('feedbackBox.points')" :max-width="160" />
+          <v-number-input v-model="amount" :min="1" :label="t('feedbackBox.points')" :max-width="160" />
           <v-text-field v-model="reason" :label="t('feedbackBox.reason')" :placeholder="t('feedbackBox.reasonHint')" maxlength="200" class="flex-grow-1" />
         </div>
       </template>

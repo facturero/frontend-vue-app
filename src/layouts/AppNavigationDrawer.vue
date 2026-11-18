@@ -90,7 +90,7 @@ const opened = computed<string[]>({
       <!-- Sin `color`: el ítem activo se pinta como píldora sólida (ver <style>). -->
       <v-list v-model:opened="opened" nav density="compact" class="flex-grow-1 overflow-y-auto overflow-x-hidden nav-scroll">
         <v-list-item prepend-icon="mdi-alpha-c-circle" :title="$t('nav.brand')" :subtitle="$t('nav.brandSubtitle')"
-          class="drawer-brand" />
+          min-height="64" />
         <v-divider class="mb-2" />
 
         <template v-for="entry in mainEntries" :key="entry.kind === 'item' ? entry.item.titleKey : entry.id">
@@ -123,10 +123,6 @@ const opened = computed<string[]>({
 </template>
 
 <style scoped>
-.drawer-brand {
-  min-height: 64px;
-}
-
 /* Sin `min-height: 0` un hijo flex no baja de la altura de su contenido y el `overflow` nunca entra en juego. */
 .nav-scroll {
   min-height: 0;

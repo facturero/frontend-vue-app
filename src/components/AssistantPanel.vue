@@ -163,7 +163,7 @@ function onMessageClick(event: MouseEvent): void {
     class="assistant-drawer"
   >
     <div class="d-flex flex-column fill-height">
-      <div class="d-flex align-center ga-3 pa-4 assistant-header">
+      <div class="d-flex align-center ga-3 pa-4 border-b">
         <v-avatar color="lightprimary" size="36">
           <v-icon icon="mdi-robot-outline" color="primary" size="20" />
         </v-avatar>
@@ -238,7 +238,6 @@ function onMessageClick(event: MouseEvent): void {
               :key="example"
               size="small"
               variant="outlined"
-              class="example-chip"
               @click="draft = $t(example)"
             >
               {{ $t(example) }}
@@ -266,12 +265,12 @@ function onMessageClick(event: MouseEvent): void {
           <div class="d-flex flex-column" :class="message.role === 'user' ? 'align-end' : 'align-start'" style="min-width: 0">
             <v-sheet
               :color="message.role === 'user' ? 'primary' : undefined"
-              :class="message.role === 'assistant' ? 'assistant-bubble' : ''"
+              :class="{ border: message.role === 'assistant' }"
               rounded="lg"
               class="pa-3 message-bubble"
               elevation="0"
             >
-              <span v-if="message.role === 'user'" class="text-body-medium message-text" style="white-space: pre-wrap; color: white">{{ message.text }}</span>
+              <span v-if="message.role === 'user'" class="text-body-medium text-pre-wrap message-text">{{ message.text }}</span>
               <!-- eslint-disable-next-line vue/no-v-html -->
               <div
                 v-else
@@ -280,7 +279,7 @@ function onMessageClick(event: MouseEvent): void {
                 v-html="renderMarkdownLite(message.text)"
               />
             </v-sheet>
-            <span class="text-body-small text-medium-emphasis mt-1 message-time">{{ formatTime(message.createdAt) }}</span>
+            <span class="text-body-small text-medium-emphasis mt-1 px-1">{{ formatTime(message.createdAt) }}</span>
           </div>
         </div>
 
@@ -326,7 +325,7 @@ function onMessageClick(event: MouseEvent): void {
           <v-avatar color="lightprimary" size="28" class="flex-shrink-0 mt-1">
             <v-icon icon="mdi-robot-outline" color="primary" size="16" />
           </v-avatar>
-          <v-sheet rounded="lg" class="pa-3 assistant-bubble message-bubble d-flex align-center">
+          <v-sheet rounded="lg" class="pa-3 border message-bubble d-flex align-center">
             <span class="typing-dots">
               <span /><span /><span />
             </span>
@@ -407,27 +406,9 @@ function onMessageClick(event: MouseEvent): void {
 </template>
 
 <style scoped>
-.assistant-header {
-  border-bottom: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
-}
-
 .message-bubble {
   max-width: 300px;
   word-break: break-word;
-}
-
-.assistant-bubble {
-  background-color: rgb(var(--v-theme-surface));
-  border: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-}
-
-.message-time {
-  padding-inline: 4px;
-}
-
-.example-chip {
-  cursor: pointer;
 }
 
 .markdown-lite :deep(p) {

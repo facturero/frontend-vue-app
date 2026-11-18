@@ -40,7 +40,7 @@ async function submit(): Promise<void> {
           <v-radio value="ec-supercias" :label="$t('accounting.setup.chartEc')" />
           <v-radio value="empty" :label="$t('accounting.setup.chartEmpty')" />
         </v-radio-group>
-        <v-text-field v-model.number="fiscalYear" type="number" :label="$t('accounting.setup.fiscalYear')" :hint="$t('accounting.setup.fiscalYearHint')" persistent-hint />
+        <v-number-input v-model="fiscalYear" :label="$t('accounting.setup.fiscalYear')" :hint="$t('accounting.setup.fiscalYearHint')" persistent-hint />
       </template>
     </v-card-text>
     <v-card-actions v-if="canManage">

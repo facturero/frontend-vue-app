@@ -15,6 +15,7 @@ import type { Account, AccountType, CostCenter } from '@/types/accounting';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import AccountingTabs from '@/components/accounting/AccountingTabs.vue';
 import AccountingSetupCard from '@/components/accounting/AccountingSetupCard.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t } = useI18n();
 const auth = useAuthStore();
@@ -184,7 +185,7 @@ async function toggleCostCenter(cc: CostCenter): Promise<void> {
 
     <v-alert v-if="loadError" type="error" class="mb-4">{{ loadError }}</v-alert>
 
-    <v-progress-linear v-if="store.loading && store.configured === null" indeterminate />
+    <ViewSkeleton v-if="store.loading && store.configured === null" type="table" :count="8" />
 
     <AccountingSetupCard v-else-if="store.configured === false" @done="load" />
 

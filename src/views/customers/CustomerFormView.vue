@@ -7,6 +7,7 @@ import { useCustomerStore } from '@/stores/customers';
 import ImageUploader from '@/components/ImageUploader.vue';
 import type { CreateCustomerInput, UpdateCustomerInput, CustomerType, CustomerDetail } from '@/types/customers';
 import PageHeader from '@/components/ui/PageHeader.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -134,21 +135,28 @@ async function submit(): Promise<void> {
   }
 }
 
+/** Primera carga (catálogo y, al editar, el cliente): sin ella el formulario se pinta vacío y se rellena de golpe. */
+const loading = ref(true);
+
 onMounted(async () => {
-  await store.fetchCatalog();
-  if (isEdit.value && customerId.value) {
-    await store.fetchById(customerId.value);
-    const c: CustomerDetail | null = store.current;
-    if (c) {
-      businessName.value = c.businessName;
-      tradeName.value = c.tradeName ?? '';
-      type.value = c.type;
-      identificationTypeId.value = c.identificationTypeId;
-      identification.value = c.identification ?? '';
-      email.value = c.email ?? '';
-      phone.value = c.phone ?? '';
-      imageFileId.value = c.imageFileId;
+  try {
+    await store.fetchCatalog();
+    if (isEdit.value && customerId.value) {
+      await store.fetchById(customerId.value);
+      const c: CustomerDetail | null = store.current;
+      if (c) {
+        businessName.value = c.businessName;
+        tradeName.value = c.tradeName ?? '';
+        type.value = c.type;
+        identificationTypeId.value = c.identificationTypeId;
+        identification.value = c.identification ?? '';
+        email.value = c.email ?? '';
+        phone.value = c.phone ?? '';
+        imageFileId.value = c.imageFileId;
+      }
     }
+  } finally {
+    loading.value = false;
   }
 });
 </script>
@@ -167,6 +175,7 @@ onMounted(async () => {
       {{ store.error }}
     </v-alert>
 
+    <ViewSkeleton :loading="loading" type="form">
     <v-row>
       <v-col cols="12" md="8">
         <v-card>
@@ -239,5 +248,6 @@ onMounted(async () => {
         </v-card>
       </v-col>
     </v-row>
+    </ViewSkeleton>
   </v-container>
 </template>

@@ -9,6 +9,7 @@ import { useProductStore } from '@/stores/products';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import AdjustStockDialog from '@/components/inventory/AdjustStockDialog.vue';
 import type { StockPosition } from '@/types/inventory';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t, locale } = useI18n();
 const router = useRouter();
@@ -259,6 +260,7 @@ onMounted(async () => {
         ]"
         @update:options="onTableUpdate"
       >
+        <template v-if="!store.positions?.length" #loading><ViewSkeleton type="rows" /></template>
         <template #item.sku="{ item }">
           <span class="text-body-small font-weight-medium">{{ productSku(item.productId) }}</span>
         </template>

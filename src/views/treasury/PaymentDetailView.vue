@@ -16,6 +16,7 @@ import { formatMoney } from '@/utils/accounting';
 import { paymentActions, PAYMENT_STATUS_COLOR } from '@/utils/treasury-payments';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import TreasuryTabs from '@/components/treasury/TreasuryTabs.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -106,6 +107,7 @@ async function confirmVoid(): Promise<void> {
     <v-alert v-if="store.error && !voidDialog && !actionError" type="error" closable class="mb-4">{{ store.error }}</v-alert>
     <v-alert v-if="actionError" type="error" closable class="mb-4" @click:close="actionError = null">{{ actionError }}</v-alert>
 
+    <ViewSkeleton v-if="!payment && !store.error" type="detail" />
     <template v-if="payment">
       <v-alert v-if="payment.status === 'voided'" type="warning" class="mb-4" :title="$t('treasury.payments.voidedTitle')">
         {{ $t('treasury.payments.voidedText', { reason: payment.voidReason, when: dateTime(payment.voidedAt) }) }}

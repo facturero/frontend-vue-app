@@ -14,6 +14,7 @@ import { validateReminderSettings } from '@/utils/treasury';
 import { MAX_FIRST_AFTER_DAYS, MAX_REPEAT_DAYS, MIN_FIRST_AFTER_DAYS, MIN_REPEAT_DAYS, type ReminderRun } from '@/types/treasury';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import TreasuryTabs from '@/components/treasury/TreasuryTabs.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t, locale } = useI18n();
 const store = useTreasuryStore();
@@ -182,6 +183,7 @@ async function runNow(): Promise<void> {
         </v-alert>
 
         <v-data-table :headers="headers" :items="preview?.customers ?? []" :loading="store.loading" :items-per-page="-1" hide-default-footer>
+          <template v-if="!preview?.customers?.length" #loading><ViewSkeleton type="rows" /></template>
           <template #item.customerName="{ item }">{{ item.customerName }}</template>
           <template #item.emailHint="{ item }">
             <span v-if="item.hasEmail">{{ item.emailHint }}</span>

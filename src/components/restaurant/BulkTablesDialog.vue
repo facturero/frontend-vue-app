@@ -53,26 +53,23 @@ function submit(): void {
 
         <div v-if="error"><v-alert type="error">{{ error }}</v-alert></div>
 
-        <v-text-field
-          v-model.number="form.count"
-          type="number"
-          min="1"
-          max="100"
+        <v-number-input
+          v-model="form.count"
+          :min="1"
+          :max="100"
           :label="$t('restaurant.bulk.count')"
           data-testid="bulk-count"
         />
 
         <div class="d-flex ga-3">
-          <v-text-field
-            v-model.number="form.capacityMin"
-            type="number"
-            min="1"
+          <v-number-input
+            v-model="form.capacityMin"
+            :min="1"
             :label="$t('restaurant.bulk.capacityMin')"
           />
-          <v-text-field
-            v-model.number="form.capacityMax"
-            type="number"
-            min="1"
+          <v-number-input
+            v-model="form.capacityMax"
+            :min="1"
             :label="$t('restaurant.bulk.capacityMax')"
           />
         </div>

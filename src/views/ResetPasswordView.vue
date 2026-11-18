@@ -53,7 +53,7 @@ async function submit(): Promise<void> {
 
 <template>
   <div class="auth-wrapper d-flex align-center justify-center h-screen bg-background pa-4">
-    <v-card max-width="480" class="mx-auto" style="width: 100%;">
+    <v-card max-width="480" class="mx-auto" width="100%">
       <v-card-item class="pa-6">
         <v-card-title>{{ t('auth.resetPassword') }}</v-card-title>
         <v-card-subtitle>{{ t('auth.setNewPassword') }}</v-card-subtitle>

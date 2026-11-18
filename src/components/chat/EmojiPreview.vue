@@ -18,7 +18,7 @@ const src = computed(() => {
 
 <template>
   <div class="d-flex flex-column align-center ga-1 py-1" data-emoji-preview>
-    <img v-if="src" :src="src" :alt="`:${name}:`" :style="{ width: '64px', height: '64px', objectFit: 'contain' }" />
+    <v-img v-if="src" :src="src" :alt="`:${name}:`" width="64" height="64" />
     <span v-else-if="char" :style="{ fontSize: '48px', lineHeight: '64px' }">{{ char }}</span>
     <span v-if="name" class="text-body-medium font-weight-medium">:{{ name }}:</span>
     <span v-if="caption" class="text-body-small text-center">{{ caption }}</span>

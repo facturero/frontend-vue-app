@@ -19,6 +19,7 @@ import FindingsCard from '@/components/reporting/FindingsCard.vue';
 import AnnexContent from '@/components/reporting/AnnexContent.vue';
 import ManualInputsCard from '@/components/reporting/ManualInputsCard.vue';
 import ReconciliationCard from '@/components/reporting/ReconciliationCard.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t, te, locale } = useI18n();
 const route = useRoute();
@@ -112,6 +113,7 @@ const changeHeaders = computed(() => [
     <v-alert v-if="actionError" type="error" closable class="mb-4" data-testid="action-error">{{ actionError }}</v-alert>
     <v-alert v-if="notice" :type="notice.type" closable class="mb-4" data-testid="notice">{{ notice.text }}</v-alert>
 
+    <ViewSkeleton v-if="!(run && detail) && !store.error" type="detail" />
     <template v-if="run && detail">
       <v-row class="mb-2">
         <v-col v-for="[key, value] in summary" :key="key" cols="12" sm="6" md="3">

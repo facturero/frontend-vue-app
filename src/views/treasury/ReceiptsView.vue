@@ -15,6 +15,7 @@ import { RECEIPT_STATUS_COLOR } from '@/utils/treasury';
 import { RECEIPT_STATUSES, type Receipt, type ReceiptStatus } from '@/types/treasury';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import TreasuryTabs from '@/components/treasury/TreasuryTabs.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t, locale } = useI18n();
 const router = useRouter();
@@ -96,6 +97,7 @@ const money = (cents: number, currency = 'USD') => formatMoney(cents, locale.val
           hide-default-footer
           @click:row="(_: Event, { item }: { item: Receipt }) => open(item)"
         >
+          <template v-if="!store.receipts?.length" #loading><ViewSkeleton type="rows" /></template>
           <template #item.number="{ item }">{{ item.number ?? $t('treasury.receipts.draft') }}</template>
           <template #item.customerName="{ item }">
             {{ item.customerName }}

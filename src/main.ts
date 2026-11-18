@@ -11,12 +11,17 @@ import '@/styles/print.css';
 import router from '@/router';
 import i18n from '@/plugins/i18n';
 import { useAuthStore } from '@/stores/auth';
+import { applyCachedTheme } from '@/stores/appTheme';
+import { getAccessToken } from '@/utils/http';
 import { installGlobalErrorHandlers, reportError, setTelemetryContext, startTelemetry } from '@/telemetry';
 import { addBreadcrumb } from '@/telemetry/breadcrumbs';
 
 const app = createApp(App);
 
 registerPlugins(app);
+
+// El último tema pintado, antes de montar: sin esto cada recarga enseñaría el claro un instante (docs/TEMAS.md).
+applyCachedTheme(!!getAccessToken());
 
 // Errores que nadie atrapó → telemetría. Poner un `errorHandler` reemplaza el aviso por defecto de Vue, así que se conserva.
 app.config.errorHandler = (err, _instance, info) => {

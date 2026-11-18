@@ -30,6 +30,7 @@ import { useAuthStore } from '@/stores/auth';
 import { usePluginsStore } from '@/stores/plugins';
 import { useProjectsStore } from '@/stores/projects';
 import { HEALTH_COLOR } from '@/utils/projects';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 /** Pestañas del proyecto, como las de Asana. Lista y Tablero pueden ser la vista por defecto del proyecto; las demás se eligen. */
 type Tab = 'overview' | 'list' | 'board' | 'calendar' | 'timeline' | 'dashboard' | 'billing';
@@ -105,10 +106,19 @@ const { helpOpen } = useViewShortcuts({
   },
 });
 
+/**
+ * Abriendo el proyecto (su ficha y su tablero). Bandera propia, no `store.loading`: la comparten todas las lecturas del almacén, y
+ * una que seguía en camino (la lista de proyectos, al entrar a uno desde ella con la red lenta) la bajaba antes de que llegara el
+ * proyecto: la pantalla se quedaba en blanco en vez de en su esqueleto.
+ */
+const opening = ref(true);
+
 async function load(): Promise<void> {
   store.closeTask();
   void store.ensureDirectory();
+  opening.value = true;
   await store.loadProject(projectId.value);
+  opening.value = false;
   const fromQuery = route.query.view;
   view.value = TABS.includes(fromQuery as Tab) && (fromQuery !== 'billing' || canBill.value) ? (fromQuery as Tab) : (store.current?.defaultView ?? 'list');
   if (typeof route.query.task === 'string') void store.openTask(route.query.task);
@@ -170,7 +180,7 @@ async function remove(): Promise<void> {
   <!-- `pb-16`: sitio para «Agregar tarea» flotante en el teléfono, que si no tapa la última fila. -->
   <v-container :class="{ 'pb-16': canQuickAdd }">
     <v-alert v-if="store.error && !project" type="error" class="mb-4">{{ store.error }}</v-alert>
-    <v-progress-linear v-if="store.loading && !project" indeterminate color="primary" />
+    <ViewSkeleton v-if="opening && !project" type="board" header />
 
     <template v-if="project">
       <PageHeader :title="project.name" :subtitle="project.description ?? undefined">

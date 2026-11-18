@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
 import { resolveFileUrl } from '@/composable/useFileUrl';
 import LocaleSwitcher from '@/components/LocaleSwitcher.vue';
+import ThemeSwitcher from '@/components/ThemeSwitcher.vue';
 import NotificationBell from '@/components/NotificationBell.vue';
 import MessageInbox from '@/components/MessageInbox.vue';
 import GlobalSearch from '@/components/GlobalSearch.vue';
@@ -172,8 +173,20 @@ function logout(): void {
       <v-divider />
 
       <v-list density="compact" class="py-0">
-        <!-- Sin interruptor de modo nocturno (quitado el 2026-11-18, decisión del dueño): claro, oscuro y los temas propios de la
-             empresa pasan a un módulo «Temas» (análisis en docs/TEMAS.md). Hasta entonces el CRM se ve siempre en claro. -->
+        <!-- Tema: claro, oscuro, como el sistema y los de la empresa (docs/TEMAS.md). Reemplazó al interruptor «Modo nocturno»,
+             que no guardaba la elección. En el alta todavía no hay empresa: no se ofrece. -->
+        <ThemeSwitcher v-if="!bareShell">
+          <template #activator="{ props: themeProps, current, locked }">
+            <v-list-item v-bind="themeProps" prepend-icon="mdi-palette-outline" :title="$t('themes.menu')" value="theme"
+              data-menu-theme>
+              <template #append>
+                <v-icon v-if="locked" icon="mdi-lock-outline" size="16" class="ml-2 text-medium-emphasis" />
+                <span class="text-body-medium text-medium-emphasis ml-2">{{ current }}</span>
+                <v-icon icon="mdi-chevron-right" size="18" class="ml-1 text-medium-emphasis" />
+              </template>
+            </v-list-item>
+          </template>
+        </ThemeSwitcher>
         <!-- La fila entera es el botón: abre el selector de idioma al costado del menú. -->
         <LocaleSwitcher location="start">
           <template #activator="{ props: localeProps, current }">

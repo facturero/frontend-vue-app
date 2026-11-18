@@ -13,6 +13,7 @@ import PageHeader from '@/components/ui/PageHeader.vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import FeedbackStatusChip from '@/components/feedback/FeedbackStatusChip.vue';
 import FeedbackConversation from '@/components/feedback/FeedbackConversation.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 /**
  * Bandeja del dueño de la plataforma (`feedback:manage`, solo `is_platform_admin`): los comentarios, mejoras y problemas de TODAS las
@@ -163,7 +164,7 @@ onMounted(async () => {
 
       <v-progress-linear :active="refreshing" indeterminate color="primary" class="mb-2" />
       <v-alert v-if="failure" type="error" class="mb-4" :text="failure" />
-      <div v-else-if="loading" class="d-flex justify-center pa-6"><v-progress-circular indeterminate color="primary" /></div>
+      <ViewSkeleton v-else-if="loading" type="list" />
       <v-card v-else-if="!items.length"><EmptyState icon="mdi-inbox-outline" :title="t('feedbackBox.platformEmpty')" /></v-card>
       <v-row v-else>
         <v-col cols="12" :md="detail && !smAndDown ? 5 : 12">
@@ -222,7 +223,7 @@ onMounted(async () => {
         <v-card-title>{{ t('feedbackBox.adjustTitle') }}</v-card-title>
         <v-card-text class="d-flex flex-column ga-4">
           <v-select v-model="adjust.organizationId" :items="orgItems" :label="t('feedbackBox.company')" />
-          <v-text-field v-model.number="adjust.amount" type="number" :label="t('feedbackBox.points')" :hint="t('feedbackBox.adjustHint')" persistent-hint />
+          <v-number-input v-model="adjust.amount" :label="t('feedbackBox.points')" :hint="t('feedbackBox.adjustHint')" persistent-hint />
           <v-text-field v-model="adjust.reason" :label="t('feedbackBox.reason')" maxlength="200" />
         </v-card-text>
         <v-card-actions>

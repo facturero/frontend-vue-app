@@ -32,6 +32,7 @@ import type { AdjustmentKind, BankLineStatus, BankLineView, BankMovement } from 
 import PageHeader from '@/components/ui/PageHeader.vue';
 import TreasuryTabs from '@/components/treasury/TreasuryTabs.vue';
 import ReasonDialog from '@/components/treasury/ReasonDialog.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -78,10 +79,18 @@ async function refreshAll(): Promise<void> {
   await Promise.all([store.fetchAccount(accountId.value), refreshPreview(), refreshLines(), refreshMovements(), store.fetchSuggestions(accountId.value), store.fetchReconciliations(accountId.value)]);
 }
 
-onMounted(async () => {
+/** Primera carga de la pantalla: mientras dura se ve su esqueleto (ViewSkeleton), no un formulario vacío que luego se rellena de golpe. */
+const loading = ref(true);
+onMounted(() => {
+  void loadView().finally(() => {
+    loading.value = false;
+  });
+});
+
+async function loadView(): Promise<void> {
   await refreshAll();
   if (balanceText.value === '' && preview.value?.suggestedStatementBalance) balanceText.value = centsToInput(preview.value.suggestedStatementBalance.cents) || '0';
-});
+}
 
 let timer: ReturnType<typeof setTimeout> | null = null;
 watch([cutoff, balanceText], () => {
@@ -247,6 +256,7 @@ const filterItems = computed(() => (['unmatched', 'matched', 'external', 'all'] 
     <v-alert v-if="store.error && !actionError" type="error" closable class="mb-4">{{ store.error }}</v-alert>
 
     <!-- Fecha de corte y saldo del extracto -->
+    <ViewSkeleton :loading="loading" type="detail">
     <v-card class="mb-4">
       <v-card-text>
         <v-row>
@@ -400,6 +410,7 @@ const filterItems = computed(() => (['unmatched', 'matched', 'external', 'all'] 
         </v-card>
       </v-col>
     </v-row>
+    </ViewSkeleton>
 
     <!-- Historial -->
     <v-card v-if="store.reconciliations.length > 0" class="mt-4">

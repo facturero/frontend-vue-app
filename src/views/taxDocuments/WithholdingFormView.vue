@@ -24,6 +24,7 @@ import type { WithholdingInput, WithholdingTax } from '@/types/fiscal';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import TaxDocumentTabs from '@/components/taxDocuments/TaxDocumentTabs.vue';
 import IssuerPicker from '@/components/taxDocuments/IssuerPicker.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const router = useRouter();
 const store = useTaxDocumentsStore();
@@ -207,12 +208,20 @@ function applyPrefill(): boolean {
   return true;
 }
 
-onMounted(async () => {
+/** Primera carga de la pantalla: mientras dura se ve su esqueleto (ViewSkeleton), no un formulario vacío que luego se rellena de golpe. */
+const loading = ref(true);
+onMounted(() => {
+  void loadView().finally(() => {
+    loading.value = false;
+  });
+});
+
+async function loadView(): Promise<void> {
   store.error = null;
   await store.loadCatalog();
   if (!applyPrefill()) taxes.value = [newTax()];
   addRow('income');
-});
+}
 </script>
 
 <template>
@@ -224,6 +233,7 @@ onMounted(async () => {
       {{ store.error }}
     </v-alert>
 
+    <ViewSkeleton :loading="loading" type="form">
     <v-form @submit.prevent="submit">
       <v-card class="mb-4">
         <v-card-title class="text-title-large">{{ $t('taxDocuments.issuer') }}</v-card-title>
@@ -392,5 +402,6 @@ onMounted(async () => {
         </v-btn>
       </div>
     </v-form>
+    </ViewSkeleton>
   </v-container>
 </template>

@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router';
 import { useInvoiceStore } from '@/stores/invoices';
 import { useAuthStore } from '@/stores/auth';
 import PageHeader from '@/components/ui/PageHeader.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const router = useRouter();
 const store = useInvoiceStore();
@@ -87,7 +88,7 @@ onMounted(load);
     </v-card>
 
     <v-card class="mt-4">
-      <v-progress-linear v-if="store.loading" indeterminate />
+      <v-progress-linear v-if="store.loading && store.list.length" indeterminate />
 
       <v-table>
         <thead>
@@ -128,6 +129,9 @@ onMounted(load);
                 @click="goEdit(inv.id)"
               />
             </td>
+          </tr>
+          <tr v-if="store.loading && store.list.length === 0">
+            <td colspan="9" class="pa-0"><ViewSkeleton type="rows" /></td>
           </tr>
           <tr v-if="store.list.length === 0 && !store.loading">
             <td colspan="9" class="text-center text-grey">{{ $t('invoices.empty') }}</td>

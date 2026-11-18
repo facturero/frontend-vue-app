@@ -16,6 +16,7 @@ import { downloadBlob, reportLang } from '@/utils/treasury';
 import { isPayableOverdue, PAYABLE_STATUS_COLOR, payableDaysOverdue } from '@/utils/treasury-payments';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import TreasuryTabs from '@/components/treasury/TreasuryTabs.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -113,6 +114,7 @@ const advanceHeaders = computed(() => [
       <v-card-title class="text-title-large">{{ $t('treasury.payables.debts') }}</v-card-title>
       <v-card-text>
         <v-data-table :headers="headers" :items="statement?.payables ?? []" :loading="store.loading" :items-per-page="-1" hide-default-footer>
+          <template v-if="!statement?.payables?.length" #loading><ViewSkeleton type="rows" /></template>
           <template #item.documentNumber="{ item }">
             {{ item.documentNumber ?? item.internalNumber ?? $t(`treasury.payables.source.${item.sourceType}`) }}
             <div v-for="a in applicationsOf(item.id)" :key="a.id" class="text-body-medium text-medium-emphasis">

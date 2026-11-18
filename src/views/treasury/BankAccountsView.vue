@@ -16,6 +16,7 @@ import type { BankAccount, BankAccountInput, BankAccountSummary, BankMovementVie
 import PageHeader from '@/components/ui/PageHeader.vue';
 import TreasuryTabs from '@/components/treasury/TreasuryTabs.vue';
 import BankAccountDialog from '@/components/treasury/BankAccountDialog.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t, locale } = useI18n();
 const auth = useAuthStore();
@@ -117,6 +118,7 @@ const typeLabel = (a: BankAccount) => t(`treasury.banking.types.${a.accountType}
       </div>
     </v-alert>
 
+    <ViewSkeleton v-if="store.loading && !store.accounts.length" type="cards" :count="3" />
     <v-row>
       <v-col v-for="account in store.accounts" :key="account.id" cols="12" md="6" lg="4">
         <v-card :class="{ 'text-medium-emphasis': !account.isActive }">
@@ -174,7 +176,7 @@ const typeLabel = (a: BankAccount) => t(`treasury.banking.types.${a.accountType}
               <span :class="item.amountCents < 0 ? 'text-error' : 'text-success'">{{ money(item.amountCents) }}</span>
             </template>
             <template #item.account="{ item }">
-              <v-select :items="accountItems" :label="$t('treasury.banking.chooseAccount')" hide-details style="min-width: 200px" @update:model-value="(v: string | null) => assign(item, v)" />
+              <v-select :items="accountItems" :label="$t('treasury.banking.chooseAccount')" hide-details min-width="200" @update:model-value="(v: string | null) => assign(item, v)" />
             </template>
           </v-data-table>
         </v-card-text>

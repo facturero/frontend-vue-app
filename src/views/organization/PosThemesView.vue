@@ -10,6 +10,7 @@ import { getSocket } from '@/utils/realtime';
 import type { EmissionPointDTO } from '@/types/organization';
 import type { PosThemeSummaryDTO } from '@/types/posTheme';
 import PageHeader from '@/components/ui/PageHeader.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t } = useI18n();
 const confirm = useConfirm();
@@ -251,8 +252,8 @@ onUnmounted(() => {
         </v-list-item>
       </v-list>
 
-      <v-card-text v-else-if="store.loading" class="text-medium-emphasis">
-        {{ $t('common.loading') }}
+      <v-card-text v-else-if="store.loading">
+        <ViewSkeleton type="text" :count="3" />
       </v-card-text>
 
       <v-card-text v-else class="text-medium-emphasis">

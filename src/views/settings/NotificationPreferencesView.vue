@@ -5,6 +5,7 @@ import { useNotificationPrefsStore } from '@/stores/notificationPrefs';
 import { usePluginsStore } from '@/stores/plugins';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import type { NotificationProvider } from '@/types/notifications';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 // Preferencias de notificaciones por usuario, a lo Moodle: matriz de providers
 // (eventos que emite cada plugin del plan de la org) con un interruptor por
@@ -110,9 +111,7 @@ async function saveAll(): Promise<void> {
       {{ $t('notificationPrefs.saved') }}
     </v-alert>
 
-    <div v-if="store.loading" class="d-flex justify-center pa-6">
-      <v-progress-circular indeterminate color="primary" />
-    </div>
+    <ViewSkeleton v-if="store.loading" type="cards" :count="3" />
 
     <v-card v-else-if="groups.length === 0" class="mb-4">
       <v-card-text class="pa-6 d-flex align-center ga-2">

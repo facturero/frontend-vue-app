@@ -6,6 +6,7 @@ import { usePluginsStore } from '@/stores/plugins';
 import { usePluginCartStore } from '@/stores/pluginCart';
 import { useAuthStore } from '@/stores/auth';
 import type { CatalogPlugin } from '@/types/plugins';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const props = defineProps<{ initialSearch?: string }>();
 
@@ -192,6 +193,7 @@ function formatDate(iso: string): string {
       </v-card-text>
     </v-card>
 
+    <ViewSkeleton v-if="store.loading && !store.catalog.length" type="cards" :count="8" />
     <v-row>
       <v-col v-for="p in filtered" :key="p.id" cols="12" sm="6" lg="4" xl="3">
         <v-card class="d-flex flex-column fill-height">

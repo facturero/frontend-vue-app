@@ -205,6 +205,13 @@ export function connectRealtime(): void {
     }
   });
 
+  // Temas de la aplicación: la empresa creó, editó o borró un tema, o cambió/fijó el suyo. El aviso no trae colores: se vuelven a
+  // pedir. Así, si un administrador fija un tema, el resto lo ve al instante sin recargar.
+  // Import diferido: el store de temas arrastra la instancia de Vuetify, y este módulo lo importan pruebas que no la cargan.
+  socket.on('app_theme.changed', () => {
+    void import('@/stores/appTheme').then((m) => m.useAppThemeStore().load()).catch(() => undefined);
+  });
+
   socket.on('notification', (data?: Record<string, unknown>) => {
     // Canal `app` de notification-service: el gateway emite esto en tu sala
     // `user:<uid>` solo si tienes activa la notificación para ese provider.

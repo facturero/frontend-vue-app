@@ -11,6 +11,7 @@ import type { ContactInput, AddressInput, AddressType } from '@/types/customers'
 import PageHeader from '@/components/ui/PageHeader.vue';
 import LinkedTasksCard from '@/components/projects/LinkedTasksCard.vue';
 import { fileUrl } from '@/composable/useFileUrl';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 
 const { t } = useI18n();
@@ -208,7 +209,10 @@ onMounted(async () => {
       {{ store.error }}
     </v-alert>
 
-    <div v-if="!store.loading && customer">
+    <!-- Esqueleto solo en la primera carga de ESTE cliente (o al pasar de un cliente a otro): al guardar un contacto, la ficha sigue a
+         la vista (R-02). -->
+    <ViewSkeleton :loading="store.loading && customer?.id !== customerId" type="detail">
+    <div v-if="customer">
       <v-row>
         <v-col cols="12" md="8">
           <!-- Información general -->
@@ -376,10 +380,7 @@ onMounted(async () => {
         </v-col>
       </v-row>
     </div>
-
-    <div v-else class="d-flex justify-center py-8">
-      <v-progress-circular indeterminate color="primary" />
-    </div>
+    </ViewSkeleton>
 
     <!-- Diálogo de contacto -->
     <v-dialog v-model="contactDialog" max-width="500">

@@ -20,6 +20,7 @@ import type { ReservationSettingsInput } from '@/types/restaurant';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import RestaurantTabs from '@/components/restaurant/RestaurantTabs.vue';
 import EstablishmentSelect from '@/components/restaurant/EstablishmentSelect.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t } = useI18n();
 const { restaurant, ready, establishmentId, showSelector, hasEstablishments, bootstrap } = useRestaurantEstablishment();
@@ -165,7 +166,7 @@ async function copyLink(): Promise<void> {
 
     <v-alert v-if="loadError" type="error" closable class="mb-4" @click:close="loadError = null">{{ loadError }}</v-alert>
     <v-alert v-else-if="ready && !hasEstablishments" type="info" class="mb-4">{{ $t('restaurant.noEstablishment') }}</v-alert>
-    <v-skeleton-loader v-else-if="!ready || !store.settings" type="card" />
+    <ViewSkeleton v-else-if="!ready || !store.settings" type="form" />
 
     <template v-else>
       <div v-if="saveError"><v-alert type="error" closable class="mb-4" @click:close="saveError = null">{{ saveError }}</v-alert></div>
@@ -240,7 +241,7 @@ async function copyLink(): Promise<void> {
               :label="$t('restaurant.reservations.settings.phone')"
               :hint="$t('restaurant.reservations.settings.phoneHint')"
               persistent-hint
-              style="min-width: 240px; flex: 1"
+              min-width="240" class="flex-1-1-0"
             />
             <v-text-field
               v-model="notifyEmail"
@@ -249,7 +250,7 @@ async function copyLink(): Promise<void> {
               :label="$t('restaurant.reservations.settings.notifyEmail')"
               :hint="$t('restaurant.reservations.settings.notifyEmailHint')"
               persistent-hint
-              style="min-width: 240px; flex: 1"
+              min-width="240" class="flex-1-1-0"
             />
           </div>
 
@@ -271,38 +272,35 @@ async function copyLink(): Promise<void> {
         <v-card-title>{{ $t('restaurant.reservations.settings.rulesTitle') }}</v-card-title>
         <v-card-subtitle>{{ $t('restaurant.reservations.settings.rulesIntro') }}</v-card-subtitle>
         <v-card-text class="d-flex flex-wrap ga-4">
-          <v-text-field
-            v-model.number="maxPartySize"
-            type="number"
-            min="1"
-            max="100"
+          <v-number-input
+            v-model="maxPartySize"
+            :min="1"
+            :max="100"
             :disabled="!canManage"
             :label="$t('restaurant.reservations.settings.maxParty')"
             :hint="$t('restaurant.reservations.settings.maxPartyHint')"
             persistent-hint
-            style="min-width: 220px; flex: 1"
+            min-width="220" class="flex-1-1-0"
           />
-          <v-text-field
-            v-model.number="maxTablesPerReservation"
-            type="number"
-            min="1"
-            max="10"
+          <v-number-input
+            v-model="maxTablesPerReservation"
+            :min="1"
+            :max="10"
             :disabled="!canManage"
             :label="$t('restaurant.reservations.settings.maxTables')"
             :hint="$t('restaurant.reservations.settings.maxTablesHint')"
             persistent-hint
-            style="min-width: 220px; flex: 1"
+            min-width="220" class="flex-1-1-0"
           />
-          <v-text-field
-            v-model.number="maxDaysAhead"
-            type="number"
-            min="1"
-            max="365"
+          <v-number-input
+            v-model="maxDaysAhead"
+            :min="1"
+            :max="365"
             :disabled="!canManage"
             :label="$t('restaurant.reservations.settings.daysAhead')"
             :hint="$t('restaurant.reservations.settings.daysAheadHint')"
             persistent-hint
-            style="min-width: 220px; flex: 1"
+            min-width="220" class="flex-1-1-0"
           />
           <v-select
             v-model="minNoticeMinutes"
@@ -311,7 +309,7 @@ async function copyLink(): Promise<void> {
             :label="$t('restaurant.reservations.settings.notice.label')"
             :hint="$t('restaurant.reservations.settings.noticeHint')"
             persistent-hint
-            style="min-width: 220px; flex: 1"
+            min-width="220" class="flex-1-1-0"
           />
         </v-card-text>
       </v-card>

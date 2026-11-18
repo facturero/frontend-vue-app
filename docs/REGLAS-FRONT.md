@@ -27,6 +27,9 @@ Antes de escribir algo de esto en una vista, úsalo de aquí. Si no existe, se c
 | `components/ui/EmptyState.vue` | Pantalla, tabla o columna sin datos (`compact` dentro de columnas y secciones) | **existe** (2026-11-06); en uso en la lista de proyectos |
 | `composable/useNotify.ts` + el único `<v-snackbar-queue>`, en `App.vue` | Avisos: `notify.success`, `notify.error(err)`, `notify.undoable` | **existe** (2026-11-06); ya no queda ningún `<v-snackbar>` fuera de `App.vue` |
 | `utils/format.ts` (+ `utils/isoDate.ts`) | `formatDate`, `formatDateTime`, `formatMoney`, `formatNumber` | **existe** (2026-11-06); todas las fechas de la app salen de aquí (`dd/mm/yyyy`); el dinero aún usa `utils/accounting.formatMoney` en varios módulos |
+| `components/ui/ViewSkeleton.vue` | Primera carga de pantalla, tabla, ficha, formulario o tablero (R-01) | **existe** (2026-11-18); en todas las vistas que piden datos |
+| `components/ui/TimeField.vue` | Todo campo de hora: `v-time-picker` en un `v-menu`, habla `HH:mm` | **existe** (2026-11-18); ya no queda ningún `type="time"` |
+| `components/ui/ColorField.vue` | Todo campo de color: hexadecimal + muestra que abre `v-color-picker`, habla `#rrggbb` | **existe** (2026-11-18); ya no queda ningún `type="color"` |
 | `components/ui/DateField.vue` | Todo campo de fecha y rango: envuelve `v-date-input` (estable desde Vuetify 4.1) y habla `YYYY-MM-DD` | **existe** (2026-11-06); ya no queda ningún `type="date"` en la app. `required`: la fecha no se puede vaciar |
 
 Antes de cualquier pieza, la regla de `UI-UX.md` §1: **solo componentes de Vuetify**; si Vuetify no tiene lo que hace falta, se
@@ -43,14 +46,16 @@ Toda vista y todo bloque que pide datos tiene **cinco estados**, y los cinco se 
 
 | Estado | Cómo se ve | Regla |
 |---|---|---|
-| Cargando por primera vez | `v-progress-linear indeterminate` bajo el encabezado; en tablas, su prop `loading` | R-01 |
+| Cargando por primera vez | `ViewSkeleton` con la forma de lo que va a llegar (tabla, ficha, formulario, tarjetas…); en un `v-data-table`, sus filas en el hueco `loading` | R-01 |
 | Recargando (ya hay datos) | Los datos siguen visibles; solo la barra o el `loading` de la tabla. **Nunca** se vacía la pantalla | R-02 |
 | Vacío | `EmptyState`: icono, título, una frase y la acción para salir del vacío | R-03 |
 | Error al cargar | `v-alert type="error"` bajo el encabezado, con lo que pasó en lenguaje de persona y botón «Reintentar» si aplica | R-04 |
 | Sin permiso / solo lectura | Lo que no se puede hacer **no se muestra**; si se ve pero no se edita, se dice una vez (chip «Solo lectura») | R-05 |
 
-- **R-01 / R-02 (a mano).** Un `v-skeleton-loader` solo cuando la forma del contenido es conocida y fija (tarjetas, resumen). No se
-  combinan barra y esqueleto en la misma zona.
+- **R-01 / R-02 (a mano).** Toda pantalla que pide datos muestra `ViewSkeleton` en su primera carga (desde el 2026-11-18, todas
+  las del CRM salvo la caja web y las de acceso): la espera se ve y la página no salta al llegar los datos. Solo la primera carga:
+  con datos ya en pantalla, la recarga deja los datos y muestra la barra. No se combinan barra y esqueleto en la misma zona. Cómo
+  usarlo y por qué el `v-if` del hueco `loading` de una tabla es obligatorio: UI-UX.md §2 bis.
 - **R-03 (falta pieza).** Hay tres vacíos distintos y cada uno dice algo distinto:
   - *aún no hay nada* → invita a crear («Crea tu primer proyecto» + botón);
   - *el filtro no encontró nada* → ofrece limpiar el filtro, no crear;

@@ -18,6 +18,7 @@ import PageHeader from '@/components/ui/PageHeader.vue';
 import AccountingTabs from '@/components/accounting/AccountingTabs.vue';
 import { useProjectOptions } from '@/composable/useProjectOptions';
 import AccountingSetupCard from '@/components/accounting/AccountingSetupCard.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -174,6 +175,7 @@ function closeLedger(): void {
             :items-length="store.ledger?.total ?? 0"
             :loading="store.loading"
           >
+            <template v-if="!store.ledger?.lines?.length" #loading><ViewSkeleton type="rows" /></template>
             <template #item.entryNumber="{ item }">
               <router-link v-if="item.entryNumber" :to="{ name: 'accounting-entry', params: { id: item.entryId } }">{{ item.entryNumber }}</router-link>
             </template>
@@ -191,6 +193,7 @@ function closeLedger(): void {
       <v-card v-else>
         <v-card-text>
           <v-data-table :headers="headers" :items="rows" :items-per-page="-1" hide-default-footer :loading="store.loading">
+            <template v-if="!rows?.length" #loading><ViewSkeleton type="rows" /></template>
             <template #item.code="{ item }">
               <a v-if="item.isPostable" class="cursor-pointer" @click="openLedger(item)">{{ item.code }}</a>
               <span v-else :class="{ 'font-weight-medium': !item.synthetic }">{{ item.code }}</span>

@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router';
 import { useRoleStore } from '@/stores/roles';
 import PermissionSelector from '@/components/PermissionSelector.vue';
 import PageHeader from '@/components/ui/PageHeader.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const store = useRoleStore();
 const router = useRouter();
@@ -86,8 +87,8 @@ async function submit(): Promise<void> {
               v-model="selectedPermissions"
             />
           </v-card-text>
-          <v-card-text v-else class="d-flex justify-center py-4">
-            <v-progress-circular indeterminate color="primary" size="24" />
+          <v-card-text v-else>
+            <ViewSkeleton type="text" :count="6" />
           </v-card-text>
         </v-card>
       </v-col>

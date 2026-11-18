@@ -21,6 +21,7 @@ import type { OrderInput } from '@/types/purchasing';
 import type { ProductSummary } from '@/types/products';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import PurchasingTabs from '@/components/purchasing/PurchasingTabs.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { locale } = useI18n();
 const route = useRoute();
@@ -157,7 +158,15 @@ function onSupplierChange(id: string | null): void {
   if (supplier && !orderId.value) paymentTermDays.value = String(supplier.paymentTermDays);
 }
 
-onMounted(async () => {
+/** Primera carga de la pantalla: mientras dura se ve su esqueleto (ViewSkeleton), no un formulario vacío que luego se rellena de golpe. */
+const loading = ref(true);
+onMounted(() => {
+  void loadView().finally(() => {
+    loading.value = false;
+  });
+});
+
+async function loadView(): Promise<void> {
   store.error = null;
   await Promise.all([store.fetchSuppliers({ status: 'active' }), inventory.fetchWarehouses(), productStore.fetchCatalog(), store.fetchSettings()]);
   searchProducts(null);
@@ -195,7 +204,7 @@ onMounted(async () => {
     ...productOptions.value,
     ...(order.lines ?? []).filter((l) => !productOptions.value.some((o) => o.value === l.productId)).map((l) => ({ value: l.productId, title: l.description })),
   ];
-});
+}
 </script>
 
 <template>
@@ -206,6 +215,7 @@ onMounted(async () => {
     <v-alert v-if="loadError" type="error" class="mb-4">{{ loadError.startsWith('purchasing.') ? $t(loadError) : loadError }}</v-alert>
     <v-alert v-if="formError" type="error" closable class="mb-4" @click:close="formError = null">{{ formError }}</v-alert>
 
+    <ViewSkeleton :loading="loading" type="form">
     <v-form v-if="!loadError" @submit.prevent="save(false)">
       <v-card class="mb-4">
         <v-card-title class="text-title-large">{{ $t('purchasing.form.header') }}</v-card-title>
@@ -294,5 +304,6 @@ onMounted(async () => {
         <v-btn color="primary" :loading="store.saving" :disabled="!canSave" @click="save(true)">{{ $t('purchasing.form.saveAndSubmit') }}</v-btn>
       </div>
     </v-form>
+    </ViewSkeleton>
   </v-container>
 </template>

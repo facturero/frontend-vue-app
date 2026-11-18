@@ -17,6 +17,7 @@ import { isPayableOverdue, PAYABLE_STATUS_COLOR, PAYABLES_AGING_BUCKETS, payable
 import { PAYABLE_STATUSES, type Payable, type PayableStatus } from '@/types/treasury';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import TreasuryTabs from '@/components/treasury/TreasuryTabs.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t, locale } = useI18n();
 const router = useRouter();
@@ -130,6 +131,7 @@ const sourceLabel = (item: Payable) => item.documentNumber ?? item.internalNumbe
         </v-row>
 
         <v-data-table :headers="headers" :items="store.payables" :loading="store.loading" :items-per-page="-1" hide-default-footer @click:row="(_: Event, { item }: { item: Payable }) => openSupplier(item)">
+          <template v-if="!store.payables?.length" #loading><ViewSkeleton type="rows" /></template>
           <template #item.supplierName="{ item }">
             {{ item.supplierName }}
             <div v-if="item.supplierIdentification" class="text-body-medium text-medium-emphasis">{{ item.supplierIdentification }}</div>

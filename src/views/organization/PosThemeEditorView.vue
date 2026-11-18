@@ -6,6 +6,7 @@ import { usePosThemeStore } from '@/stores/posTheme';
 import { useAuthStore } from '@/stores/auth';
 import PosThemeLogoField from '@/components/pos-theme/PosThemeLogoField.vue';
 import PageHeader from '@/components/ui/PageHeader.vue';
+import ColorField from '@/components/ui/ColorField.vue';
 import PosThemePreview from '@/components/pos-theme/PosThemePreview.vue';
 import {
   CONTRAST_MIN_ADVISORY,
@@ -160,10 +161,9 @@ function setColor(token: keyof PosThemeColors, value: string): void {
   config.value.colors[editMode.value][token] = normalizeHexColor(value);
 }
 
-/** El input de color nativo devuelve siempre `#rrggbb` en minúsculas, que es
- * justo lo que pide el contrato. El campo de texto de al lado deja pegar un
- * valor a mano; se normaliza al perder el foco para no enviar `#5D87FF` y comerse
- * un 422. */
+/** `ColorField` entrega lo que se escribe o se elige en su selector. Solo se guarda
+ * cuando ya es un color válido (escribir a medias no borra el anterior) y se
+ * normaliza a `#rrggbb` en minúsculas para no enviar `#5D87FF` y comerse un 422. */
 function setColorFromText(token: keyof PosThemeColors, value: string): void {
   if (isValidHexColor(normalizeHexColor(value))) setColor(token, value);
 }
@@ -375,26 +375,13 @@ onMounted(async () => {
 
             <v-row density="compact">
               <v-col v-for="token in COLOR_TOKENS" :key="token" cols="12" sm="6">
-                <div class="d-flex align-center ga-2">
-                  <!-- Input nativo: siempre `#rrggbb` en minúsculas, que es lo que
-                       acepta el contrato. Sin hoja de estilo propia (el guardián
-                       de UI no admite estilos de vista): el borde sale del token
-                       `borderColor` del tema, no de un color escrito aquí. -->
-                  <input
-                    type="color"
-                    :value="colors[token]"
-                    :aria-label="$t(`posThemes.tokens.${token}`)"
-                    style="width: 38px; height: 38px; padding: 2px; cursor: pointer; flex-shrink: 0; border-radius: 6px; border: 1px solid rgb(var(--v-border-color)); background: transparent;"
-                    @input="setColor(token, ($event.target as HTMLInputElement).value)"
-                  />
-                  <v-text-field
-                    :model-value="colors[token]"
-                    :label="$t(`posThemes.tokens.${token}`)"
-                    :error="invalidColors.includes(token)"
-                    @update:model-value="setColorFromText(token, $event as string)"
-                    @blur="setColorFromText(token, colors[token])"
-                  />
-                </div>
+                <ColorField
+                  :model-value="colors[token]"
+                  :label="$t(`posThemes.tokens.${token}`)"
+                  :error="invalidColors.includes(token)"
+                  @update:model-value="setColorFromText(token, $event)"
+                  @blur="setColorFromText(token, colors[token])"
+                />
               </v-col>
             </v-row>
           </v-card-text>

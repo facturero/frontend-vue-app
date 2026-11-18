@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { usePluginsStore } from '@/stores/plugins';
 import PageHeader from '@/components/ui/PageHeader.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 /**
  * Alta, paso 3: perfil de negocio. Razón de ser: una organización recién creada
@@ -61,11 +62,7 @@ async function omit(): Promise<void> {
       {{ store.error }}
     </v-alert>
 
-    <v-row v-if="store.loading && !store.businessProfiles.length" density="compact">
-      <v-col cols="12" class="text-center py-12">
-        <v-progress-circular indeterminate color="primary" />
-      </v-col>
-    </v-row>
+    <ViewSkeleton v-if="store.loading && !store.businessProfiles.length" type="cards" :count="8" />
 
     <v-row v-else density="compact">
       <v-col v-for="p in store.businessProfiles" :key="p.code" cols="12" sm="6" md="4" lg="3">

@@ -652,7 +652,11 @@
       "chat_message_updated": "Message edited",
       "chat_message_deleted": "Message deleted",
       "chat_reaction_added": "Reaction added",
-      "chat_reaction_removed": "Reaction removed"
+      "chat_reaction_removed": "Reaction removed",
+      "organization_app_theme_created": "Theme created",
+      "organization_app_theme_updated": "Theme edited",
+      "organization_app_theme_deleted": "Theme deleted",
+      "organization_theme_settings_updated": "Company theme changed"
     },
     "filters": {
       "title": "Filters",
@@ -740,6 +744,7 @@
     "validRange": "Valid from {from} to {to}"
   },
   "common": {
+    "pickColor": "Pick a color",
     "actions": "Actions",
     "active": "Active",
     "add": "Add",
@@ -3616,6 +3621,10 @@
     }
   },
   "uploader": {
+    "uploading": "Uploading… {done} of {total}",
+    "retry": "Retry",
+    "replace": "Change image",
+    "remove": "Remove image",
     "addMore": "Add more",
     "change": "Change",
     "dropHint": "Drag or click to select",
@@ -4746,6 +4755,69 @@
     },
     "browserNotify": {
       "enable": "Turn on browser notifications"
+    }
+  },
+  "themes": {
+    "tabTitle": "Themes",
+    "menu": "Theme",
+    "builtin": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "Same as system"
+    },
+    "companyDefault": "Company's ({name})",
+    "lockedByCompany": "Your company set the theme for everyone.",
+    "companyTitle": "Company theme",
+    "companyIntro": "The whole team sees it unless they pick another one in their avatar menu.",
+    "companyDefaultLabel": "Company theme",
+    "enforce": "Set it for everyone",
+    "enforceHint": "The team won’t be able to change it. Organization admins still can.",
+    "settingsSaved": "Company theme saved.",
+    "listTitle": "Custom themes",
+    "listIntro": "Your brand colors across the whole app. Up to {max} themes.",
+    "new": "New theme",
+    "emptyTitle": "No custom themes yet",
+    "emptyText": "Create one with your brand colors. While you edit it, the whole app is your preview.",
+    "isDefault": "Company theme",
+    "isEnforced": "Set for everyone",
+    "removeTitle": "Delete the “{name}” theme?",
+    "removeText": "Whoever picked it will see the company theme.",
+    "removeTextDefault": "It is the company theme: the company goes back to the light theme and it is no longer set for everyone.",
+    "removed": "Theme “{name}” deleted.",
+    "editor": {
+      "newTitle": "New theme",
+      "editTitle": "Edit theme",
+      "intro": "Your changes show right away across the app, behind this window. If you cancel, it goes back to how it was.",
+      "name": "Name",
+      "base": "Base",
+      "pick": "Pick a color",
+      "color": {
+        "primary": "Primary",
+        "secondary": "Secondary",
+        "background": "Background",
+        "surface": "Cards",
+        "text": "Text",
+        "success": "Success",
+        "warning": "Warning",
+        "error": "Error"
+      },
+      "pair": {
+        "text": "text",
+        "on-primary": "button text",
+        "background": "the background",
+        "surface": "cards",
+        "primary": "the primary color"
+      },
+      "contrastPair": "{a} on {b}: {ratio} to 1",
+      "contrastBlocking": "It wouldn’t be readable. Raise the contrast (at least 3 to 1) to save:",
+      "contrastAdvisory": "Readable, but with low contrast (4.5 to 1 is recommended):",
+      "save": "Save theme",
+      "create": "Create theme",
+      "nameTaken": "There is already a theme with that name.",
+      "limit": "You already have the maximum number of themes. Delete one to create another.",
+      "discardTitle": "Discard changes?",
+      "discardText": "The theme stays as it was.",
+      "discard": "Discard"
     }
   }
 }

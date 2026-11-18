@@ -14,6 +14,7 @@ import { formatMoney } from '@/utils/accounting';
 import { ORDER_STATUS_COLOR, orderActions, RECEIVING_VISIBLE_STATUSES } from '@/utils/purchasing';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import PurchasingTabs from '@/components/purchasing/PurchasingTabs.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -97,7 +98,8 @@ async function confirmReason(): Promise<void> {
     </PageHeader>
     <PurchasingTabs />
 
-    <v-progress-linear v-if="store.loading" indeterminate class="mb-4" />
+    <ViewSkeleton v-if="store.loading && !order" type="detail" />
+    <v-progress-linear v-else-if="store.loading" indeterminate class="mb-4" />
     <v-alert v-if="!order && !store.loading && store.error" type="error" class="mb-4">{{ store.error }}</v-alert>
     <v-alert v-if="actionError && !reasonDialog" type="error" closable class="mb-4" @click:close="actionError = null">{{ actionError }}</v-alert>
 

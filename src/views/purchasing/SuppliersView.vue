@@ -11,6 +11,7 @@ import { usePurchasingStore } from '@/stores/purchasing';
 import type { Supplier, SupplierIdentificationType, SupplierInput } from '@/types/purchasing';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import PurchasingTabs from '@/components/purchasing/PurchasingTabs.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t } = useI18n();
 const auth = useAuthStore();
@@ -147,6 +148,7 @@ async function toggle(supplier: Supplier): Promise<void> {
         </div>
 
         <v-data-table :headers="headers" :items="store.suppliers" :loading="store.loading" :items-per-page="-1" hide-default-footer>
+          <template v-if="!store.suppliers?.length" #loading><ViewSkeleton type="rows" /></template>
           <template #item.identification="{ item }">
             {{ item.identification }}
             <div class="text-body-medium text-medium-emphasis">{{ $t(`purchasing.idTypes.${item.identificationType}`) }}</div>

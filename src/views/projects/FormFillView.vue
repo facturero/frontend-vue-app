@@ -7,6 +7,7 @@ import PageHeader from '@/components/ui/PageHeader.vue';
 import { projectsApi } from '@/api/projects';
 import { extractError } from '@/utils/error';
 import type { PublicForm } from '@/types/projects';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 /**
  * Llenar un formulario de solicitud (entregable 7). Lo abre cualquiera de la organización con el enlace, aunque no sea miembro del
@@ -56,7 +57,8 @@ function again(): void {
     <PageHeader :title="form?.title ?? t('projects.forms.fillTitle')" :subtitle="form ? t('projects.forms.forProject', { project: form.projectName }) : undefined" />
     <v-alert v-if="failure" type="error" class="mb-4">{{ failure }}</v-alert>
 
-    <v-card v-if="sentTaskId" class="pa-6 text-center">
+    <ViewSkeleton v-if="!form && !failure" type="form" :count="4" />
+    <v-card v-else-if="sentTaskId" class="pa-6 text-center">
       <v-icon icon="mdi-check-circle" color="success" size="48" class="mb-2" />
       <div class="text-title-large mb-2">{{ t('projects.forms.sent') }}</div>
       <div class="text-body-medium text-medium-emphasis mb-4">{{ t('projects.forms.sentHint') }}</div>

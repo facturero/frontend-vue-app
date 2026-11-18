@@ -652,7 +652,11 @@
       "chat_message_updated": "Message modifié",
       "chat_message_deleted": "Message supprimé",
       "chat_reaction_added": "Réaction ajoutée",
-      "chat_reaction_removed": "Réaction retirée"
+      "chat_reaction_removed": "Réaction retirée",
+      "organization_app_theme_created": "Thème créé",
+      "organization_app_theme_updated": "Thème modifié",
+      "organization_app_theme_deleted": "Thème supprimé",
+      "organization_theme_settings_updated": "Thème de l'entreprise modifié"
     },
     "filters": {
       "title": "Filtres",
@@ -740,6 +744,7 @@
     "validRange": "Valable du {from} au {to}"
   },
   "common": {
+    "pickColor": "Choisir une couleur",
     "actions": "Actions",
     "active": "Actif",
     "add": "Ajouter",
@@ -3616,6 +3621,10 @@
     }
   },
   "uploader": {
+    "uploading": "Envoi… {done} sur {total}",
+    "retry": "Réessayer",
+    "replace": "Changer l’image",
+    "remove": "Retirer l’image",
     "addMore": "Ajouter plus",
     "change": "Changer",
     "dropHint": "Glissez ou cliquez pour sélectionner",
@@ -4746,6 +4755,69 @@
     },
     "browserNotify": {
       "enable": "Activer les notifications du navigateur"
+    }
+  },
+  "themes": {
+    "tabTitle": "Thèmes",
+    "menu": "Thème",
+    "builtin": {
+      "light": "Clair",
+      "dark": "Sombre",
+      "system": "Comme le système"
+    },
+    "companyDefault": "Celui de l'entreprise ({name})",
+    "lockedByCompany": "Votre entreprise a fixé le thème pour tout le monde.",
+    "companyTitle": "Thème de l'entreprise",
+    "companyIntro": "Toute l'équipe le voit tant qu'elle n'en choisit pas un autre dans le menu de son avatar.",
+    "companyDefaultLabel": "Thème de l'entreprise",
+    "enforce": "Le fixer pour tout le monde",
+    "enforceHint": "L'équipe ne pourra plus le changer. Les administrateurs de l'organisation, si.",
+    "settingsSaved": "Thème de l'entreprise enregistré.",
+    "listTitle": "Thèmes personnalisés",
+    "listIntro": "Les couleurs de votre marque dans toute l'application. Jusqu'à {max} thèmes.",
+    "new": "Nouveau thème",
+    "emptyTitle": "Aucun thème personnalisé pour le moment",
+    "emptyText": "Créez-en un aux couleurs de votre marque. Pendant que vous le modifiez, toute l'application vous sert d'aperçu.",
+    "isDefault": "De l'entreprise",
+    "isEnforced": "Fixé pour tout le monde",
+    "removeTitle": "Supprimer le thème « {name} » ?",
+    "removeText": "Ceux qui l'avaient choisi verront le thème de l'entreprise.",
+    "removeTextDefault": "C'est le thème de l'entreprise : l'entreprise revient au thème clair et il n'est plus fixé.",
+    "removed": "Thème « {name} » supprimé.",
+    "editor": {
+      "newTitle": "Nouveau thème",
+      "editTitle": "Modifier le thème",
+      "intro": "Vos changements s'affichent tout de suite dans toute l'application, derrière cette fenêtre. Si vous annulez, tout redevient comme avant.",
+      "name": "Nom",
+      "base": "Base",
+      "pick": "Choisir une couleur",
+      "color": {
+        "primary": "Principale",
+        "secondary": "Secondaire",
+        "background": "Fond",
+        "surface": "Cartes",
+        "text": "Texte",
+        "success": "Succès",
+        "warning": "Avertissement",
+        "error": "Erreur"
+      },
+      "pair": {
+        "text": "le texte",
+        "on-primary": "le texte des boutons",
+        "background": "le fond",
+        "surface": "les cartes",
+        "primary": "la couleur principale"
+      },
+      "contrastPair": "{a} sur {b} : {ratio} pour 1",
+      "contrastBlocking": "Ce ne serait pas lisible. Augmentez le contraste (au moins 3 pour 1) pour enregistrer :",
+      "contrastAdvisory": "Lisible, mais avec peu de contraste (4,5 pour 1 est recommandé) :",
+      "save": "Enregistrer le thème",
+      "create": "Créer le thème",
+      "nameTaken": "Un thème porte déjà ce nom.",
+      "limit": "Vous avez déjà le nombre maximum de thèmes. Supprimez-en un pour en créer un autre.",
+      "discardTitle": "Abandonner les modifications ?",
+      "discardText": "Le thème reste tel quel.",
+      "discard": "Abandonner"
     }
   }
 }

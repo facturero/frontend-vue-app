@@ -11,6 +11,7 @@ import { useOrganizationStore } from '@/stores/organization';
 import { productApi } from '@/api/products';
 import ImageUploader from '@/components/ImageUploader.vue';
 import PageHeader from '@/components/ui/PageHeader.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t } = useI18n();
 const confirm = useConfirm();
@@ -180,7 +181,8 @@ onMounted(async () => {
       {{ uploadError }}
     </v-alert>
 
-    <div v-if="!store.loading && product">
+    <ViewSkeleton :loading="store.loading && product?.id !== productId" type="detail">
+    <div v-if="product">
       <v-row>
         <v-col cols="12" md="8">
           <v-card class="mb-4">
@@ -385,9 +387,6 @@ onMounted(async () => {
         </v-col>
       </v-row>
     </div>
-
-    <div v-else class="d-flex justify-center py-8">
-      <v-progress-circular indeterminate color="primary" />
-    </div>
+    </ViewSkeleton>
   </v-container>
 </template>

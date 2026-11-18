@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute, useRouter, type RouteLocationNormalizedLoaded } from 'vue-router';
 import { useDisplay } from 'vuetify';
 import { useUiStore } from '@/stores/ui';
 import { useAuthStore } from '@/stores/auth';
 import { usePluginsStore } from '@/stores/plugins';
+import { useAppThemeStore } from '@/stores/appTheme';
 import { shouldAutoStartTour, useAppTour } from '@/composable/useAppTour';
 import { useBareShell } from '@/composable/useBareShell';
 import AssistantPanel from '@/components/AssistantPanel.vue';
@@ -37,6 +38,11 @@ const showShell = computed(() => !!route.meta.requiresAuth);
  */
 const APP_MAX_WIDTH = 1920;
 
+/** Clave de la transición entre pantallas: el patrón del registro de ruta (`/customers/:id`), no la URL concreta. */
+function pageKey(r: RouteLocationNormalizedLoaded): string {
+  return r.matched[r.matched.length - 1]?.path ?? r.path;
+}
+
 /**
  * El tour automático sale una sola vez por usuario, cuando la sesión ya tiene
  * los datos necesarios (usuario cargado, plugins de la organización cargados y
@@ -58,6 +64,18 @@ watch(
       autoStarted.value = true;
       if (shouldAutoStartTour(auth.user.id, 'app')) startTour();
     }
+  },
+  { immediate: true },
+);
+
+// Tema de la empresa: se pide en cuanto se sabe de qué organización es la sesión (y otra vez si cambia de organización). Al
+// perderla (cerrar sesión) vuelve el claro. Al arrancar, mientras aún no se sabe quién es, se deja el tema de la caché.
+const appTheme = useAppThemeStore();
+watch(
+  () => (auth.user && 'orgId' in auth.user ? auth.user.orgId : null),
+  (orgId, before) => {
+    if (orgId) void appTheme.load();
+    else if (before) appTheme.reset();
   },
   { immediate: true },
 );
@@ -84,13 +102,28 @@ watch(
              de la tarea y el «Enviar» del chat). -->
         <!-- Laptops: 100 % del ancho. Monitores muy grandes: se centra con márgenes a los lados (ver APP_MAX_WIDTH). -->
         <v-container :max-width="mobile ? undefined : APP_MAX_WIDTH" :class="mobile ? 'pa-0' : undefined">
-          <router-view />
+          <!-- Cambio de pantalla con transición (base.css, bloque 5). La envoltura lleva la clave del REGISTRO de ruta, no de la URL:
+               cambiar de pantalla anima; cambiar solo de parámetro (otro cliente, otra pestaña en `?tab=`) no remonta la vista. El
+               `div` existe porque varias vistas tienen más de un nodo raíz, y una transición solo anima un elemento. -->
+          <router-view v-slot="{ Component, route: current }">
+            <transition name="page" appear>
+              <div :key="pageKey(current)">
+                <component :is="Component" />
+              </div>
+            </transition>
+          </router-view>
         </v-container>
       </v-main>
     </template>
     <template v-else>
       <v-main>
-        <router-view />
+        <router-view v-slot="{ Component, route: current }">
+          <transition name="page" appear>
+            <div :key="pageKey(current)">
+              <component :is="Component" />
+            </div>
+          </transition>
+        </router-view>
       </v-main>
     </template>
 

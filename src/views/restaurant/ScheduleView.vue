@@ -21,6 +21,8 @@ import type { PartyDuration, ScheduleException, ShiftInput } from '@/types/resta
 import PageHeader from '@/components/ui/PageHeader.vue';
 import RestaurantTabs from '@/components/restaurant/RestaurantTabs.vue';
 import EstablishmentSelect from '@/components/restaurant/EstablishmentSelect.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
+import TimeField from '@/components/ui/TimeField.vue';
 
 const { t } = useI18n();
 const { restaurant, ready, establishmentId, showSelector, hasEstablishments, bootstrap } = useRestaurantEstablishment();
@@ -246,7 +248,7 @@ onMounted(runPreview);
     </v-alert>
     <v-alert v-if="saveError" type="error" closable class="mb-4" @click:close="saveError = null">{{ saveError }}</v-alert>
 
-    <v-skeleton-loader v-if="!ready" type="article" />
+    <ViewSkeleton v-if="!ready" type="form" />
 
     <template v-else-if="schedule">
       <v-card class="mb-4">
@@ -272,25 +274,23 @@ onMounted(runPreview);
             </div>
 
             <div v-for="shift in shiftsFor(weekday)" :key="weekday + shift.opensAt + shift.closesAt" class="d-flex align-center ga-2 mb-2 flex-wrap">
-              <v-text-field
+              <TimeField
                 v-model="shift.opensAt"
-                type="time"
                 :label="$t('restaurant.schedule.opensAt')"
-                style="max-width: 140px"
+                max-width="140"
                 :disabled="!canManage"
               />
-              <v-text-field
+              <TimeField
                 v-model="shift.closesAt"
-                type="time"
                 :label="$t('restaurant.schedule.closesAt')"
-                style="max-width: 140px"
+                max-width="140"
                 :disabled="!canManage"
               />
               <v-text-field
                 v-model="shift.label"
                 :label="$t('restaurant.schedule.label')"
                 :placeholder="$t('restaurant.schedule.labelPlaceholder')"
-                style="max-width: 200px"
+                max-width="200"
                 :disabled="!canManage"
               />
               <v-btn
@@ -318,24 +318,23 @@ onMounted(runPreview);
             :items="slotOptions"
             :label="$t('restaurant.schedule.slotMinutes')"
             :suffix="$t('restaurant.schedule.minutes')"
-            style="max-width: 220px"
+            max-width="220"
             :disabled="!canManage"
           />
-          <v-text-field
-            v-model.number="cleanupMinutes"
-            type="number"
-            min="0"
-            max="120"
+          <v-number-input
+            v-model="cleanupMinutes"
+            :min="0"
+            :max="120"
             :label="$t('restaurant.schedule.cleanupMinutes')"
             :suffix="$t('restaurant.schedule.minutes')"
-            style="max-width: 200px"
+            max-width="200"
             :disabled="!canManage"
           />
           <v-select
             v-model="timezone"
             :items="timezones"
             :label="$t('restaurant.schedule.timezone')"
-            style="max-width: 280px"
+            max-width="280"
             :disabled="!canManage"
           />
         </v-card-text>
@@ -347,22 +346,20 @@ onMounted(runPreview);
             <span v-if="duration.upTo === null" class="text-body-medium">{{ $t('restaurant.schedule.upToMax') }}</span>
             <template v-else>
               <span class="text-body-medium">{{ $t('restaurant.schedule.upTo') }}</span>
-              <v-text-field
-                v-model.number="duration.upTo"
-                type="number"
-                min="1"
-                style="max-width: 110px"
+              <v-number-input
+                v-model="duration.upTo"
+                :min="1"
+                max-width="110"
                 :disabled="!canManage"
               />
               <span class="text-body-medium">{{ $t('restaurant.schedule.people') }}</span>
             </template>
-            <v-text-field
-              v-model.number="duration.minutes"
-              type="number"
-              min="1"
-              max="1440"
+            <v-number-input
+              v-model="duration.minutes"
+              :min="1"
+              :max="1440"
               :suffix="$t('restaurant.schedule.durationMinutes')"
-              style="max-width: 160px"
+              max-width="160"
               :disabled="!canManage"
             />
             <v-btn
@@ -417,7 +414,7 @@ onMounted(runPreview);
             <DateField
               v-model="previewDate"
               :label="$t('restaurant.schedule.previewDate')"
-              style="max-width: 220px"
+              max-width="220"
             />
             <v-btn variant="tonal" prepend-icon="mdi-eye-outline" @click="runPreview">
               {{ $t('restaurant.schedule.preview') }}
@@ -464,8 +461,8 @@ onMounted(runPreview);
             :label="$t('restaurant.schedule.exceptionKind')"
           />
           <div v-if="exceptionForm.kind === 'special_hours'" class="d-flex ga-3">
-            <v-text-field v-model="exceptionForm.opensAt" type="time" :label="$t('restaurant.schedule.opensAt')" />
-            <v-text-field v-model="exceptionForm.closesAt" type="time" :label="$t('restaurant.schedule.closesAt')" />
+            <TimeField v-model="exceptionForm.opensAt" :label="$t('restaurant.schedule.opensAt')" />
+            <TimeField v-model="exceptionForm.closesAt" :label="$t('restaurant.schedule.closesAt')" />
           </div>
           <v-text-field
             v-model="exceptionForm.reason"

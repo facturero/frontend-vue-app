@@ -14,6 +14,7 @@ import { useInventoryStore } from '@/stores/inventory';
 import { useOrganizationStore } from '@/stores/organization';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import type { Warehouse } from '@/types/inventory';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t } = useI18n();
 const auth = useAuthStore();
@@ -149,6 +150,7 @@ onMounted(async () => {
         item-value="id"
         :items-per-page="25"
       >
+        <template v-if="!store.warehouses?.length" #loading><ViewSkeleton type="rows" /></template>
         <template #item.code="{ item }">
           <span class="font-weight-medium">{{ item.code }}</span>
           <v-chip v-if="item.isDefault" size="x-small" variant="flat" color="lightprimary" class="ml-2">

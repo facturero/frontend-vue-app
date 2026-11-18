@@ -19,6 +19,7 @@ import type { JournalEntry } from '@/types/accounting';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import AccountingTabs from '@/components/accounting/AccountingTabs.vue';
 import { useProjectOptions } from '@/composable/useProjectOptions';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 interface FormLine {
   key: number;
@@ -111,8 +112,12 @@ async function load(): Promise<void> {
     }
   } catch {
     loadError.value = store.error;
+  } finally {
+    loading.value = false;
   }
 }
+/** Primera carga (catálogo de cuentas y, al editar, el asiento): el formulario no se pinta vacío para luego rellenarse de golpe. */
+const loading = ref(true);
 onMounted(load);
 
 function setSide(line: FormLine, side: 'debit' | 'credit', value: string): void {
@@ -260,6 +265,7 @@ const money = (c: number): string => formatMoney(c, locale.value, store.currency
       <router-link :to="{ name: 'accounting-entry', params: { id: entry.reversedByEntryId } }">{{ $t('accounting.entry.seeReversal') }}</router-link>
     </v-alert>
 
+    <ViewSkeleton :loading="loading" type="form">
     <v-card>
       <v-card-text class="d-flex flex-column ga-4">
         <v-row>
@@ -367,6 +373,7 @@ const money = (c: number): string => formatMoney(c, locale.value, store.currency
         <v-btn variant="flat" v-if="canPost" color="primary" :disabled="!canPostNow" :loading="store.saving" @click="post">{{ $t('accounting.entry.post') }}</v-btn>
       </v-card-actions>
     </v-card>
+    </ViewSkeleton>
 
     <v-dialog v-model="deleteDialog">
       <v-card>

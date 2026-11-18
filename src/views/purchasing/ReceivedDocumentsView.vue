@@ -2,6 +2,7 @@
   <div>
     <PageHeader title="Comprobantes recibidos SRI" subtitle="Sincronización desde el portal del SRI" />
 
+    <ViewSkeleton :loading="loading" type="form" :count="2">
     <v-row>
       <v-col cols="12" md="6">
         <v-card>
@@ -58,6 +59,7 @@
         </v-card>
       </v-col>
     </v-row>
+    </ViewSkeleton>
   </div>
 </template>
 
@@ -66,6 +68,7 @@ import { onMounted, reactive, ref } from 'vue';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import { purchasingApi } from '@/api/purchasing';
 import { useAuthStore } from '@/stores/auth';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const auth = useAuthStore();
 const config = reactive<any>({
@@ -142,5 +145,11 @@ async function disable() {
   }
 }
 
-onMounted(load);
+/** Primera carga de la configuración del portal: esqueleto en vez de una tarjeta con «Nunca» y campos vacíos. */
+const loading = ref(true);
+onMounted(() => {
+  void load().finally(() => {
+    loading.value = false;
+  });
+});
 </script>

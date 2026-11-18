@@ -154,7 +154,7 @@ function confirmDuplicate(): void {
 </script>
 
 <template>
-  <v-sheet class="pa-4 d-flex flex-column ga-3 flex-shrink-0" style="min-width: 320px">
+  <v-sheet class="pa-4 d-flex flex-column ga-3 flex-shrink-0" min-width="320">
     <!-- Mesa -->
     <template v-if="kind === 'table' && store.selectedTable">
       <div class="text-title-large">{{ $t('restaurant.inspector.table') }}</div>
@@ -165,21 +165,24 @@ function confirmDuplicate(): void {
         @change="commitName"
       />
       <div class="d-flex ga-2">
-        <v-text-field
-          v-model.number="form.capacityMin"
-          type="number"
-          min="1"
+        <!-- Los campos del inspector guardan al confirmar (Enter o salir del campo, evento `change`). Sin flechas: un clic en una
+             flecha cambia el valor sin disparar `change` y no se guardaría. Se guarda el valor del formulario, no `$event`, que es el
+             evento nativo (antes `Number($event)` mandaba NaN y `String($event)` «[object Event]»). -->
+        <v-number-input
+          control-variant="hidden"
+          v-model="form.capacityMin"
+          :min="1"
           :label="$t('restaurant.inspector.capacityMin')"
           :disabled="!canManage"
-          @change="patchTable({ capacityMin: Number($event) })"
+          @change="patchTable({ capacityMin: form.capacityMin })"
         />
-        <v-text-field
-          v-model.number="form.capacityMax"
-          type="number"
-          min="1"
+        <v-number-input
+          control-variant="hidden"
+          v-model="form.capacityMax"
+          :min="1"
           :label="$t('restaurant.inspector.capacityMax')"
           :disabled="!canManage"
-          @change="patchTable({ capacityMax: Number($event) })"
+          @change="patchTable({ capacityMax: form.capacityMax })"
         />
       </div>
       <v-select
@@ -197,25 +200,25 @@ function confirmDuplicate(): void {
         @update:model-value="patchTable({ shape: $event as TableShape })"
       />
       <div class="d-flex ga-2">
-        <v-text-field
-          v-model.number="form.widthCm"
-          type="number"
-          min="20"
-          step="10"
+        <v-number-input
+          control-variant="hidden"
+          v-model="form.widthCm"
+          :min="20"
+          :step="10"
           :label="$t('restaurant.inspector.width')"
           suffix="cm"
           :disabled="!canManage"
-          @change="patchTable({ widthCm: Number($event) })"
+          @change="patchTable({ widthCm: form.widthCm })"
         />
-        <v-text-field
-          v-model.number="form.heightCm"
-          type="number"
-          min="20"
-          step="10"
+        <v-number-input
+          control-variant="hidden"
+          v-model="form.heightCm"
+          :min="20"
+          :step="10"
           :label="$t('restaurant.inspector.height')"
           suffix="cm"
           :disabled="!canManage || form.shape === 'round'"
-          @change="patchTable({ heightCm: Number($event) })"
+          @change="patchTable({ heightCm: form.heightCm })"
         />
       </div>
       <div class="text-body-medium text-medium-emphasis">
@@ -270,15 +273,15 @@ function confirmDuplicate(): void {
       <div class="text-title-large">{{ $t('restaurant.inspector.element') }}</div>
 
       <template v-if="store.selectedElement.type === 'door'">
-        <v-text-field
-          v-model.number="form.doorWidthCm"
-          type="number"
-          min="40"
-          step="10"
+        <v-number-input
+          control-variant="hidden"
+          v-model="form.doorWidthCm"
+          :min="40"
+          :step="10"
           :label="$t('restaurant.inspector.doorWidth')"
           suffix="cm"
           :disabled="!canManage"
-          @change="store.updateElement(store.selectedElement.id, { widthCm: Number($event) })"
+          @change="store.updateElement(store.selectedElement.id, { widthCm: form.doorWidthCm })"
         />
       </template>
 
@@ -294,7 +297,7 @@ function confirmDuplicate(): void {
           v-model="form.label"
           :label="$t('restaurant.inspector.label')"
           :disabled="!canManage"
-          @change="store.updateElement(store.selectedElement.id, { label: String($event) })"
+          @change="store.updateElement(store.selectedElement.id, { label: form.label })"
         />
       </template>
 
@@ -333,22 +336,22 @@ function confirmDuplicate(): void {
           <div class="text-title-large">{{ $t('restaurant.inspector.floorSize') }}</div>
           <div class="text-body-medium text-medium-emphasis">{{ $t('restaurant.inspector.floorSizeHint') }}</div>
         </div>
-        <v-text-field
-          v-model.number="form.floorWidthM"
-          type="number"
-          min="1"
-          step="0.5"
+        <v-number-input
+          control-variant="hidden"
+          v-model="form.floorWidthM"
+          :min="1"
+          :step="0.5" :precision="2"
           density="comfortable"
           :label="$t('restaurant.inspector.width')"
           suffix="m"
           :disabled="!canManage"
           @change="commitFloorSize"
         />
-        <v-text-field
-          v-model.number="form.floorHeightM"
-          type="number"
-          min="1"
-          step="0.5"
+        <v-number-input
+          control-variant="hidden"
+          v-model="form.floorHeightM"
+          :min="1"
+          :step="0.5" :precision="2"
           density="comfortable"
           :label="$t('restaurant.inspector.height')"
           suffix="m"
@@ -391,9 +394,9 @@ function confirmDuplicate(): void {
       <v-card>
         <v-card-title>{{ $t('restaurant.inspector.duplicateTitle') }}</v-card-title>
         <v-card-text class="d-flex flex-column ga-3">
-          <v-text-field v-model.number="duplicate.count" type="number" min="1" max="20" :label="$t('restaurant.inspector.duplicateCount')" />
+          <v-number-input v-model="duplicate.count" :min="1" :max="20" :label="$t('restaurant.inspector.duplicateCount')" />
           <v-select v-model="duplicate.direction" :items="duplicateOptions" :label="$t('restaurant.inspector.duplicateDirection')" />
-          <v-text-field v-model.number="duplicate.spacingM" type="number" min="0" step="0.1" :label="$t('restaurant.inspector.duplicateSpacing')" suffix="m" />
+          <v-number-input v-model="duplicate.spacingM" :min="0" :step="0.1" :precision="2" :label="$t('restaurant.inspector.duplicateSpacing')" suffix="m" />
         </v-card-text>
         <v-card-actions>
           <v-spacer />

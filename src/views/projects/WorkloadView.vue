@@ -14,6 +14,7 @@ import { extractError } from '@/utils/error';
 import { addDays, displayName, localIsoDate } from '@/utils/projects';
 import { mondayOf } from '@/utils/timeReport';
 import type { Workload, WorkloadPerson } from '@/types/projects';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 /**
  * «Carga de trabajo» (entregable 5), como el Workload de Asana: por persona y semana, las horas estimadas de sus tareas abiertas
@@ -105,13 +106,14 @@ async function saveCapacity(): Promise<void> {
       <v-btn variant="tonal" :disabled="start === thisWeek" @click="start = thisWeek">{{ t('projects.workload.today') }}</v-btn>
       <v-tooltip location="top" :text="t('projects.workload.next')"><template #activator="{ props: tip }"><v-btn v-bind="tip" icon="mdi-chevron-right" variant="text" :aria-label="t('projects.workload.next')" @click="start = addDays(start, 7 * WEEKS)" /></template></v-tooltip>
       <v-spacer />
-      <v-autocomplete v-model="projectId" :items="projectItems" :label="t('projects.time.project')" clearable class="flex-grow-0 w-100" style="max-width: 320px" />
+      <v-autocomplete v-model="projectId" :items="projectItems" :label="t('projects.time.project')" clearable class="flex-grow-0 w-100" max-width="320" />
     </div>
 
     <v-alert v-if="failure" type="error" closable class="mb-4" @click:close="failure = null">{{ failure }}</v-alert>
-    <v-progress-linear v-if="loading" indeterminate color="primary" class="mb-4" />
+    <v-progress-linear v-if="loading && data" indeterminate color="primary" class="mb-4" />
 
-    <v-card v-if="data">
+    <ViewSkeleton v-if="loading && !data" type="table" />
+    <v-card v-else-if="data">
       <v-table>
         <thead>
           <tr>

@@ -7,6 +7,7 @@ import { useAuthStore } from '@/stores/auth';
 import type { OrganizationPlugin } from '@/types/plugins';
 import { resolveBlockingPlugins, type BlockingPlugin } from '@/utils/plugin-blockers';
 import { dependentCodesOf } from '@/utils/plugin-dependents';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const emit = defineEmits<{ reactivate: [code: string] }>();
 
@@ -125,6 +126,7 @@ async function confirmDeactivate(): Promise<void> {
       </v-btn>
     </div>
 
+    <ViewSkeleton v-if="store.loading && !visiblePlugins.length" type="cards" :count="3" />
     <v-row>
       <v-col v-for="p in visiblePlugins" :key="p.pluginId" cols="12" sm="6" lg="4">
         <v-card class="d-flex flex-column fill-height">

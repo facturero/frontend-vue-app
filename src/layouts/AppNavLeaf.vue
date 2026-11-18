@@ -23,8 +23,10 @@ const badge = computed(() => (props.item.badge === 'chat' ? chat.badge : null));
   </v-list-item>
   <v-list-item v-else-if="item.blocked" disabled rounded="lg">
     <template #prepend>
-      <v-icon :icon="item.icon" class="mr-2" />
-      <v-icon icon="mdi-lock-outline" size="x-small" class="lock-icon" />
+      <!-- El candado como insignia de Vuetify sobre el icono del área, no como icono posicionado a mano. -->
+      <v-badge icon="mdi-lock-outline" color="surface" location="bottom end" class="mr-2">
+        <v-icon :icon="item.icon" />
+      </v-badge>
     </template>
     <v-list-item-title>{{ $t(item.titleKey) }}</v-list-item-title>
   </v-list-item>
@@ -38,13 +40,4 @@ const badge = computed(() => (props.item.badge === 'chat' ? chat.badge : null));
   </v-list-item>
 </template>
 
-<style scoped>
-.lock-icon {
-  position: absolute;
-  bottom: 2px;
-  right: -2px;
-  background: rgba(var(--v-theme-surface), 0.85);
-  border-radius: 50%;
-  padding: 1px;
-}
-</style>
+

@@ -5,6 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { usePluginsStore } from '@/stores/plugins';
 import type { RecommendationItem } from '@/types/plugins';
 import PageHeader from '@/components/ui/PageHeader.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 /**
  * Alta, paso 4: los módulos recomendados por el perfil elegido. Aquí se ve el
@@ -119,11 +120,7 @@ function skip(): void {
       {{ store.error }}
     </v-alert>
 
-    <v-row v-if="store.loading && !store.recommendations" density="compact">
-      <v-col cols="12" class="text-center py-12">
-        <v-progress-circular indeterminate color="primary" />
-      </v-col>
-    </v-row>
+    <ViewSkeleton v-if="store.loading && !store.recommendations" type="cards" />
 
     <template v-else>
       <v-row density="compact">

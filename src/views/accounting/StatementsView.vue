@@ -20,6 +20,7 @@ import PageHeader from '@/components/ui/PageHeader.vue';
 import AccountingTabs from '@/components/accounting/AccountingTabs.vue';
 import { useProjectOptions } from '@/composable/useProjectOptions';
 import AccountingSetupCard from '@/components/accounting/AccountingSetupCard.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t, locale } = useI18n();
 const store = useAccountingStore();
@@ -163,7 +164,8 @@ const isCurrentBalanced = computed(() => (store.balanceSheet?.totals.differenceC
 
     <v-alert v-if="loadError" type="error" class="mb-4 d-print-none">{{ loadError }}</v-alert>
 
-    <AccountingSetupCard v-if="store.configured === false" @done="load" />
+    <ViewSkeleton v-if="store.configured === null && !loadError" type="table" :count="10" />
+    <AccountingSetupCard v-else-if="store.configured === false" @done="load" />
 
     <template v-else-if="store.configured">
       <v-card class="mb-4 d-print-none">
@@ -199,6 +201,9 @@ const isCurrentBalanced = computed(() => (store.balanceSheet?.totals.differenceC
           </div>
         </v-card-text>
       </v-card>
+
+      <!-- El estado aún no llegó (primera vez en esta pestaña): su silueta, no un hueco. -->
+      <ViewSkeleton v-if="!loadError && ((tab === 'balance' && !store.balanceSheet) || (tab === 'income' && !store.incomeStatement))" type="table" :count="10" />
 
       <!-- Balance general -->
       <v-card v-if="tab === 'balance' && store.balanceSheet">

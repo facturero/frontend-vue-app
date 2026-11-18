@@ -41,9 +41,9 @@ es el calendario de Chrome, no el `v-date-picker` del tema.
 |---|---|---|
 | Una fecha | `<DateField>` (= `v-date-input`, ver abajo) | `type="date"` |
 | Un rango (inicio–fin) | dos `<DateField>`, el de fin con `:min` = inicio; o uno con `multiple="range"` | dos `type="date"` sin relación |
-| Una hora | `v-time-picker` dentro de un `v-menu` (Vuetify 3.12 no tiene campo de hora, ni en *labs*) | `type="time"` |
+| Una hora | `<TimeField>` (= `v-time-picker` en un `v-menu`, ver abajo) | `type="time"` |
 | Un número, una cantidad, un importe | `v-number-input` (con `:precision` y `:min`) | `type="number"` |
-| Un color | `v-color-picker` | `type="color"` |
+| Un color | `<ColorField>` (= `v-text-field` con muestra que abre `v-color-picker`) | `type="color"` |
 | Un archivo | `v-file-input` o `ImageUploader` | `<input type="file">` |
 | Elegir de una lista | `v-select` / `v-autocomplete` | `<select>` |
 | Un botón | `v-btn` | `<button>` |
@@ -89,14 +89,32 @@ Excepciones aprobadas hoy:
 | Texto enriquecido (descripción y comentarios de tareas) | Tiptap (`@tiptap/*`, con tablas, imágenes y fichas de archivo) | Vuetify no tiene editor de texto con formato ni menciones. Los archivos se adjuntan desde el editor (clip, pegar o soltar): la imagen se ve en línea y el documento queda como ficha con el color de su tipo; la tarea ya no tiene recuadro de subida, solo la lista compacta de Adjuntos. Imágenes y fichas guardan el id del archivo, no la URL (caduca); solo se ofrece lo que acepta la lista blanca de `projects-service/src/domain/richtext.ts` |
 | Arrastrar y soltar (tablero, listas) | `vue-draggable-plus` | Vuetify no tiene arrastrar y soltar |
 | Recorrido guiado | `driver.js` | Vuetify no tiene tours (§8) |
-| Color del editor de tema del POS | `<input type="color">` | **por revisar**: se decidió cuando Vuetify no traía `v-color-picker`; hoy sí lo trae |
+| Abrir el selector de archivos desde un botón propio (clip del editor de texto, emoji personalizado del chat) | `<input type="file" hidden>` que el botón dispara | el diálogo de archivos del sistema solo se abre desde un `input` de archivo; `v-file-input` dibuja su propio campo, que ahí sobra. El `input` nunca se ve |
 | Búsqueda global (Ctrl+K) | `v-command-palette` (*labs*, aprobado 2026-11-10), envuelto en `components/ui/CommandPalette.vue` | está en *labs*; se envuelve para que un cambio de API toque un archivo. Filtro propio (`no-filter`): el orden y los resultados de Proyectos los decide `GlobalSearch` |
 | Gráfico de anillo (panel del proyecto) | `v-pie` (*labs*, aprobado 2026-11-10), envuelto en `components/ui/PieChart.vue` | está en *labs*. Colores por token del tema: el envoltorio los pasa como `rgb(var(--v-theme-…))`, nunca en hexadecimal |
 
 **Fechas: hecho el 2026-11-06.** Las 61 `type="date"` de la app pasaron a
 `DateField` y `lint:ui` rechaza cualquier `type="date"` (kind `fecha`, sin
-excepciones). Pendientes, para cuando se toque cada pantalla: 36
-`type="number"` (→ `v-number-input`) y 4 `type="time"`.
+excepciones).
+
+**Número, hora y color: hecho el 2026-11-18.** Las 38 `type="number"` pasaron a `v-number-input` (`:min`/`:max`/`:step` como
+números; con un paso decimal, `:precision="2"`, porque su precisión por defecto es 0 y redondearía 2,35 m a 2), las 4
+`type="time"` a `TimeField` y el único `type="color"` a `ColorField`. `lint:ui` rechaza los tres (kind `control`, sin excepciones).
+
+- **`TimeField`** (`components/ui/TimeField.vue`): Vuetify 4.3 no trae campo de hora estable (`v-time-input` sigue en *labs*), así
+  que es un `v-text-field` con `v-time-picker` (núcleo, 24 h) en un `v-menu`. Habla `HH:mm`. Se puede escribir a mano: al salir del
+  campo, «8:5» o «0805» se leen como 08:05 y algo que no es hora vuelve al valor anterior.
+- **`ColorField`** (`components/ui/ColorField.vue`): `v-text-field` con el hexadecimal y una muestra dentro que abre
+  `v-color-picker` (solo hexadecimal). Habla `#rrggbb` en minúsculas, como los contratos de temas.
+- **`ImageUploader`** (`components/ImageUploader.vue`, avatares y fotos de producto) va sobre componentes de Vuetify desde el
+  2026-11-18, sin hoja de estilo propia (antes, 118 líneas de CSS para una zona de soltar hecha a mano): la galería y la imagen
+  única vacía son `v-file-upload` (zona para soltar, lista con miniatura, tamaño y quitar); la imagen única con imagen es un
+  `v-img` dentro de un `v-sheet` con un `v-overlay` que invita a cambiarla y muestra el progreso al subir. La capa lleva
+  `:z-index="0"` y `pointer-events-none`: con su `z-index` por defecto tapaba el botón de quitar. La API para el padre no cambió
+  (`uploadAll()`, `hasPending()`, `openPicker()`).
+- **Un `v-number-input` que guarda al confirmar** (`@change`, como el inspector del plano) va con `control-variant="hidden"`: un
+  clic en sus flechas cambia el valor sin disparar `change` y no se guardaría. Y se guarda el valor del modelo, nunca `$event`,
+  que en `@change` es el evento nativo (`Number($event)` daba NaN).
 
 ---
 
@@ -170,6 +188,55 @@ divergencias: alguien cambia el default y esa vista se queda atrás.
 Si necesitas otro valor **de forma recurrente**, cambia el default; no lo
 sobreescribas vista por vista. Sobreescribir es legítimo sólo cuando es una
 excepción real y puntual.
+
+---
+
+## 2 bis. Carga y movimiento (2026-11-18)
+
+Una espera se tiene que ver, y la página no debe «saltar» cuando llegan los datos.
+
+**Primera carga: `ViewSkeleton`** (`components/ui/ViewSkeleton.vue`, envuelve `v-skeleton-loader`). Dibuja la silueta de lo que va
+a llegar, con el brillo de Vuetify, en el sitio exacto donde va a estar. Un tipo por arquetipo de pantalla: `table` (tabla en su
+tarjeta), `rows` (solo filas, para el hueco `loading` de un `v-data-table`), `list`, `cards`, `detail` (ficha: cabecera + tarjetas),
+`form`, `board` (columnas de tablero), `dashboard` (Inicio) y `text` (un bloque dentro de una tarjeta ya dibujada). `count` cambia
+cuántas filas, tarjetas o campos; `header` añade la silueta del `PageHeader` solo cuando el título sale de los datos (el nombre de
+un proyecto).
+
+```vue
+<!-- Envolviendo: esqueleto mientras carga; el contenido entra con un fundido. -->
+<ViewSkeleton :loading="store.loading && customer?.id !== customerId" type="detail">
+  <div v-if="customer">…</div>
+</ViewSkeleton>
+
+<!-- En una cadena v-if: cuando el contenido ya tiene su propio v-if/v-else-if. -->
+<ViewSkeleton v-if="store.loading && !store.projects.length" type="cards" />
+<v-card v-else-if="store.projects.length === 0"><EmptyState … /></v-card>
+
+<!-- Tablas: filas de esqueleto bajo la cabecera real. El v-if es obligatorio (ver abajo). -->
+<v-data-table :items="store.items" :loading="store.loading">
+  <template v-if="!store.items?.length" #loading><ViewSkeleton type="rows" /></template>
+</v-data-table>
+```
+
+- **Solo la primera carga.** La condición es «cargando **y** aún no hay nada que enseñar» (`loading && !items.length`, o en una
+  ficha `loading && entidad?.id !== idDeLaRuta`, que cubre también pasar de un cliente a otro). Al recargar con datos en pantalla
+  se quedan los datos y solo sale la barra o el `loading` de la tabla: nunca se vuelve al esqueleto (REGLAS-FRONT R-02).
+- **El `v-if` del hueco `loading` de una tabla no es opcional:** con el hueco puesto, Vuetify cambia TODAS las filas por él mientras
+  `loading` sea `true`, aunque ya haya datos, y cada recarga vaciaría la tabla.
+- **Un formulario de edición no se pinta vacío** para rellenarse de golpe: la vista lleva un `loading` propio que baja cuando
+  terminó de pedir sus catálogos y la entidad (`onMounted(() => void loadView().finally(() => (loading.value = false)))`).
+- **Con error, no hay esqueleto**: la condición incluye `!store.error` (o `!loadError`) donde el contenido no llegaría nunca.
+- No se combinan barra y esqueleto en la misma zona, y no se arma un esqueleto a mano en la vista: si una forma no está, se añade
+  un tipo a `ViewSkeleton`.
+
+**Cambio de pantalla con transición** (`App.vue`, `<transition name="page">`, estilos en `src/styles/base.css` bloque 5): la
+pantalla nueva entra con un fundido y un desliz de 8 px hacia arriba (220 ms); la que se va desaparece al instante. Sin
+`mode="out-in"` a propósito: la vista nueva se monta en el mismo tick que el cambio de ruta, así no hay un hueco en blanco entre
+pantallas y el recorrido guiado (`useAppTour`, que busca su ancla tras `router.afterEach` + `nextTick`) la encuentra. La clave es el
+registro de ruta (`/customers/:id`), no la URL: cambiar de cliente o de `?tab=` no remonta la vista.
+
+**Menos movimiento**: con `prefers-reduced-motion: reduce` del sistema operativo no hay transiciones ni brillo de esqueletos
+(`base.css` bloque 6). Toda animación nueva tiene que respetarlo; con hacerla en CSS ya lo hace.
 
 ---
 
@@ -391,6 +458,7 @@ propios van en `src/styles/base.css`, dentro de `@layer vuetify-core.reset`.
 | Gráfico pequeño de barras o línea | `v-sparkline type="bar"` | `div` con alturas en `:style` |
 | Resaltar lo buscado | `v-highlight :text :query` | `split` + `<mark>` |
 | Sin datos | `EmptyState` (envuelve `v-empty-state`) | tarjeta armada a mano |
+| Primera carga | `ViewSkeleton` (envuelve `v-skeleton-loader`, §2 bis) | barra suelta, `v-progress-circular` centrado, «Cargando…» en texto |
 | Fecha | `DateField` (envuelve `v-date-input`) | `type="date"` |
 | Número o importe | `v-number-input` (`:precision`, `:min`, `control-variant`) | `type="number"` |
 | Editar en línea con Guardar/Cancelar | `v-confirm-edit` | botones a mano alrededor del campo |
@@ -419,7 +487,7 @@ arrastre nativo, no como eventos de `v-calendar` (sus fichas no se mueven de dí
   con `<v-tooltip><template #activator="{ props: tip }"><v-btn v-bind="tip" … /></template></v-tooltip>`; si el botón ya abre un
   menú, `v-bind="mergeProps(menu, tip)"`.
 - `v-btn variant="outlined"` no se usa (REGLAS-FRONT R-10, `lint:ui` kind `boton`); `v-btn-toggle` sí puede ir con borde.
-- El tema por defecto de la 4 es `system`; aquí está fijo en `light` (`vuetify.ts`).
+- El tema por defecto de la 4 es `system`; aquí arranca en `light` (`vuetify.ts`) y luego manda el módulo Temas (§9 bis).
 - En un diálogo, Vuetify 4 pone el `v-card-text` a 24 px de los lados pero deja el `v-card-title` suelto a 15 px y el
   `v-card-actions` a 8 px: título, campos y botones quedaban desalineados. `src/styles/base.css` (bloque 4) los pone a los tres a
   24 px del borde. No le pongas `pa-*` al título ni al pie de un diálogo.
@@ -500,10 +568,8 @@ previa**, y por eso vive aislada.
 - **Por qué no usa `v-card`:** los defaults globales de `vuetify.ts` (radio, sombra)
   son de la app y falsearían la única vista que tiene que ser fiel al 100 % a lo que
   verá la caja. El mock se construye con `div` y estilos en línea.
-- **Selector de color:** un `<input type="color">` nativo con su campo hexadecimal al
-  lado; el contrato solo acepta `#rrggbb` en minúsculas. Se decidió cuando Vuetify no
-  traía selector de color; hoy trae `v-color-picker`, así que está **por revisar**
-  (ver §1, «Solo componentes de Vuetify»).
+- **Selector de color:** `ColorField` (§1), el mismo campo de toda la app; el contrato
+  solo acepta `#rrggbb` en minúsculas y el editor lo normaliza antes de guardarlo.
 - **Imágenes de marca:** `PosThemeLogoField` reutiliza `ImageUploader`. Los archivos
   cuelgan de la **organización** (`resourceType: pos-theme-brand`, categorías `logo`,
   `logo-dark`, `login-background`), no del tema, porque un tema nuevo aún no tiene id.
@@ -515,6 +581,26 @@ previa**, y por eso vive aislada.
 - **Defaults = aspecto actual del POS:** el tema "Clásico" reproduce los colores y la
   distribución que la caja tiene hoy (paleta gray/blue de Tailwind). Si se toca, hay
   que tocar también el tema integrado del POS.
+
+## 9 bis. Temas de la aplicación (claro, oscuro y los de la empresa)
+
+Cada persona elige su tema en el menú del avatar («Tema»); quien administra la organización crea los de la empresa en
+`Ajustes → Temas` y puede fijar uno para todos. Diseño y decisiones en `docs/TEMAS.md`.
+
+- **Un solo sitio cambia el tema:** `stores/appTheme.ts`. Registra el tema en Vuetify en caliente
+  (`theme.themes[nombre] = …` + `theme.change`). Ninguna vista llama a `useTheme().change` por su cuenta.
+- **Por qué funciona sin tocar las vistas:** todo lo que usa tokens (`color="primary"`, `bg-surface`, `text-medium-emphasis`,
+  `lightprimary`…) cambia solo. Lo que tenga un color fijo no cambia, y en un tema oscuro se ve mal: otra razón más para la regla
+  de §1 (nunca un hexadecimal, nunca `bg-white`).
+- **Un tema propio son 8 colores y una base**, y `deriveThemeColors` (`types/appTheme.ts`) saca de ellos la paleta entera: tonales,
+  bordes y el texto encima de cada color. Si se añade un token a `vuetify.ts`, decide ahí cómo se deriva; si no, se hereda el del
+  tema integrado de la base y no seguirá al tema propio.
+- **Vista previa = la aplicación misma:** el editor (`components/themes/AppThemeEditorDialog.vue`) pinta toda la aplicación con lo que
+  se edita. Por eso es el único diálogo sin velo (`:scrim="false"`): lo de detrás es la vista previa.
+- **Sin destello al recargar:** el último tema pintado se guarda en `localStorage` (`crm:app-theme`) y `main.ts` lo aplica antes de
+  montar. Sin sesión (inicio de sesión, alta) siempre claro.
+- **No siguen el tema, a propósito:** la caja web (`/pos`, tiene sus propios temas, §9), la vista previa del tema del POS y la página
+  pública de reservas.
 
 ## La caja web no usa el sistema de UI del CRM (`/pos`)
 

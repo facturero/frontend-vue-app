@@ -11,6 +11,7 @@ import { openFile } from '@/composable/useFileUrl';
 import { productApi } from '@/api/products';
 import type { TaxRate } from '@/types/products';
 import FiscalStatusCard from '@/components/invoices/FiscalStatusCard.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const props = defineProps<{ id: string }>();
 const { t } = useI18n();
@@ -263,9 +264,11 @@ onMounted(async () => {
       </v-col>
     </v-row>
 
-    <v-progress-linear v-if="store.loading" indeterminate />
+    <!-- Primera carga (o el paso de una factura a otra): esqueleto. Recarga de la misma factura: la ficha sigue y solo sale la barra. -->
+    <ViewSkeleton v-if="store.loading && store.current?.id !== invoiceId" type="detail" />
+    <v-progress-linear v-else-if="store.loading" indeterminate />
 
-    <template v-if="store.current">
+    <template v-if="store.current && store.current.id === invoiceId">
       <v-card class="mb-4">
         <v-card-title class="d-flex align-center flex-wrap ga-2">
           {{ $t('invoices.singular') }} {{ store.current.number || $t('invoices.draftSuffix') }}

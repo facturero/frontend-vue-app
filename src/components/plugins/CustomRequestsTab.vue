@@ -3,6 +3,7 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { usePluginsStore } from '@/stores/plugins';
 import { useAuthStore } from '@/stores/auth';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t } = useI18n();
 const store = usePluginsStore();
@@ -61,6 +62,7 @@ async function submitRequest(): Promise<void> {
     </div>
 
     <v-card>
+      <ViewSkeleton v-if="store.loading && !store.requests.length" type="text" :count="3" />
       <v-list>
         <v-list-item v-for="r in store.requests" :key="r.id">
           <template #prepend>

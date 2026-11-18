@@ -11,6 +11,7 @@ import InviteEmployeeDialog from '@/components/InviteEmployeeDialog.vue';
 import RestorePasswordDialog from '@/components/RestorePasswordDialog.vue';
 import type { EmployeeSummary } from '@/types/employees';
 import PageHeader from '@/components/ui/PageHeader.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -131,7 +132,8 @@ onMounted(async () => {
       </v-card-text>
     </v-card>
 
-    <v-card v-if="!emp.loading">
+    <ViewSkeleton :loading="emp.loading && !emp.list.length" type="table">
+    <v-card>
       <v-table>
         <thead>
           <tr>
@@ -209,10 +211,7 @@ onMounted(async () => {
         </tbody>
       </v-table>
     </v-card>
-
-    <div v-else class="d-flex justify-center py-8">
-      <v-progress-circular indeterminate color="primary" />
-    </div>
+    </ViewSkeleton>
 
     <InviteEmployeeDialog v-model="showInviteDialog" />
     <RestorePasswordDialog

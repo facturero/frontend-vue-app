@@ -6,6 +6,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useProductStore } from '@/stores/products';
 import { useOrganizationStore } from '@/stores/organization';
 import PageHeader from '@/components/ui/PageHeader.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t, locale } = useI18n();
 const router = useRouter();
@@ -152,6 +153,7 @@ onMounted(async () => {
           { title: '50', value: 50 },
           { title: '100', value: 100 },
         ]" @update:options="onTableOptions">
+        <template v-if="!store.list?.length" #loading><ViewSkeleton type="rows" /></template>
         <template #item.sku="{ item }">
           <span class="text-body-small font-weight-medium">{{ item.sku || '—' }}</span>
         </template>

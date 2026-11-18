@@ -82,9 +82,9 @@ async function removeLine(lineId: string) {
       <tr v-for="line in lines" :key="line.id">
         <td>{{ lineItemName(line) }}</td>
         <td class="text-medium-emphasis">{{ line.description }}</td>
-        <td class="text-right mono">{{ line.quantity }}</td>
-        <td class="text-right mono">{{ (line.unitPriceCents / 100).toFixed(2) }}</td>
-        <td class="text-right mono">{{ (line.subtotalCents / 100).toFixed(2) }}</td>
+        <td class="text-right text-mono">{{ line.quantity }}</td>
+        <td class="text-right text-mono">{{ (line.unitPriceCents / 100).toFixed(2) }}</td>
+        <td class="text-right text-mono">{{ (line.subtotalCents / 100).toFixed(2) }}</td>
         <td class="text-right">
           <v-btn
             icon="mdi-delete-outline"
@@ -123,13 +123,12 @@ async function removeLine(lineId: string) {
       />
     </v-col>
     <v-col cols="4" md="1">
-      <v-text-field
-        v-model.number="newLine.quantity"
+      <v-number-input
+        v-model="newLine.quantity"
         :label="$t('invoices.qtyShort')"
-        type="number"
-        min="1"
+        :min="1"
         hide-details
-        class="mono"
+        class="text-mono"
         :disabled="disabled"
       />
     </v-col>
@@ -139,7 +138,7 @@ async function removeLine(lineId: string) {
         :label="$t('products.price')"
         :error-messages="priceInvalid ? [$t('invoices.priceRequired')] : []"
         :hide-details="!priceInvalid"
-        class="mono"
+        class="text-mono"
         :disabled="disabled"
       />
     </v-col>
@@ -159,9 +158,3 @@ async function removeLine(lineId: string) {
   </v-row>
 </template>
 
-<style scoped>
-.mono {
-  font-family: ui-monospace, 'SF Mono', 'Cascadia Mono', 'Roboto Mono', monospace;
-  font-variant-numeric: tabular-nums;
-}
-</style>

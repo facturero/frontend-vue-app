@@ -13,6 +13,7 @@ import EmptyState from '@/components/ui/EmptyState.vue';
 import DashboardWidget from '@/widgets/DashboardWidget.vue';
 import WidgetCatalogDialog from '@/widgets/WidgetCatalogDialog.vue';
 import { GRID_COLUMNS, MOBILE_MAX_HEIGHT, ROW_HEIGHT } from '@/widgets/registry';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 /**
  * Inicio = el tablero de la persona: widgets de los plugins activos de su organización que su rol le deja ver, en una rejilla de 12
@@ -141,7 +142,7 @@ onMounted(async () => {
       </ul>
     </v-alert>
 
-    <div v-if="loading" class="text-center py-12"><v-progress-circular indeterminate color="primary" /></div>
+    <ViewSkeleton v-if="loading" type="dashboard" />
 
     <template v-else>
       <v-alert v-if="editing" type="info" class="mb-4" :text="t(smAndDown ? 'dashboard.editingHintMobile' : 'dashboard.editingHint')" />

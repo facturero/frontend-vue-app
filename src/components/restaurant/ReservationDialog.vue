@@ -130,13 +130,12 @@ function slotHint(slot: { reason?: string }): string {
         <div v-if="error"><v-alert type="error">{{ error }}</v-alert></div>
 
         <div class="d-flex flex-wrap ga-4">
-          <DateField v-model="date" :label="$t('restaurant.reservations.dialog.date')" style="max-width: 200px" data-testid="resv-date" />
-          <v-text-field
-            v-model.number="partySize"
-            type="number"
-            min="1"
+          <DateField v-model="date" :label="$t('restaurant.reservations.dialog.date')" max-width="200" data-testid="resv-date" />
+          <v-number-input
+            v-model="partySize"
+            :min="1"
             :label="$t('restaurant.reservations.dialog.partySize')"
-            style="max-width: 160px"
+            max-width="160"
             data-testid="resv-party"
           />
         </div>
@@ -166,8 +165,8 @@ function slotHint(slot: { reason?: string }): string {
         </div>
 
         <div class="d-flex flex-wrap ga-4">
-          <v-text-field v-model="guestName" :label="$t('restaurant.reservations.dialog.guestName')" style="min-width: 240px; flex: 1" data-testid="resv-name" />
-          <v-text-field v-model="guestPhone" type="tel" :label="$t('restaurant.reservations.dialog.guestPhone')" style="min-width: 200px; flex: 1" data-testid="resv-phone" />
+          <v-text-field v-model="guestName" :label="$t('restaurant.reservations.dialog.guestName')" min-width="240" class="flex-1-1-0" data-testid="resv-name" />
+          <v-text-field v-model="guestPhone" type="tel" :label="$t('restaurant.reservations.dialog.guestPhone')" min-width="200" class="flex-1-1-0" data-testid="resv-phone" />
         </div>
         <v-text-field
           v-model="guestEmail"

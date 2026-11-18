@@ -116,7 +116,7 @@ function label(tool: ToolDef): string {
       :items="presetOptions"
       :label="$t('restaurant.plan.preset')"
       class="d-none d-lg-flex"
-      style="min-width: 180px"
+      min-width="180"
       @update:model-value="emit('update:preset', $event)"
     />
 
@@ -126,7 +126,7 @@ function label(tool: ToolDef): string {
       :items="objectOptions"
       :label="$t('restaurant.plan.objectKind')"
       class="d-none d-lg-flex"
-      style="min-width: 180px"
+      min-width="180"
       @update:model-value="emit('update:objectKind', $event as ObjectKind)"
     />
   </v-sheet>

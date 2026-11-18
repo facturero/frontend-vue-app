@@ -173,7 +173,7 @@ defineExpose({
         <div v-if="!entries.length" class="text-body-medium text-medium-emphasis">{{ t('projects.conversation.empty') }}</div>
         <template v-for="e in entries" :key="e.kind === 'comment' ? `c-${e.comment.id}` : `a-${e.activity.id}`">
         <!-- Una línea del historial (pestaña «Todo»): compacta, para que la conversación siga mandando. -->
-        <div v-if="e.kind === 'activity'" class="d-flex align-center ga-2 text-body-small text-medium-emphasis activity-line">
+        <div v-if="e.kind === 'activity'" class="d-flex align-center ga-2 text-body-small text-medium-emphasis ps-10">
           <v-icon icon="mdi-history" size="x-small" />
           <span><strong>{{ name(e.activity.actorUserId) }}</strong> {{ describe(e.activity) }} · {{ relative(e.at) }}</span>
         </div>
@@ -235,9 +235,4 @@ defineExpose({
   </div>
 </template>
 
-<style scoped>
-/* La línea del historial empieza donde el texto de un comentario (avatar de 32 px + separación): se lee como parte del hilo. */
-.activity-line {
-  padding-left: 40px;
-}
-</style>
+

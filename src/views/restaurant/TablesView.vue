@@ -23,6 +23,7 @@ import EstablishmentSelect from '@/components/restaurant/EstablishmentSelect.vue
 import TableDialog from '@/components/restaurant/TableDialog.vue';
 import BulkTablesDialog from '@/components/restaurant/BulkTablesDialog.vue';
 import FloorPlanViewer from '@/components/restaurant/floorplan/FloorPlanViewer.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t } = useI18n();
 const { restaurant, ready, establishmentId, showSelector, hasEstablishments, bootstrap } = useRestaurantEstablishment();
@@ -201,7 +202,7 @@ async function reactivate(table: DiningTable): Promise<void> {
       {{ $t('restaurant.noEstablishment') }}
     </v-alert>
 
-    <v-skeleton-loader v-else-if="!ready" type="table" />
+    <ViewSkeleton v-else-if="!ready" type="table" />
 
     <!-- Arranque: quien no tiene nada montado empieza aquí. -->
     <v-card v-else-if="!hasTables" class="pa-6 text-center">
@@ -217,6 +218,7 @@ async function reactivate(table: DiningTable): Promise<void> {
     <template v-else>
       <v-card class="mb-4">
         <v-data-table :headers="headers" :items="tables" :loading="restaurant.loading" item-value="id" :items-per-page="50">
+          <template v-if="!tables?.length" #loading><ViewSkeleton type="rows" /></template>
           <template #item.name="{ item }">
             <span class="font-weight-medium">{{ item.name }}</span>
           </template>

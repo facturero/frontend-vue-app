@@ -14,6 +14,7 @@ import { useInventoryStore } from '@/stores/inventory';
 import { useProductStore } from '@/stores/products';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import type { AccountingNature, MovementType } from '@/types/inventory';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const props = defineProps<{ productId: string }>();
 
@@ -223,6 +224,7 @@ onMounted(async () => {
         ]"
         @update:options="onTableUpdate"
       >
+        <template v-if="!store.movements?.length" #loading><ViewSkeleton type="rows" /></template>
         <template #item.createdAt="{ item }">
           <span class="text-body-small">{{ formatDateTime(item.createdAt) }}</span>
         </template>

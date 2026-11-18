@@ -16,6 +16,7 @@ import { cashFlowBucketLabel, cashFlowClosingColor } from '@/utils/treasury-bank
 import type { CashFlowBucket } from '@/types/treasury';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import TreasuryTabs from '@/components/treasury/TreasuryTabs.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t, locale } = useI18n();
 const auth = useAuthStore();
@@ -76,6 +77,7 @@ const headers = computed(() => [
       </v-col>
     </v-row>
 
+    <ViewSkeleton v-if="!flow && !store.error" type="table" :count="8" />
     <template v-if="flow">
       <v-alert v-if="negativeLabel" type="warning" class="mb-4">{{ $t('treasury.cashFlow.goesNegative', { when: negativeLabel }) }}</v-alert>
 

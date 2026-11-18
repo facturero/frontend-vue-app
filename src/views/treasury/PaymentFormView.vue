@@ -31,6 +31,7 @@ import { PAYMENT_METHODS, type Payable, type SupplierAdvance } from '@/types/tre
 import type { Supplier } from '@/types/purchasing';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import TreasuryTabs from '@/components/treasury/TreasuryTabs.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t, locale } = useI18n();
 const route = useRoute();
@@ -81,7 +82,15 @@ const err = (key: string) => (errors.value[key] ? t(errors.value[key]!) : undefi
 const isEditing = computed(() => paymentId.value !== null);
 const overdue = (p: Payable) => (statement.value && isPayableOverdue(p, statement.value.asOf) ? payableDaysOverdue(p.dueDate, statement.value.asOf) : 0);
 
-onMounted(async () => {
+/** Primera carga de la pantalla: mientras dura se ve su esqueleto (ViewSkeleton), no un formulario vacío que luego se rellena de golpe. */
+const loading = ref(true);
+onMounted(() => {
+  void loadView().finally(() => {
+    loading.value = false;
+  });
+});
+
+async function loadView(): Promise<void> {
   if (auth.can('bank_account:read')) {
     await bank.fetchAccounts(true);
     // Con una sola cuenta activa y un documento nuevo, se elige sola: lo normal es que sea esa.
@@ -122,7 +131,7 @@ onMounted(async () => {
   } else if (form.value.supplierId) {
     await loadSupplier(form.value.supplierId);
   }
-});
+}
 
 async function loadSupplier(supplierId: string): Promise<void> {
   await store.fetchSupplier(supplierId);
@@ -212,6 +221,7 @@ async function submit(andPost: boolean): Promise<void> {
 
     <v-alert v-if="serverError" type="error" closable class="mb-4" @click:close="serverError = null">{{ serverError }}</v-alert>
 
+    <ViewSkeleton :loading="loading" type="form">
     <v-card class="mb-4">
       <v-card-text>
         <v-row>
@@ -317,5 +327,6 @@ async function submit(andPost: boolean): Promise<void> {
         <v-btn variant="flat" color="primary" prepend-icon="mdi-cash-check" :loading="store.saving" @click="submit(true)">{{ $t('treasury.payments.pay') }}</v-btn>
       </v-card-actions>
     </v-card>
+    </ViewSkeleton>
   </v-container>
 </template>

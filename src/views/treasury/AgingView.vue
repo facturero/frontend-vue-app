@@ -14,6 +14,7 @@ import { agingShares, AGING_BUCKETS, downloadBlob, reportLang } from '@/utils/tr
 import type { AgingCustomer } from '@/types/treasury';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import TreasuryTabs from '@/components/treasury/TreasuryTabs.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t, locale } = useI18n();
 const router = useRouter();
@@ -79,6 +80,7 @@ const openCustomer = (item: AgingCustomer) => router.push({ name: 'treasury-cust
           hide-default-footer
           @click:row="(_: Event, { item }: { item: AgingCustomer }) => openCustomer(item)"
         >
+          <template v-if="!aging?.customers?.length" #loading><ViewSkeleton type="rows" /></template>
           <template v-for="bucket in AGING_BUCKETS" :key="bucket.key" #[`item.${bucket.key}`]="{ item }">
             <span :class="item[bucket.key] === 0 ? 'text-medium-emphasis' : undefined">{{ money(item[bucket.key]) }}</span>
           </template>

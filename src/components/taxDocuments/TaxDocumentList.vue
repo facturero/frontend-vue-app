@@ -10,6 +10,7 @@ import { useTaxDocumentsStore } from '@/stores/taxDocuments';
 import { fromCents } from '@/utils/taxDocuments';
 import type { FiscalDocumentType, FiscalInvoiceDTO, FiscalInvoiceStatus } from '@/types/fiscal';
 import FiscalStatusCard from '@/components/invoices/FiscalStatusCard.vue';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const props = defineProps<{ documentType: Extract<FiscalDocumentType, '06' | '07'> }>();
 
@@ -99,6 +100,7 @@ defineExpose({ reload: () => load(store.page) });
         item-value="id"
         @click:row="(_: Event, { item }: { item: FiscalInvoiceDTO }) => (selected = item)"
       >
+        <template v-if="!store.items?.length" #loading><ViewSkeleton type="rows" /></template>
         <template #item.created_at="{ item }">
           {{ formatDate(item.created_at) }}
         </template>

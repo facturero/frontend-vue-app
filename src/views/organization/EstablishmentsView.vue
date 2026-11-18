@@ -8,6 +8,7 @@ import { usePosThemeStore } from '@/stores/posTheme';
 import type { EstablishmentDTO, EmissionPointDTO } from '@/types/organization';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import { getSocket } from '@/utils/realtime';
+import ViewSkeleton from '@/components/ui/ViewSkeleton.vue';
 
 const { t } = useI18n();
 const confirm = useConfirm();
@@ -122,12 +123,15 @@ watch(
   },
 );
 
+/** Primera carga de la lista de establecimientos (y los puntos del primero): esqueleto en vez de columnas vacías. */
+const loading = ref(true);
 onMounted(async () => {
   if (canAssignTheme.value) void themeStore.fetchThemes();
   await store.fetchEstablishments();
   if (store.establishments.length > 0) {
     await selectEstablishment(store.establishments[0]);
   }
+  loading.value = false;
   getSocket()?.on('emission_points.changed', refreshPoints);
 });
 
@@ -151,6 +155,7 @@ onUnmounted(() => {
       {{ store.error }}
     </v-alert>
 
+    <ViewSkeleton :loading="loading" type="detail">
     <v-row>
       <!-- Establecimientos -->
       <v-col cols="12" md="5">
@@ -282,6 +287,7 @@ onUnmounted(() => {
         </v-card>
       </v-col>
     </v-row>
+    </ViewSkeleton>
 
     <!-- Dialog: nuevo establecimiento -->
     <v-dialog v-model="showEstablishmentDialog" max-width="480">

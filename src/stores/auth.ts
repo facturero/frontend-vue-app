@@ -126,6 +126,8 @@ export const useAuthStore = defineStore('auth', () => {
     // Y la mensajería: sus conversaciones y mensajes no pueden quedar para quien entre después en esta pestaña.
     useChatStore().reset();
     useFeedbackStore().reset();
+    // El tema vuelve a claro desde App.vue (al quedarse sin organización): importarlo aquí arrastraría Vuetify a cada prueba
+    // que usa este store.
   }
 
   return {
