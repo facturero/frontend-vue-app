@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { contrastRatio } from '@/types/posTheme';
-import { bestTextOn, configFromBase, contrastPairs, deriveThemeColors, isUsableConfig, mix, type AppThemeConfig } from './appTheme';
+import { existsSync, readFileSync } from 'node:fs';
+import { PRESET_THEMES, bestTextOn, builtinNameKey, configFromBase, contrastPairs, deriveThemeColors, isBuiltinRef, isUsableConfig, mix, presetRef, type AppThemeConfig } from './appTheme';
+import es from '@/i18n/es.json';
 
 const base = { primary: '#5D87FF', info: '#539BFF', background: '#F2F6FA', surface: '#FFFFFF', 'on-surface': '#2A3547', 'surface-variant': '#424242' };
 
@@ -55,6 +57,25 @@ describe('temas de la aplicación', () => {
     expect(contrastPairs(ocean).map((p) => `${p.a}/${p.b}`)).toEqual(['text/background', 'text/surface', 'on-primary/primary']);
     const unreadable = { ...ocean, colors: { ...ocean.colors, text: '#f0f0f0' } };
     expect(contrastPairs(unreadable).filter((p) => p.ratio < 3).map((p) => p.b)).toEqual(['background', 'surface']);
+  });
+
+  it('los predefinidos son válidos, se leen bien, tienen nombre en i18n y son integrados', () => {
+    expect(PRESET_THEMES.length).toBeGreaterThanOrEqual(7);
+    for (const p of PRESET_THEMES) {
+      expect(isUsableConfig(p.config), p.id).toBe(true);
+      expect(contrastPairs(p.config).filter((c) => c.ratio < 3), p.id).toEqual([]);
+      expect(isBuiltinRef(presetRef(p.id))).toBe(true);
+      expect((es as { themes: { preset: Record<string, string> } }).themes.preset[p.id], p.id).toBeTruthy();
+      expect(builtinNameKey(presetRef(p.id))).toBe(`themes.preset.${p.id}`);
+    }
+    expect(isBuiltinRef('preset:inventado')).toBe(false);
+  });
+
+  // Solo en la carpeta del proyecto completa: el CI del frontend no tiene el repo de organization-service al lado.
+  const serverFile = new URL('../../../backend/organization-service/src/domain/app-theme.ts', import.meta.url);
+  it.skipIf(!existsSync(serverFile))('los nombres de los predefinidos coinciden con los que acepta el servidor', () => {
+    const server = readFileSync(serverFile, 'utf8');
+    for (const p of PRESET_THEMES) expect(server.includes(`'preset:${p.id}'`), p.id).toBe(true);
   });
 
   it('descarta un tema roto que llegue del servidor', () => {

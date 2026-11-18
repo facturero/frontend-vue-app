@@ -6,7 +6,7 @@ import { useConfirm } from '@/composable/useConfirm';
 import { useNotify } from '@/composable/useNotify';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import AppThemeEditorDialog from '@/components/themes/AppThemeEditorDialog.vue';
-import { APP_THEME_COLOR_TOKENS, APP_THEME_MAX_PER_ORGANIZATION, type AppThemeDTO, type ThemeRef } from '@/types/appTheme';
+import { APP_THEME_COLOR_TOKENS, APP_THEME_MAX_PER_ORGANIZATION, PRESET_THEMES, presetRef, type AppThemeDTO, type ThemeRef } from '@/types/appTheme';
 
 /**
  * Ajustes → Temas, para quien administra la organización (docs/TEMAS.md): crear los temas de la empresa, elegir cuál ve todo el
@@ -31,6 +31,7 @@ const defaultOptions = computed(() => [
   { value: 'light', title: t('themes.builtin.light') },
   { value: 'dark', title: t('themes.builtin.dark') },
   { value: 'system', title: t('themes.builtin.system') },
+  ...PRESET_THEMES.map((p) => ({ value: presetRef(p.id), title: t(`themes.preset.${p.id}`) })),
   ...store.themes.map((th) => ({ value: th.id, title: th.name })),
 ]);
 

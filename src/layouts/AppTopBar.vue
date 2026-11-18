@@ -8,7 +8,7 @@ import { resolveFileUrl } from '@/composable/useFileUrl';
 import LocaleSwitcher from '@/components/LocaleSwitcher.vue';
 import ThemeSwitcher from '@/components/ThemeSwitcher.vue';
 import { useAppThemeStore } from '@/stores/appTheme';
-import { isBuiltinRef } from '@/types/appTheme';
+import { builtinNameKey } from '@/types/appTheme';
 import { useI18n } from 'vue-i18n';
 import NotificationBell from '@/components/NotificationBell.vue';
 import MessageInbox from '@/components/MessageInbox.vue';
@@ -100,7 +100,8 @@ const appTheme = useAppThemeStore();
 const themeOpen = ref(false);
 const themeLabel = computed(() => {
   const r = appTheme.effectiveRef;
-  if (isBuiltinRef(r)) return t(`themes.builtin.${r}`);
+  const key = builtinNameKey(r);
+  if (key) return t(key);
   return appTheme.themes.find((th) => th.id === r)?.name ?? t('themes.builtin.light');
 });
 

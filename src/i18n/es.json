@@ -4821,6 +4821,16 @@
     "companyOption": "El de la empresa",
     "ofCompany": "De tu empresa",
     "dialogTitle": "Tema",
-    "dialogIntro": "Elige cómo se ve la aplicación para ti. Lo guardamos en tu cuenta: te sigue en cualquier equipo."
+    "dialogIntro": "Elige cómo se ve la aplicación para ti. Lo guardamos en tu cuenta: te sigue en cualquier equipo.",
+    "preset": {
+      "ocean": "Océano",
+      "forest": "Bosque",
+      "sunset": "Atardecer",
+      "lavender": "Lavanda",
+      "cherry": "Cereza",
+      "midnight": "Medianoche",
+      "graphite": "Grafito",
+      "emerald": "Esmeralda"
+    }
   }
 }

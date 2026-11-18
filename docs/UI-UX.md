@@ -592,6 +592,7 @@ Cada persona elige su tema en el menú del avatar («Tema», un diálogo de cuad
 - **Por qué funciona sin tocar las vistas:** todo lo que usa tokens (`color="primary"`, `bg-surface`, `text-medium-emphasis`,
   `lightprimary`…) cambia solo. Lo que tenga un color fijo no cambia, y en un tema oscuro se ve mal: otra razón más para la regla
   de §1 (nunca un hexadecimal, nunca `bg-white`).
+- **Temas predefinidos** (`PRESET_THEMES`, `preset:*`): mismos 8 colores y base, definidos en código; los ve toda empresa.
 - **Un tema propio son 8 colores y una base**, y `deriveThemeColors` (`types/appTheme.ts`) saca de ellos la paleta entera: tonales,
   bordes y el texto encima de cada color. Si se añade un token a `vuetify.ts`, decide ahí cómo se deriva; si no, se hereda el del
   tema integrado de la base y no seguirá al tema propio.

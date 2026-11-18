@@ -29,6 +29,11 @@ oscuro por todas las pantallas (ver «Lo que hay que arreglar antes de ofrecer e
   propio como tema de la empresa; si nunca creó uno, sería un «Claro» repetido (decisión del dueño, 2026-11-18). También `Ajustes → Temas` (`AppThemesView.vue`) con el editor
   (`AppThemeEditorDialog.vue`), y el store `stores/appTheme.ts` (ver UI-UX.md §9 bis).
 
+- **Temas predefinidos (2026-11-18):** 8 temas que ve toda empresa, como los de Slack: Océano, Bosque, Atardecer, Lavanda y
+  Cereza (claros), Medianoche, Grafito y Esmeralda (oscuros). Referencia `preset:<id>`; los colores viven solo en el frontend
+  (`PRESET_THEMES` en `types/appTheme.ts`) y organization-service solo conoce los nombres para validar (`BUILTIN_THEME_REFS`). Un
+  predefinido nuevo va en las dos listas y en `themes.preset.*` de i18n; `appTheme.test.ts` comprueba contraste, nombres e i18n.
+
 **Orden de despliegue:** organization-service (migración) → api-gateway-node → frontend.
 
 ---

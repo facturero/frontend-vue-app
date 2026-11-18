@@ -4821,6 +4821,16 @@
     "companyOption": "Company's theme",
     "ofCompany": "From your company",
     "dialogTitle": "Theme",
-    "dialogIntro": "Choose how the app looks for you. It is saved to your account and follows you on any device."
+    "dialogIntro": "Choose how the app looks for you. It is saved to your account and follows you on any device.",
+    "preset": {
+      "ocean": "Ocean",
+      "forest": "Forest",
+      "sunset": "Sunset",
+      "lavender": "Lavender",
+      "cherry": "Cherry",
+      "midnight": "Midnight",
+      "graphite": "Graphite",
+      "emerald": "Emerald"
+    }
   }
 }

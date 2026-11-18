@@ -3,14 +3,14 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { baseColorsOf, useAppThemeStore } from '@/stores/appTheme';
 import { useNotify } from '@/composable/useNotify';
-import type { AppThemeConfig, ThemeRef } from '@/types/appTheme';
+import { PRESET_THEMES, presetRef, type AppThemeConfig, type ThemeRef } from '@/types/appTheme';
 import ThemeTile, { type TilePalette } from '@/components/themes/ThemeTile.vue';
 
 /**
  * El diálogo «Tema» (lo abre la fila «Tema» del menú del avatar): un cuadro por tema (miniatura con sus colores y su nombre, como
  * en Slack). Vive FUERA del menú del avatar (AppTopBar): si estuviera dentro, cerrar el menú desmontaría el diálogo, y dejar el
  * menú abierto detrás obligaba a cerrarlo después a mano.
- * Claro, oscuro, como el sistema y los temas de la empresa. Si la empresa fijó su tema y esta persona no administra la
+ * Claro, oscuro, como el sistema, los predefinidos (`preset:*`, los ve toda empresa) y los temas de la empresa. Si la empresa fijó su tema y esta persona no administra la
  * organización, se ve cuál es pero no se puede cambiar (docs/TEMAS.md).
  *
  * «El de la empresa» (`null`) solo se ofrece si la empresa tiene un tema PROPIO como tema de la empresa: quien lo elige lo sigue
@@ -55,6 +55,7 @@ const options = computed<Option[]>(() => {
     { value: 'dark', name: t('themes.builtin.dark'), palette: dark },
     { value: 'system', name: t('themes.builtin.system'), palette: light, split: dark },
   );
+  for (const p of PRESET_THEMES) list.push({ value: presetRef(p.id), name: t(`themes.preset.${p.id}`), palette: paletteOf(p.config) });
   for (const th of store.themes) list.push({ value: th.id, name: th.name, caption: t('themes.ofCompany'), palette: paletteOf(th.config) });
   return list;
 });

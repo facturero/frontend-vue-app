@@ -4821,6 +4821,16 @@
     "companyOption": "Celui de l'entreprise",
     "ofCompany": "De votre entreprise",
     "dialogTitle": "Thème",
-    "dialogIntro": "Choisissez l'apparence de l'application pour vous. C'est enregistré dans votre compte et vous suit sur tous vos appareils."
+    "dialogIntro": "Choisissez l'apparence de l'application pour vous. C'est enregistré dans votre compte et vous suit sur tous vos appareils.",
+    "preset": {
+      "ocean": "Océan",
+      "forest": "Forêt",
+      "sunset": "Coucher de soleil",
+      "lavender": "Lavande",
+      "cherry": "Cerise",
+      "midnight": "Minuit",
+      "graphite": "Graphite",
+      "emerald": "Émeraude"
+    }
   }
 }

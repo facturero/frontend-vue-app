@@ -7,6 +7,7 @@ import {
   deriveThemeColors,
   isBuiltinRef,
   isUsableConfig,
+  presetOf,
   type AppThemeConfig,
   type AppThemeDTO,
   type ThemeRef,
@@ -104,15 +105,18 @@ export const useAppThemeStore = defineStore('appTheme', () => {
       writeCache({ name: target, dark: target === 'dark', colors: {} });
       return;
     }
-    const theme = themes.value.find((t) => t.id === target);
-    if (!theme || !isUsableConfig(theme.config)) {
+    // Un predefinido (`preset:*`, colores en types/appTheme.ts) o un tema propio de la empresa.
+    const preset = presetOf(target);
+    const own = preset ? null : themes.value.find((t) => t.id === target);
+    const config = preset?.config ?? own?.config;
+    if (!config || !isUsableConfig(config)) {
       show('light');
       writeCache(null);
       return;
     }
-    const name = `app-${theme.id}`;
-    const dark = theme.config.base === 'dark';
-    const colors = deriveThemeColors(theme.config, baseColorsOf(theme.config.base));
+    const name = preset ? `preset-${preset.id}` : `app-${own!.id}`;
+    const dark = config.base === 'dark';
+    const colors = deriveThemeColors(config, baseColorsOf(config.base));
     register(name, dark, colors);
     show(name);
     writeCache({ name, dark, colors });

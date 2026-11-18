@@ -47,8 +47,43 @@ export interface AppThemesState {
   myChoice: ThemeRef | null;
 }
 
+/* ------------------------------------------------------------------ *
+ * Temas predefinidos (`preset:*`): los ve toda empresa, como los de Slack
+ * ------------------------------------------------------------------ */
+
+/**
+ * Sus colores viven solo aquí; el servidor conoce sus nombres para validar la referencia (organization-service,
+ * `BUILTIN_THEME_REFS`). Si se añade uno, va en las dos listas y en `themes.preset.*` de i18n. Cada uno pasa el contraste mínimo
+ * (lo comprueba `appTheme.test.ts`).
+ */
+export const PRESET_THEMES: Array<{ id: string; config: AppThemeConfig }> = [
+  { id: 'ocean', config: { schemaVersion: 1, base: 'light', colors: { primary: '#0b6e99', secondary: '#14a3c7', background: '#f1f6f9', surface: '#ffffff', text: '#1d2b36', success: '#1a9d6b', warning: '#d99a00', error: '#d64545' } } },
+  { id: 'forest', config: { schemaVersion: 1, base: 'light', colors: { primary: '#2f7d4a', secondary: '#7cb342', background: '#f2f7f2', surface: '#ffffff', text: '#1f2b22', success: '#2e9e5b', warning: '#d99a00', error: '#d14b3a' } } },
+  { id: 'sunset', config: { schemaVersion: 1, base: 'light', colors: { primary: '#d9480f', secondary: '#f59f00', background: '#fdf6f1', surface: '#ffffff', text: '#3a2a20', success: '#2b9348', warning: '#e8a400', error: '#c92a2a' } } },
+  { id: 'lavender', config: { schemaVersion: 1, base: 'light', colors: { primary: '#6741d9', secondary: '#a78bfa', background: '#f6f4fd', surface: '#ffffff', text: '#2b2540', success: '#2f9e6d', warning: '#e0a100', error: '#d6336c' } } },
+  { id: 'cherry', config: { schemaVersion: 1, base: 'light', colors: { primary: '#c2255c', secondary: '#f06595', background: '#fdf3f6', surface: '#ffffff', text: '#35202a', success: '#2b9348', warning: '#e0a100', error: '#e03131' } } },
+  { id: 'midnight', config: { schemaVersion: 1, base: 'dark', colors: { primary: '#4dabf7', secondary: '#74c0fc', background: '#0f1724', surface: '#172233', text: '#e6edf5', success: '#38d9a9', warning: '#ffc94d', error: '#ff8787' } } },
+  { id: 'graphite', config: { schemaVersion: 1, base: 'dark', colors: { primary: '#a5b4c8', secondary: '#7c8a9e', background: '#18191b', surface: '#232427', text: '#e8e8ea', success: '#51cf66', warning: '#fcc419', error: '#ff6b6b' } } },
+  { id: 'emerald', config: { schemaVersion: 1, base: 'dark', colors: { primary: '#20c997', secondary: '#63e6be', background: '#0d1f1a', surface: '#142b25', text: '#e3f5ef', success: '#69db7c', warning: '#ffd43b', error: '#ff8787' } } },
+];
+
+export const presetRef = (id: string): ThemeRef => `preset:${id}`;
+
+/** El tema predefinido de una referencia `preset:*`, si existe. */
+export function presetOf(ref: string): { id: string; config: AppThemeConfig } | null {
+  return ref.startsWith('preset:') ? (PRESET_THEMES.find((p) => presetRef(p.id) === ref) ?? null) : null;
+}
+
+/** Integrado = no es un tema propio de la empresa: claro, oscuro, como el sistema o uno predefinido. */
 export function isBuiltinRef(ref: string): boolean {
-  return (BUILTIN_THEME_REFS as readonly string[]).includes(ref);
+  return (BUILTIN_THEME_REFS as readonly string[]).includes(ref) || presetOf(ref) !== null;
+}
+
+/** Clave de i18n del nombre de un tema integrado (`null` si es un tema propio: su nombre lo escribió la empresa). */
+export function builtinNameKey(ref: string): string | null {
+  if ((BUILTIN_THEME_REFS as readonly string[]).includes(ref)) return `themes.builtin.${ref}`;
+  const p = presetOf(ref);
+  return p ? `themes.preset.${p.id}` : null;
 }
 
 /* ------------------------------------------------------------------ *
