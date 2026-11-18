@@ -4,7 +4,7 @@ import { useAuthStore } from '@/stores/auth';
 
 /**
  * Si la aplicación se enseña desnuda: sin menú lateral y con la barra superior
- * reducida a idioma, modo nocturno y cerrar sesión.
+ * reducida a idioma y cerrar sesión.
  *
  * Pasa por dos motivos distintos, y conviene no mezclarlos:
  *

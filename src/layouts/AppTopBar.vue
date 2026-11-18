@@ -3,7 +3,6 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useDisplay } from 'vuetify';
 import { useUiStore } from '@/stores/ui';
 import { useAuthStore } from '@/stores/auth';
-import { useThemeToggle } from '@/composable/useThemeToggle';
 import { useRouter } from 'vue-router';
 import { resolveFileUrl } from '@/composable/useFileUrl';
 import LocaleSwitcher from '@/components/LocaleSwitcher.vue';
@@ -20,7 +19,6 @@ const ui = useUiStore();
 const auth = useAuthStore();
 const router = useRouter();
 const { mobile } = useDisplay();
-const { toggleTheme, isDark } = useThemeToggle();
 const bareShell = useBareShell();
 const assistant = useAssistantStore();
 const { startTour } = useAppTour();
@@ -174,15 +172,8 @@ function logout(): void {
       <v-divider />
 
       <v-list density="compact" class="py-0">
-        <!-- El switch es solo indicador: el clic lo recoge la fila entera, así no alterna dos veces. -->
-        <v-list-item :prepend-icon="isDark() ? 'mdi-weather-night' : 'mdi-weather-sunny'" :title="$t('common.darkMode')"
-          value="theme" @click="toggleTheme">
-          <template #append>
-            <v-switch :model-value="isDark()" color="primary" density="compact" hide-details readonly inset
-              class="ml-2" />
-          </template>
-        </v-list-item>
-
+        <!-- Sin interruptor de modo nocturno (quitado el 2026-11-18, decisión del dueño): claro, oscuro y los temas propios de la
+             empresa pasan a un módulo «Temas» (análisis en docs/TEMAS.md). Hasta entonces el CRM se ve siempre en claro. -->
         <!-- La fila entera es el botón: abre el selector de idioma al costado del menú. -->
         <LocaleSwitcher location="start">
           <template #activator="{ props: localeProps, current }">
