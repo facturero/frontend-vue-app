@@ -584,7 +584,7 @@ previa**, y por eso vive aislada.
 
 ## 9 bis. Temas de la aplicación (claro, oscuro y los de la empresa)
 
-Cada persona elige su tema en el menú del avatar («Tema»); quien administra la organización crea los de la empresa en
+Cada persona elige su tema en el menú del avatar («Tema», un diálogo de cuadros con la miniatura de cada tema); quien administra la organización crea los de la empresa en
 `Ajustes → Temas` y puede fijar uno para todos. Diseño y decisiones en `docs/TEMAS.md`.
 
 - **Un solo sitio cambia el tema:** `stores/appTheme.ts`. Registra el tema en Vuetify en caliente

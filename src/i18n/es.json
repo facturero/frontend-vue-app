@@ -4765,7 +4765,6 @@
       "dark": "Oscuro",
       "system": "Como el sistema"
     },
-    "companyDefault": "El de la empresa ({name})",
     "lockedByCompany": "Tu empresa fijó el tema para todos.",
     "companyTitle": "Tema de la empresa",
     "companyIntro": "Lo ve todo el equipo mientras no elija otro en el menú de su avatar.",
@@ -4818,6 +4817,10 @@
       "discardTitle": "¿Descartar los cambios?",
       "discardText": "El tema queda como estaba.",
       "discard": "Descartar"
-    }
+    },
+    "companyOption": "El de la empresa",
+    "ofCompany": "De tu empresa",
+    "dialogTitle": "Tema",
+    "dialogIntro": "Elige cómo se ve la aplicación para ti. Lo guardamos en tu cuenta: te sigue en cualquier equipo."
   }
 }

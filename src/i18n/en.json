@@ -4765,7 +4765,6 @@
       "dark": "Dark",
       "system": "Same as system"
     },
-    "companyDefault": "Company's ({name})",
     "lockedByCompany": "Your company set the theme for everyone.",
     "companyTitle": "Company theme",
     "companyIntro": "The whole team sees it unless they pick another one in their avatar menu.",
@@ -4818,6 +4817,10 @@
       "discardTitle": "Discard changes?",
       "discardText": "The theme stays as it was.",
       "discard": "Discard"
-    }
+    },
+    "companyOption": "Company's theme",
+    "ofCompany": "From your company",
+    "dialogTitle": "Theme",
+    "dialogIntro": "Choose how the app looks for you. It is saved to your account and follows you on any device."
   }
 }

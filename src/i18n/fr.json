@@ -4765,7 +4765,6 @@
       "dark": "Sombre",
       "system": "Comme le système"
     },
-    "companyDefault": "Celui de l'entreprise ({name})",
     "lockedByCompany": "Votre entreprise a fixé le thème pour tout le monde.",
     "companyTitle": "Thème de l'entreprise",
     "companyIntro": "Toute l'équipe le voit tant qu'elle n'en choisit pas un autre dans le menu de son avatar.",
@@ -4818,6 +4817,10 @@
       "discardTitle": "Abandonner les modifications ?",
       "discardText": "Le thème reste tel quel.",
       "discard": "Abandonner"
-    }
+    },
+    "companyOption": "Celui de l'entreprise",
+    "ofCompany": "De votre entreprise",
+    "dialogTitle": "Thème",
+    "dialogIntro": "Choisissez l'apparence de l'application pour vous. C'est enregistré dans votre compte et vous suit sur tous vos appareils."
   }
 }

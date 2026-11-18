@@ -7,6 +7,9 @@ import { useRouter } from 'vue-router';
 import { resolveFileUrl } from '@/composable/useFileUrl';
 import LocaleSwitcher from '@/components/LocaleSwitcher.vue';
 import ThemeSwitcher from '@/components/ThemeSwitcher.vue';
+import { useAppThemeStore } from '@/stores/appTheme';
+import { isBuiltinRef } from '@/types/appTheme';
+import { useI18n } from 'vue-i18n';
 import NotificationBell from '@/components/NotificationBell.vue';
 import MessageInbox from '@/components/MessageInbox.vue';
 import GlobalSearch from '@/components/GlobalSearch.vue';
@@ -17,6 +20,7 @@ import { useFeedbackStore } from '@/stores/feedback';
 import type { Me } from '@/types/auth';
 
 const ui = useUiStore();
+const { t } = useI18n();
 const auth = useAuthStore();
 const router = useRouter();
 const { mobile } = useDisplay();
@@ -89,6 +93,20 @@ function openTour(): void {
 function openReport(): void {
   menuOpen.value = false;
   ui.openReport();
+}
+
+/* Tema: la fila del menú cierra el menú y abre el diálogo, que vive fuera de él (ver ThemeSwitcher.vue). */
+const appTheme = useAppThemeStore();
+const themeOpen = ref(false);
+const themeLabel = computed(() => {
+  const r = appTheme.effectiveRef;
+  if (isBuiltinRef(r)) return t(`themes.builtin.${r}`);
+  return appTheme.themes.find((th) => th.id === r)?.name ?? t('themes.builtin.light');
+});
+
+function openTheme(): void {
+  menuOpen.value = false;
+  themeOpen.value = true;
 }
 
 function go(name: string): void {
@@ -175,18 +193,14 @@ function logout(): void {
       <v-list density="compact" class="py-0">
         <!-- Tema: claro, oscuro, como el sistema y los de la empresa (docs/TEMAS.md). Reemplazó al interruptor «Modo nocturno»,
              que no guardaba la elección. En el alta todavía no hay empresa: no se ofrece. -->
-        <ThemeSwitcher v-if="!bareShell">
-          <template #activator="{ props: themeProps, current, locked }">
-            <v-list-item v-bind="themeProps" prepend-icon="mdi-palette-outline" :title="$t('themes.menu')" value="theme"
-              data-menu-theme>
-              <template #append>
-                <v-icon v-if="locked" icon="mdi-lock-outline" size="16" class="ml-2 text-medium-emphasis" />
-                <span class="text-body-medium text-medium-emphasis ml-2">{{ current }}</span>
-                <v-icon icon="mdi-chevron-right" size="18" class="ml-1 text-medium-emphasis" />
-              </template>
-            </v-list-item>
+        <v-list-item v-if="!bareShell" prepend-icon="mdi-palette-outline" :title="$t('themes.menu')" value="theme" data-menu-theme
+          @click="openTheme">
+          <template #append>
+            <v-icon v-if="appTheme.locked" icon="mdi-lock-outline" size="16" class="ml-2 text-medium-emphasis" />
+            <span class="text-body-medium text-medium-emphasis ml-2">{{ themeLabel }}</span>
+            <v-icon icon="mdi-chevron-right" size="18" class="ml-1 text-medium-emphasis" />
           </template>
-        </ThemeSwitcher>
+        </v-list-item>
         <!-- La fila entera es el botón: abre el selector de idioma al costado del menú. -->
         <LocaleSwitcher location="start">
           <template #activator="{ props: localeProps, current }">
@@ -237,5 +251,6 @@ function logout(): void {
       </v-list>
       </v-card>
     </v-menu>
+    <ThemeSwitcher v-if="!bareShell" v-model="themeOpen" />
   </v-app-bar>
 </template>

@@ -24,7 +24,9 @@ oscuro por todas las pantallas (ver «Lo que hay que arreglar antes de ofrecer e
     regla del fijado se aplica junto al dato. Así auth-service no se toca.
 - **api-gateway-node:** el hub enlaza `organization.app_theme.#` y `organization.theme_settings.#` y avisa `app_theme.changed` a
   la sala de la organización: si un administrador fija un tema, el resto lo ve sin recargar.
-- **frontend:** «Tema» en el menú del avatar (`ThemeSwitcher.vue`), `Ajustes → Temas` (`AppThemesView.vue`) con el editor
+- **frontend:** «Tema» en el menú del avatar abre un diálogo con un cuadro por tema, como en Slack: miniatura con sus colores y
+  el nombre (`ThemeSwitcher.vue` + `components/themes/ThemeTile.vue`). «El de la empresa» solo aparece si la empresa tiene un tema
+  propio como tema de la empresa; si nunca creó uno, sería un «Claro» repetido (decisión del dueño, 2026-11-18). También `Ajustes → Temas` (`AppThemesView.vue`) con el editor
   (`AppThemeEditorDialog.vue`), y el store `stores/appTheme.ts` (ver UI-UX.md §9 bis).
 
 **Orden de despliegue:** organization-service (migración) → api-gateway-node → frontend.
