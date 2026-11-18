@@ -597,7 +597,7 @@ Cada persona elige su tema en el menú del avatar («Tema», un diálogo de cuad
   bordes y el texto encima de cada color. Si se añade un token a `vuetify.ts`, decide ahí cómo se deriva; si no, se hereda el del
   tema integrado de la base y no seguirá al tema propio.
 - **Vista previa = la aplicación misma:** el editor (`components/themes/AppThemeEditorDialog.vue`) pinta toda la aplicación con lo que
-  se edita. Por eso es el único diálogo sin velo (`:scrim="false"`): lo de detrás es la vista previa.
+  se edita. Por eso es un panel lateral sin velo (`:scrim="false"`, teletransportado al `body` para que ningún encabezado fijo lo tape): lo que queda a la izquierda es la vista previa.
 - **Sin destello al recargar:** el último tema pintado se guarda en `localStorage` (`crm:app-theme`) y `main.ts` lo aplica antes de
   montar. Sin sesión (inicio de sesión, alta) siempre claro.
 - **No siguen el tema, a propósito:** la caja web (`/pos`, tiene sus propios temas, §9), la vista previa del tema del POS y la página

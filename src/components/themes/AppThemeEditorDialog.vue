@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useDisplay } from 'vuetify';
 import { useAppThemeStore, baseColorsOf } from '@/stores/appTheme';
 import { useConfirm } from '@/composable/useConfirm';
 import { extractError, extractErrorCode } from '@/utils/error';
@@ -18,14 +19,19 @@ import {
 } from '@/types/appTheme';
 
 /**
- * Crear o editar un tema de la empresa. La vista previa es la aplicación misma: mientras el diálogo está abierto, todo lo que hay
- * detrás se pinta con lo que se está editando (`store.startPreview`). Es más fiel que una maqueta y no hay una segunda copia del
- * armazón que mantener (la del POS existe porque la caja no es el CRM). Al cerrar sin guardar, vuelve el tema de antes.
+ * Crear o editar un tema de la empresa. La vista previa es la aplicación misma: mientras el panel está abierto, todo lo que hay
+ * a su izquierda se pinta con lo que se está editando (`store.startPreview`). Es más fiel que una maqueta y no hay una segunda
+ * copia del armazón que mantener (la del POS existe porque la caja no es el CRM). Al cerrar sin guardar, vuelve el tema de antes.
+ *
+ * Es un panel lateral (REGLAS-FRONT R-23) y no un diálogo: un diálogo sin velo, que hace falta para ver la vista previa, se
+ * confundía con la página de detrás (sin sombra, del mismo color en un tema oscuro, con la página asomando por los bordes). El
+ * panel queda pegado a la derecha, con borde y sombra, y deja a la vista el resto de la aplicación. En teléfono, ancho completo.
  */
 const props = defineProps<{ theme: AppThemeDTO | null }>();
 const open = defineModel<boolean>({ required: true });
 
 const { t } = useI18n();
+const { mobile, width } = useDisplay();
 const store = useAppThemeStore();
 const confirm = useConfirm();
 
@@ -103,11 +109,31 @@ async function save(): Promise<void> {
 </script>
 
 <template>
-  <!-- Sin velo oscuro y a un lado: la aplicación de detrás es la vista previa, tiene que verse. -->
-  <v-dialog :model-value="open" max-width="640" :scrim="false" persistent scrollable content-class="align-self-end" @update:model-value="(v: boolean) => !v && close()">
-    <v-card data-theme-editor>
-      <v-card-title>{{ theme ? t('themes.editor.editTitle') : t('themes.editor.newTitle') }}</v-card-title>
-      <v-card-text class="d-flex flex-column ga-4">
+  <!-- Sin velo: la aplicación a la izquierda es la vista previa, tiene que verse. Sin velo tampoco hay «clic fuera»: se cierra con
+       Cancelar o la X (y pide confirmar si hay cambios).
+       Teleport al body: dentro de la pestaña de Ajustes el panel quedaba atrapado en el contexto de apilamiento de la tarjeta
+       (`.v-card` lleva z-index 0) y el encabezado fijo de la página (z-index 5) se le pintaba encima. -->
+  <Teleport to="body">
+  <v-navigation-drawer
+    :model-value="open"
+    location="right"
+    temporary
+    :scrim="false"
+    :width="mobile ? width : 560"
+    elevation="8"
+    class="border-s"
+    touchless
+    data-theme-editor
+  >
+    <div class="d-flex flex-column h-100">
+      <div class="d-flex align-center ga-2 pa-4 border-b">
+        <div class="text-title-large flex-1-1">{{ theme ? t('themes.editor.editTitle') : t('themes.editor.newTitle') }}</div>
+        <v-btn icon="mdi-close" variant="text" size="small" :aria-label="t('common.close')" @click="close" />
+      </div>
+      <!-- El contenedor que hace scroll no es flex: dentro de una columna flex de alto fijo, los campos (v-input es flex: 1 1 auto)
+           se estiraban a lo alto para llenar el panel. -->
+      <div class="pa-4 flex-1-1 overflow-y-auto">
+        <div class="d-flex flex-column ga-4">
         <div class="text-body-medium text-medium-emphasis">{{ t('themes.editor.intro') }}</div>
         <v-alert v-if="error" type="error" closable @click:close="error = null">{{ error }}</v-alert>
 
@@ -157,14 +183,16 @@ async function save(): Promise<void> {
           {{ t('themes.editor.contrastAdvisory') }}
           <div v-for="p in advisory" :key="p.a + p.b" class="text-body-small">{{ pairLabel(p) }}</div>
         </v-alert>
-      </v-card-text>
-      <v-card-actions class="flex-wrap ga-2">
+        </div>
+      </div>
+      <div class="d-flex flex-wrap ga-2 pa-4 border-t">
         <v-spacer />
         <v-btn variant="text" @click="close">{{ t('common.cancel') }}</v-btn>
-        <v-btn color="primary" variant="flat" :loading="saving" :disabled="!valid" data-theme-save @click="save">
+        <v-btn color="primary" :loading="saving" :disabled="!valid" data-theme-save @click="save">
           {{ theme ? t('themes.editor.save') : t('themes.editor.create') }}
         </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+      </div>
+    </div>
+  </v-navigation-drawer>
+  </Teleport>
 </template>

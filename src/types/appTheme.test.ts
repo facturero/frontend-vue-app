@@ -53,6 +53,12 @@ describe('temas de la aplicación', () => {
     expect(isUsableConfig(c)).toBe(true);
   });
 
+  it('un tema nuevo de base oscura no arranca con fondo y tarjetas iguales', () => {
+    const c = configFromBase('dark', { surface: '#2A3447', background: '#2A3447', 'on-surface': '#EAEFF4' });
+    expect(c.colors.background).not.toBe(c.colors.surface);
+    expect(contrastRatio(c.colors.background, c.colors.surface)).toBeGreaterThan(1.1);
+  });
+
   it('las parejas de contraste son las mismas que valida el servidor', () => {
     expect(contrastPairs(ocean).map((p) => `${p.a}/${p.b}`)).toEqual(['text/background', 'text/surface', 'on-primary/primary']);
     const unreadable = { ...ocean, colors: { ...ocean.colors, text: '#f0f0f0' } };

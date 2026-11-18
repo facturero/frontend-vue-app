@@ -4786,7 +4786,7 @@
     "editor": {
       "newTitle": "Nouveau thème",
       "editTitle": "Modifier le thème",
-      "intro": "Vos changements s'affichent tout de suite dans toute l'application, derrière cette fenêtre. Si vous annulez, tout redevient comme avant.",
+      "intro": "Vos changements s'affichent tout de suite sur le reste de l'écran. Si vous annulez, tout redevient comme avant.",
       "name": "Nom",
       "base": "Base",
       "pick": "Choisir une couleur",

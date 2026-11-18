@@ -4786,7 +4786,7 @@
     "editor": {
       "newTitle": "Nuevo tema",
       "editTitle": "Editar tema",
-      "intro": "Lo que cambies se ve al instante en toda la aplicación, detrás de esta ventana. Si cancelas, vuelve como estaba.",
+      "intro": "Lo que cambies se ve al instante en el resto de la pantalla. Si cancelas, vuelve como estaba.",
       "name": "Nombre",
       "base": "Base",
       "pick": "Elegir color",

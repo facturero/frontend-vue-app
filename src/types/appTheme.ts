@@ -167,17 +167,23 @@ export function deriveThemeColors(config: AppThemeConfig, baseColors: Record<str
   return out;
 }
 
-/** Un tema nuevo empieza con los colores del tema integrado de su base: lo que la persona ve hoy. */
+/**
+ * Un tema nuevo empieza con los colores del tema integrado de su base: lo que la persona ve hoy. Salvo el fondo en base oscura:
+ * el oscuro integrado tiene fondo y superficie iguales, y en un tema propio las tarjetas no se distinguirían del fondo; se oscurece.
+ */
 export function configFromBase(base: AppThemeBase, baseColors: Record<string, string>): AppThemeConfig {
   const pick = (k: string, fallback: string) => (isValidHexColor((baseColors[k] ?? '').toLowerCase()) ? baseColors[k].toLowerCase() : fallback);
+  const surface = pick('surface', base === 'dark' ? '#2a3447' : '#ffffff');
+  let background = pick('background', base === 'dark' ? '#202936' : '#f2f6fa');
+  if (background === surface) background = mix(surface, base === 'dark' ? '#000000' : '#6b7a90', base === 'dark' ? 0.72 : 0.94);
   return {
     schemaVersion: APP_THEME_SCHEMA_VERSION,
     base,
     colors: {
       primary: pick('primary', '#5d87ff'),
       secondary: pick('secondary', '#49beff'),
-      background: pick('background', base === 'dark' ? '#202936' : '#f2f6fa'),
-      surface: pick('surface', base === 'dark' ? '#2a3447' : '#ffffff'),
+      background,
+      surface,
       text: pick('on-surface', base === 'dark' ? '#eaeff4' : '#2a3547'),
       success: pick('success', '#13deb9'),
       warning: pick('warning', '#ffae1f'),

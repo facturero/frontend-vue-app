@@ -4786,7 +4786,7 @@
     "editor": {
       "newTitle": "New theme",
       "editTitle": "Edit theme",
-      "intro": "Your changes show right away across the app, behind this window. If you cancel, it goes back to how it was.",
+      "intro": "Your changes show right away on the rest of the screen. If you cancel, it goes back to how it was.",
       "name": "Name",
       "base": "Base",
       "pick": "Pick a color",
