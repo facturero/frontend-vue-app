@@ -27,7 +27,6 @@ import {
  */
 
 const CACHE_KEY = 'crm:app-theme';
-const PREVIEW_NAME = 'app-preview';
 
 interface CachedTheme {
   name: string;
@@ -92,8 +91,6 @@ export const useAppThemeStore = defineStore('appTheme', () => {
   const settings = ref<ThemeSettings>({ defaultTheme: 'light', enforced: false });
   const myChoice = ref<ThemeRef | null>(null);
   const loaded = ref(false);
-  /** Mientras el editor está abierto, la aplicación entera se pinta con lo que se está editando: esa es la vista previa. */
-  const preview = ref<AppThemeConfig | null>(null);
 
   const isAdmin = computed(() => auth.can('organization:admin'));
   /** La empresa fijó su tema y esta persona no lo puede cambiar. */
@@ -101,12 +98,6 @@ export const useAppThemeStore = defineStore('appTheme', () => {
   const effectiveRef = computed<ThemeRef>(() => (locked.value ? settings.value.defaultTheme : (myChoice.value ?? settings.value.defaultTheme)));
 
   function apply(): void {
-    if (preview.value) {
-      const colors = deriveThemeColors(preview.value, baseColorsOf(preview.value.base));
-      register(PREVIEW_NAME, preview.value.base === 'dark', colors);
-      show(PREVIEW_NAME);
-      return;
-    }
     let target = effectiveRef.value;
     if (target === 'system') target = systemDark?.matches ? 'dark' : 'light';
     if (target === 'light' || target === 'dark') {
@@ -196,29 +187,18 @@ export const useAppThemeStore = defineStore('appTheme', () => {
     return config && isUsableConfig(config) ? structuredClone(config) : configFromBase('light', baseColorsOf('light'));
   }
 
-  function startPreview(config: AppThemeConfig): void {
-    preview.value = config;
-    apply();
-  }
-
-  function stopPreview(): void {
-    preview.value = null;
-    apply();
-  }
-
   /** Al cerrar sesión: el siguiente que entre en esta pestaña no hereda el tema de otra empresa. */
   function reset(): void {
     themes.value = [];
     settings.value = { defaultTheme: 'light', enforced: false };
     myChoice.value = null;
     loaded.value = false;
-    preview.value = null;
     writeCache(null);
     show('light');
   }
 
   return {
-    themes, settings, myChoice, loaded, preview, isAdmin, locked, effectiveRef,
-    load, choose, saveSettings, create, update, remove, startPreview, stopPreview, reset, apply, currentConfig,
+    themes, settings, myChoice, loaded, isAdmin, locked, effectiveRef,
+    load, choose, saveSettings, create, update, remove, reset, apply, currentConfig,
   };
 });

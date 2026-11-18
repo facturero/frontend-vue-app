@@ -4786,7 +4786,6 @@
     "editor": {
       "newTitle": "New theme",
       "editTitle": "Edit theme",
-      "intro": "Your changes show right away on the rest of the screen. If you cancel, it goes back to how it was.",
       "name": "Name",
       "base": "Base",
       "pick": "Pick a color",
@@ -4816,7 +4815,8 @@
       "limit": "You already have the maximum number of themes. Delete one to create another.",
       "discardTitle": "Discard changes?",
       "discardText": "The theme stays as it was.",
-      "discard": "Discard"
+      "discard": "Discard",
+      "preview": "Preview"
     },
     "companyOption": "Company's theme",
     "ofCompany": "From your company",
@@ -4831,6 +4831,16 @@
       "midnight": "Midnight",
       "graphite": "Graphite",
       "emerald": "Emerald"
+    },
+    "preview": {
+      "page": "Home",
+      "card": "Invoice 001-001-000123",
+      "secondary": "Clínica Vida · due 11/30",
+      "paid": "Paid",
+      "pending": "Pending",
+      "overdue": "Overdue",
+      "primaryAction": "Save",
+      "secondaryAction": "Export"
     }
   }
 }

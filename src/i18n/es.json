@@ -4786,7 +4786,6 @@
     "editor": {
       "newTitle": "Nuevo tema",
       "editTitle": "Editar tema",
-      "intro": "Lo que cambies se ve al instante en el resto de la pantalla. Si cancelas, vuelve como estaba.",
       "name": "Nombre",
       "base": "Base",
       "pick": "Elegir color",
@@ -4816,7 +4815,8 @@
       "limit": "Ya tienes el máximo de temas. Borra uno para crear otro.",
       "discardTitle": "¿Descartar los cambios?",
       "discardText": "El tema queda como estaba.",
-      "discard": "Descartar"
+      "discard": "Descartar",
+      "preview": "Vista previa"
     },
     "companyOption": "El de la empresa",
     "ofCompany": "De tu empresa",
@@ -4831,6 +4831,16 @@
       "midnight": "Medianoche",
       "graphite": "Grafito",
       "emerald": "Esmeralda"
+    },
+    "preview": {
+      "page": "Inicio",
+      "card": "Factura 001-001-000123",
+      "secondary": "Clínica Vida · vence el 30/11",
+      "paid": "Pagada",
+      "pending": "Pendiente",
+      "overdue": "Vencida",
+      "primaryAction": "Guardar",
+      "secondaryAction": "Exportar"
     }
   }
 }

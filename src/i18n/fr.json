@@ -4786,7 +4786,6 @@
     "editor": {
       "newTitle": "Nouveau thème",
       "editTitle": "Modifier le thème",
-      "intro": "Vos changements s'affichent tout de suite sur le reste de l'écran. Si vous annulez, tout redevient comme avant.",
       "name": "Nom",
       "base": "Base",
       "pick": "Choisir une couleur",
@@ -4816,7 +4815,8 @@
       "limit": "Vous avez déjà le nombre maximum de thèmes. Supprimez-en un pour en créer un autre.",
       "discardTitle": "Abandonner les modifications ?",
       "discardText": "Le thème reste tel quel.",
-      "discard": "Abandonner"
+      "discard": "Abandonner",
+      "preview": "Aperçu"
     },
     "companyOption": "Celui de l'entreprise",
     "ofCompany": "De votre entreprise",
@@ -4831,6 +4831,16 @@
       "midnight": "Minuit",
       "graphite": "Graphite",
       "emerald": "Émeraude"
+    },
+    "preview": {
+      "page": "Accueil",
+      "card": "Facture 001-001-000123",
+      "secondary": "Clínica Vida · échéance le 30/11",
+      "paid": "Payée",
+      "pending": "En attente",
+      "overdue": "En retard",
+      "primaryAction": "Enregistrer",
+      "secondaryAction": "Exporter"
     }
   }
 }
