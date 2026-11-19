@@ -8,12 +8,10 @@ import Suggestion from '@tiptap/suggestion';
 import StarterKit from '@tiptap/starter-kit';
 import Mention from '@tiptap/extension-mention';
 import Link from '@tiptap/extension-link';
-import Placeholder from '@tiptap/extension-placeholder';
+// TipTap 3: Placeholder vive en `@tiptap/extensions` y las cuatro piezas de la tabla salen de un solo paquete.
+import { Placeholder } from '@tiptap/extensions';
 import Image from '@tiptap/extension-image';
-import Table from '@tiptap/extension-table';
-import TableRow from '@tiptap/extension-table-row';
-import TableHeader from '@tiptap/extension-table-header';
-import TableCell from '@tiptap/extension-table-cell';
+import { Table, TableCell, TableHeader, TableRow } from '@tiptap/extension-table';
 import type { SuggestionKeyDownProps, SuggestionProps } from '@tiptap/suggestion';
 import { useProjectsStore } from '@/stores/projects';
 import { displayName } from '@/utils/projects';
@@ -343,7 +341,10 @@ const editor = useEditor({
   editable: props.editable,
   autofocus: props.autofocus ? 'end' : false,
   extensions: [
-    StarterKit.configure({ heading: false, horizontalRule: false }),
+    // StarterKit 3 trae además enlace, subrayado y un párrafo vacío fijo al final. El enlace se configura aparte (abajo); el subrayado
+    // se apaga porque el servidor rechaza esa marca y Ctrl+U haría que se perdiera el mensaje entero; el párrafo final, porque
+    // cambiaría el documento guardado respecto al de TipTap 2.
+    StarterKit.configure({ heading: false, horizontalRule: false, link: false, underline: false, trailingNode: false }),
     Link.configure({ openOnClick: false, autolink: true, protocols: ['http', 'https', 'mailto'], HTMLAttributes: { rel: 'noopener noreferrer', target: '_blank' } }),
     Placeholder.configure({ placeholder: () => props.placeholder }),
     RichImage.configure({ inline: false }),
@@ -459,8 +460,16 @@ watch(
   (doc) => {
     const e = editor.value;
     if (!e) return;
-    if (JSON.stringify(e.getJSON()) === JSON.stringify(doc ?? { type: 'doc', content: [{ type: 'paragraph' }] })) return;
-    e.commands.setContent(doc ?? '', false);
+    // Se comparan nodos, no el JSON como texto: el servidor devuelve las claves en otro orden (`text` antes que `type`) y la cadena
+    // nunca coincidía, así que cada recarga de la tarea (un aviso en tiempo real) reemplazaba el contenido aunque fuera el mismo, y
+    // con él la selección.
+    try {
+      if (e.state.doc.eq(e.schema.nodeFromJSON(doc ?? { type: 'doc', content: [{ type: 'paragraph' }] }))) return;
+    } catch {
+      // Un documento que este esquema no entiende: se reemplaza como antes.
+    }
+    // TipTap 3 emite `update` por defecto al reemplazar el contenido: se pide explícitamente que no, como hacía el `false` de la 2.
+    e.commands.setContent(doc ?? '', { emitUpdate: false });
   },
 );
 watch(
