@@ -20,6 +20,14 @@ const slices = computed<PieSlice[]>(() =>
   props.chart.labels.map((title, i) => ({ key: `${i}`, title, value: props.chart.values[i] ?? 0, color: PALETTE[i % PALETTE.length]! })),
 );
 
+/**
+ * Bajo las barras solo caben rótulos cortos («oct», «2026-10»): con nombres de producto se pisaban unos con otros (prueba en
+ * producción, 2026-11-24). Si alguno es largo, el eje lleva números y la lista de abajo dice a qué corresponde cada uno.
+ */
+const MAX_AXIS_LABEL = 8;
+const numbered = computed(() => props.chart.labels.some((l) => l.length > MAX_AXIS_LABEL));
+const axisLabels = computed(() => (numbered.value ? props.chart.labels.map((_, i) => String(i + 1)) : props.chart.labels));
+
 const value = (n: number) => (props.chart.unit ? `${formatNumber(n)} ${props.chart.unit}` : formatNumber(n));
 
 const label = computed(() =>
@@ -36,7 +44,7 @@ const label = computed(() =>
       <v-sparkline
         :type="chart.type === 'bar' ? 'bar' : 'trend'"
         :model-value="chart.values"
-        :labels="chart.labels"
+        :labels="axisLabels"
         color="primary"
         :height="100"
         :padding="12"
@@ -49,7 +57,7 @@ const label = computed(() =>
 
     <div class="d-flex flex-column">
       <div v-for="(l, i) in chart.labels" :key="i" class="d-flex justify-space-between ga-2 text-body-small">
-        <span class="text-medium-emphasis">{{ l }}</span>
+        <span class="text-medium-emphasis">{{ numbered && chart.type !== 'pie' ? `${i + 1}. ${l}` : l }}</span>
         <span class="font-weight-medium">{{ value(chart.values[i] ?? 0) }}</span>
       </div>
     </div>
