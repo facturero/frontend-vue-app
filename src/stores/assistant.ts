@@ -19,6 +19,11 @@ export const useAssistantStore = defineStore('assistant', () => {
   const sending = ref(false);
   const deciding = ref<string | null>(null);
   const error = ref<string | null>(null);
+  // Vista grande (diálogo) o panel lateral. El borrador y la vista de historial viven aquí y no en el componente: al cambiar
+  // de tamaño se monta otra instancia del chat, y lo que estabas escribiendo no debe perderse por eso.
+  const expanded = ref(false);
+  const draft = ref('');
+  const showHistory = ref(false);
 
   // El historial vive en el servidor (assistant_db). Esto solo recuerda CUÁL
   // conversación estaba abierta: al recargar la página el chat que estabas
@@ -169,7 +174,7 @@ export const useAssistantStore = defineStore('assistant', () => {
 
   return {
     open, conversationId, messages, pendingActions, conversations,
-    sending, deciding, error,
+    sending, deciding, error, expanded, draft, showHistory,
     toggle, reset, send, decide, loadConversations, openConversation, deleteConversation, restoreActive,
   };
 });
