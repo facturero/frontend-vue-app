@@ -13,6 +13,13 @@ import { formatDate as fmtDate } from '@/utils/format';
 import { useRouter } from 'vue-router';
 import { useAssistantStore } from '@/stores/assistant';
 import type { ConversationSummary } from '@/types/assistant';
+import AssistantChart from '@/components/AssistantChart.vue';
+import { parseAssistantBlocks } from '@/utils/assistant-blocks';
+
+/** Una tabla o un gráfico necesitan todo el ancho de la burbuja; el texto, no. */
+function hasRichBlocks(text: string): boolean {
+  return parseAssistantBlocks(text).some((b) => b.kind !== 'text');
+}
 
 const props = defineProps<{
   /** En el diálogo grande: burbujas más anchas y el botón pasa a «volver al panel». */
@@ -274,19 +281,43 @@ function onMessageClick(event: MouseEvent): void {
         <div class="d-flex flex-column" :class="message.role === 'user' ? 'align-end' : 'align-start'" style="min-width: 0">
           <v-sheet
             :color="message.role === 'user' ? 'primary' : undefined"
-            :class="{ border: message.role === 'assistant', 'message-bubble--wide': expanded }"
+            :class="{
+              border: message.role === 'assistant',
+              'message-bubble--wide': expanded,
+              'message-bubble--rich': message.role === 'assistant' && hasRichBlocks(message.text),
+            }"
             rounded="lg"
             class="pa-3 message-bubble"
             elevation="0"
           >
             <span v-if="message.role === 'user'" class="text-body-medium text-pre-wrap message-text">{{ message.text }}</span>
-            <!-- eslint-disable-next-line vue/no-v-html -->
-            <div
-              v-else
-              class="text-body-medium message-text markdown-lite"
-              @click="onMessageClick"
-              v-html="renderMarkdownLite(message.text)"
-            />
+            <!-- Texto, tabla o gráfico: las tablas y los gráficos solo aparecen si la persona los pidió (lo decide el prompt). -->
+            <div v-else class="d-flex flex-column ga-2">
+              <template v-for="(block, b) in parseAssistantBlocks(message.text)" :key="b">
+                <!-- eslint-disable-next-line vue/no-v-html -->
+                <div
+                  v-if="block.kind === 'text'"
+                  class="text-body-medium message-text markdown-lite"
+                  @click="onMessageClick"
+                  v-html="renderMarkdownLite(block.text)"
+                />
+                <div v-else-if="block.kind === 'table'" class="overflow-x-auto">
+                  <v-table density="compact" class="text-body-small" data-testid="assistant-table">
+                    <thead>
+                      <tr>
+                        <th v-for="(head, h) in block.head" :key="h">{{ head }}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(row, r) in block.rows" :key="r">
+                        <td v-for="(cell, c) in row" :key="c">{{ cell }}</td>
+                      </tr>
+                    </tbody>
+                  </v-table>
+                </div>
+                <AssistantChart v-else :chart="block.chart" />
+              </template>
+            </div>
           </v-sheet>
           <span class="text-body-small text-medium-emphasis mt-1 px-1">{{ formatTime(message.createdAt) }}</span>
         </div>
@@ -423,6 +454,11 @@ function onMessageClick(event: MouseEvent): void {
 /* En el diálogo grande hay sitio: la respuesta se lee de corrido en vez de en una columna estrecha. */
 .message-bubble--wide {
   max-width: 680px;
+}
+
+/* Con tabla o gráfico la burbuja toma todo su ancho máximo: si no, se encoge al texto y el gráfico queda en nada. */
+.message-bubble--rich {
+  width: 100%;
 }
 
 .markdown-lite :deep(p) {

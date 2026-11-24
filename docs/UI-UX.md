@@ -456,6 +456,7 @@ propios van en `src/styles/base.css`, dentro de `@layer vuetify-core.reset`.
 | Atender un atajo | composable `useHotkey('cmd+k', fn)` (sintaxis: `+` combina, `/` alternativas, `-` secuencia) | `keydown` a mano |
 | Soltar archivos | `v-file-upload` (`density="compact"`, `multiple`) | `<input type="file">` oculto |
 | Gráfico pequeño de barras o línea | `v-sparkline type="bar"` | `div` con alturas en `:style` |
+| Tabla o gráfico pedido al asistente | `parseAssistantBlocks` (`utils/assistant-blocks.ts`) → `v-table` o `AssistantChart` (`v-sparkline` / `PieChart`), con la lista de valores debajo | HTML generado desde el texto del modelo, librería de gráficos nueva |
 | Resaltar lo buscado | `v-highlight :text :query` | `split` + `<mark>` |
 | Sin datos | `EmptyState` (envuelve `v-empty-state`) | tarjeta armada a mano |
 | Primera carga | `ViewSkeleton` (envuelve `v-skeleton-loader`, §2 bis) | barra suelta, `v-progress-circular` centrado, «Cargando…» en texto |
