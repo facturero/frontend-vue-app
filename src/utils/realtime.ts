@@ -1,5 +1,5 @@
 import { io, type Socket } from 'socket.io-client';
-import { getAccessToken } from '@/utils/http';
+import { freshAccessToken, getAccessToken } from '@/utils/http';
 import { useRealtimeStore } from '@/stores/realtime';
 import { useFeedbackStore } from '@/stores/feedback';
 import { useProjectsStore } from '@/stores/projects';
@@ -38,7 +38,25 @@ export function assistantDecide(actionId: string, approve: boolean): Promise<Ass
   return emitAssistant('assistant:decide', { actionId, approve });
 }
 
-function emitAssistant<T>(event: string, payload: Record<string, unknown>): Promise<T> {
+/**
+ * Cada mensaje del asistente lleva el token vigente. El gateway guardaba el del handshake, que caduca a los 15 minutos: pasado
+ * ese tiempo el asistente respondía «exp claim timestamp check failed» y, sin poder leer los permisos, ofrecía todas las
+ * herramientas (producción, 2026-11-25). Si aun así el gateway dice que caducó (otra pestaña rotó el token, el reloj va
+ * desfasado), se renueva y se reintenta una vez.
+ */
+async function emitAssistant<T>(event: string, payload: Record<string, unknown>): Promise<T> {
+  const token = await freshAccessToken();
+  try {
+    return await emitAssistantOnce<T>(event, { ...payload, token });
+  } catch (e) {
+    if ((e as { code?: string }).code !== 'TOKEN_EXPIRED') throw e;
+    const renewed = await freshAccessToken(60, true);
+    if (!renewed) throw e;
+    return emitAssistantOnce<T>(event, { ...payload, token: renewed });
+  }
+}
+
+function emitAssistantOnce<T>(event: string, payload: Record<string, unknown>): Promise<T> {
   return new Promise<T>((resolve, reject) => {
     if (!socket?.connected) {
       reject(new Error('Sin conexión con el asistente'));
@@ -46,7 +64,7 @@ function emitAssistant<T>(event: string, payload: Record<string, unknown>): Prom
     }
     // El ack del gateway llega cuando el turno termina (puede tardar más de un
     // minuto). socket.io por defecto no corta los acks; nosotras fijamos el cap.
-    socket.timeout(ASSISTANT_TURN_TIMEOUT_MS).emit(event, payload, (err: Error | null, res?: { ok?: boolean; data?: T; message?: string }) => {
+    socket.timeout(ASSISTANT_TURN_TIMEOUT_MS).emit(event, payload, (err: Error | null, res?: { ok?: boolean; data?: T; message?: string; code?: string }) => {
       if (err) {
         reject(new Error('El asistente tardó demasiado'));
         return;
@@ -55,7 +73,7 @@ function emitAssistant<T>(event: string, payload: Record<string, unknown>): Prom
         resolve(res.data);
         return;
       }
-      reject(new Error(res?.message ?? 'El asistente no respondió'));
+      reject(Object.assign(new Error(res?.message ?? 'El asistente no respondió'), { code: res?.code }));
     });
   });
 }
@@ -75,7 +93,9 @@ export function connectRealtime(): void {
     // El locale va en el auth (no en un header): el navegador no deja fijar
     // headers en un transport websocket, pero socket.io entrega `auth` al
     // gateway, que lo guarda en socket.data.locale para el asistente.
-    auth: { token, locale: localStorage.getItem('app-locale') || 'es' },
+    // Función y no objeto: socket.io la vuelve a llamar en cada reconexión, así que reconecta con el token vigente y no con
+    // el de la primera conexión (que a los 15 minutos ya no vale y haría fallar el handshake).
+    auth: (cb) => cb({ token: getAccessToken() ?? token, locale: localStorage.getItem('app-locale') || 'es' }),
     transports: ['websocket', 'polling'],
   });
 

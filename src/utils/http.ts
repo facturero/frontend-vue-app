@@ -70,6 +70,42 @@ async function doRefresh(staleAccess: string | null): Promise<string> {
   return typeof navigator !== 'undefined' && navigator.locks ? navigator.locks.request('crm:auth-refresh', run) : run();
 }
 
+/** Segundos de vida que le quedan a un JWT según su `exp`; `null` si no se puede leer. */
+export function tokenSecondsLeft(token: string): number | null {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]!.replace(/-/g, '+').replace(/_/g, '/'))) as { exp?: unknown };
+    return typeof payload.exp === 'number' ? payload.exp - Date.now() / 1000 : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Un access token con al menos `minSeconds` de vida, renovándolo si hace falta (o siempre, con `force`). Comparte el candado
+ * del interceptor: si ya hay una renovación en marcha, se espera a esa.
+ *
+ * Existe por el socket del asistente: allí no hay interceptor de 401, y el token del handshake caducaba a los 15 minutos
+ * (ver `utils/realtime.ts`). Devuelve `null` si no hay sesión o no se pudo renovar.
+ */
+export async function freshAccessToken(minSeconds = 60, force = false): Promise<string | null> {
+  const current = getAccessToken();
+  if (!current) return null;
+  const left = tokenSecondsLeft(current);
+  if (!force && (left === null || left > minSeconds)) return current;
+  try {
+    if (!refreshing) {
+      refreshing = doRefresh(current).finally(() => {
+        refreshing = null;
+      });
+    }
+    return await refreshing;
+  } catch {
+    // Otra pestaña pudo renovar mientras tanto.
+    const fresh = getAccessToken();
+    return fresh && fresh !== current ? fresh : null;
+  }
+}
+
 http.interceptors.response.use(
   (response) => {
     traceResponse(response);
