@@ -152,8 +152,14 @@ function renderMarkdownLite(text: string): string {
       html.push('</ul>');
       inList = false;
     }
-    if (line.trim() === '') {
-      html.push('<br>');
+    // Títulos `## Algo`: Qwen los usa en respuestas largas («¿qué puedes hacer?») y salían con los `##` a la vista (prueba
+    // en producción, 2026-11-25). En una burbuja de chat un título grande sobra: van como línea en negrita.
+    const heading = line.match(/^\s*#{1,6}\s+(.*)/);
+    if (heading) {
+      html.push(`<p><strong>${inlineMarkdown(heading[1])}</strong></p>`);
+    } else if (line.trim() === '') {
+      // Varias líneas en blanco seguidas dejaban huecos enormes entre párrafos: basta con una.
+      if (html[html.length - 1] !== '<br>') html.push('<br>');
     } else {
       html.push(`<p>${inlineMarkdown(line)}</p>`);
     }
@@ -425,8 +431,8 @@ function onMessageClick(event: MouseEvent): void {
          respuesta. Sin él, quien sube a releer no sabe si esperar o si ya le contestaron. -->
     <v-btn
       v-if="!atBottom"
-      class="scroll-down"
-      color="primary"
+      class="scroll-down border"
+      color="surface"
       size="small"
       rounded="pill"
       elevation="4"
@@ -434,7 +440,8 @@ function onMessageClick(event: MouseEvent): void {
       data-testid="assistant-scroll-down"
       @click="scrollToBottom(true)"
     >
-      <span class="d-inline-flex align-center ga-2">
+      <!-- Fondo de superficie y no `primary`: pasa por encima de las burbujas de la persona, que ya son de ese color. -->
+      <span class="d-inline-flex align-center ga-2 text-primary">
         <v-progress-circular v-if="store.sending" indeterminate size="14" width="2" />
         <v-icon v-else icon="mdi-arrow-down" size="16" />
         <span v-if="store.sending">{{ $t('assistant.thinking') }}</span>
