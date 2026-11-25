@@ -12,14 +12,15 @@ describe('bloques de una respuesta del asistente', () => {
     );
     expect(blocks).toEqual([
       { kind: 'text', text: 'Tu stock:' },
-      { kind: 'table', head: ['Producto', 'Disponible'], rows: [['Martillo', '34'], ['Clavos', '120']] },
+      // La negrita se queda: el chat la pinta en la celda. `---:` alinea las cifras a la derecha.
+      { kind: 'table', head: ['Producto', 'Disponible'], rows: [['**Martillo**', '34'], ['Clavos', '120']], align: [null, 'right'] },
       { kind: 'text', text: 'Nada más.' },
     ]);
   });
 
   it('una fila corta se completa con celdas vacías', () => {
     const [table] = parseAssistantBlocks('| a | b | c |\n|---|---|---|\n| 1 | 2 |');
-    expect(table).toEqual({ kind: 'table', head: ['a', 'b', 'c'], rows: [['1', '2', '']] });
+    expect(table).toEqual({ kind: 'table', head: ['a', 'b', 'c'], rows: [['1', '2', '']], align: [null, null, null] });
   });
 
   it('un gráfico válido se convierte en bloque de gráfico', () => {

@@ -15,8 +15,14 @@ import { useAssistantStore } from '@/stores/assistant';
 import type { ConversationSummary } from '@/types/assistant';
 import AssistantChart from '@/components/AssistantChart.vue';
 import { parseAssistantBlocks } from '@/utils/assistant-blocks';
+import { renderInlineMarkdown, renderMarkdownLite } from '@/utils/markdown-lite';
 
 /** Una tabla o un gráfico necesitan todo el ancho de la burbuja; el texto, no. */
+/** Alineación de una columna según el separador (`---:` a la derecha): las cifras se leen mejor alineadas. */
+function alignClass(align: 'left' | 'right' | 'center' | null | undefined): string | undefined {
+  return align === 'right' ? 'text-right' : align === 'center' ? 'text-center' : undefined;
+}
+
 function hasRichBlocks(text: string): boolean {
   return parseAssistantBlocks(text).some((b) => b.kind !== 'text');
 }
@@ -122,79 +128,24 @@ async function confirmDelete(): Promise<void> {
 }
 
 /**
- * Markdown-lite sin dependencias nuevas: el asistente devuelve **negrita**,
- * listas con "- "/"* " y párrafos — antes se mostraba todo literal (con los
- * asteriscos incluidos). Solo cubre ese subconjunto, a propósito: escapa HTML
- * primero para no abrir una vía de inyección con texto que viene del modelo.
- * Las tablas no se dibujan: el prompt del asistente le pide listas.
- */
-function renderMarkdownLite(text: string): string {
-  const escaped = text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-
-  const lines = escaped.split('\n');
-  const html: string[] = [];
-  let inList = false;
-
-  for (const line of lines) {
-    const bullet = line.match(/^\s*[-*]\s+(.*)/);
-    if (bullet) {
-      if (!inList) {
-        html.push('<ul>');
-        inList = true;
-      }
-      html.push(`<li>${inlineMarkdown(bullet[1])}</li>`);
-      continue;
-    }
-    if (inList) {
-      html.push('</ul>');
-      inList = false;
-    }
-    // Títulos `## Algo`: Qwen los usa en respuestas largas («¿qué puedes hacer?») y salían con los `##` a la vista (prueba
-    // en producción, 2026-11-25). En una burbuja de chat un título grande sobra: van como línea en negrita.
-    const heading = line.match(/^\s*#{1,6}\s+(.*)/);
-    if (heading) {
-      html.push(`<p><strong>${inlineMarkdown(heading[1])}</strong></p>`);
-    } else if (line.trim() === '') {
-      // Varias líneas en blanco seguidas dejaban huecos enormes entre párrafos: basta con una.
-      if (html[html.length - 1] !== '<br>') html.push('<br>');
-    } else {
-      html.push(`<p>${inlineMarkdown(line)}</p>`);
-    }
-  }
-  if (inList) html.push('</ul>');
-
-  return html.join('');
-}
-
-function inlineMarkdown(text: string): string {
-  return text
-    .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_match, label: string, href: string) => renderLink(label, href))
-    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-    .replace(/`(.+?)`/g, '<code>$1</code>');
-}
-
-/**
  * Enlaces del asistente a pantallas de la app, como `[facturación](/invoices/new)`.
  *
  * Solo se convierten en enlace las rutas **internas que existen en el router**:
  * el texto viene del modelo, y el modelo lee datos de clientes y productos. Si
- * un dato trae un enlace a otra web, aquí se queda en texto plano y nunca llega
- * a ser clicable. Con cualquier ruta que no encaje pasa lo mismo.
+ * un dato trae un enlace a otra web, se queda en texto plano y nunca llega a ser
+ * clicable. Con cualquier ruta que no encaje pasa lo mismo.
  */
 const SAFE_PATH = /^\/(?!\/)[A-Za-z0-9/_\-?=&.]*$/;
 
-function renderLink(label: string, escapedHref: string): string {
-  // El texto ya viene escapado: `&` llega como `&amp;` (p. ej. en `?tab=x&y=z`).
-  const href = escapedHref.replace(/&amp;/g, '&');
-  if (!SAFE_PATH.test(href)) return label;
+function resolveLink(href: string): string | null {
+  if (!SAFE_PATH.test(href)) return null;
   // La ruta comodín del router redirige a inicio y no tiene nombre: una ruta
   // que solo encaja con ella es una pantalla que no existe.
-  if (!router.resolve(href).name) return label;
-  return `<a href="${href.replace(/&/g, '&amp;')}" class="text-primary font-weight-medium text-decoration-underline" data-internal-link>${label}</a>`;
+  return router.resolve(href).name ? href : null;
 }
+
+const renderText = (text: string) => renderMarkdownLite(text, resolveLink);
+const renderCell = (text: string) => renderInlineMarkdown(text, resolveLink);
 
 /** Los enlaces se pintan con v-html, así que la navegación se engancha aquí. */
 function onMessageClick(event: MouseEvent): void {
@@ -342,18 +293,20 @@ function onMessageClick(event: MouseEvent): void {
                   v-if="block.kind === 'text'"
                   class="text-body-medium message-text markdown-lite"
                   @click="onMessageClick"
-                  v-html="renderMarkdownLite(block.text)"
+                  v-html="renderText(block.text)"
                 />
-                <div v-else-if="block.kind === 'table'" class="overflow-x-auto">
+                <div v-else-if="block.kind === 'table'" class="overflow-x-auto markdown-lite" @click="onMessageClick">
                   <v-table density="compact" class="text-body-small" data-testid="assistant-table">
                     <thead>
                       <tr>
-                        <th v-for="(head, h) in block.head" :key="h">{{ head }}</th>
+                        <!-- eslint-disable-next-line vue/no-v-html -->
+                        <th v-for="(head, h) in block.head" :key="h" :class="alignClass(block.align[h])" v-html="renderCell(head)" />
                       </tr>
                     </thead>
                     <tbody>
                       <tr v-for="(row, r) in block.rows" :key="r">
-                        <td v-for="(cell, c) in row" :key="c">{{ cell }}</td>
+                        <!-- eslint-disable-next-line vue/no-v-html -->
+                        <td v-for="(cell, c) in row" :key="c" :class="alignClass(block.align[c])" v-html="renderCell(cell)" />
                       </tr>
                     </tbody>
                   </v-table>
@@ -548,25 +501,68 @@ function onMessageClick(event: MouseEvent): void {
   width: 100%;
 }
 
-.markdown-lite :deep(p) {
+/* El HTML de la respuesta sale de `utils/markdown-lite.ts` (v-html): aquí no llegan las utilidades de Vuetify a cada
+   etiqueta, así que los márgenes van con :deep. Mismo ritmo que el resto de la app: 8 px entre bloques. */
+.markdown-lite :deep(p),
+.markdown-lite :deep(ul),
+.markdown-lite :deep(ol),
+.markdown-lite :deep(blockquote),
+.markdown-lite :deep(pre) {
   margin: 0 0 8px;
 }
 
-.markdown-lite :deep(p:last-child) {
+.markdown-lite :deep(:is(p, ul, ol, blockquote, pre, hr):last-child) {
   margin-bottom: 0;
 }
 
-.markdown-lite :deep(ul) {
-  margin: 0 0 8px;
+.markdown-lite :deep(ul),
+.markdown-lite :deep(ol) {
   padding-inline-start: 20px;
 }
 
-.markdown-lite :deep(ul:last-child) {
-  margin-bottom: 0;
+/* Una lista dentro de otra va pegada a su elemento. */
+.markdown-lite :deep(li > ul),
+.markdown-lite :deep(li > ol) {
+  margin: 2px 0 0;
 }
 
 .markdown-lite :deep(li) {
   margin-bottom: 2px;
+}
+
+/* Títulos `##`/`###` de las respuestas largas: un respiro arriba para separar secciones, sin tamaños de página. */
+.markdown-lite :deep(.md-heading) {
+  font-weight: 600;
+  margin-top: 12px;
+}
+
+.markdown-lite :deep(.md-heading:first-child) {
+  margin-top: 0;
+}
+
+.markdown-lite :deep(.md-rule) {
+  border: 0;
+  border-top: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
+  margin: 12px 0;
+}
+
+.markdown-lite :deep(blockquote) {
+  border-inline-start: 3px solid rgba(var(--v-border-color), var(--v-border-opacity));
+  padding-inline-start: 8px;
+  color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+}
+
+.markdown-lite :deep(pre) {
+  background-color: rgba(var(--v-theme-on-surface), 0.06);
+  border-radius: 4px;
+  padding: 8px;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.markdown-lite :deep(pre code) {
+  background: none;
+  padding: 0;
 }
 
 .markdown-lite :deep(code) {

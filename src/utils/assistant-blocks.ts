@@ -22,8 +22,11 @@ export interface ChartSpec {
 
 export type AssistantBlock =
   | { kind: 'text'; text: string }
-  | { kind: 'table'; head: string[]; rows: string[][] }
+  | { kind: 'table'; head: string[]; rows: string[][]; align: ColumnAlign[] }
   | { kind: 'chart'; chart: ChartSpec };
+
+/** Alineación de una columna según su separador: `:---` izquierda, `---:` derecha, `:---:` centro, `---` sin indicar. */
+export type ColumnAlign = 'left' | 'right' | 'center' | null;
 
 /** Tope de puntos de un gráfico: más no se leen en un chat y suele ser señal de que el modelo volcó una lista entera. */
 export const MAX_CHART_POINTS = 24;
@@ -32,14 +35,24 @@ const FENCE = /^```\s*(grafico|gráfico|chart)\s*$/i;
 const ROW = /^\s*\|.*\|\s*$/;
 const SEPARATOR = /^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$/;
 
-/** Celdas de una fila `| a | b |`, sin los `**` de negrita (en una celda se pintan como texto plano). */
+/** Celdas de una fila `| a | b |`, en crudo: el chat les aplica el formato en línea (negrita, cursiva…) al pintarlas. */
 function cells(line: string): string[] {
   return line
     .trim()
     .replace(/^\|/, '')
     .replace(/\|$/, '')
     .split('|')
-    .map((c) => c.trim().replace(/\*\*(.+?)\*\*/g, '$1'));
+    .map((c) => c.trim());
+}
+
+function alignments(separator: string, columns: number): ColumnAlign[] {
+  const marks = cells(separator);
+  return Array.from({ length: columns }, (_, k) => {
+    const m = marks[k] ?? '';
+    const left = m.startsWith(':');
+    const right = m.endsWith(':');
+    return left && right ? 'center' : right ? 'right' : left ? 'left' : null;
+  });
 }
 
 /** Valida el JSON de un gráfico. Devuelve `null` si no se puede dibujar con honestidad. */
@@ -108,7 +121,7 @@ export function parseAssistantBlocks(text: string): AssistantBlock[] {
       }
       if (head.length >= 2 && rows.length > 0) {
         flush();
-        blocks.push({ kind: 'table', head, rows });
+        blocks.push({ kind: 'table', head, rows, align: alignments(lines[i + 1]!, head.length) });
         i = j - 1;
         continue;
       }
