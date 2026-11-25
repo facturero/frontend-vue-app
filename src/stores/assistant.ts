@@ -27,6 +27,9 @@ export const useAssistantStore = defineStore('assistant', () => {
   // ¿Responde algún servidor de IA? Sin ninguno, el chat no deja escribir (fallaría a los segundos) pero sí leer el historial,
   // que vive en la base y no en el modelo. Empieza en `true`: sin saberlo todavía, no se le cierra el chat a nadie.
   const available = ref(true);
+  // La última respuesta llegó con el principio de la conversación olvidado (el servidor lo recorta para que quepa en el
+  // modelo). Se avisa bajo el chat y se ofrece empezar otra.
+  const contextTrimmed = ref(false);
   let statusTimer: ReturnType<typeof setInterval> | null = null;
   const STATUS_POLL_MS = 20_000;
 
@@ -49,6 +52,7 @@ export const useAssistantStore = defineStore('assistant', () => {
     messages.value = [];
     pendingActions.value = [];
     error.value = null;
+    contextTrimmed.value = false;
     persistActive();
   }
 
@@ -102,6 +106,7 @@ export const useAssistantStore = defineStore('assistant', () => {
       conversationId.value = detail.id;
       messages.value = detail.messages;
       pendingActions.value = detail.pendingActions;
+      contextTrimmed.value = false;
       persistActive();
     } catch (e) {
       error.value = extractError(e);
@@ -148,6 +153,7 @@ export const useAssistantStore = defineStore('assistant', () => {
         });
       }
       pendingActions.value = turn.pendingActions;
+      contextTrimmed.value = turn.contextTrimmed ?? false;
       void loadConversations();
     } catch (e) {
       error.value = extractError(e);
@@ -179,6 +185,7 @@ export const useAssistantStore = defineStore('assistant', () => {
         });
       }
       pendingActions.value = turn.pendingActions;
+      if (turn.contextTrimmed !== undefined) contextTrimmed.value = turn.contextTrimmed;
     } catch (e) {
       error.value = extractError(e);
       void checkStatus();
@@ -206,7 +213,7 @@ export const useAssistantStore = defineStore('assistant', () => {
 
   return {
     open, conversationId, messages, pendingActions, conversations,
-    sending, deciding, error, expanded, draft, showHistory, available,
+    sending, deciding, error, expanded, draft, showHistory, available, contextTrimmed,
     checkStatus, watchStatus, toggle, reset, send, decide, loadConversations, openConversation, deleteConversation, restoreActive,
   };
 });

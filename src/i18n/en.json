@@ -352,6 +352,9 @@
     "reject": "Reject",
     "disclaimer": "The assistant can only do what you can do, and never writes anything without your confirmation.",
     "unavailable": "Service unavailable right now. Please try again later.",
+    "scrollDown": "Go to the end",
+    "newReply": "New reply",
+    "contextTrimmed": "Long conversation: the assistant no longer remembers the beginning.",
     "examples": {
       "sales": "How much did I invoice this month?",
       "role": "Create a cashier role that can only issue invoices",

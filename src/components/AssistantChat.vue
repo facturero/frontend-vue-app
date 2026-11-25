@@ -31,13 +31,46 @@ const store = useAssistantStore();
 const router = useRouter();
 const scroller = ref<HTMLElement | null>(null);
 
-async function scrollToBottom(): Promise<void> {
-  await nextTick();
-  if (scroller.value) scroller.value.scrollTop = scroller.value.scrollHeight;
+// ¿Está la persona viendo el final? Si subió a leer algo, una respuesta nueva no la arrastra abajo: se le avisa con el botón
+// flotante («Respuesta nueva») y baja cuando quiera. El margen evita que unos píxeles de redondeo cuenten como «arriba».
+const NEAR_BOTTOM_PX = 80;
+const atBottom = ref(true);
+const unread = ref(false);
+
+function onScroll(): void {
+  const el = scroller.value;
+  if (!el) return;
+  atBottom.value = el.scrollHeight - el.scrollTop - el.clientHeight < NEAR_BOTTOM_PX;
+  if (atBottom.value) unread.value = false;
 }
 
-watch(() => store.messages.length, scrollToBottom);
-watch(() => store.pendingActions.length, scrollToBottom);
+async function scrollToBottom(smooth = false): Promise<void> {
+  await nextTick();
+  const el = scroller.value;
+  if (!el) return;
+  el.scrollTo({ top: el.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
+  atBottom.value = true;
+  unread.value = false;
+}
+
+/** Lo que escribe la persona siempre se ve; lo que llega del asistente, solo si ya estaba abajo. */
+function followNew(): void {
+  const last = store.messages[store.messages.length - 1];
+  if (atBottom.value || last?.role === 'user') void scrollToBottom();
+  else unread.value = true;
+}
+
+watch(() => store.messages.length, followNew);
+watch(() => store.pendingActions.length, followNew);
+// Los puntos de «escribiendo» aparecen abajo: si estaba abajo, que se vean.
+watch(() => store.sending, (sending) => {
+  if (sending && atBottom.value) void scrollToBottom();
+});
+// Otra conversación, o volver del historial: se empieza por el final. Va después de `followNew` para corregir lo que marcó.
+watch(() => store.conversationId, () => void scrollToBottom());
+watch(() => store.showHistory, (history) => {
+  if (!history) void scrollToBottom();
+});
 // Al abrir en grande (otra instancia), la conversación tiene que verse desde el final, como estaba.
 void scrollToBottom();
 
@@ -244,7 +277,8 @@ function onMessageClick(event: MouseEvent): void {
       </v-alert>
     </div>
 
-    <div v-else ref="scroller" class="flex-grow-1 overflow-y-auto pa-4">
+    <div v-else class="position-relative flex-grow-1 d-flex flex-column chat-viewport">
+    <div ref="scroller" class="flex-grow-1 overflow-y-auto pa-4" @scroll.passive="onScroll">
       <div v-if="!store.messages.length" class="text-center text-medium-emphasis py-8">
         <v-avatar color="lightprimary" size="56" class="mb-3">
           <v-icon icon="mdi-robot-happy-outline" color="primary" size="30" />
@@ -387,6 +421,28 @@ function onMessageClick(event: MouseEvent): void {
       </v-alert>
     </div>
 
+    <!-- Arriba leyendo: un botón para volver al final, que además dice si el asistente sigue pensando o si llegó una
+         respuesta. Sin él, quien sube a releer no sabe si esperar o si ya le contestaron. -->
+    <v-btn
+      v-if="!atBottom"
+      class="scroll-down"
+      color="primary"
+      size="small"
+      rounded="pill"
+      elevation="4"
+      :aria-label="$t('assistant.scrollDown')"
+      data-testid="assistant-scroll-down"
+      @click="scrollToBottom(true)"
+    >
+      <span class="d-inline-flex align-center ga-2">
+        <v-progress-circular v-if="store.sending" indeterminate size="14" width="2" />
+        <v-icon v-else icon="mdi-arrow-down" size="16" />
+        <span v-if="store.sending">{{ $t('assistant.thinking') }}</span>
+        <span v-else-if="unread">{{ $t('assistant.newReply') }}</span>
+      </span>
+    </v-btn>
+    </div>
+
     <!-- En el historial no se escribe: primero se abre una conversación o se
          empieza una nueva. -->
     <v-divider v-if="!store.showHistory" />
@@ -402,6 +458,16 @@ function onMessageClick(event: MouseEvent): void {
       >
         {{ $t('assistant.unavailable') }}
       </v-alert>
+      <!-- El servidor dejó fuera los turnos más antiguos para que la conversación quepa en el modelo. -->
+      <div
+        v-if="store.contextTrimmed"
+        class="d-flex align-center ga-2 mb-2 text-body-small text-medium-emphasis"
+        data-testid="assistant-context-trimmed"
+      >
+        <v-icon icon="mdi-history" size="16" />
+        <span class="flex-grow-1">{{ $t('assistant.contextTrimmed') }}</span>
+        <v-btn variant="text" size="x-small" color="primary" @click="startNewChat">{{ $t('assistant.newChat') }}</v-btn>
+      </div>
       <div class="d-flex align-end ga-2">
         <v-textarea
           v-model="store.draft"
@@ -506,6 +572,19 @@ function onMessageClick(event: MouseEvent): void {
 .confirm-card {
   border: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
   border-inline-start: 3px solid rgb(var(--v-theme-warning));
+}
+
+/* El hueco del scroll tiene que poder encogerse dentro del flex: sin min-height 0 crece con los mensajes y no hay scroll. */
+.chat-viewport {
+  min-height: 0;
+}
+
+.scroll-down {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1;
 }
 
 .assistant-input :deep(textarea) {

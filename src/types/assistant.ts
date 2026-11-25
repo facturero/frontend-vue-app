@@ -13,6 +13,8 @@ export interface AssistantTurn {
   pendingActions: PendingAction[];
   /** El agente se quedó sin pasos antes de cerrar. */
   truncated: boolean;
+  /** Para caber en el modelo se dejaron fuera los turnos más antiguos: el asistente ya no los recuerda. */
+  contextTrimmed?: boolean;
 }
 
 export interface ConversationSummary {

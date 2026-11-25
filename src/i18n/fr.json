@@ -352,6 +352,9 @@
     "reject": "Refuser",
     "disclaimer": "L'assistant ne peut faire que ce que vous pouvez faire, et n'écrit jamais rien sans votre confirmation.",
     "unavailable": "Service indisponible pour le moment. Réessayez plus tard.",
+    "scrollDown": "Aller à la fin",
+    "newReply": "Nouvelle réponse",
+    "contextTrimmed": "Longue conversation : l'assistant ne se souvient plus du début.",
     "examples": {
       "sales": "Combien ai-je facturé ce mois-ci ?",
       "role": "Crée un rôle de caissier qui ne peut que facturer",

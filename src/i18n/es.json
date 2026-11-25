@@ -352,6 +352,9 @@
     "reject": "Rechazar",
     "disclaimer": "El asistente solo puede hacer lo que tú puedes hacer, y nunca escribe sin que lo confirmes.",
     "unavailable": "Servicio no disponible ahora. Intente más tarde.",
+    "scrollDown": "Ir al final",
+    "newReply": "Respuesta nueva",
+    "contextTrimmed": "Conversación larga: el asistente ya no recuerda el principio.",
     "examples": {
       "sales": "¿Cuánto facturé este mes?",
       "role": "Crea un rol de cajero que solo pueda facturar",
