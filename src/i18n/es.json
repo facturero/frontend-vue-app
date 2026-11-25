@@ -351,7 +351,7 @@
     "approve": "Confirmar",
     "reject": "Rechazar",
     "disclaimer": "El asistente solo puede hacer lo que tú puedes hacer, y nunca escribe sin que lo confirmes.",
-    "unavailable": "Los servidores de IA no responden ahora mismo. Puedes leer tus conversaciones; podrás escribir en cuanto vuelvan.",
+    "unavailable": "Servicio no disponible ahora. Intente más tarde.",
     "examples": {
       "sales": "¿Cuánto facturé este mes?",
       "role": "Crea un rol de cajero que solo pueda facturar",

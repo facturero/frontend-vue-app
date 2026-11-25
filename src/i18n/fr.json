@@ -351,7 +351,7 @@
     "approve": "Confirmer",
     "reject": "Refuser",
     "disclaimer": "L'assistant ne peut faire que ce que vous pouvez faire, et n'écrit jamais rien sans votre confirmation.",
-    "unavailable": "Les serveurs d'IA ne répondent pas pour le moment. Vous pouvez lire vos conversations ; vous pourrez écrire dès leur retour.",
+    "unavailable": "Service indisponible pour le moment. Réessayez plus tard.",
     "examples": {
       "sales": "Combien ai-je facturé ce mois-ci ?",
       "role": "Crée un rôle de caissier qui ne peut que facturer",
