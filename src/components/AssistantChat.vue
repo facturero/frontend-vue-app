@@ -42,6 +42,8 @@ watch(() => store.pendingActions.length, scrollToBottom);
 void scrollToBottom();
 
 async function submit(): Promise<void> {
+  // Con Enter el botón deshabilitado no frena nada: sin servidores, el borrador se queda para cuando vuelvan.
+  if (!store.available || !store.draft.trim()) return;
   const text = store.draft;
   store.draft = '';
   store.showHistory = false;
@@ -254,6 +256,7 @@ function onMessageClick(event: MouseEvent): void {
             :key="example"
             size="small"
             variant="outlined"
+            :disabled="!store.available"
             @click="store.draft = $t(example)"
           >
             {{ $t(example) }}
@@ -344,7 +347,7 @@ function onMessageClick(event: MouseEvent): void {
           <v-btn
             variant="text"
             size="small"
-            :disabled="!!store.deciding"
+            :disabled="!!store.deciding || !store.available"
             @click="store.decide(action.id, false)"
           >
             {{ $t('assistant.reject') }}
@@ -354,6 +357,7 @@ function onMessageClick(event: MouseEvent): void {
             variant="flat"
             size="small"
             :loading="store.deciding === action.id"
+            :disabled="!store.available"
             @click="store.decide(action.id, true)"
           >
             {{ $t('assistant.approve') }}
@@ -388,6 +392,16 @@ function onMessageClick(event: MouseEvent): void {
     <v-divider v-if="!store.showHistory" />
 
     <div v-if="!store.showHistory" class="pa-3">
+      <!-- Sin servidores de IA no se escribe, pero lo de arriba (y el historial) se sigue leyendo. Se reabre solo. -->
+      <v-alert
+        v-if="!store.available"
+        type="warning"
+        icon="mdi-server-off"
+        class="mb-2"
+        data-testid="assistant-unavailable"
+      >
+        {{ $t('assistant.unavailable') }}
+      </v-alert>
       <div class="d-flex align-end ga-2">
         <v-textarea
           v-model="store.draft"
@@ -399,7 +413,7 @@ function onMessageClick(event: MouseEvent): void {
           density="comfortable"
           rounded="lg"
           class="assistant-input"
-          :disabled="store.sending"
+          :disabled="store.sending || !store.available"
           :autofocus="expanded"
           @keydown.enter.exact.prevent="submit"
         />
@@ -409,7 +423,7 @@ function onMessageClick(event: MouseEvent): void {
           variant="flat"
           size="default"
           class="flex-shrink-0"
-          :disabled="!store.draft.trim() || store.sending"
+          :disabled="!store.draft.trim() || store.sending || !store.available"
           @click="submit"
         />
       </div>

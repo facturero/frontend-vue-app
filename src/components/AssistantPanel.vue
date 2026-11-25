@@ -4,7 +4,7 @@
  * diálogo grande para conversaciones largas (listas de stock, cobranza, informes). Los dos muestran el mismo chat
  * (`AssistantChat.vue`) sobre el mismo store: pasar de uno a otro no pierde la conversación ni lo que estabas escribiendo.
  */
-import { computed } from 'vue';
+import { computed, onBeforeUnmount, watch } from 'vue';
 import { useDisplay } from 'vuetify';
 import { useAssistantStore } from '@/stores/assistant';
 import AssistantChat from '@/components/AssistantChat.vue';
@@ -25,6 +25,10 @@ const dialogOpen = computed({
     if (!value) store.open = false;
   },
 });
+
+// Mientras el asistente está abierto (panel o diálogo) se vigila si hay servidores de IA; cerrado, no se gasta nada.
+watch(() => store.open, (open) => store.watchStatus(open), { immediate: true });
+onBeforeUnmount(() => store.watchStatus(false));
 
 function toggleSize(): void {
   store.expanded = !store.expanded;

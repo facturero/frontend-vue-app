@@ -19,7 +19,17 @@ import type {
  */
 const TURN_TIMEOUT_MS = 120_000;
 
+/** Si algún servidor del modelo (las tarjetas) responde. Lo da el último sondeo del servicio, no llama al modelo. */
+export interface AssistantStatus {
+  available: boolean;
+  servers: number;
+  healthy: number;
+  checkedAt: string | null;
+}
+
 export const assistantApi = {
+  status: () => http.get<AssistantStatus>('/assistant/status').then((r) => r.data),
+
   conversations: () =>
     http.get<ConversationSummary[]>('/assistant/conversations').then((r) => r.data),
 

@@ -24,6 +24,11 @@ export const useAssistantStore = defineStore('assistant', () => {
   const expanded = ref(false);
   const draft = ref('');
   const showHistory = ref(false);
+  // ¿Responde algún servidor de IA? Sin ninguno, el chat no deja escribir (fallaría a los segundos) pero sí leer el historial,
+  // que vive en la base y no en el modelo. Empieza en `true`: sin saberlo todavía, no se le cierra el chat a nadie.
+  const available = ref(true);
+  let statusTimer: ReturnType<typeof setInterval> | null = null;
+  const STATUS_POLL_MS = 20_000;
 
   // El historial vive en el servidor (assistant_db). Esto solo recuerda CUÁL
   // conversación estaba abierta: al recargar la página el chat que estabas
@@ -52,6 +57,29 @@ export const useAssistantStore = defineStore('assistant', () => {
   function sendTurn(text: string, conversationId: string | null): Promise<AssistantTurn> {
     if (isConnected()) return assistantSend(text, conversationId);
     return assistantApi.send(text, conversationId);
+  }
+
+  /**
+   * Pregunta al servicio si hay modelo. Un 502/503/504 es que no llega ni al servicio: tampoco se puede escribir. Cualquier
+   * otro fallo (un 404 de un servicio todavía sin la ruta, la red del navegador caída) no cambia nada: no hay pruebas de que
+   * el modelo esté caído, y cerrar el chat por una duda es peor que un envío que falla y lo dice.
+   */
+  async function checkStatus(): Promise<void> {
+    try {
+      available.value = (await assistantApi.status()).available;
+    } catch (e) {
+      const status = (e as { response?: { status?: number } }).response?.status ?? 0;
+      if (status >= 502 && status <= 504) available.value = false;
+    }
+  }
+
+  /** Mientras el chat está abierto, cada 20 s: así se reabre solo cuando la tarjeta vuelve, sin recargar la página. */
+  function watchStatus(on: boolean): void {
+    if (statusTimer) clearInterval(statusTimer);
+    statusTimer = null;
+    if (!on) return;
+    void checkStatus();
+    statusTimer = setInterval(() => void checkStatus(), STATUS_POLL_MS);
   }
 
   function toggle(): void {
@@ -102,7 +130,7 @@ export const useAssistantStore = defineStore('assistant', () => {
    */
   async function send(text: string): Promise<void> {
     const clean = text.trim();
-    if (!clean || sending.value) return;
+    if (!clean || sending.value || !available.value) return;
 
     sending.value = true;
     error.value = null;
@@ -123,6 +151,8 @@ export const useAssistantStore = defineStore('assistant', () => {
       void loadConversations();
     } catch (e) {
       error.value = extractError(e);
+      // Si falló porque se cayeron las tarjetas, que el chat se cierre ya y no al siguiente sondeo.
+      void checkStatus();
     } finally {
       sending.value = false;
     }
@@ -135,7 +165,8 @@ export const useAssistantStore = defineStore('assistant', () => {
 
   /** Confirma o rechaza una escritura propuesta. */
   async function decide(actionId: string, approve: boolean): Promise<void> {
-    if (deciding.value) return;
+    // Confirmar o rechazar reanuda el turno del modelo: sin servidores, fallaría igual que un mensaje.
+    if (deciding.value || !available.value) return;
     deciding.value = actionId;
     error.value = null;
     try {
@@ -150,6 +181,7 @@ export const useAssistantStore = defineStore('assistant', () => {
       pendingActions.value = turn.pendingActions;
     } catch (e) {
       error.value = extractError(e);
+      void checkStatus();
       // La propuesta se queda en pantalla: si falló la red, se puede reintentar.
     } finally {
       deciding.value = null;
@@ -174,7 +206,7 @@ export const useAssistantStore = defineStore('assistant', () => {
 
   return {
     open, conversationId, messages, pendingActions, conversations,
-    sending, deciding, error, expanded, draft, showHistory,
-    toggle, reset, send, decide, loadConversations, openConversation, deleteConversation, restoreActive,
+    sending, deciding, error, expanded, draft, showHistory, available,
+    checkStatus, watchStatus, toggle, reset, send, decide, loadConversations, openConversation, deleteConversation, restoreActive,
   };
 });
