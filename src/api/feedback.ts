@@ -7,6 +7,7 @@ import type {
   FeedbackStatus,
   OrganizationBalance,
   PointsEntry,
+  ReplyInput,
   RespondInput,
   SubmitFeedbackInput,
 } from '@/types/feedback';
@@ -17,7 +18,9 @@ export const feedbackApi = {
   submit: (input: SubmitFeedbackInput) => http.post('/feedback', input).then((r) => r.data),
   mine: (params: { cursor?: string; limit?: number } = {}) => http.get<FeedbackPage>('/feedback', { params }).then((r) => r.data),
   get: (id: string) => http.get<FeedbackDetail>(`/feedback/${id}`).then((r) => r.data),
-  reply: (id: string, body: string) => http.post<FeedbackReply>(`/feedback/${id}/replies`, { body }).then((r) => r.data),
+  reply: (id: string, input: ReplyInput) => http.post<FeedbackReply>(`/feedback/${id}/replies`, input).then((r) => r.data),
+  /** Una captura de mi conversación (los bytes: el dueño que la mandó es de otra empresa, ver composable/useFeedbackImages.ts). */
+  image: (id: string, documentId: string) => http.get<Blob>(`/feedback/${id}/images/${documentId}`, { responseType: 'blob' }).then((r) => r.data),
   unread: () => http.get<{ count: number }>('/feedback/unread').then((r) => r.data.count),
   points: () => http.get<{ balance: number; entries: PointsEntry[] }>('/feedback/points').then((r) => r.data),
 
@@ -25,6 +28,7 @@ export const feedbackApi = {
   adminList: (params: { status?: FeedbackStatus; kind?: FeedbackKind; organizationId?: string; unread?: boolean; q?: string; cursor?: string; limit?: number } = {}) =>
     http.get<FeedbackPage>('/feedback/admin/items', { params: { ...params, unread: params.unread ? 'true' : undefined } }).then((r) => r.data),
   adminGet: (id: string) => http.get<FeedbackDetail>(`/feedback/admin/items/${id}`).then((r) => r.data),
+  adminImage: (id: string, documentId: string) => http.get<Blob>(`/feedback/admin/items/${id}/images/${documentId}`, { responseType: 'blob' }).then((r) => r.data),
   respond: (id: string, input: RespondInput) => http.post<FeedbackDetail>(`/feedback/admin/items/${id}/respond`, input).then((r) => r.data),
   adminUnread: () => http.get<{ count: number }>('/feedback/admin/unread').then((r) => r.data.count),
   suggestions: () => http.get<{ points: Partial<Record<FeedbackStatus, number>> }>('/feedback/admin/suggestions').then((r) => r.data.points),

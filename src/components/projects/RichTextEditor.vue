@@ -71,8 +71,29 @@ const props = withDefaults(
      * acepta el nodo `crmLink`.
      */
     crmLinks?: boolean;
+    /**
+     * @menciones. Apagadas en el buzón de comentarios: la conversación es con el equipo de la plataforma, de otra empresa, y su servidor
+     * no acepta el nodo (sin esto, «@» ofrecería a los compañeros y el mensaje entero se rechazaría).
+     */
+    mentions?: boolean;
+    /** Tipos que ofrece el selector del clip (`accept` del input). El buzón solo acepta imágenes. Sin esto, cualquier archivo. */
+    accept?: string;
   }>(),
-  { placeholder: '', editable: true, autofocus: false, toolbar: true, uploadFile: undefined, enterSends: false, mentionExtras: () => [], mentionUserIds: null, crmLinks: false, customEmojis: null, formatting: true },
+  {
+    placeholder: '',
+    editable: true,
+    autofocus: false,
+    toolbar: true,
+    uploadFile: undefined,
+    enterSends: false,
+    mentionExtras: () => [],
+    mentionUserIds: null,
+    crmLinks: false,
+    customEmojis: null,
+    formatting: true,
+    mentions: true,
+    accept: undefined,
+  },
 );
 const emit = defineEmits<{ 'update:modelValue': [RichDoc]; submit: []; blur: []; slash: [] }>();
 
@@ -336,6 +357,50 @@ function clipboardFiles(data: DataTransfer | null | undefined): File[] {
     .filter((f): f is File => !!f);
 }
 
+/** @menciones con la lista de compañeros junto al cursor. */
+function mentionExtension() {
+  return Mention.configure({
+    HTMLAttributes: { class: 'rte-mention' },
+    suggestion: {
+      items: ({ query }: { query: string }) => {
+        const q = query.toLowerCase();
+        const allowed = props.mentionUserIds ? new Set(props.mentionUserIds) : null;
+        // Las especiales van con la forma de una persona del directorio: `email` lleva su ayuda («avisa a todo el canal»).
+        // Por el principio («@can» → canal), no por cualquier parte: «@Ana» no debe ofrecer «c-ana-l» antes que a Ana.
+        const extras = props.mentionExtras
+          .filter((x) => x.label.toLowerCase().startsWith(q) || x.id.startsWith(q))
+          .map((x): DirectoryUser => ({ id: x.id, email: x.hint, fullName: x.label, avatarFileId: null }));
+        const people = store.directory.filter((u) => (!allowed || allowed.has(u.id)) && (displayName(u).toLowerCase().includes(q) || u.email.toLowerCase().includes(q)));
+        // Sin nada escrito, las especiales arriba (se descubren); escribiendo, primero las personas.
+        return (q ? [...people.slice(0, 6), ...extras] : [...extras, ...people]).slice(0, 7);
+      },
+      render: () => ({
+        onStart: (p: SuggestionProps<DirectoryUser>) => {
+          mention.open = true;
+          mention.index = 0;
+          place(p);
+        },
+        onUpdate: (p: SuggestionProps<DirectoryUser>) => {
+          mention.index = 0;
+          place(p);
+        },
+        onKeyDown: ({ event }: SuggestionKeyDownProps) => {
+          if (!mention.open || mention.items.length === 0) return false;
+          if (event.key === 'ArrowDown') mention.index = (mention.index + 1) % mention.items.length;
+          else if (event.key === 'ArrowUp') mention.index = (mention.index - 1 + mention.items.length) % mention.items.length;
+          else if (event.key === 'Enter' || event.key === 'Tab') choose(mention.items[mention.index]);
+          else if (event.key === 'Escape') mention.open = false;
+          else return false;
+          return true;
+        },
+        onExit: () => {
+          mention.open = false;
+        },
+      }),
+    },
+  });
+}
+
 const editor = useEditor({
   content: props.modelValue ?? '',
   editable: props.editable,
@@ -356,46 +421,7 @@ const editor = useEditor({
     TableRow,
     TableHeader,
     TableCell,
-    Mention.configure({
-      HTMLAttributes: { class: 'rte-mention' },
-      suggestion: {
-        items: ({ query }: { query: string }) => {
-          const q = query.toLowerCase();
-          const allowed = props.mentionUserIds ? new Set(props.mentionUserIds) : null;
-          // Las especiales van con la forma de una persona del directorio: `email` lleva su ayuda («avisa a todo el canal»).
-          // Por el principio («@can» → canal), no por cualquier parte: «@Ana» no debe ofrecer «c-ana-l» antes que a Ana.
-          const extras = props.mentionExtras
-            .filter((x) => x.label.toLowerCase().startsWith(q) || x.id.startsWith(q))
-            .map((x): DirectoryUser => ({ id: x.id, email: x.hint, fullName: x.label, avatarFileId: null }));
-          const people = store.directory.filter((u) => (!allowed || allowed.has(u.id)) && (displayName(u).toLowerCase().includes(q) || u.email.toLowerCase().includes(q)));
-          // Sin nada escrito, las especiales arriba (se descubren); escribiendo, primero las personas.
-          return (q ? [...people.slice(0, 6), ...extras] : [...extras, ...people]).slice(0, 7);
-        },
-        render: () => ({
-          onStart: (p: SuggestionProps<DirectoryUser>) => {
-            mention.open = true;
-            mention.index = 0;
-            place(p);
-          },
-          onUpdate: (p: SuggestionProps<DirectoryUser>) => {
-            mention.index = 0;
-            place(p);
-          },
-          onKeyDown: ({ event }: SuggestionKeyDownProps) => {
-            if (!mention.open || mention.items.length === 0) return false;
-            if (event.key === 'ArrowDown') mention.index = (mention.index + 1) % mention.items.length;
-            else if (event.key === 'ArrowUp') mention.index = (mention.index - 1 + mention.items.length) % mention.items.length;
-            else if (event.key === 'Enter' || event.key === 'Tab') choose(mention.items[mention.index]);
-            else if (event.key === 'Escape') mention.open = false;
-            else return false;
-            return true;
-          },
-          onExit: () => {
-            mention.open = false;
-          },
-        }),
-      },
-    }),
+    ...(props.mentions ? [mentionExtension()] : []),
   ],
   editorProps: {
     handleKeyDown: (_view, event) => {
@@ -678,7 +704,7 @@ onBeforeUnmount(() => editor.value?.destroy());
       </template>
     </div>
     <!-- Fuera de la barra: así `attach()` también abre el selector cuando no hay barra. -->
-    <input v-if="uploadFile" ref="fileInput" type="file" multiple hidden @change="pickFiles" />
+    <input v-if="uploadFile" ref="fileInput" type="file" multiple hidden :accept="accept" @change="pickFiles" />
     <!-- `append`: un botón dentro del recuadro, abajo a la derecha (el chat pone ahí «Enviar», como el icono de un campo de texto). -->
     <div class="position-relative">
       <EditorContent :editor="editor" />

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useDisplay } from 'vuetify';
-import { fileUrl, openFile } from '@/composable/useFileUrl';
+import { defaultFileUrlResolver, FILE_URL_RESOLVER } from '@/composable/useFileUrl';
 
 /**
  * Imagen dentro de una descripción o un comentario. El documento guarda el id del archivo en document-service y no su URL (la
@@ -11,11 +11,15 @@ import { fileUrl, openFile } from '@/composable/useFileUrl';
  * A tamaño completo se ve en un visor dentro del CRM, no en otra pestaña (lo pidió un cliente: «verlas sin tener que descargarlas»).
  * Al leer, un clic en la imagen lo abre; dentro del editor el clic la selecciona (para moverla o borrarla), así que el visor se abre
  * con la lupa que sale al pasar el ratón. Desde el visor se puede abrir en otra pestaña si hace falta.
+ *
+ * El enlace sale de document-service, salvo que quien la muestra provea otro origen (`FILE_URL_RESOLVER`): el buzón de comentarios
+ * reutiliza este visor con capturas de otras empresas, que sirve feedback-service.
  */
 const props = withDefaults(defineProps<{ documentId: string; alt?: string; selected?: boolean; clickable?: boolean }>(), { alt: '', selected: false, clickable: true });
 const { t } = useI18n();
 const { xs } = useDisplay();
-const src = computed(() => fileUrl(props.documentId));
+const resolver = inject(FILE_URL_RESOLVER, defaultFileUrlResolver);
+const src = computed(() => resolver.url(props.documentId));
 const viewing = ref(false);
 </script>
 
@@ -40,7 +44,7 @@ const viewing = ref(false);
       <v-card>
         <v-card-title class="d-flex align-center ga-2">
           <span class="text-truncate flex-grow-1">{{ alt || t('projects.image.title') }}</span>
-          <v-btn variant="text" size="small" prepend-icon="mdi-open-in-new" @click="openFile(documentId)">{{ t('projects.image.openTab') }}</v-btn>
+          <v-btn variant="text" size="small" prepend-icon="mdi-open-in-new" @click="resolver.open(documentId)">{{ t('projects.image.openTab') }}</v-btn>
           <v-btn icon="mdi-close" variant="text" size="small" :aria-label="t('common.close')" @click="viewing = false" />
         </v-card-title>
         <v-card-text class="d-flex justify-center align-center">

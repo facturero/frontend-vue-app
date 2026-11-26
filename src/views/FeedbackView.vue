@@ -8,7 +8,7 @@ import { useFeedbackStore } from '@/stores/feedback';
 import { useNotify } from '@/composable/useNotify';
 import { extractError } from '@/utils/error';
 import { formatDate, formatRelative } from '@/utils/format';
-import type { FeedbackDetail, FeedbackItem, PointsEntry } from '@/types/feedback';
+import type { FeedbackDetail, FeedbackItem, PointsEntry, ReplyInput } from '@/types/feedback';
 import PageHeader from '@/components/ui/PageHeader.vue';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import FeedbackStatusChip from '@/components/feedback/FeedbackStatusChip.vue';
@@ -78,11 +78,11 @@ function select(id: string): void {
   void router.replace({ query: { id } });
 }
 
-async function reply(body: string): Promise<void> {
+async function reply(input: ReplyInput): Promise<void> {
   if (!detail.value) return;
   busy.value = true;
   try {
-    await feedbackApi.reply(detail.value.item.id, body);
+    await feedbackApi.reply(detail.value.item.id, input);
     detail.value = await feedbackApi.get(detail.value.item.id);
     await load();
   } catch (e) {

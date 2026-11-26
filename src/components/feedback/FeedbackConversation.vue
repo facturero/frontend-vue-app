@@ -1,8 +1,15 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, provide, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { formatDateTime } from '@/utils/format';
-import { FEEDBACK_STATUSES, type FeedbackDetail, type FeedbackStatus, type RespondInput } from '@/types/feedback';
+import { useNotify } from '@/composable/useNotify';
+import { extractError } from '@/utils/error';
+import { FILE_URL_RESOLVER } from '@/composable/useFileUrl';
+import { docHasContent, FEEDBACK_IMAGE_TYPES, FeedbackImageError, feedbackImageResolver, uploadFeedbackImage } from '@/composable/useFeedbackImages';
+import { FEEDBACK_STATUSES, type FeedbackDetail, type FeedbackStatus, type ReplyInput, type RespondInput } from '@/types/feedback';
+import type { RichDoc } from '@/types/projects';
+import RichTextEditor from '@/components/projects/RichTextEditor.vue';
+import RichTextView from '@/components/projects/RichTextView.vue';
 import FeedbackStatusChip from './FeedbackStatusChip.vue';
 
 /**
@@ -10,10 +17,19 @@ import FeedbackStatusChip from './FeedbackStatusChip.vue';
  *   - `author` (la persona): lee las respuestas y contesta;
  *   - `platform` (el dueño): ve quién y de qué empresa, y responde en una sola acción con texto, estado y puntos para la empresa.
  *     Al elegir «aceptada» o «implementada» se proponen los puntos sugeridos; él confirma, cambia el monto o no da nada.
+ *
+ * Se escribe con el editor de los comentarios de Proyectos (lo pidió el dueño: «es bueno»): formato y capturas pegadas (Ctrl+V),
+ * soltadas o con el clip, con miniatura y visor al hacer clic. Sin @menciones (no hay a quién mencionar) y solo imágenes. Las capturas
+ * se ven por feedback-service (`feedbackImageResolver`): la otra punta de la conversación puede ser de otra empresa.
  */
 const props = defineProps<{ detail: FeedbackDetail; mode: 'author' | 'platform'; busy?: boolean; suggestions?: Partial<Record<FeedbackStatus, number>> }>();
-const emit = defineEmits<{ reply: [string]; respond: [RespondInput] }>();
+const emit = defineEmits<{ reply: [ReplyInput]; respond: [RespondInput] }>();
 const { t } = useI18n();
+const notify = useNotify();
+
+// Una instancia por envío (las vistas la montan con `key` por envío), así que el origen de las capturas se fija una vez.
+const images = feedbackImageResolver(props.mode, props.detail.item.id);
+provide(FILE_URL_RESOLVER, images);
 
 const KIND_ICON = { improvement: 'mdi-lightbulb-on-outline', comment: 'mdi-comment-text-outline', problem: 'mdi-bug-outline' } as const;
 const item = computed(() => props.detail.item);
@@ -21,7 +37,7 @@ const item = computed(() => props.detail.item);
 const PLATFORM_BG = { backgroundColor: 'rgb(var(--v-theme-lightprimary))' };
 const earned = computed(() => props.detail.points.reduce((n, p) => n + p.amount, 0));
 
-const text = ref('');
+const draft = ref<RichDoc | null>(null);
 const status = ref<FeedbackStatus>(props.detail.item.status);
 const givePoints = ref(false);
 const amount = ref<number | null>(null);
@@ -31,7 +47,7 @@ const reason = ref('');
 watch(
   () => [props.detail.item.id, props.detail.item.status, props.detail.replies.length, props.detail.points.length] as const,
   () => {
-    text.value = '';
+    draft.value = null;
     status.value = props.detail.item.status;
     givePoints.value = false;
     amount.value = null;
@@ -47,22 +63,43 @@ watch(status, (s) => {
   }
 });
 
+const hasMessage = computed(() => docHasContent(draft.value));
+
 const statusItems = computed(() => FEEDBACK_STATUSES.map((s) => ({ value: s, title: t(`feedbackBox.status.${s}`) })));
 const canSend = computed(() => {
-  if (props.mode === 'author') return !!text.value.trim();
+  if (uploading.value) return false;
+  if (props.mode === 'author') return hasMessage.value;
   const pointsOk = !givePoints.value || (!!amount.value && amount.value > 0);
-  return pointsOk && (!!text.value.trim() || status.value !== item.value.status || givePoints.value);
+  return pointsOk && (hasMessage.value || status.value !== item.value.status || givePoints.value);
 });
 
 function send(): void {
   if (!canSend.value) return;
-  if (props.mode === 'author') return emit('reply', text.value.trim());
+  const bodyDoc = hasMessage.value ? draft.value : null;
+  if (props.mode === 'author') return emit('reply', { bodyDoc: bodyDoc! });
   emit('respond', {
-    body: text.value.trim() || null,
+    bodyDoc,
     status: status.value !== item.value.status ? status.value : undefined,
     // La clave evita que un doble clic (o un reintento tras un corte) dé los puntos dos veces.
     points: givePoints.value && amount.value ? { amount: amount.value, reason: reason.value.trim() || null, idempotencyKey: crypto.randomUUID() } : null,
   });
+}
+
+// Mientras una captura se sube, «Enviar» espera: si no, la respuesta saldría sin ella.
+const uploading = ref(0);
+async function upload(file: File): Promise<string | null> {
+  uploading.value += 1;
+  try {
+    const id = await uploadFeedbackImage(file, item.value.id);
+    images.markLocal(id);
+    return id;
+  } catch (e) {
+    if (e instanceof FeedbackImageError) notify.error(t(e.reason === 'type' ? 'feedbackBox.imageType' : 'feedbackBox.imageSize'));
+    else notify.error(extractError(e));
+    return null;
+  } finally {
+    uploading.value -= 1;
+  }
 }
 </script>
 
@@ -84,7 +121,8 @@ function send(): void {
     </div>
 
     <v-sheet class="border rounded pa-4">
-      <div class="text-body-medium text-pre-wrap">{{ item.body }}</div>
+      <RichTextView v-if="item.bodyDoc" :doc="item.bodyDoc" class="text-body-medium" />
+      <div v-else class="text-body-medium text-pre-wrap">{{ item.body }}</div>
       <div v-if="item.traceId || item.urlPath" class="text-body-small text-medium-emphasis mt-2">
         <template v-if="item.urlPath">{{ t('feedbackBox.screen') }}: {{ item.urlPath }}</template>
         <template v-if="item.traceId"> · {{ t('feedbackBox.traceCode') }}: <code>{{ item.traceId }}</code></template>
@@ -109,20 +147,22 @@ function send(): void {
           {{ r.fromPlatform ? t('feedbackBox.platformTeam') : mode === 'author' ? t('feedbackBox.you') : item.authorName || t('feedbackBox.unknownPerson') }}
           · {{ formatDateTime(r.createdAt) }}
         </div>
-        <div class="text-body-medium text-pre-wrap">{{ r.body }}</div>
+        <RichTextView v-if="r.bodyDoc" :doc="r.bodyDoc" class="text-body-medium" />
+        <div v-else class="text-body-medium text-pre-wrap">{{ r.body }}</div>
       </div>
     </div>
 
     <!-- Contestar (persona) o responder (dueño) -->
-    <div class="d-flex flex-column ga-2">
-      <v-textarea
-        v-model="text"
-        :label="mode === 'author' ? t('feedbackBox.replyLabel') : t('feedbackBox.respondLabel')"
-        rows="3"
-        auto-grow
-        maxlength="4000"
-       
+    <div class="d-flex flex-column ga-2" data-composer>
+      <RichTextEditor
+        v-model="draft"
+        :placeholder="mode === 'author' ? t('feedbackBox.replyLabel') : t('feedbackBox.respondLabel')"
+        :upload-file="upload"
+        :mentions="false"
+        :accept="FEEDBACK_IMAGE_TYPES.join(',')"
+        @submit="send"
       />
+      <div class="text-body-small text-medium-emphasis">{{ t('feedbackBox.imageHint') }}</div>
       <template v-if="mode === 'platform'">
         <div class="d-flex flex-wrap ga-4 align-center">
           <v-select v-model="status" :items="statusItems" :label="t('feedbackBox.statusLabel')" hide-details :max-width="240" />

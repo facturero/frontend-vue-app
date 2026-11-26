@@ -1,4 +1,4 @@
-import { reactive } from 'vue';
+import { reactive, type InjectionKey } from 'vue';
 import { fileApi } from '@/api/files';
 
 /**
@@ -64,10 +64,18 @@ export function fileUrl(fileId: string | null | undefined): string | undefined {
   return cached?.url ?? undefined;
 }
 
+const clearHooks = new Set<() => void>();
+
+/** Otras cachés de archivos (las capturas del buzón) se vacían junto con esta al cerrar sesión. */
+export function onFileUrlsCleared(hook: () => void): void {
+  clearHooks.add(hook);
+}
+
 /** Al cerrar sesión: los enlaces eran de esa sesión y esa organización. */
 export function clearFileUrls(): void {
   cache.clear();
   inFlight.clear();
+  clearHooks.forEach((hook) => hook());
 }
 
 /** Abre un archivo en otra pestaña. La ventana se abre antes de pedir el enlace para que el navegador no la bloquee. */
@@ -78,3 +86,16 @@ export async function openFile(fileId: string): Promise<void> {
   if (url) tab.location.href = url;
   else tab.close();
 }
+
+/**
+ * De dónde saca `RichImage` el enlace de una imagen. Por defecto, de document-service (arriba): sirve cuando quien mira es de la
+ * empresa del archivo. Quien muestre imágenes de OTRA empresa (el buzón de comentarios: el dueño de la plataforma ve las capturas de
+ * cualquier empresa) provee otro con `provide(FILE_URL_RESOLVER, …)` y las sirve por su servicio.
+ */
+export interface FileUrlResolver {
+  url(fileId: string): string | undefined;
+  open(fileId: string): Promise<void>;
+}
+
+export const FILE_URL_RESOLVER: InjectionKey<FileUrlResolver> = Symbol('FileUrlResolver');
+export const defaultFileUrlResolver: FileUrlResolver = { url: fileUrl, open: openFile };
