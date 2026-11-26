@@ -175,6 +175,15 @@ según la semántica:
 - "tipo"/etiqueta neutra → `lightinfo` (persona, bien/servicio); empresa → `lightprimary`
 - etiqueta de sistema → `lightsecondary` (Sistema, establecimientos)
 
+**Etiquetas de Proyectos: paleta `tag-*` (2026-11-26).** Las etiquetas que crea cada
+organización eligen entre 16 colores: `primary`, `secondary`, `success`, `warning`,
+`error` y once tokens propios del tema (`tag-red`, `tag-orange`, `tag-yellow`,
+`tag-lime`, `tag-green`, `tag-cyan`, `tag-violet`, `tag-purple`, `tag-pink`,
+`tag-brown`, `tag-grey`), definidos en `plugins/vuetify.ts` para claro y oscuro y
+heredados por los temas de empresa. Solo para etiquetas: no son colores semánticos y
+no se usan en otras pantallas. La lista vive en `utils/projects.ts` (`TAG_COLORS`) y
+projects-service valida la misma; el selector es `TagColorSwatches` (8 por fila).
+
 Ejemplo real en `CustomersListView.vue`:
 
 ```vue

@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { useProjectsStore } from '@/stores/projects';
 import { TAG_COLORS } from '@/utils/projects';
-import type { ProjectColor, Tag } from '@/types/projects';
+import type { TagColor, Tag } from '@/types/projects';
 import TagColorPicker from './TagColorPicker.vue';
 import TagColorSwatches from './TagColorSwatches.vue';
 import TagManagerDialog from './TagManagerDialog.vue';
@@ -32,8 +32,8 @@ const menu = ref(false);
 const search = ref('');
 const busy = ref(false);
 /** Color elegido para la etiqueta nueva; sin elegir, rota según cuántas hay (dos nuevas seguidas no salen iguales). */
-const pickedColor = ref<ProjectColor | null>(null);
-const newColor = computed<ProjectColor>({
+const pickedColor = ref<TagColor | null>(null);
+const newColor = computed<TagColor>({
   get: () => pickedColor.value ?? TAG_COLORS[store.tags.length % TAG_COLORS.length]!,
   set: (c) => (pickedColor.value = c),
 });
@@ -94,7 +94,7 @@ function onEnter(): void {
   if (!visible.value.length) void create();
 }
 
-async function recolor(tag: Tag, color: ProjectColor): Promise<void> {
+async function recolor(tag: Tag, color: TagColor): Promise<void> {
   if (color === tag.color) return;
   try {
     await store.updateTag(tag.id, { color });
@@ -132,7 +132,7 @@ async function remove(tagId: string): Promise<void> {
         </template>
         <v-card class="pa-4">
           <div class="text-body-small text-medium-emphasis mb-2">{{ t('projects.tags.colorEverywhere') }}</div>
-          <TagColorSwatches :model-value="tag.color" @update:model-value="(c: ProjectColor) => recolor(tag, c)" />
+          <TagColorSwatches :model-value="tag.color" @update:model-value="(c: TagColor) => recolor(tag, c)" />
           <v-btn variant="text" size="small" prepend-icon="mdi-tag-multiple-outline" class="mt-2" @click="openManager">
             {{ t('projects.tags.manage') }}
           </v-btn>

@@ -1,4 +1,4 @@
-import type { CustomField, DirectoryUser, FieldType, FieldValue, LinkEntity, MyTask, ProjectColor, ProjectHealth } from '@/types/projects';
+import type { CustomField, DirectoryUser, FieldType, FieldValue, LinkEntity, MyTask, ProjectColor, ProjectHealth, TagColor } from '@/types/projects';
 import { localIsoDate } from './isoDate';
 
 // Vive en utils/isoDate.ts (la usan otros módulos); se reexporta aquí para no tocar los imports de Proyectos.
@@ -91,8 +91,29 @@ export const HEALTH_COLOR: Record<ProjectHealth, string> = { on_track: 'success'
 // ── Entregable 4 ──────────────────────────────────────────────────────────────
 export const PROJECT_COLORS: ProjectColor[] = ['primary', 'secondary', 'success', 'warning', 'error', 'info'];
 
-/** Colores para elegir al crear una etiqueta: sin `info`, que en el tema es casi el mismo azul que `primary` y no se distinguían. */
-export const TAG_COLORS: ProjectColor[] = PROJECT_COLORS.filter((c) => c !== 'info');
+/**
+ * Colores para elegir en una etiqueta: los del tema (sin `info`, que es casi el mismo azul que `primary`) y la paleta `tag-*` del tema.
+ * Con cinco se repetían enseguida en una organización con muchas etiquetas (lo pidió el dueño, 2026-11-26). Ordenados como un arcoíris
+ * para que se encuentren rápido; projects-service valida la misma lista.
+ */
+export const TAG_COLORS: TagColor[] = [
+  'primary',
+  'secondary',
+  'tag-cyan',
+  'success',
+  'tag-green',
+  'tag-lime',
+  'tag-yellow',
+  'warning',
+  'tag-orange',
+  'error',
+  'tag-red',
+  'tag-pink',
+  'tag-purple',
+  'tag-violet',
+  'tag-brown',
+  'tag-grey',
+];
 
 /** Icono de cada tipo de registro del ERP al que se vincula una tarea. */
 export const LINK_ICON: Record<LinkEntity, string> = {

@@ -117,10 +117,13 @@ export interface TaskLink {
   createdAt: string;
 }
 
+/** Colores de etiqueta: los del tema y la paleta `tag-*` (plugins/vuetify.ts). Misma lista que projects-service. */
+export type TagColor = ProjectColor | 'tag-red' | 'tag-orange' | 'tag-yellow' | 'tag-lime' | 'tag-green' | 'tag-cyan' | 'tag-violet' | 'tag-purple' | 'tag-pink' | 'tag-brown' | 'tag-grey';
+
 export interface Tag {
   id: string;
   name: string;
-  color: ProjectColor;
+  color: TagColor;
   /** En cuántas tareas está (solo en la lista de la organización, `GET /projects/tags`). */
   taskCount?: number;
 }

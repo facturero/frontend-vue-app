@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import type { ProjectColor } from '@/types/projects';
+import type { TagColor } from '@/types/projects';
 import TagColorSwatches from './TagColorSwatches.vue';
 
 /**
@@ -11,7 +11,7 @@ import TagColorSwatches from './TagColorSwatches.vue';
  * corta el `mousedown` para que el campo no pierda el foco ni lo escrito.
  */
 defineProps<{ name: string }>();
-const model = defineModel<ProjectColor>({ required: true });
+const model = defineModel<TagColor>({ required: true });
 const emit = defineEmits<{ create: [] }>();
 const { t } = useI18n();
 </script>

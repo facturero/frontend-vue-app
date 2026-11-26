@@ -97,6 +97,21 @@ export default createVuetify({
           warning: '#FFAE1F',
           error: '#FA896B',
 
+          // Paleta de etiquetas de Proyectos (`tag-*`): una organización tiene muchas etiquetas y con los cinco colores del tema se
+          // repetían. Tonos medios que se leen como texto sobre su fondo tonal (chips) en claro y en oscuro. Lista en
+          // utils/projects.ts (TAG_COLORS) y en projects-service (domain/types.ts); los temas de empresa los heredan tal cual.
+          'tag-red': '#E03131',
+          'tag-orange': '#E8590C',
+          'tag-yellow': '#C99A06',
+          'tag-lime': '#66A80F',
+          'tag-green': '#2F9E44',
+          'tag-cyan': '#1098AD',
+          'tag-violet': '#7048E8',
+          'tag-purple': '#AE3EC9',
+          'tag-pink': '#D6336C',
+          'tag-brown': '#9C6644',
+          'tag-grey': '#868E96',
+
           // Fondos tonales suaves: chips, alertas, badges y cabeceras de
           // sección. Sin ellos el conjunto se ve plano — son la mitad del
           // carácter visual. Uso: color="lightprimary".
@@ -181,6 +196,21 @@ export default createVuetify({
           info: '#539BFF',
           warning: '#FFAE1F',
           error: '#FA896B',
+
+          // Paleta de etiquetas de Proyectos (`tag-*`): una organización tiene muchas etiquetas y con los cinco colores del tema se
+          // repetían. Tonos medios que se leen como texto sobre su fondo tonal (chips) en claro y en oscuro. Lista en
+          // utils/projects.ts (TAG_COLORS) y en projects-service (domain/types.ts); los temas de empresa los heredan tal cual.
+          'tag-red': '#E03131',
+          'tag-orange': '#E8590C',
+          'tag-yellow': '#C99A06',
+          'tag-lime': '#66A80F',
+          'tag-green': '#2F9E44',
+          'tag-cyan': '#1098AD',
+          'tag-violet': '#7048E8',
+          'tag-purple': '#AE3EC9',
+          'tag-pink': '#D6336C',
+          'tag-brown': '#9C6644',
+          'tag-grey': '#868E96',
 
           // En oscuro los tonales son versiones apagadas, no claras.
           lightprimary: '#253662',

@@ -18,6 +18,7 @@ import type {
   LinkEntity,
   Project,
   ProjectColor,
+  TagColor,
   Tag,
   Visibility,
   CreateProjectInput,
@@ -549,7 +550,7 @@ export const useProjectsStore = defineStore('projects', () => {
   }
 
   /** Crea la etiqueta (o devuelve la que ya se llama igual) y la deja en la lista del autocompletado. */
-  async function createTag(name: string, color?: ProjectColor): Promise<Tag> {
+  async function createTag(name: string, color?: TagColor): Promise<Tag> {
     const tag = await write(() => projectsApi.createTag(name, color));
     if (!tags.value.some((t) => t.id === tag.id)) tags.value = [...tags.value, tag].sort((a, b) => a.name.localeCompare(b.name));
     return tag;
@@ -562,7 +563,7 @@ export const useProjectsStore = defineStore('projects', () => {
   }
 
   /** Renombrar o cambiar el color (pide «Administrar etiquetas»; el servidor lo comprueba). */
-  async function updateTag(tagId: string, patch: { name?: string; color?: ProjectColor }): Promise<Tag> {
+  async function updateTag(tagId: string, patch: { name?: string; color?: TagColor }): Promise<Tag> {
     const tag = await write(() => projectsApi.updateTag(tagId, patch));
     tags.value = tags.value.map((t) => (t.id === tagId ? { ...t, ...tag } : t)).sort((a, b) => a.name.localeCompare(b.name));
     eachTagged(tagId, (list) => list.map((t) => (t.id === tagId ? { ...t, ...tag } : t)));
