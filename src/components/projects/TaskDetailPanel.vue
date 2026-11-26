@@ -227,6 +227,25 @@ const followerCandidates = computed(() =>
 );
 
 /**
+ * «Espera a» y «Seguidores» se eligen en un buscador que se vacía y se cierra al elegir. Antes el buscador guardaba lo elegido: al
+ * agregarse, la tarea (o la persona) salía de la lista de candidatas y el campo se quedaba mostrando su id, un uuid (lo vio un
+ * cliente).
+ */
+const dependencyMenu = ref(false);
+const followerMenu = ref(false);
+function pickDependency(id: string | null): void {
+  if (!id || !task.value) return;
+  dependencyMenu.value = false;
+  const taskId = task.value.id;
+  void run(() => store.addDependency(taskId, id));
+}
+function pickFollower(id: string | null): void {
+  if (!id) return;
+  followerMenu.value = false;
+  void run(() => store.setFollowing(id, true));
+}
+
+/**
  * Atajos de Asana dentro del detalle (manteniendo Tab y pulsando la letra): Tab+M asignarme, Tab+C completar, Tab+L «me gusta»,
  * Tab+D fecha de entrega, Tab+K ir al comentario. Se ignoran mientras se escribe en un campo de texto.
  */
@@ -561,15 +580,18 @@ const moveTargets = computed(() => {
                   >
                     {{ b.title }}
                   </v-chip>
-                  <v-menu v-if="task.canEdit && dependencyCandidates.length" :close-on-content-click="false">
+                  <v-menu v-if="task.canEdit && dependencyCandidates.length" v-model="dependencyMenu" :close-on-content-click="false">
                     <template #activator="{ props: menu }">
                       <v-btn v-bind="menu" icon="mdi-plus" variant="text" size="x-small" :aria-label="t('projects.dependencies.add')" />
                     </template>
                     <v-card min-width="300" class="pa-2">
                       <v-autocomplete
+                        :model-value="null"
                         :items="dependencyCandidates"
                         :label="t('projects.dependencies.add')"
-                        @update:model-value="(v: string | null) => v && run(() => store.addDependency(task!.id, v))"
+                        autofocus
+                        data-dependency-picker
+                        @update:model-value="pickDependency"
                       />
                     </v-card>
                   </v-menu>
@@ -590,15 +612,18 @@ const moveTargets = computed(() => {
               <td>
                 <div class="d-flex align-center flex-wrap ga-2 py-2">
                   <UserAvatar v-for="f in task.followers" :key="f" :user-id="f" :size="26" />
-                  <v-menu v-if="task.canEdit" :close-on-content-click="false">
+                  <v-menu v-if="task.canEdit" v-model="followerMenu" :close-on-content-click="false">
                     <template #activator="{ props: menu }">
                       <v-tooltip location="top" :text="t('projects.followers.add')"><template #activator="{ props: tip }"><v-btn v-bind="mergeProps(menu, tip)" icon="mdi-account-plus-outline" variant="text" size="x-small" :aria-label="t('projects.followers.add')" /></template></v-tooltip>
                     </template>
                     <v-card min-width="280" class="pa-2">
                       <v-autocomplete
+                        :model-value="null"
                         :items="followerCandidates"
                         :label="t('projects.followers.add')"
-                        @update:model-value="(v: string | null) => v && run(() => store.setFollowing(v, true))"
+                        autofocus
+                        data-follower-picker
+                        @update:model-value="pickFollower"
                       />
                     </v-card>
                   </v-menu>
