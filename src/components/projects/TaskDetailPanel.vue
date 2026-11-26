@@ -162,7 +162,8 @@ async function save(patch: Parameters<typeof store.updateTask>[2]): Promise<bool
 }
 
 function saveTitle(): void {
-  const value = title.value.trim();
+  // El título se edita en varias líneas (para que uno largo se lea entero), pero es una sola: un salto pegado se vuelve espacio.
+  const value = title.value.replace(/\s*\n\s*/g, ' ').trim();
   if (!task.value || !value || value === task.value.title) {
     title.value = task.value?.title ?? '';
     return;
@@ -424,14 +425,21 @@ const moveTargets = computed(() => {
           {{ task.parent.title }}
         </v-btn>
 
-        <v-text-field
+        <!--
+          Área de texto que crece con el título y no un campo de una línea: un título largo (una historia de usuario) se cortaba y no se
+          podía leer entero (lo pidió un cliente). Enter guarda, como antes, en vez de partir la línea.
+        -->
+        <v-textarea
           v-model="title"
           variant="plain"
           class="title-field text-title-large"
+          rows="1"
+          auto-grow
           :readonly="readOnly"
           :aria-label="t('projects.task.title')"
+          data-task-title
           @blur="saveTitle"
-          @keyup.enter="($event.target as HTMLInputElement).blur()"
+          @keydown.enter.prevent="($event.target as HTMLTextAreaElement).blur()"
         />
 
         <v-alert v-if="openBlockers" type="warning" icon="mdi-lock-clock">{{ t('projects.dependencies.waiting', openBlockers) }}</v-alert>
@@ -707,7 +715,7 @@ const moveTargets = computed(() => {
 
         <TaskAttachments />
         <v-divider />
-        <TaskConversation ref="conversation" />
+        <TaskConversation ref="conversation" />
       </div>
     </template>
   </v-navigation-drawer>
