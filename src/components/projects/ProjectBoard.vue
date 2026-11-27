@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { nextTick, reactive, ref } from 'vue';
+import { nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
+import { useDisplay } from 'vuetify';
 import { useI18n } from 'vue-i18n';
 import { VueDraggable } from 'vue-draggable-plus';
 import { useProjectsStore } from '@/stores/projects';
@@ -98,17 +99,52 @@ function onColumnDrop(evt: DropEvent): void {
   const sectionId = evt.item.dataset.sectionId;
   if (sectionId) void nextTick(() => store.moveSection(sectionId));
 }
+/**
+ * El tablero llega hasta el pie de la ventana y cada columna desplaza sus tarjetas por dentro (como Trello o Asana). Antes el alto
+ * era el de la columna más larga: la barra de desplazamiento lateral quedaba a media página, justo debajo de las tarjetas, y con
+ * una columna larga había que bajar hasta el final para moverse de lado (lo vio un cliente). En móvil se deja como estaba: ahí se
+ * desplaza la página entera y el botón flotante de «Agregar tarea» taparía el pie de las columnas.
+ */
+const boardEl = ref<HTMLElement | null>(null);
+const boardHeight = ref<number | null>(null);
+const { mdAndUp } = useDisplay();
+/** Lo que queda libre bajo el tablero: el relleno inferior de la página. */
+const BOTTOM_GAP = 16;
+const MIN_HEIGHT = 320;
+
+function measureBoard(): void {
+  const el = boardEl.value;
+  if (!el || !mdAndUp.value) {
+    boardHeight.value = null;
+    return;
+  }
+  const top = el.getBoundingClientRect().top + window.scrollY;
+  boardHeight.value = Math.max(MIN_HEIGHT, Math.round(window.innerHeight - top - BOTTOM_GAP));
+}
+
+onMounted(() => {
+  measureBoard();
+  window.addEventListener('resize', measureBoard);
+});
+onBeforeUnmount(() => window.removeEventListener('resize', measureBoard));
+// Lo que hay encima (avisos, la barra de filtros) puede cambiar de alto al cargar el proyecto.
+watch([mdAndUp, () => store.sections.length], () => void nextTick(measureBoard));
 </script>
 
 <template>
-  <div class="d-flex align-start ga-4 overflow-x-auto pb-4">
+  <div
+    ref="boardEl"
+    class="d-flex align-start ga-4 overflow-x-auto pb-4"
+    :class="{ 'board--fixed': boardHeight !== null }"
+    :style="boardHeight !== null ? { height: `${boardHeight}px` } : undefined"
+  >
     <div class="d-sr-only" aria-live="polite">{{ announcement }}</div>
     <VueDraggable
       v-model="store.sections"
       handle=".column-drag"
       :animation="150"
       :disabled="!editable()"
-      class="d-flex align-start ga-4"
+      class="d-flex align-start ga-4 board-columns"
       @end="onColumnDrop"
     >
       <v-sheet
@@ -117,7 +153,7 @@ function onColumnDrop(evt: DropEvent): void {
         :data-section-id="section.id"
         color="background"
         width="300"
-        class="flex-shrink-0 pa-2 border"
+        class="flex-shrink-0 pa-2 border d-flex flex-column board-sheet"
       >
         <div class="d-flex align-center ga-2 px-2 py-1" :class="{ 'column-drag cursor-grab': editable() }">
           <span class="text-body-large font-weight-bold text-truncate">{{ section.name }}</span>
@@ -227,5 +263,21 @@ function onColumnDrop(evt: DropEvent): void {
 <style scoped>
 .board-column {
   min-height: 48px;
+}
+/* Alto fijo (ver `measureBoard`): las columnas no pasan del alto del tablero y la lista de tarjetas se desplaza por dentro; la
+   cabecera y «Agregar tarea» quedan siempre a la vista. */
+.board--fixed .board-columns {
+  height: 100%;
+}
+.board--fixed .board-sheet {
+  max-height: 100%;
+}
+.board--fixed .board-column {
+  flex: 0 1 auto;
+  overflow-y: auto;
+}
+/* Sin esto, en una columna llena las tarjetas se encogían (son hijas de un flex) en vez de desplazarse. */
+.board--fixed .board-column > * {
+  flex-shrink: 0;
 }
 </style>
