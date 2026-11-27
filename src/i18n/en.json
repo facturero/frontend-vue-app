@@ -4471,7 +4471,8 @@
     "image": {
       "view": "View image",
       "title": "Image",
-      "openTab": "Open in new tab"
+      "openTab": "Open in new tab",
+      "remove": "Remove image from the text"
     }
   },
   "dashboard": {

@@ -4471,7 +4471,8 @@
     "image": {
       "view": "Voir l'image",
       "title": "Image",
-      "openTab": "Ouvrir dans un nouvel onglet"
+      "openTab": "Ouvrir dans un nouvel onglet",
+      "remove": "Retirer l'image du texte"
     }
   },
   "dashboard": {
