@@ -6,6 +6,7 @@ import { InputRule, Node, mergeAttributes } from '@tiptap/core';
 import { NodeSelection, PluginKey } from '@tiptap/pm/state';
 import Suggestion from '@tiptap/suggestion';
 import StarterKit from '@tiptap/starter-kit';
+import { TextSelection } from '@tiptap/pm/state';
 import Mention from '@tiptap/extension-mention';
 import Link from '@tiptap/extension-link';
 // TipTap 3: Placeholder vive en `@tiptap/extensions` y las cuatro piezas de la tabla salen de un solo paquete.
@@ -570,7 +571,10 @@ function removeLink(): void {
 
 const inTable = computed(() => !!editor.value?.isActive('table'));
 type TableCmd = 'addRowAfter' | 'addColumnAfter' | 'deleteRow' | 'deleteColumn' | 'toggleHeaderRow' | 'deleteTable';
-const tableActions = computed<Array<{ cmd: TableCmd; icon: string; label: string }>>(() => [
+type TableAction = TableCmd | 'paragraphBefore' | 'paragraphAfter';
+const tableActions = computed<Array<{ cmd: TableAction; icon: string; label: string }>>(() => [
+  { cmd: 'paragraphBefore', icon: 'mdi-format-paragraph', label: t('projects.editor.paragraphBefore') },
+  { cmd: 'paragraphAfter', icon: 'mdi-format-paragraph', label: t('projects.editor.paragraphAfter') },
   { cmd: 'addRowAfter', icon: 'mdi-table-row-plus-after', label: t('projects.editor.addRow') },
   { cmd: 'addColumnAfter', icon: 'mdi-table-column-plus-after', label: t('projects.editor.addColumn') },
   { cmd: 'deleteRow', icon: 'mdi-table-row-remove', label: t('projects.editor.deleteRow') },
@@ -579,11 +583,51 @@ const tableActions = computed<Array<{ cmd: TableCmd; icon: string; label: string
   { cmd: 'deleteTable', icon: 'mdi-table-remove', label: t('projects.editor.deleteTable') },
 ]);
 
-function insertTable(): void {
-  editor.value?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+/**
+ * Posición de la tabla donde está el cursor (`from`/`to` del nodo entero), o `null` si no está en una.
+ */
+function currentTable(): { from: number; to: number } | null {
+  const ed = editor.value;
+  if (!ed) return null;
+  const $from = ed.state.selection.$from;
+  for (let depth = $from.depth; depth > 0; depth--) {
+    if ($from.node(depth).type.name === 'table') return { from: $from.before(depth), to: $from.after(depth) };
+  }
+  return null;
 }
 
-function tableCmd(cmd: TableCmd): void {
+/**
+ * Un párrafo vacío pegado a la tabla, arriba o abajo. Una tabla al principio o al final del texto no dejaba dónde escribir antes
+ * o después (lo vio un cliente): el cursor solo entraba en las celdas. No se usa el «párrafo final fijo» de StarterKit porque
+ * cambiaría el documento guardado de todos los textos (ver `trailingNode: false`).
+ */
+function addParagraphBeside(side: 'before' | 'after', onlyIfMissing = false): void {
+  const ed = editor.value;
+  const table = currentTable();
+  if (!ed || !table) return;
+  const { state } = ed;
+  const at = side === 'before' ? table.from : table.to;
+  const neighbour = side === 'before' ? state.doc.resolve(at).nodeBefore : state.doc.resolve(at).nodeAfter;
+  if (onlyIfMissing && neighbour?.isTextblock) return;
+  const tr = state.tr.insert(at, state.schema.nodes.paragraph!.create());
+  // Al pedirlo desde el menú, el cursor va al párrafo nuevo para escribir ya; al insertar la tabla, se queda en la primera celda.
+  if (!onlyIfMissing) tr.setSelection(TextSelection.create(tr.doc, at + 1));
+  ed.view.dispatch(tr.scrollIntoView());
+  ed.view.focus();
+}
+
+function insertTable(): void {
+  editor.value?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+  // Primero abajo y luego arriba: insertar arriba corre las posiciones de lo que viene detrás, al revés no.
+  addParagraphBeside('after', true);
+  addParagraphBeside('before', true);
+}
+
+function tableCmd(cmd: TableAction): void {
+  if (cmd === 'paragraphBefore' || cmd === 'paragraphAfter') {
+    addParagraphBeside(cmd === 'paragraphBefore' ? 'before' : 'after');
+    return;
+  }
   editor.value?.chain().focus()[cmd]().run();
 }
 

@@ -3794,6 +3794,8 @@
       "deleteColumn": "Supprimer la colonne",
       "headerRow": "Ligne d'en-tête",
       "deleteTable": "Supprimer le tableau",
+      "paragraphBefore": "Paragraphe au-dessus du tableau",
+      "paragraphAfter": "Paragraphe sous le tableau",
       "attach": "Joindre un fichier (vous pouvez aussi le coller ou le déposer ici)",
       "removeFile": "Retirer du texte (reste dans les pièces jointes)"
     },

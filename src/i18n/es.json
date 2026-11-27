@@ -3794,6 +3794,8 @@
       "deleteColumn": "Eliminar columna",
       "headerRow": "Fila de encabezado",
       "deleteTable": "Eliminar tabla",
+      "paragraphBefore": "Párrafo encima de la tabla",
+      "paragraphAfter": "Párrafo debajo de la tabla",
       "attach": "Adjuntar archivo (también puedes pegarlo o soltarlo aquí)",
       "removeFile": "Quitar del texto (sigue en Adjuntos)"
     },

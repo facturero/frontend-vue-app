@@ -3794,6 +3794,8 @@
       "deleteColumn": "Delete column",
       "headerRow": "Header row",
       "deleteTable": "Delete table",
+      "paragraphBefore": "Paragraph above the table",
+      "paragraphAfter": "Paragraph below the table",
       "attach": "Attach a file (you can also paste or drop it here)",
       "removeFile": "Remove from text (stays in Attachments)"
     },
