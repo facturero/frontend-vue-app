@@ -475,7 +475,8 @@ const moveTargets = computed(() => {
           <div v-else-if="task.approvalStatus === 'pending' && !task.assigneeUserId" class="text-body-small mt-1">{{ t('projects.approval.needsAssignee') }}</div>
         </v-alert>
 
-        <v-table density="compact">
+        <!-- `task-fields`: la columna de valores no crece con su contenido (ver el estilo): un chip largo se corta, no ensancha el panel. -->
+        <v-table density="compact" class="task-fields">
           <tbody>
             <tr>
               <td class="text-medium-emphasis text-no-wrap">{{ t('projects.task.assignee') }}</td>
@@ -541,6 +542,7 @@ const moveTargets = computed(() => {
                     :color="p.color"
                     :to="`/projects/${p.projectId}`"
                     prepend-icon="mdi-folder-outline"
+                    :title="p.sectionName ? `${p.name} · ${p.sectionName}` : p.name"
                   >
                     {{ p.name }}<template v-if="p.sectionName"> · {{ p.sectionName }}</template>
                   </v-chip>
@@ -575,6 +577,7 @@ const moveTargets = computed(() => {
                     :color="b.completed ? 'success' : 'warning'"
                     :prepend-icon="b.completed ? 'mdi-check' : 'mdi-lock-outline'"
                     :closable="task.canEdit"
+                    :title="b.title"
                     @click="store.openTask(b.id)"
                     @click:close="run(() => store.removeDependency(task!.id, b.id))"
                   >
@@ -603,7 +606,7 @@ const moveTargets = computed(() => {
               <td class="text-medium-emphasis text-no-wrap">{{ t('projects.dependencies.blocking') }}</td>
               <td>
                 <div class="d-flex flex-wrap ga-2 py-2">
-                  <v-chip v-for="b in task.blocking" :key="b.id" size="small" prepend-icon="mdi-arrow-right" @click="store.openTask(b.id)">{{ b.title }}</v-chip>
+                  <v-chip v-for="b in task.blocking" :key="b.id" size="small" prepend-icon="mdi-arrow-right" :title="b.title" @click="store.openTask(b.id)">{{ b.title }}</v-chip>
                 </div>
               </td>
             </tr>
@@ -748,6 +751,25 @@ const moveTargets = computed(() => {
 </template>
 
 <style scoped>
+/* Tabla de campos: la columna de valores toma el ancho que dejan las etiquetas y no más (`width: 100%` + `max-width: 0`, el truco de
+   las tablas con `table-layout: auto`). Antes crecía hasta el chip más largo —una tarea en «Espera a» o «La esperan» con un título de
+   historia de usuario— y el panel entero se desplazaba de lado (lo vio un cliente). Los chips se cortan con «…» y el título completo
+   sale al pasar el ratón (`title`). */
+.task-fields :deep(td:last-child) {
+  width: 100%;
+  max-width: 0;
+}
+.task-fields :deep(.v-chip) {
+  max-width: 100%;
+}
+.task-fields :deep(.v-chip__content) {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* «Agregar subtarea»: el campo `plain` reserva relleno arriba para una etiqueta flotante que aquí no hay, y su texto (32 px, pegado
    arriba) quedaba más alto que el «+», centrado en los 40 px del botón. Sin ese relleno y con la altura del botón, quedan en línea. */
 .subtask-add :deep(.v-field__input),
