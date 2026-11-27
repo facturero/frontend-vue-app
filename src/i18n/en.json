@@ -3796,6 +3796,8 @@
       "deleteTable": "Delete table",
       "paragraphBefore": "Paragraph above the table",
       "paragraphAfter": "Paragraph below the table",
+      "openLink": "Open link (or Ctrl + click)",
+      "editLink": "Edit link",
       "addColumnEnd": "Add a column at the end",
       "removeColumnEnd": "Remove the last column",
       "addRowEnd": "Add a row at the end",

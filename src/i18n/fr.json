@@ -3796,6 +3796,8 @@
       "deleteTable": "Supprimer le tableau",
       "paragraphBefore": "Paragraphe au-dessus du tableau",
       "paragraphAfter": "Paragraphe sous le tableau",
+      "openLink": "Ouvrir le lien (ou Ctrl + clic)",
+      "editLink": "Modifier le lien",
       "addColumnEnd": "Ajouter une colonne à la fin",
       "removeColumnEnd": "Supprimer la dernière colonne",
       "addRowEnd": "Ajouter une ligne à la fin",

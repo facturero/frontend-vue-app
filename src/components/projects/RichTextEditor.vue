@@ -463,6 +463,15 @@ const editor = useEditor({
       void insertFiles(files);
       return true;
     },
+    // Ctrl/⌘ + clic en un enlace lo abre (como en Word o Google Docs). Un clic normal sigue poniendo el cursor para editarlo.
+    handleClick: (view, pos, event) => {
+      if (!(event.ctrlKey || event.metaKey)) return false;
+      const mark = view.state.doc.resolve(pos).marks().find((m) => m.type.name === 'link');
+      const href = safeHref(mark?.attrs.href);
+      if (!href) return false;
+      window.open(href, '_blank', 'noopener,noreferrer');
+      return true;
+    },
     // «/» con el editor vacío abre el buscador de registros del CRM (como los comandos de Slack). En medio de un texto es una barra.
     handleTextInput: (_view, _from, _to, text) => {
       if (!props.crmLinks || text !== '/' || !editor.value?.isEmpty) return false;
@@ -477,16 +486,23 @@ const editor = useEditor({
     },
   },
   onUpdate: ({ editor: e }) => emit('update:modelValue', e.getJSON() as RichDoc),
-  onTransaction: () => placeTableControls(),
+  onTransaction: () => {
+    placeTableControls();
+    placeLinkBubble();
+  },
   onBlur: ({ event }) => {
     // Abrir un menú de la barra (enlace, tabla) quita el foco al editor: eso no es «terminé de escribir», no se guarda todavía.
     const next = (event as FocusEvent | undefined)?.relatedTarget as HTMLElement | null;
     if (next?.closest('.rte-popover')) return;
     // Fuera del editor, los botones de la tabla sobran (y taparían lo que haya al lado).
     tableBox.value = null;
+    linkBox.value = null;
     emit('blur');
   },
-  onFocus: () => placeTableControls(),
+  onFocus: () => {
+    placeTableControls();
+    placeLinkBubble();
+  },
 });
 
 // Un cambio que llega de fuera (se guardó en otra pestaña, se vació tras comentar) reemplaza el contenido sin disparar `update`.
@@ -538,6 +554,37 @@ function normalizeUrl(raw: string): string {
   if (/^(https?:\/\/|mailto:)/i.test(v)) return v;
   if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return `mailto:${v}`;
   return `https://${v}`;
+}
+
+/**
+ * Abrir un enlace desde el texto. El editor está siempre en modo edición (`openOnClick: false`, para poder corregir el texto del
+ * enlace), así que un clic solo ponía el cursor y no había forma de ir a la dirección (lo vio un cliente). Con el cursor sobre un
+ * enlace aparece una burbuja con la dirección para abrirla, y el botón para editarla.
+ */
+const linkBox = ref<{ top: number; left: number; href: string } | null>(null);
+
+/** Solo direcciones web o de correo: el texto viene de lo que pega cualquiera, no se abre otra cosa (`javascript:`…). */
+function safeHref(href: unknown): string | null {
+  return typeof href === 'string' && /^(https?:\/\/|mailto:)/i.test(href) ? href : null;
+}
+
+function placeLinkBubble(): void {
+  const ed = editor.value;
+  const box = wrapper.value;
+  const href = ed && props.editable && ed.isFocused && ed.isActive('link') ? safeHref(ed.getAttributes('link').href) : null;
+  if (!ed || !box || !href) {
+    linkBox.value = null;
+    return;
+  }
+  const at = ed.view.coordsAtPos(ed.state.selection.from);
+  const w = box.getBoundingClientRect();
+  // Debajo de la línea del cursor y sin salirse por la derecha del editor (la burbuja mide como mucho 320 px).
+  linkBox.value = { top: at.bottom - w.top + 4, left: Math.max(0, Math.min(at.left - w.left, w.width - 320)), href };
+}
+
+/** El menú del enlace cuelga del botón de la barra: abierto en el mismo clic, lo cerraría al tomarlo como un clic fuera de él. */
+function editLinkFromBubble(): void {
+  requestAnimationFrame(() => openLink());
 }
 
 function openLink(): void {
@@ -833,6 +880,18 @@ onBeforeUnmount(() => {
     <!-- `append`: un botón dentro del recuadro, abajo a la derecha (el chat pone ahí «Enviar», como el icono de un campo de texto). -->
     <div ref="wrapper" class="position-relative">
       <EditorContent :editor="editor" />
+      <!-- Burbuja del enlace bajo el cursor (ver `placeLinkBubble`). `mousedown.prevent`: no quitar el foco al editor. -->
+      <div
+        v-if="linkBox && !link.open"
+        class="rte-link-bubble position-absolute d-flex align-center ga-1 bg-surface border rounded elevation-2 pl-2"
+        :style="{ top: `${linkBox.top}px`, left: `${linkBox.left}px` }"
+        data-link-bubble
+      >
+        <v-icon icon="mdi-link-variant" size="14" class="text-medium-emphasis" />
+        <a :href="linkBox.href" target="_blank" rel="noopener noreferrer" class="text-body-small text-primary text-truncate" :title="t('projects.editor.openLink')" @mousedown.prevent>{{ linkBox.href }}</a>
+        <v-btn v-tooltip:top="t('projects.editor.openLink')" :href="linkBox.href" target="_blank" rel="noopener noreferrer" icon="mdi-open-in-new" size="x-small" variant="text" :aria-label="t('projects.editor.openLink')" @mousedown.prevent />
+        <v-btn v-tooltip:top="t('projects.editor.editLink')" icon="mdi-pencil-outline" size="x-small" variant="text" :aria-label="t('projects.editor.editLink')" @mousedown.prevent @click.stop="editLinkFromBubble" />
+      </div>
       <!-- Agrandar o achicar la tabla desde sus bordes (ver `placeTableControls`). `mousedown.prevent`: no quitar el foco al editor. -->
       <template v-if="tableBox">
         <div
@@ -906,6 +965,12 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+/* Burbuja del enlace: por encima del texto y con un ancho tope para que una dirección larga se corte con «…». */
+.rte-link-bubble {
+  z-index: 3;
+  max-width: 320px;
+}
+
 /* Botones de los bordes de la tabla: centrados sobre el borde, por encima del texto y con fondo para leerse sobre las celdas. */
 .rte-table-edge {
   z-index: 2;
