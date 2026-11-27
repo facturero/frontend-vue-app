@@ -331,6 +331,24 @@ async function assignSubtask(sub: Task, userId: string | null): Promise<void> {
   }
 }
 
+/**
+ * Cambiar el título de una subtarea desde la fila. Antes la fila solo abría la subtarea, y desde la lista solo se podía asignar o
+ * borrar (lo vio un cliente). Vacío o igual, se deja como estaba; `subtaskTitleKey` vuelve a pintar el campo con el título guardado.
+ */
+const subtaskTitleKey = ref(0);
+async function renameSubtask(sub: Task, raw: string): Promise<void> {
+  const value = raw.replace(/\s+/g, ' ').trim();
+  if (!value || value === sub.title) {
+    subtaskTitleKey.value++;
+    return;
+  }
+  try {
+    await store.updateTask(sub.id, sub.version, { title: value });
+  } catch {
+    subtaskTitleKey.value++;
+  }
+}
+
 async function removeSubtask(sub: Task): Promise<void> {
   const ok = await confirm({ title: t('projects.task.deleteSubtaskTitle'), text: t('projects.task.deleteSubtaskText', { title: sub.title }), confirmText: t('common.delete'), destructive: true });
   if (!ok) return;
@@ -689,7 +707,23 @@ const moveTargets = computed(() => {
                   :aria-label="t('projects.task.markComplete')"
                   @click.stop="toggle(s)" /></template></v-tooltip>
               </template>
-              <v-list-item-title :class="{ 'text-decoration-line-through text-medium-emphasis': s.completedAt }">{{ s.title }}</v-list-item-title>
+              <!-- El título se edita en la fila (Enter o salir del campo guarda); la flecha de la derecha abre la subtarea. -->
+              <v-text-field
+                v-if="!readOnly"
+                :key="`${s.id}:${s.version}:${subtaskTitleKey}`"
+                :model-value="s.title"
+                variant="plain"
+                hide-details
+                :maxlength="TASK_TITLE_MAX"
+                class="subtask-title"
+                :class="{ 'subtask-title--done': s.completedAt }"
+                :aria-label="t('projects.task.subtaskTitle')"
+                data-subtask-title
+                @click.stop
+                @keydown.enter.prevent="($event.target as HTMLInputElement).blur()"
+                @blur="renameSubtask(s, ($event.target as HTMLInputElement).value)"
+              />
+              <v-list-item-title v-else :class="{ 'text-decoration-line-through text-medium-emphasis': s.completedAt }">{{ s.title }}</v-list-item-title>
               <!-- Responsable y borrar desde la fila, sin abrir la subtarea (lo pidió un cliente: entrar a cada una era lento). -->
               <template #append>
                 <div class="d-flex align-center ga-1" @click.stop>
@@ -722,6 +756,8 @@ const moveTargets = computed(() => {
                   <UserAvatar v-else-if="s.assigneeUserId" :user-id="s.assigneeUserId" :size="22" />
                   <v-btn v-if="!readOnly" v-tooltip:top="t('projects.task.deleteSubtask')" icon="mdi-trash-can-outline" size="small"
                     variant="text" :aria-label="t('projects.task.deleteSubtask')" @click="removeSubtask(s)" />
+                  <v-btn v-tooltip:top="t('projects.task.openSubtask')" icon="mdi-chevron-right" size="small" variant="text"
+                    :aria-label="t('projects.task.openSubtask')" data-subtask-open @click="store.openTask(s.id)" />
                 </div>
               </template>
             </v-list-item>
@@ -781,6 +817,18 @@ const moveTargets = computed(() => {
 
 /* «Agregar subtarea»: el campo `plain` reserva relleno arriba para una etiqueta flotante que aquí no hay, y su texto (32 px, pegado
    arriba) quedaba más alto que el «+», centrado en los 40 px del botón. Sin ese relleno y con la altura del botón, quedan en línea. */
+/* Título de subtarea editable: el campo `plain` reserva relleno para una etiqueta que aquí no hay; sin él queda alineado con el
+   resto de la fila. Tachado si está terminada, como antes. */
+.subtask-title :deep(.v-field__input) {
+  padding-top: 0;
+  padding-bottom: 0;
+  min-height: 32px;
+}
+.subtask-title--done :deep(input) {
+  text-decoration: line-through;
+  color: rgba(var(--v-theme-on-surface), var(--v-medium-emphasis-opacity));
+}
+
 .subtask-add :deep(.v-field__input),
 .subtask-add :deep(.v-field__prepend-inner) {
   padding-top: 0;

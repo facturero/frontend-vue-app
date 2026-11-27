@@ -4011,6 +4011,8 @@
       "addSubtaskButton": "Add subtask",
       "assignSubtask": "Assign",
       "deleteSubtask": "Delete subtask",
+      "subtaskTitle": "Subtask title",
+      "openSubtask": "Open subtask",
       "deleteSubtaskTitle": "Delete this subtask?",
       "deleteSubtaskText": "\"{title}\" will be deleted along with its comments and attachments.",
       "delete": "Delete task",

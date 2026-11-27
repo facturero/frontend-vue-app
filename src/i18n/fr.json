@@ -4011,6 +4011,8 @@
       "addSubtaskButton": "Ajouter la sous-tâche",
       "assignSubtask": "Assigner",
       "deleteSubtask": "Supprimer la sous-tâche",
+      "subtaskTitle": "Titre de la sous-tâche",
+      "openSubtask": "Ouvrir la sous-tâche",
       "deleteSubtaskTitle": "Supprimer cette sous-tâche ?",
       "deleteSubtaskText": "« {title} » sera supprimée avec ses commentaires et pièces jointes.",
       "delete": "Supprimer la tâche",

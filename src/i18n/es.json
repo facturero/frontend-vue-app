@@ -4011,6 +4011,8 @@
       "addSubtaskButton": "Agregar subtarea",
       "assignSubtask": "Asignar responsable",
       "deleteSubtask": "Eliminar subtarea",
+      "subtaskTitle": "Título de la subtarea",
+      "openSubtask": "Abrir subtarea",
       "deleteSubtaskTitle": "¿Eliminar esta subtarea?",
       "deleteSubtaskText": "Se eliminará «{title}» con sus comentarios y adjuntos.",
       "delete": "Eliminar tarea",
