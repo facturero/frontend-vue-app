@@ -3796,6 +3796,10 @@
       "deleteTable": "Delete table",
       "paragraphBefore": "Paragraph above the table",
       "paragraphAfter": "Paragraph below the table",
+      "addColumnEnd": "Add a column at the end",
+      "removeColumnEnd": "Remove the last column",
+      "addRowEnd": "Add a row at the end",
+      "removeRowEnd": "Remove the last row",
       "attach": "Attach a file (you can also paste or drop it here)",
       "removeFile": "Remove from text (stays in Attachments)"
     },

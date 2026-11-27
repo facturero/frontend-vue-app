@@ -3796,6 +3796,10 @@
       "deleteTable": "Eliminar tabla",
       "paragraphBefore": "Párrafo encima de la tabla",
       "paragraphAfter": "Párrafo debajo de la tabla",
+      "addColumnEnd": "Agregar columna al final",
+      "removeColumnEnd": "Quitar la última columna",
+      "addRowEnd": "Agregar fila al final",
+      "removeRowEnd": "Quitar la última fila",
       "attach": "Adjuntar archivo (también puedes pegarlo o soltarlo aquí)",
       "removeFile": "Quitar del texto (sigue en Adjuntos)"
     },

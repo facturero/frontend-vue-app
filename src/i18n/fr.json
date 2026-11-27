@@ -3796,6 +3796,10 @@
       "deleteTable": "Supprimer le tableau",
       "paragraphBefore": "Paragraphe au-dessus du tableau",
       "paragraphAfter": "Paragraphe sous le tableau",
+      "addColumnEnd": "Ajouter une colonne à la fin",
+      "removeColumnEnd": "Supprimer la dernière colonne",
+      "addRowEnd": "Ajouter une ligne à la fin",
+      "removeRowEnd": "Supprimer la dernière ligne",
       "attach": "Joindre un fichier (vous pouvez aussi le coller ou le déposer ici)",
       "removeFile": "Retirer du texte (reste dans les pièces jointes)"
     },

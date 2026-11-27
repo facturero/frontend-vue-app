@@ -7,6 +7,7 @@ import { NodeSelection, PluginKey } from '@tiptap/pm/state';
 import Suggestion from '@tiptap/suggestion';
 import StarterKit from '@tiptap/starter-kit';
 import { TextSelection } from '@tiptap/pm/state';
+import { addColumn, addRow, removeColumn, removeRow, selectedRect } from '@tiptap/pm/tables';
 import Mention from '@tiptap/extension-mention';
 import Link from '@tiptap/extension-link';
 // TipTap 3: Placeholder vive en `@tiptap/extensions` y las cuatro piezas de la tabla salen de un solo paquete.
@@ -473,12 +474,16 @@ const editor = useEditor({
     },
   },
   onUpdate: ({ editor: e }) => emit('update:modelValue', e.getJSON() as RichDoc),
+  onTransaction: () => placeTableControls(),
   onBlur: ({ event }) => {
     // Abrir un menú de la barra (enlace, tabla) quita el foco al editor: eso no es «terminé de escribir», no se guarda todavía.
     const next = (event as FocusEvent | undefined)?.relatedTarget as HTMLElement | null;
     if (next?.closest('.rte-popover')) return;
+    // Fuera del editor, los botones de la tabla sobran (y taparían lo que haya al lado).
+    tableBox.value = null;
     emit('blur');
   },
+  onFocus: () => placeTableControls(),
 });
 
 // Un cambio que llega de fuera (se guardó en otra pestaña, se vació tras comentar) reemplaza el contenido sin disparar `update`.
@@ -616,6 +621,48 @@ function addParagraphBeside(side: 'before' | 'after', onlyIfMissing = false): vo
   ed.view.focus();
 }
 
+/**
+ * Botones + / − en los bordes de la tabla donde está el cursor: a la derecha, columnas; abajo, filas. Siempre al final (como en
+ * Notion), para no depender de en qué celda está el cursor. Antes solo estaba el menú de la barra, y el cliente buscaba agrandar
+ * la tabla desde la propia tabla.
+ */
+const wrapper = ref<HTMLElement | null>(null);
+const tableBox = ref<{ top: number; left: number; width: number; height: number; rows: number; cols: number } | null>(null);
+
+function placeTableControls(): void {
+  const ed = editor.value;
+  const box = wrapper.value;
+  if (!ed || !box || !props.editable || !ed.isActive('table')) {
+    tableBox.value = null;
+    return;
+  }
+  const dom = ed.view.domAtPos(ed.state.selection.from).node;
+  const table = (dom instanceof HTMLElement ? dom : dom.parentElement)?.closest('table');
+  if (!table) {
+    tableBox.value = null;
+    return;
+  }
+  const rect = selectedRect(ed.state);
+  const t = table.getBoundingClientRect();
+  const w = box.getBoundingClientRect();
+  tableBox.value = { top: t.top - w.top, left: t.left - w.left, width: t.width, height: t.height, rows: rect.map.height, cols: rect.map.width };
+}
+
+type TableEdge = 'addRow' | 'removeRow' | 'addColumn' | 'removeColumn';
+function tableEdge(action: TableEdge): void {
+  const ed = editor.value;
+  if (!ed?.isActive('table')) return;
+  const rect = selectedRect(ed.state);
+  const tr = ed.state.tr;
+  if (action === 'addRow') addRow(tr, rect, rect.map.height);
+  else if (action === 'addColumn') addColumn(tr, rect, rect.map.width);
+  else if (action === 'removeRow' && rect.map.height > 1) removeRow(tr, rect, rect.map.height - 1);
+  else if (action === 'removeColumn' && rect.map.width > 1) removeColumn(tr, rect, rect.map.width - 1);
+  else return;
+  ed.view.dispatch(tr);
+  ed.view.focus();
+}
+
 function insertTable(): void {
   editor.value?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
   // Primero abajo y luego arriba: insertar arriba corre las posiciones de lo que viene detrás, al revés no.
@@ -657,7 +704,16 @@ defineExpose({
   uploading: () => uploading.value > 0,
 });
 
-onBeforeUnmount(() => editor.value?.destroy());
+// El panel lateral se puede ensanchar: los botones de la tabla se recolocan cuando cambia el ancho del editor.
+const resizeObserver = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(() => placeTableControls()) : null;
+watch(wrapper, (el, old) => {
+  if (old) resizeObserver?.unobserve(old);
+  if (el) resizeObserver?.observe(el);
+});
+onBeforeUnmount(() => {
+  resizeObserver?.disconnect();
+  editor.value?.destroy();
+});
 </script>
 
 <template>
@@ -750,8 +806,25 @@ onBeforeUnmount(() => editor.value?.destroy());
     <!-- Fuera de la barra: así `attach()` también abre el selector cuando no hay barra. -->
     <input v-if="uploadFile" ref="fileInput" type="file" multiple hidden :accept="accept" @change="pickFiles" />
     <!-- `append`: un botón dentro del recuadro, abajo a la derecha (el chat pone ahí «Enviar», como el icono de un campo de texto). -->
-    <div class="position-relative">
+    <div ref="wrapper" class="position-relative">
       <EditorContent :editor="editor" />
+      <!-- Agrandar o achicar la tabla desde sus bordes (ver `placeTableControls`). `mousedown.prevent`: no quitar el foco al editor. -->
+      <template v-if="tableBox">
+        <div
+          class="rte-table-edge rte-table-edge--cols position-absolute d-flex flex-column bg-surface border rounded-pill elevation-2"
+          :style="{ top: `${tableBox.top + tableBox.height / 2}px`, left: `${tableBox.left + tableBox.width}px` }"
+        >
+          <v-btn v-tooltip:right="t('projects.editor.addColumnEnd')" icon="mdi-plus" size="small" density="comfortable" variant="text" color="primary" :aria-label="t('projects.editor.addColumnEnd')" data-table-add-col @mousedown.prevent @click="tableEdge('addColumn')" />
+          <v-btn v-tooltip:right="t('projects.editor.removeColumnEnd')" icon="mdi-minus" size="small" density="comfortable" variant="text" :disabled="tableBox.cols <= 1" :aria-label="t('projects.editor.removeColumnEnd')" data-table-remove-col @mousedown.prevent @click="tableEdge('removeColumn')" />
+        </div>
+        <div
+          class="rte-table-edge rte-table-edge--rows position-absolute d-flex bg-surface border rounded-pill elevation-2"
+          :style="{ top: `${tableBox.top + tableBox.height}px`, left: `${tableBox.left + tableBox.width / 2}px` }"
+        >
+          <v-btn v-tooltip:bottom="t('projects.editor.addRowEnd')" icon="mdi-plus" size="small" density="comfortable" variant="text" color="primary" :aria-label="t('projects.editor.addRowEnd')" data-table-add-row @mousedown.prevent @click="tableEdge('addRow')" />
+          <v-btn v-tooltip:bottom="t('projects.editor.removeRowEnd')" icon="mdi-minus" size="small" density="comfortable" variant="text" :disabled="tableBox.rows <= 1" :aria-label="t('projects.editor.removeRowEnd')" data-table-remove-row @mousedown.prevent @click="tableEdge('removeRow')" />
+        </div>
+      </template>
       <div v-if="$slots.append && editable" class="rte-append position-absolute d-flex align-center">
         <slot name="append" />
       </div>
@@ -808,6 +881,16 @@ onBeforeUnmount(() => editor.value?.destroy());
 </template>
 
 <style scoped>
+/* Botones de los bordes de la tabla: centrados sobre el borde, por encima del texto y con fondo para leerse sobre las celdas. */
+.rte-table-edge {
+  z-index: 2;
+}
+.rte-table-edge--cols {
+  transform: translate(-50%, -50%);
+}
+.rte-table-edge--rows {
+  transform: translate(-50%, -50%);
+}
 /* Sitio para el botón de `append` dentro del recuadro: el texto no pasa por debajo. */
 .rte--append :deep(.ProseMirror) {
   padding-right: 52px;
