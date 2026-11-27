@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { useDisplay } from 'vuetify';
 import { useConfirm } from '@/composable/useConfirm';
 import { useProjectsStore } from '@/stores/projects';
-import { TAG_COLORS } from '@/utils/projects';
+import { isCustomTagColor, TAG_COLORS } from '@/utils/projects';
 import type { Tag, TagColor } from '@/types/projects';
 import TagColorSwatches from './TagColorSwatches.vue';
 
@@ -38,6 +38,8 @@ const newColor = computed<TagColor>({
   set: (c) => (pickedColor.value = c),
 });
 const newColorMenu = ref(false);
+/** Nombre del color para lectores de pantalla: el de la paleta, o el código si es uno libre. */
+const colorName = (c: TagColor) => (isCustomTagColor(c) ? c.toUpperCase() : t(`projects.colors.${c}`));
 const creating = ref(false);
 /** Ya existe una con ese nombre (el servidor no distingue mayúsculas): se avisa en vez de «crear» la misma. */
 const duplicate = computed(() => {
@@ -138,7 +140,7 @@ async function remove(tag: Tag): Promise<void> {
                 :color="newColor"
                 rounded="circle"
                 size="small"
-                :aria-label="t('projects.tags.colorOption', { color: t(`projects.colors.${newColor}`) })"
+                :aria-label="t('projects.tags.colorOption', { color: colorName(newColor) })"
                 data-new-tag-color
               >
                 <v-icon icon="mdi-tag" size="small" />
@@ -185,7 +187,7 @@ async function remove(tag: Tag): Promise<void> {
                     :color="tag.color"
                     rounded="circle"
                     size="small"
-                    :aria-label="t('projects.tags.colorOption', { color: t(`projects.colors.${tag.color}`) })"
+                    :aria-label="t('projects.tags.colorOption', { color: colorName(tag.color) })"
                   >
                     <v-icon icon="mdi-tag" size="small" />
                   </v-btn>

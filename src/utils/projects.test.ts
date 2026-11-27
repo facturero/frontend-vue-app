@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { CustomField, MyTask } from '@/types/projects';
-import { addDays, avatarColor, dueState, fieldValueText, groupMyTasks, initials, linkRoute, localIsoDate, neighbours, fileKind } from './projects';
+import { addDays, avatarColor, dueState, fieldValueText, groupMyTasks, initials, linkRoute, localIsoDate, neighbours, fileKind, isCustomTagColor, readableTagColor } from './projects';
 
 const task = (over: Partial<MyTask>): MyTask => ({
   id: over.id ?? 'x',
@@ -152,5 +152,30 @@ describe('fileKind: icono y color de cada tipo de archivo', () => {
   it('sin extensión, decide por el tipo MIME', () => {
     expect(fileKind('application/pdf', 'escaneo')).toEqual({ icon: 'mdi-file-pdf-box', color: 'error' });
     expect(fileKind('image/webp', 'captura')).toEqual({ icon: 'mdi-file-image-outline', color: 'secondary' });
+  });
+});
+
+describe('color libre de etiqueta', () => {
+  const lum = (hex: string) => {
+    const lin = (v: number) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+    const [r, g, b] = [1, 3, 5].map((i) => lin(parseInt(hex.slice(i, i + 2), 16) / 255)) as [number, number, number];
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
+  const contrastOnWhite = (hex: string) => 1.05 / (lum(hex) + 0.05);
+  it('un pastel o el blanco bajan hasta leerse sobre blanco (≥ 3:1); un casi negro sube; los medios no cambian', () => {
+    for (const hex of ['#fff7a8', '#ffffff', '#c8f0ff', '#ffed3d']) expect(contrastOnWhite(readableTagColor(hex))).toBeGreaterThanOrEqual(2.99);
+    for (const hex of ['#000000', '#0a0a1a']) expect(lum(readableTagColor(hex))).toBeGreaterThanOrEqual(0.115);
+    expect(readableTagColor('#2f9e44')).toBe('#2f9e44');
+    expect(readableTagColor('#7048E8')).toBe('#7048e8');
+  });
+  it('conserva el tono: un amarillo pastel sigue siendo amarillo (rojo y verde altos, azul bajo)', () => {
+    const out = readableTagColor('#fff7a8');
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(out.slice(i, i + 2), 16));
+    expect(r).toBeGreaterThan(b! + 60);
+    expect(g).toBeGreaterThan(b! + 60);
+  });
+  it('distingue un color libre de uno de la paleta', () => {
+    expect(isCustomTagColor('#7048e8')).toBe(true);
+    expect(isCustomTagColor('tag-violet')).toBe(false);
   });
 });

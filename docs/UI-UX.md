@@ -183,6 +183,10 @@ organización eligen entre 16 colores: `primary`, `secondary`, `success`, `warni
 heredados por los temas de empresa. Solo para etiquetas: no son colores semánticos y
 no se usan en otras pantallas. La lista vive en `utils/projects.ts` (`TAG_COLORS`) y
 projects-service valida la misma; el selector es `TagColorSwatches` (8 por fila).
+Su último círculo, «Color personalizado», abre `v-color-picker` para cualquier otro
+color: es un dato que elige la persona (se guarda `#rrggbb` en la etiqueta), no un
+color escrito en el código. Pasa antes por `readableTagColor`, que mueve solo la
+luminosidad hasta que el texto del chip tenga contraste ≥ 3:1 sobre blanco.
 
 Ejemplo real en `CustomersListView.vue`:
 

@@ -25,6 +25,6 @@ const { t } = useI18n();
   </v-list-item>
   <div class="d-flex align-center ga-2 px-4 pb-2" @mousedown.prevent @click.stop>
     <span class="text-body-small text-medium-emphasis">{{ t('projects.tags.color') }}</span>
-    <TagColorSwatches v-model="model" />
+    <TagColorSwatches v-model="model" :custom="false" />
   </div>
 </template>
