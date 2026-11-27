@@ -89,6 +89,9 @@ export function initials(user: DirectoryUser | undefined): string {
 export const HEALTH_COLOR: Record<ProjectHealth, string> = { on_track: 'success', at_risk: 'warning', off_track: 'error', complete: 'info' };
 
 // ── Entregable 4 ──────────────────────────────────────────────────────────────
+/** Largo máximo del título de una tarea: el mismo tope que valida projects-service (`validators.ts`). */
+export const TASK_TITLE_MAX = 500;
+
 export const PROJECT_COLORS: ProjectColor[] = ['primary', 'secondary', 'success', 'warning', 'error', 'info'];
 
 /**

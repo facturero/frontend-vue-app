@@ -7,7 +7,7 @@ import { formatMinutes } from '@/utils/duration';
 import DateField from '@/components/ui/DateField.vue';
 import { useAuthStore } from '@/stores/auth';
 import { useProjectsStore } from '@/stores/projects';
-import { FIELD_ICON, displayName } from '@/utils/projects';
+import { FIELD_ICON, TASK_TITLE_MAX, displayName } from '@/utils/projects';
 import type { ApprovalDecision, RichDoc, Task } from '@/types/projects';
 import DueDateChip from './DueDateChip.vue';
 import RichTextEditor from './RichTextEditor.vue';
@@ -160,6 +160,12 @@ async function save(patch: Parameters<typeof store.updateTask>[2]): Promise<bool
     return false;
   }
 }
+
+/**
+ * Pasado el tope del servidor, guardar daba «La petición no es válida» sin decir por qué (lo vio un cliente con una historia de
+ * usuario larga). El campo ya no deja escribir más y, cerca del tope, enseña el contador.
+ */
+const titleCounter = computed(() => (title.value.length >= TASK_TITLE_MAX * 0.9 ? TASK_TITLE_MAX : undefined));
 
 function saveTitle(): void {
   // El título se edita en varias líneas (para que uno largo se lea entero), pero es una sola: un salto pegado se vuelve espacio.
@@ -454,6 +460,9 @@ const moveTargets = computed(() => {
           class="title-field text-title-large"
           rows="1"
           auto-grow
+          :maxlength="TASK_TITLE_MAX"
+          :counter="titleCounter"
+          persistent-counter
           :readonly="readOnly"
           :aria-label="t('projects.task.title')"
           data-task-title
