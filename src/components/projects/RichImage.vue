@@ -8,7 +8,7 @@ import { defaultFileUrlResolver, FILE_URL_RESOLVER } from '@/composable/useFileU
  * Imagen dentro de una descripción o un comentario. El documento guarda el id del archivo en document-service y no su URL (la
  * firmada caduca en una hora): aquí se pide el enlace con la sesión y se pinta en línea, para verla sin descargarla.
  *
- * Se pinta como miniatura de alto fijo y, si hay varias seguidas, en fila (lo pidió un cliente: una captura de pantalla alta
+ * Se pinta como miniatura de tamaño fijo y, si hay varias seguidas, en fila (lo pidió un cliente: una captura de pantalla alta
  * ocupaba media tarea y se veía mal). A tamaño completo se ve en un visor dentro del CRM con un clic en la imagen, también dentro
  * del editor: antes allí había que atinar a una lupa que solo salía al pasar el ratón. En el editor, la «×» la quita del texto.
  *
@@ -26,6 +26,21 @@ const { xs } = useDisplay();
 const resolver = inject(FILE_URL_RESOLVER, defaultFileUrlResolver);
 const src = computed(() => resolver.url(props.documentId));
 const viewing = ref(false);
+/**
+ * Cómo cabe en el recuadro, según su forma. Una captura horizontal se ve entera (con bandas arriba y abajo): recortada perdía los
+ * lados, que es donde suele estar el menú. Una vertical llena el recuadro y se ve desde arriba: entera quedaría como una tira.
+ */
+const portrait = ref(false);
+function onLoad(event: Event): void {
+  const img = event.target as HTMLImageElement;
+  portrait.value = img.naturalHeight > img.naturalWidth * (THUMB_H / THUMB_W);
+}
+</script>
+
+<script lang="ts">
+/** Tamaño de la miniatura (también en el estilo): caben dos por fila en el panel de una tarea. */
+const THUMB_W = 200;
+const THUMB_H = 136;
 </script>
 
 <template>
@@ -36,7 +51,9 @@ const viewing = ref(false);
         :alt="alt"
         :title="t('projects.image.view')"
         class="rich-image__thumb rounded cursor-zoom-in"
+        :class="{ 'rich-image__thumb--portrait': portrait }"
         data-rich-image
+        @load="onLoad"
         @click="viewing = true"
       />
       <v-btn
@@ -50,7 +67,7 @@ const viewing = ref(false);
         @click.stop="emit('remove')"
       />
     </template>
-    <v-skeleton-loader v-else type="image" width="240" height="160" />
+    <v-skeleton-loader v-else type="image" width="200" height="136" />
 
     <v-dialog v-model="viewing" :fullscreen="xs" max-width="1200">
       <v-card>
@@ -77,16 +94,22 @@ const viewing = ref(false);
   overflow: hidden;
   margin-right: 8px;
 }
-/* Miniatura de alto fijo: una captura alta o una ancha se ven del mismo tamaño y recortadas al centro; entera, en el visor. */
+/* Miniatura de tamaño fijo, la misma para cualquier captura: con solo el alto fijo, una vertical quedaba como una tira estrecha y
+   una horizontal ocupaba el renglón (lo vio un cliente). Horizontal, entera dentro del recuadro; vertical, llenándolo desde arriba,
+   que en una captura es donde está lo que importa (ver `portrait`). Entera siempre, en el visor. Tamaños en px y no en %: un tope en % no cuenta al calcular el ancho de
+   un `inline-block` y la fila se rompía. */
 .rich-image__thumb {
   display: block;
-  height: 160px;
-  width: auto;
-  /* En píxeles y no en %: un tope en % no cuenta al calcular el ancho de un `inline-block`, y una imagen ancha se quedaba con el
-     renglón entero, así que la siguiente bajaba de línea en vez de ponerse al lado. */
-  max-width: 320px;
-  object-fit: cover;
+  width: 200px;
+  height: 136px;
+  max-width: 100%;
+  object-fit: contain;
+  background-color: rgba(var(--v-theme-on-surface), 0.04);
   border: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
+}
+.rich-image__thumb--portrait {
+  object-fit: cover;
+  object-position: top center;
 }
 .rich-image--selected .rich-image__thumb {
   outline: 2px solid rgb(var(--v-theme-primary));
