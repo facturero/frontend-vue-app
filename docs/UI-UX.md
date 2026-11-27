@@ -185,8 +185,17 @@ no se usan en otras pantallas. La lista vive en `utils/projects.ts` (`TAG_COLORS
 projects-service valida la misma; el selector es `TagColorSwatches` (8 por fila).
 Su último círculo, «Color personalizado», abre `v-color-picker` para cualquier otro
 color: es un dato que elige la persona (se guarda `#rrggbb` en la etiqueta), no un
-color escrito en el código. Pasa antes por `readableTagColor`, que mueve solo la
-luminosidad hasta que el texto del chip tenga contraste ≥ 3:1 sobre blanco.
+color escrito en el código, y se guarda tal cual.
+
+**Los chips de etiqueta son sólidos (`TagChip`, 2026-11-27).** Fondo del color de la
+etiqueta y texto blanco o negro, el de mayor contraste WCAG (`readableOn` en
+`utils/projects.ts`; con la paleta y los colores libres queda ≥ 4,5:1 en claro y
+oscuro, medido). No se deja a Vuetify: con el nombre del token usa el `on-*` del tema
+(blanco sobre `warning`, `success`, `tag-yellow`) y con un hexadecimal su cálculo APCA
+deja blanco el amarillo o el salmón. Así se lee cualquier color, también negro o un
+pastel, y el color libre se guarda tal cual. Toda etiqueta se pinta con `TagChip`
+(tablero, lista, panel de la tarea); los círculos del selector usan el mismo cálculo
+para la ✓. El default de `v-chip` sigue siendo `tonal`.
 
 Ejemplo real en `CustomersListView.vue`:
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { CustomField, MyTask } from '@/types/projects';
-import { addDays, avatarColor, dueState, fieldValueText, groupMyTasks, initials, linkRoute, localIsoDate, neighbours, fileKind, isCustomTagColor, readableTagColor } from './projects';
+import { addDays, avatarColor, dueState, fieldValueText, groupMyTasks, initials, linkRoute, localIsoDate, neighbours, fileKind, isCustomTagColor, readableOn, resolveTagColor } from './projects';
 
 const task = (over: Partial<MyTask>): MyTask => ({
   id: over.id ?? 'x',
@@ -162,17 +162,18 @@ describe('color libre de etiqueta', () => {
     return 0.2126 * r + 0.7152 * g + 0.0722 * b;
   };
   const contrastOnWhite = (hex: string) => 1.05 / (lum(hex) + 0.05);
-  it('un pastel o el blanco bajan hasta leerse sobre blanco (≥ 3:1); un casi negro sube; los medios no cambian', () => {
-    for (const hex of ['#fff7a8', '#ffffff', '#c8f0ff', '#ffed3d']) expect(contrastOnWhite(readableTagColor(hex))).toBeGreaterThanOrEqual(2.99);
-    for (const hex of ['#000000', '#0a0a1a']) expect(lum(readableTagColor(hex))).toBeGreaterThanOrEqual(0.115);
-    expect(readableTagColor('#2f9e44')).toBe('#2f9e44');
-    expect(readableTagColor('#7048E8')).toBe('#7048e8');
+  it('el texto de una etiqueta es blanco o negro, el que más contrasta', () => {
+    expect(readableOn('#000000')).toBe('white');
+    expect(readableOn('#ffffff')).toBe('black');
+    // Amarillo y salmón: Vuetify los dejaba en blanco (contraste < 3).
+    expect(readableOn('#c99a06')).toBe('black');
+    expect(readableOn('#fa896b')).toBe('black');
+    expect(readableOn('#7048e8')).toBe('white');
+    expect(readableOn('warning')).toBeUndefined();
   });
-  it('conserva el tono: un amarillo pastel sigue siendo amarillo (rojo y verde altos, azul bajo)', () => {
-    const out = readableTagColor('#fff7a8');
-    const [r, g, b] = [1, 3, 5].map((i) => parseInt(out.slice(i, i + 2), 16));
-    expect(r).toBeGreaterThan(b! + 60);
-    expect(g).toBeGreaterThan(b! + 60);
+  it('resuelve un color de la paleta al del tema y deja el libre tal cual', () => {
+    expect(resolveTagColor('tag-red', { 'tag-red': '#e03131' })).toBe('#e03131');
+    expect(resolveTagColor('#123456', {})).toBe('#123456');
   });
   it('distingue un color libre de uno de la paleta', () => {
     expect(isCustomTagColor('#7048e8')).toBe(true);

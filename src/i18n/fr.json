@@ -4074,7 +4074,7 @@
       "exists": "Une étiquette porte déjà ce nom.",
       "customColor": "Couleur personnalisée",
       "useColor": "Utiliser cette couleur",
-      "customHint": "La teinte est ajustée pour rester lisible en mode clair et sombre.",
+      "customHint": "Le texte de l'étiquette devient clair ou foncé selon la couleur.",
       "colorEverywhere": "Couleur (change sur toutes les tâches)",
       "name": "Nom",
       "searchLabel": "Rechercher une étiquette",

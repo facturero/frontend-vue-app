@@ -9,6 +9,7 @@ import { fieldValueText } from '@/utils/projects';
 import type { BoardTask, CustomField } from '@/types/projects';
 import DueDateChip from './DueDateChip.vue';
 import SectionMenu from './SectionMenu.vue';
+import TagChip from './TagChip.vue';
 import TaskBulkBar from './TaskBulkBar.vue';
 import UserAvatar from './UserAvatar.vue';
 
@@ -243,7 +244,7 @@ defineExpose({
                 @keyup.enter="($event.target as HTMLInputElement).blur()"
               />
             </div>
-            <v-chip v-for="tag in task.tags.slice(0, 2)" :key="tag.id" size="x-small" :color="tag.color" class="d-none d-sm-flex flex-shrink-0">{{ tag.name }}</v-chip>
+            <TagChip v-for="tag in task.tags.slice(0, 2)" :key="tag.id" size="x-small" :color="tag.color" class="d-none d-sm-flex flex-shrink-0">{{ tag.name }}</TagChip>
             <v-chip v-if="task.tags.length > 2" size="x-small" class="d-none d-sm-flex flex-shrink-0">+{{ task.tags.length - 2 }}</v-chip>
             <v-chip v-if="task.actualMinutes" size="x-small" prepend-icon="mdi-timer-outline" class="d-none d-sm-flex flex-shrink-0">{{ formatMinutes(task.actualMinutes) }}</v-chip>
             <v-chip v-if="task.subtasks.total && !smAndDown" size="x-small" prepend-icon="mdi-file-tree-outline" class="flex-shrink-0">

@@ -121,56 +121,30 @@ export const TAG_COLORS: TagPaletteColor[] = [
 export const isCustomTagColor = (c: TagColor): c is `#${string}` => c.startsWith('#');
 
 /**
- * Un color libre del selector, llevado a un tono que se lea: las etiquetas se pintan como chips tonales (el texto va en el color, sobre
- * un fondo suave del mismo), así que un color muy claro (un amarillo pastel) no se lee sobre blanco y uno muy oscuro no se lee en el
- * tema oscuro. Se conserva el tono y la saturación (HSL) y se mueve solo la luminosidad hasta que la luminancia relativa (la del
- * contraste WCAG, no la «L» de HSL: un amarillo con L 60 % sigue siendo ilegible sobre blanco) quede entre `min` y `max`. Con 0,30 de
- * tope el texto tiene contraste ≥ 3:1 sobre blanco.
+ * El `#rrggbb` real de un color de etiqueta: el libre tal cual y el de la paleta, el del tema activo (`theme.current.colors`). Con un
+ * hexadecimal Vuetify elige el texto del chip por contraste (ver `TagChip`); sin el color en el tema, se devuelve el nombre.
  */
-export function readableTagColor(hex: string, min = 0.12, max = 0.3): `#${string}` {
-  const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i.exec(hex.trim());
-  if (!m) return '#7048e8';
-  const [r, g, b] = [m[1], m[2], m[3]].map((x) => parseInt(x!, 16) / 255) as [number, number, number];
-  const hi = Math.max(r, g, b);
-  const lo = Math.min(r, g, b);
-  const l = (hi + lo) / 2;
-  const d = hi - lo;
-  const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
-  let h = 0;
-  if (d !== 0) {
-    if (hi === r) h = ((g - b) / d) % 6;
-    else if (hi === g) h = (b - r) / d + 2;
-    else h = (r - g) / d + 4;
-    h *= 60;
-    if (h < 0) h += 360;
-  }
-  const rgbAt = (L: number): [number, number, number] => {
-    const c = (1 - Math.abs(2 * L - 1)) * s;
-    const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
-    const o = L - c / 2;
-    const [r1, g1, b1] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
-    return [r1 + o, g1 + o, b1 + o];
+/**
+ * Texto (e icono) que se lee sobre un fondo `#rrggbb`: blanco o negro, el de mayor contraste WCAG. No se deja a Vuetify: su cálculo
+ * (APCA) elige blanco en tonos medios como el amarillo o el salmón, donde el negro contrasta más (2,4–2,9 frente a más de 7, medido
+ * con la paleta de etiquetas). Con un fondo que no es hexadecimal no decide (`undefined`): queda el de Vuetify.
+ */
+export function readableOn(background: string): 'white' | 'black' | undefined {
+  const m = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})/i.exec(background);
+  if (!m) return undefined;
+  const lin = (x: string) => {
+    const v = parseInt(x, 16) / 255;
+    return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
   };
-  const lum = ([R, G, B]: [number, number, number]) => {
-    const lin = (v: number) => (v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
-    return 0.2126 * lin(R) + 0.7152 * lin(G) + 0.0722 * lin(B);
-  };
-  let L = l;
-  const target = lum(rgbAt(l)) > max ? max : lum(rgbAt(l)) < min ? min : null;
-  if (target !== null) {
-    // La luminancia crece con L (mismo tono y saturación): búsqueda binaria del L que la deja justo en el límite.
-    let a = 0;
-    let z = 1;
-    for (let k = 0; k < 30; k++) {
-      L = (a + z) / 2;
-      if (lum(rgbAt(L)) > target) z = L;
-      else a = L;
-    }
-    L = target === max ? a : z;
-  }
-  const to = (v: number) => Math.round(Math.min(1, Math.max(0, v)) * 255).toString(16).padStart(2, '0');
-  const [R, G, B] = rgbAt(L);
-  return `#${to(R)}${to(G)}${to(B)}`;
+  const L = 0.2126 * lin(m[1]!) + 0.7152 * lin(m[2]!) + 0.0722 * lin(m[3]!);
+  // Contraste con blanco (1,05 / (L + 0,05)) frente a con negro ((L + 0,05) / 0,05).
+  return 1.05 / (L + 0.05) >= (L + 0.05) / 0.05 ? 'white' : 'black';
+}
+
+export function resolveTagColor(c: TagColor, themeColors: Readonly<Record<string, unknown>>): string {
+  if (isCustomTagColor(c)) return c;
+  const v = themeColors[c];
+  return typeof v === 'string' ? v : c;
 }
 
 /** Icono de cada tipo de registro del ERP al que se vincula una tarea. */

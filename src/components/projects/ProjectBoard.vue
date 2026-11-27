@@ -8,6 +8,7 @@ import type { BoardTask } from '@/types/projects';
 import EmptyState from '@/components/ui/EmptyState.vue';
 import DueDateChip from './DueDateChip.vue';
 import SectionMenu from './SectionMenu.vue';
+import TagChip from './TagChip.vue';
 import UserAvatar from './UserAvatar.vue';
 
 /**
@@ -209,7 +210,7 @@ watch([mdAndUp, () => store.sections.length], () => void nextTick(measureBoard))
             </div>
             <div v-if="task.tags.length || chipsOf(task).length" class="d-flex flex-wrap ga-1 mt-2">
               <v-chip v-for="c in chipsOf(task)" :key="c.id" size="x-small" :color="c.color" variant="flat">{{ c.label }}</v-chip>
-              <v-chip v-for="tag in task.tags" :key="tag.id" size="x-small" :color="tag.color">{{ tag.name }}</v-chip>
+              <TagChip v-for="tag in task.tags" :key="tag.id" size="x-small" :color="tag.color">{{ tag.name }}</TagChip>
             </div>
             <div class="d-flex align-center ga-2 mt-2">
               <UserAvatar :user-id="task.assigneeUserId" :size="24" />

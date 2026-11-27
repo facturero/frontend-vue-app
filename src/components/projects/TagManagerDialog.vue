@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useDisplay } from 'vuetify';
+import { useDisplay, useTheme } from 'vuetify';
 import { useConfirm } from '@/composable/useConfirm';
 import { useProjectsStore } from '@/stores/projects';
-import { isCustomTagColor, TAG_COLORS } from '@/utils/projects';
+import { isCustomTagColor, resolveTagColor, TAG_COLORS } from '@/utils/projects';
 import type { Tag, TagColor } from '@/types/projects';
 import TagColorSwatches from './TagColorSwatches.vue';
 
@@ -18,6 +18,8 @@ import TagColorSwatches from './TagColorSwatches.vue';
  */
 const open = defineModel<boolean>({ required: true });
 const { t } = useI18n();
+/** Para pintar el botón de color con el hexadecimal real (la ✓ y el icono, claros u oscuros según el fondo). */
+const theme = useTheme();
 const store = useProjectsStore();
 const confirm = useConfirm();
 /** En el teléfono, a pantalla completa: dentro de una ventana flotante de 360 px las filas no tenían sitio. */
@@ -184,7 +186,7 @@ async function remove(tag: Tag): Promise<void> {
                   <v-btn
                     v-bind="menu"
                     icon
-                    :color="tag.color"
+                    :color="resolveTagColor(tag.color, theme.current.value.colors)"
                     rounded="circle"
                     size="small"
                     :aria-label="t('projects.tags.colorOption', { color: colorName(tag.color) })"

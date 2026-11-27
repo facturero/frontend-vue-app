@@ -4074,7 +4074,7 @@
       "exists": "Ya hay una etiqueta con ese nombre.",
       "customColor": "Color personalizado",
       "useColor": "Usar este color",
-      "customHint": "El tono se ajusta para que se lea en claro y en oscuro.",
+      "customHint": "El texto de la etiqueta se pone claro u oscuro según el color.",
       "colorEverywhere": "Color (cambia en todas las tareas)",
       "name": "Nombre",
       "searchLabel": "Buscar etiqueta",

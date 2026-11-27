@@ -119,7 +119,7 @@ export interface TaskLink {
 
 /** Colores de etiqueta: los del tema y la paleta `tag-*` (plugins/vuetify.ts). Misma lista que projects-service. */
 export type TagPaletteColor = ProjectColor | 'tag-red' | 'tag-orange' | 'tag-yellow' | 'tag-lime' | 'tag-green' | 'tag-cyan' | 'tag-violet' | 'tag-purple' | 'tag-pink' | 'tag-brown' | 'tag-grey';
-/** Uno de la paleta o un color libre del selector (`#rrggbb`, ya ajustado con `readableTagColor`). */
+/** Uno de la paleta o un color libre del selector (`#rrggbb`, tal como lo eligió la persona). */
 export type TagColor = TagPaletteColor | `#${string}`;
 
 export interface Tag {

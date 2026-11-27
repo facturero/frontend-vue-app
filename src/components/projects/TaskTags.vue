@@ -6,6 +6,7 @@ import { useProjectsStore } from '@/stores/projects';
 import { TAG_COLORS } from '@/utils/projects';
 import type { TagColor, Tag } from '@/types/projects';
 import TagColorPicker from './TagColorPicker.vue';
+import TagChip from './TagChip.vue';
 import TagColorSwatches from './TagColorSwatches.vue';
 import TagManagerDialog from './TagManagerDialog.vue';
 
@@ -126,9 +127,9 @@ async function remove(tagId: string): Promise<void> {
       <v-menu v-if="canManage" :model-value="colorMenuFor === tag.id" :close-on-content-click="false"
         @update:model-value="(open: boolean) => (colorMenuFor = open ? tag.id : null)">
         <template #activator="{ props: chipMenu }">
-          <v-chip v-bind="chipMenu" size="small" :color="tag.color" :closable="props.canEdit" link @click:close="remove(tag.id)">
+          <TagChip v-bind="chipMenu" size="small" :color="tag.color" :closable="props.canEdit" link @click:close="remove(tag.id)">
             {{ tag.name }}
-          </v-chip>
+          </TagChip>
         </template>
         <v-card class="pa-4">
           <div class="text-body-small text-medium-emphasis mb-2">{{ t('projects.tags.colorEverywhere') }}</div>
@@ -138,9 +139,9 @@ async function remove(tagId: string): Promise<void> {
           </v-btn>
         </v-card>
       </v-menu>
-      <v-chip v-else size="small" :color="tag.color" :closable="props.canEdit" @click:close="remove(tag.id)">
+      <TagChip v-else size="small" :color="tag.color" :closable="props.canEdit" @click:close="remove(tag.id)">
         {{ tag.name }}
-      </v-chip>
+      </TagChip>
     </template>
     <v-menu v-if="props.canEdit" v-model="menu" :close-on-content-click="false">
       <template #activator="{ props: activator }">

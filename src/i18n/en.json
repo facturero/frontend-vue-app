@@ -4074,7 +4074,7 @@
       "exists": "There is already a tag with that name.",
       "customColor": "Custom color",
       "useColor": "Use this color",
-      "customHint": "The shade is adjusted so it reads in light and dark mode.",
+      "customHint": "The tag's text turns light or dark to match the color.",
       "colorEverywhere": "Color (changes on every task)",
       "name": "Name",
       "searchLabel": "Search tags",

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { isCustomTagColor, readableTagColor, TAG_COLORS } from '@/utils/projects';
+import { useTheme } from 'vuetify';
+import { isCustomTagColor, readableOn, resolveTagColor, TAG_COLORS } from '@/utils/projects';
 import type { TagColor } from '@/types/projects';
 
 /**
@@ -10,8 +11,9 @@ import type { TagColor } from '@/types/projects';
  * (lo pidió el dueño, 2026-11-26). Mientras se arrastra solo cambia la vista previa; se aplica con «Usar este color», así mover el
  * cursor no guarda veinte cambios en el servidor.
  *
- * El color libre pasa por `readableTagColor` (misma tonalidad, luminosidad media): las etiquetas son chips tonales y un pastel no se
- * leería sobre blanco ni uno muy oscuro en el tema oscuro. La vista previa ya muestra el color ajustado, el que se guarda.
+ * El color libre se guarda tal cual: las etiquetas son chips sólidos (`variant="flat"`) y Vuetify pone el texto claro u oscuro según
+ * el contraste con el fondo, así que cualquier color se lee, también el negro o un amarillo pastel (2026-11-27; antes eran chips
+ * tonales y había que mover la luminosidad del color elegido, que acababa siendo otro).
  *
  * Lo usan la opción «Crear» del buscador de etiquetas (allí sin el color libre: `custom=false`, el campo del buscador perdería el foco
  * y lo escrito), el menú de una etiqueta puesta en una tarea y el diálogo «Administrar etiquetas».
@@ -19,13 +21,16 @@ import type { TagColor } from '@/types/projects';
 const model = defineModel<TagColor>({ required: true });
 const props = withDefaults(defineProps<{ custom?: boolean }>(), { custom: true });
 const { t } = useI18n();
+const theme = useTheme();
+/** El hexadecimal real de cada círculo: así la ✓ sale clara u oscura según el fondo, como el texto de la etiqueta (ver `TagChip`). */
+const hex = (c: TagColor) => resolveTagColor(c, theme.current.value.colors);
 /** 8 por fila: círculos de 32 px (`x-small` con icono) y 8 px entre ellos. */
 const GRID = { maxWidth: '312px' };
 
 const customOpen = ref(false);
 /** Lo que se ve en el selector libre mientras se elige (aún sin aplicar). */
 const draft = ref<string>(isCustomTagColor(model.value) ? model.value : '#7048E8');
-const preview = computed(() => readableTagColor(draft.value));
+const preview = computed(() => draft.value.slice(0, 7).toLowerCase() as `#${string}`);
 const customSelected = computed(() => isCustomTagColor(model.value));
 
 // Otra etiqueta en el mismo selector (o un cambio que llegó de fuera): el libre arranca desde su color.
@@ -54,7 +59,8 @@ const label = (c: TagColor) => (isCustomTagColor(c) ? c.toUpperCase() : t(`proje
         :key="c"
         v-tooltip:bottom="label(c)"
         icon
-        :color="c"
+        :color="hex(c)"
+        :style="{ color: readableOn(hex(c)) }"
         rounded="circle"
         size="x-small"
         role="radio"
@@ -88,7 +94,7 @@ const label = (c: TagColor) => (isCustomTagColor(c) ? c.toUpperCase() : t(`proje
     <div v-if="props.custom && customOpen" class="d-flex flex-column ga-2" data-custom-color>
       <v-color-picker v-model="draft" mode="hex" :modes="['hex']" elevation="0" width="312" canvas-height="120" />
       <div class="d-flex align-center ga-2">
-        <v-chip size="small" :color="preview" prepend-icon="mdi-tag">{{ preview.toUpperCase() }}</v-chip>
+        <v-chip size="small" :color="preview" variant="flat" prepend-icon="mdi-tag">{{ preview.toUpperCase() }}</v-chip>
         <v-spacer />
         <v-btn color="primary" size="small" data-use-color @click="applyCustom">{{ t('projects.tags.useColor') }}</v-btn>
       </div>
