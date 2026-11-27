@@ -7,6 +7,8 @@ import { NodeSelection, PluginKey } from '@tiptap/pm/state';
 import Suggestion from '@tiptap/suggestion';
 import StarterKit from '@tiptap/starter-kit';
 import { TextSelection } from '@tiptap/pm/state';
+import { Fragment, Slice } from '@tiptap/pm/model';
+import type { EditorView } from '@tiptap/pm/view';
 import { addColumn, addRow, removeColumn, removeRow, selectedRect } from '@tiptap/pm/tables';
 import Mention from '@tiptap/extension-mention';
 import Link from '@tiptap/extension-link';
@@ -445,7 +447,7 @@ const editor = useEditor({
     //   - Si no trae texto, se sube el archivo aunque venga con HTML: «Copiar imagen» del navegador pone la imagen Y un `<img src=…>`.
     //     Antes cualquier HTML hacía descartar la imagen, y ese `<img>` tampoco se pegaba (solo se aceptan imágenes subidas al CRM):
     //     pegar una imagen copiada no hacía nada.
-    handlePaste: (_view, event) => {
+    handlePaste: (view, event) => {
       const data = event.clipboardData;
       if (props.crmLinks) {
         const link = parseCrmUrl(data?.getData('text/plain') ?? '', window.location.origin);
@@ -454,6 +456,7 @@ const editor = useEditor({
           return true;
         }
       }
+      if (pasteAsCode(view, data?.getData('text/plain') ?? '')) return true;
       const files = clipboardFiles(data);
       if (!props.uploadFile || !files.length) return false;
       if ((data?.getData('text/plain') ?? '').trim()) return false;
@@ -661,6 +664,28 @@ function tableEdge(action: TableEdge): void {
   else return;
   ed.view.dispatch(tr);
   ed.view.focus();
+}
+
+/**
+ * Con «código» (`<>`) activo, lo pegado sigue siendo código. ProseMirror pega con las marcas de lo copiado y, si eran varias líneas,
+ * crea párrafos nuevos sin la marca: marcar `<>` y pegar dejaba el texto normal (lo vio un cliente pegando un fragmento de Python),
+ * mientras que pegar y luego marcar sí funcionaba. Se pega como texto plano, cada línea en su párrafo y todas con la marca.
+ */
+function pasteAsCode(view: EditorView, text: string): boolean {
+  const { state } = view;
+  const code = state.schema.marks.code;
+  if (!text || !code || !editor.value?.isActive('code')) return false;
+  const mark = code.create();
+  const lines = text.replace(/\r\n?/g, '\n').split('\n');
+  if (lines.length === 1) {
+    view.dispatch(state.tr.replaceSelectionWith(state.schema.text(text, [mark]), false).scrollIntoView());
+    return true;
+  }
+  const paragraph = state.schema.nodes.paragraph!;
+  const paragraphs = lines.map((line) => paragraph.create(null, line ? state.schema.text(line, [mark]) : null));
+  // Abierta por los dos lados: la primera línea se une al párrafo donde está el cursor y la última, a lo que viene detrás.
+  view.dispatch(state.tr.replaceSelection(new Slice(Fragment.from(paragraphs), 1, 1)).scrollIntoView());
+  return true;
 }
 
 function insertTable(): void {
